@@ -1,0 +1,29 @@
+class: Digraph
+name: active-learning-repl
+engine: 'dot'
+wrap_node_labels: True
+wrap_edge_labels: True
+# args:
+#     - unix
+filename: active-learning-repl.gv
+node_attr:
+  shape: circle  # plaintext box oval
+  color: cornflowerblue  # https://graphviz.org/doc/info/colors.html#x11
+  stroke: cornflowerblue
+  penwidth: "3"
+# style: filled
+attr:
+  size: '12,12'
+  color: cornflowerblue
+  stroke: cornflowerblue
+  penwidth: "3"
+  # rankdir: 'LR'
+# TODO: node_attrs like shape and color per node or per node pair in edge
+# nodes:
+#   - "R"
+#   - "E"
+edges:
+  - ["R", "E", {stroke: cornflowerblue}]
+  - ["E", "P", {stroke: cornflowerblue}]
+  - ["P", "L", {stroke: cornflowerblue}]
+  - ["L", "R", {stroke: cornflowerblue}]

@@ -71,7 +71,7 @@ __MACOSX
 .directory
 
 # BigData and Models
-.nlpia2-data
+# .nlpia2-data
 db.sqlite3
 *.bz2
 *.zip
