@@ -52,4 +52,5 @@ tqdm==4.38.0
 transformers==4.3.3
 wheel
 wikipedia-api==0.5.4
+xmltodict
 yake==0.4.6
