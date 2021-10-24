@@ -18,5 +18,8 @@ Chapter 3:
 Chapter 4:
   - What is the context or neighborhood of words that LSA (PCA on BOW vectors) pays attention to when creating topics?
 Chapter 5:
-  -
+  - What are the advantages and disadvantages of using the `torch.nn.functional` interface to PyTorch rather than the `torch.nn.Module` class?
+  - What is the simple AI logic "problem" that Rosenblatt's artifical neurons couldn't?
+  - What minor change to Rosenblatt's architecture "fixed" perceptrons and ended the first "AI Winter"?
+  - What is the equivalent of a PyTorch `model.forward()` function in SciKit-Learn models?
 
