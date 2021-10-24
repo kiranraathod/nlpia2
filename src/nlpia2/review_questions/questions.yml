@@ -14,4 +14,9 @@ Chapter 2:
   - "Is there a website where you can download the token frequencies for most of the words and n-grams ever published? footnote:[Hint: A company that aspired to "do no evil", but now does, created this massive NLP corpus.]"
   - What are the risks and possible benefits of pair coding AI assistants built with NLP? What sort of organizations and algorithms do you trust with your mind and your code?
 Chapter 3:
+  - What is the most memory efficient data structure for storing BOW and TF-IDF vectors?
+Chapter 4:
+  - What is the context or neighborhood of words that LSA (PCA on BOW vectors) pays attention to when creating topics?
+Chapter 5:
+  -
 
