@@ -1,0 +1,31 @@
+class: Digraph
+name: perceptron
+engine: 'dot'
+wrap_node_labels: True
+wrap_edge_labels: True
+# args:
+#     - unix
+filename: perceptron.gv
+node_attr:
+  shape: circle  # plaintext box oval
+  color: darkblue
+  stroke: "3"
+# style: filled
+attr:
+  rankdir: 'LR'
+#  size: '6,6'
+# TODO: node_attrs like shape and color per node or per node pair in edge
+nodes:
+  - "x_0 = 1.0"
+  - "x_1"
+  - "x_2"
+  - "x_..."
+  - "x_n"
+edges:
+  - ["x_0 = 1.0", "sum(x * w)", label: "w_0 = intercept"]
+  - ["x_1", "sum(x * w)", label: "w_1"]
+  - ["x_2", "sum(x * w)", label: "w_2"]
+  - ["x_...", "sum(x * w)", label: "w_..."]
+  - ["x_n", "sum(x * w)", label: "w_n"]
+  - ["sum(x * w)", "z > threshold", label: "z"]
+  - ["z > threshold", " ", label: "y"]

@@ -1,0 +1,41 @@
+Chapter 1:
+  - Why is NLP considered to be a core enabling feature for AGI?
+  - Why do advanced NLP models tend to show significant discriminatory biases?
+  - How is it possible to create a prosocial chatbot using training data from sources that include antisocial examples?
+  - What are 4 different approaches or architectures for building a chatbot?
+  - How is NLP used within a search engine?
+  - Write a regular expression to recognize your name and all the variations on its spelling (including nicknames) that you've seen.
+  - Write a regular expression to try to recognize a sentence boundary (usually a period ("."), question mark "?", or exclamation mark "!")
+Chapter 2:
+  - How does a lemmatizer increase the likelihood that your DuckDuckGo search results contain what you are looking for?
+  - Is there a way to optimally decide the _n_ in the _n_-gram range you use to tokenize your documents?
+  - Does lemmatization, case folding, or stopword removal help or hurt your performance on a model to predict misleading news articles with this Kaggle dataset (https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset/download).
+  - How could your find out the best sizes for the word pieces or sentence pieces for your tokenizer?
+  - "Is there a website where you can download the token frequencies for most of the words and n-grams ever published? footnote:[Hint: A company that aspired to "do no evil", but now does, created this massive NLP corpus.]"
+  - What are the risks and possible benefits of pair coding AI assistants built with NLP? What sort of organizations and algorithms do you trust with your mind and your code?
+Chapter 3:
+  - What is the most memory efficient data structure for storing BOW and TF-IDF vectors?
+Chapter 4:
+  - 
+    Q: What is the context, or neighborhood of words, that LSA (PCA on BOW or TF-IDF vectors) pays attention to when creating topics?
+    A: PCA and T-SNE pay attention to the coocurrence of words within the same document, since this is what makes up the TF-IDF and BOW word vectors in the rows of the matrix it is transforming. This is different from what other Deep Learning transformations like Word2Vec and GLoVE do. Word2Vec and GLoVe limit the neighborhood to only those words that occur within 5 words of the _target_ word.
+  -
+    Q: What does PCA optimize as it is composing linear combinations of words into topics? How is this different from what T-SNE does?
+    A: PCA maximizes the variance of the topic vectors in the lower dimensional space. Variance is the average euclidian distance between vectors and the origin. PCA keeps vectors far apart in the low dimensional space that were far apart in the high dimensional space. This is essentially what you would do if you rotated a 3-D object in front of a camera to maximize the amount of area the object occupies in the 2-D picture you take. T-SNE minimizes the distance between pairs of vectors in the low dimensional space that were close to each other in the high dimensional space. 
+Chapter 5:
+  - 
+    Q: What are the advantages and disadvantages of using the `torch.nn.functional` interface to PyTorch rather than the `torch.nn.Module` class?
+    A: The PyTorch `nn.functional` API is easier to understand and debug for many people. But the declarative `torch.nn.Module` allows you to create an unlimitted array of new architectures that utilize the internal model _state_ to produce more complex behavior. 
+  - 
+    Q: What is the simple AI logic "problem" that Rosenblatt's artifical neurons couldn't?
+    A: Rosenblatt's perceptron couldn't handle the XOR logic gate problem and this led to the first AI Winter when most researchers stopped pursuing AI and neural networks.
+  - 
+    Q: What minor change to Rosenblatt's architecture "fixed" perceptrons and ended the first "AI Winter"?
+    A: Adding a second layer of neurons allowed just 3 neurons to solve the XOR logic gate problem. Multi-layer peceptrons eventually evolved into the deep learning architectures we use today to solve AI problems that were previously unsolvable.
+  - 
+    Q: What is the equivalent of a PyTorch `model.forward()` function in SciKit-Learn models?
+    A: The `model.predict()` function is what accomplishes inference or prediction in the same way that `model.forward()` does within PyTorch models.
+Chapter 6:
+  - 
+    Q: What is the context, or neighborhood of words, that Word2Vec and GloVE pays attention to when creating semantic embeddings for words?
+    A: Word2Vec and GloVE do. Word2Vec and GloVe limit the neighborhood to only those words that occur within 5 words of the _target_ word.
