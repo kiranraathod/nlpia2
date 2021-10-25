@@ -1,4 +1,55 @@
-# general NLP datasets
+# data science datasets and data sources data aggregators data indexes
+-
+  description: genomics and gis and other speciality datasets with juptyer notebooks
+  url: https://github.com/markusschanta/awesome-jupyter#domain-specific-projects
+-
+  url: https://github.com/datasets/covid-19
+  tags: [time series, epidemiology]
+-
+  url: https://github.com/datasets/awesome-data
+  description: polished frontend at https://datahub.io/collections
+  tags:
+    - Air Pollution data
+    - Bibliographic data
+    - Broadband data
+    - Climate Change
+    - Demographics (population)
+    - Economic Data and Indicators
+    - Education 
+    - Football
+    - GeoJSON
+    - Health Care Data
+    - Inflation
+    - Linked Open Data
+    - Logistics
+    - Machine Learning / Statistical
+    - Movies and TV
+    - Open Corporates
+    - Property Prices
+    - Reference Data
+    - Stock Market Data
+    - War and Peace
+    - Wealth, Income and Inequality
+    - World Bank
+    - YAGO
+-
+  url: paperswithcode.com
+  description: high quality benchmark datasets for state of the art problems
+-
+  url: kaggle.com
+  description: must sign up for an account, urls not publicly accessible outside kaggle
+-
+  url: data.world
+  description: "community" data is free and open source but hard to find
+-
+  url: data.gov
+  description: really poor dataset aggregator that favors advertisers and paywalls
+-
+  url: datasetsearch.google.com
+  description: really poor dataset aggregator that favors advertisers and paywalls
+-
+  url: https://data.world/search?q=electric+vehicles
+  description: data aggregator from data.gov etc
 - 
   url: https://raw.githubusercontent.com/Davidelanz/nlp-contextual-meaning/master/dataset/situations_it.csv
   problem: foreign language intent classification
