@@ -1,6 +1,7 @@
 # neither year nor len are statistically significant predictors of sex
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression  # , Lasso
 
 DATA_DIR = Path('.nlpia2-data')
@@ -20,7 +21,6 @@ y_test_pred = model.predict(df[['len', 'year']][~istrain])
 df_plot = pd.DataFrame()
 df_plot['female'] = y_test
 df_plot['female_pred'] = y_test_pred
-df_plot['female_proba'] = y_test_proba
 y_test_proba = model.predict_proba(df[['len', 'year']][~istrain])
 df_plot['female_proba'] = y_test_proba[:, 1]
 df_plot.sample(30)

@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LogisticRegression, Lasso
+# from sklearn.linear_model import LogisticRegression, Lasso
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from constants import DATA_DIR
 
-df = pd.read_csv('/home/hobs/.nlpia2-data/baby-names-region.csv.gz')
+df = pd.read_csv(DATA_DIR / 'baby-names-region.csv.gz')
 
 
 """ Add a freq column based on the counts, to use as sample_weights in LogisticRegression.fit
@@ -42,12 +43,6 @@ for y in df['year'].unique():
     tot = g['count'].sum()
     mask = y == df['year']
     print(y, tot, df['freq'][mask].sum())
-
-
-import pandas as pd
-import numpy as np
-from sklearn.linear_model import LogisticRegression, Lasso
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 df = pd.read_csv('/home/hobs/.nlpia2-data/baby-names-region.csv.gz')
