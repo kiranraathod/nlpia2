@@ -48,7 +48,7 @@ for y in df['year'].unique():
 df = pd.read_csv('/home/hobs/.nlpia2-data/baby-names-region.csv.gz')
 
 # df = df.sample(1_000_000, random_state=1989)
-np.random.seed(314)
+np.random.seed(451)
 istrain = np.random.rand(len(df)) < .9
 
 vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1, 3))

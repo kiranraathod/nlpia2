@@ -8,7 +8,7 @@ DATA_DIR = Path('.nlpia2-data')
 df = pd.read_csv(DATA_DIR / 'baby-names-region.csv.gz')
 
 df = df.sample(10_000, random_state=1989)
-np.random.seed(3200)
+np.random.seed(451)
 istrain = np.random.rand(len(df)) < .9
 df['len'] = df['name'].str.len()
 model = LogisticRegression(class_weight='balanced', max_iter=2000)

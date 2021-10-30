@@ -2,10 +2,20 @@ import pandas as pd
 dfs = pd.read_html('https://en.wikipedia.org/wiki/List_of_emoticons')
 dfs[0]
 dfs[1]
-pwd
+# pwd
 dfs[1].to_csv('code/data/wikipedia_emoticon_emoji_table.csv', index=False)
 dfs[1]
-ls code/data
-more code/data/wikipedia_emoticon_emoji_table.csv
+# ls code / data
+# more code / data / wikipedia_emoticon_emoji_table.csv
 df = pd.read_csv('code/data/wikipedia_emoticon_emoji_table.csv')
-df
+
+
+# !pip install emoji
+import emoji
+result = emoji.emojize('Python is :thumbs_up:')
+print(result)
+# 'Python is 👍'
+# You can also reverse this:
+result = emoji.demojize('Python is 👍')
+print(result)
+# 'Python is :thumbs_up:'

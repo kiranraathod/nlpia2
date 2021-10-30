@@ -13,6 +13,105 @@
 # Edelman:
 #   _Neural Darwinism_:
 ## ch1 and philosophy, wisdom, prosocial
+# translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
+-
+  text: I begin to speak only when I'm certain what I'll say isn't better left unsaid."
+  author: Cato (Marcus Porcius Cato or Cato the Younger)
+  circa: 50's BC 
+  tags: [stoicism, inspiration, stoic, philosophy, life]
+-
+  text: Make the mind tougher by exposing it to adversity.
+  author: Robert Greene
+  tags: [stoicism, inspiration, stoic, philosophy, life]
+-
+  text: To be calm is the highest achievement of the self.
+  author: Zen proverb
+  tags: [stoicism, inspiration, stoic, philosophy, life]
+-
+  text: The best revenge is not to be like your enemy.
+  author: Marcus Aurelius
+  tags: [stoicism, inspiration, stoic, philosophy, life, revenge, character]
+-
+  text: "We should always be asking ourselves: Is this something that is, or is not, in my control?"
+  tags: [stoicism, inspiration, stoic, philosophy, life]
+  author: Epictetus
+-
+  text: "Choose not to be harmed — and you won't feel harmed. Don't feel harmed — and you haven't been."
+  author: Marcus Aurelius"
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: "Self-control is strength. Right thought is mastery. Calmness is power."
+  author: James Allen
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: "External things are not the problem. It's your assessment of them. Which you can erase right now."
+  author: Marcus Aurelius
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: "Be tolerant with others and strict with yourself."
+  author: Marcus Aurelius
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: "We are more often frightened than hurt; and we suffer more in imagination than in reality."
+  author: Seneca
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: To be even-minded is the greatest virtue.
+  author: Heraclitus
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: Learn to be indifferent to what makes no difference.
+  author: Marcus Aurelius
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+-
+  text: People hide their truest nature. I understood that; I even applauded it. What sort of world would it be if people bled all over the sidewalks, if they wept under trees, smacked whomever they despised, kissed strangers, revealed themselves?
+  author: Alice Hoffman
+  tags: [self, selfishness, mind, self-control, stoicism, stoic]
+-
+  text: If you are pained by any external thing, it is not this thing that disturbs you, but your own judgment about it. And it is in your power to wipe out this judgment now.
+  author: Marcus Aurelius
+  tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
+  
+-
+  text: "Be quiet, darling. Let pattern recognition have its way."
+  author: William Gibson
+  book: The Peripheral
+  tags: [ml, ai, generalization, machine learning, data science, ds]
+-
+  text: "I have already told you of the sickness and confusion that comes with time travelling."
+  author: H. G. Wells
+  source: William Gibson, The Peripheral
+-
+  text: "They'd started out as a church, or in a church, not liking anyone being gay or getting abortions or using birth control. Protesting military funerals, which was a thing. Basically they were just assholes, though, and took it as the measure of God's satisfaction with them that everybody else thought they were assholes."
+  author: William Gibson
+  book: The Peripheral
+  context: Activist group named after a bible verse, something like Luke-4:20
+-
+  text: "Algorithms are called the aunties. They're self-organising and so nobody fully understands them."
+  author: William Gibson
+  book: The Peripheral
+  page: 145
+  tags: [algorithms, ml, ai, machine learning, assistants, virtual assistants, siri, alexa, chatbot, complexity, self-organizing, agency]
+-
+  text: "'Encryption isn't optional, when we address one another,' she said."
+  author: William Gibson
+  book: The Peripheral
+  page: ~30
+  tags: [privacy, encryption, communication, language, nlp]
+-
+  text: "The day the soldiers stop bringing you their problems is the day you stopped leading them. They have either lost confidence that you can help them or concluded that you do not care. Either case is a failure of leadership."
+  author: Colin Powell
+  tags: [leadership, inspiration, problems, employees, team, ceo, mentorship, mentor, teaching, caring, engagement]
+-
+  text: "terror should remain the sole prerogative of the state."
+  tags: [terrorism, government, military, military industrial complex]
+  author: William Gibson
+  book: The Peripheral
+-
+  text: "'Reality television. It merged with politics. Then with performance art.' They walked on. 'I think that already happened, back home,'"
+  author: William Gibson
+  book: The Peripheral
+  tags: [entertainment, art, politics, television, reality tv, nonfiction, fiction, post truth, fake news, news]
 -
   text: "There are times...when we are in the midst of life-moments of confrontation with birth or death, or moments of beauty when nature or love is fully revealed, or moments of terrible loneliness-times when a holy and awesome awareness comes upon us. It may come as deep inner stillness or as a rush of overflowing emotion. It may seem to come from beyond us, without any provocation, or from within us, evoked by music or by a sleeping child. If we open our hearts at such moments, creation reveals itself to us in all it's unity and fullness. And when we return from such a moment of awareness, our hearts long to find some way to capture it in words forever, so that we can remain faithful to it's higher truth."
   tags: [god, faith, love, awe, clarity, inspiration, emotion]
@@ -206,7 +305,7 @@
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
   tags: [intuition pumps, argument, debate, toxic comments, social media, discipline, philosophy, nlp, nlpia, save the world, collective consciousness]
-- text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it’s far easier to be wrong than right).
+- text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it's far easier to be wrong than right).
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
   tags: [beliefs, post-truth, misinformation, intuition pumps, argument, debate, toxic comments, misinformation, social media, discipline, philosophy, nlp, nlpia, save the world, collective consciousness]
@@ -279,7 +378,7 @@
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
 -
-  text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it’s far easier to be wrong than right).
+  text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it's far easier to be wrong than right).
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
 -
@@ -376,7 +475,7 @@
   tags: [prosocial, sociopathy, inequality, education, psychology]
 -
   author: "Cathy McMorris Rodgers"
-  text: As the foundation of America’s robust technology industry, computer science drives advancements in health care, aerospace, financial services, national defense, retail and so many other industries both at home and abroad. Young people should be exposed to computer science in our schools so they have the opportunity to learn, innovate, and develop new advancements to promote the future of technology."
+  text: As the foundation of America's robust technology industry, computer science drives advancements in health care, aerospace, financial services, national defense, retail and so many other industries both at home and abroad. Young people should be exposed to computer science in our schools so they have the opportunity to learn, innovate, and develop new advancements to promote the future of technology."
   tags: [computer science, programming, code school, teaching, career]
 -
   author: "Satya Nadella"
@@ -384,7 +483,7 @@
   tags: [computer science, programming, code school, teaching, career]
 -
   author: "Michael Bloomberg"
-  text: "We salute the coders, designers, and programmers already hard at work at their desks, and we encourage every student who can't decide whether to take that computer science class to give it a try. New York City’s economic future depends on it, and while we're already giving thousands of our students the opportunity to learn how to code, much more can and should be done."
+  text: "We salute the coders, designers, and programmers already hard at work at their desks, and we encourage every student who can't decide whether to take that computer science class to give it a try. New York City's economic future depends on it, and while we're already giving thousands of our students the opportunity to learn how to code, much more can and should be done."
   tags: [computer science, programming, code school, teaching, career]
 -
   author: "President Barack Obama"
@@ -584,7 +683,7 @@
 -
   text: "The reason that no computer program can ever be a mind is simply that a computer program is only syntactical, and minds are more than syntactical. Minds are semantical, in the sense that they have more than a formal structure, they have content."
   tags: [computationalism, consciousness, ai, agi, self awareness, mind, neuroscience, nlp]
-  concepts: ["brains cause minds", "syntax doesn’t suffice for semantics", "Strong AI", "AGI (Artificial General Intelligence)", "The Chinese Room"]
+  concepts: ["brains cause minds", "syntax doesn't suffice for semantics", "Strong AI", "AGI (Artificial General Intelligence)", "The Chinese Room"]
   author: John Searle
 -
   text: "CAC: Consciousness can be explained computationally, and further, the computational details of a system fix the kind of conscious experiences that it has and whether it has any."
