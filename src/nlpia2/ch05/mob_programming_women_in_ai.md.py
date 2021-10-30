@@ -67,7 +67,15 @@ istrain = np.random.rand(len(df)) < .9
 istrain.sum() / len(istrain)
 # 0.8997952854283825
 
-"""
+
+#############################################################################
+# START: Kazuma Investigation
+#
+# Case folding reduces accuracy of model for rare names not in training set, like Kazume
+#
+#
+
+""" This vectorizer+model incorrectly labels Kazuma because TFIDFVectorizer(lowercase=True) is default
 >>> vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1, 3))
 >>> vectorizer.fit(tqdm(df['name'][istrain]))
 >>> feature_names = list(vectorizer.get_feature_names_out())
@@ -97,13 +105,16 @@ vecs
 #     with 86718620 stored elements in Compressed Sparse Row format>
 
 
-"""
+""" This vectorizer+model incorrectly labels Kazuma because TFIDFVectorizer(lowercase=True) is default
+
 >>> model = LogisticRegression(C=1, max_iter=2000)
 >>> model.fit(vecs[istrain], df['sex'][istrain], sample_weight=df['freq'][istrain])
 LogisticRegression(C=1, max_iter=2000)
 """
+#
 model = LogisticRegression(C=1, max_iter=2000)
-model.fit(vecs[istrain], df['sex'][istrain], sample_weight=df['freq'][istrain])
+model.fit(vecs[istrain], df['sex'][istrain],
+          sample_weight=df['freq'][istrain])
 # LogisticRegression(max_iter=2000)
 
 
@@ -448,16 +459,42 @@ array(['F', 'M'], dtype=object)
 >>> hist - o - p - f kemal_kazuma_labeled_female.md
 """
 
-"""
+#
+#
+# END: Kazuma investigation
+#############################################################################
+
+
+#############################################################################
+# Start: Women in AI investigation
+#
+#
+#
+
+""" Women outside the US are more prominent and numerous in the AI research
 >>> import yaml
 >>> women = yaml.full_load(
-...     str(DATA_DIR / 'women-in-ai-ethics-and-prosocial-ai.yml'))
->>> list(women)[:3]
-['Vinita Silaparasetty', 'Ivana Bartoletti', 'Karolyn Gainfort']
->>> women = [w.split() for w in women]
->>> women = [w[1] if w[0] == 'Dr.' else w[0] for w in women]
->>> women[:6]
-['Vinita', 'Ivana', 'Karolyn', 'Bulbul', 'Moojan', 'Hanan']
+...     (DATA_DIR / 'women-in-ai.yml').open())
+>>> list(women)[:4]
+['Maria Dyshel', 'Nathalie Post', 'Zeynep Tufekci', 'Melanie Mitchel']
+"""
+import yaml
+women = yaml.full_load(
+    (DATA_DIR / 'women-in-ai.yml').open())
+print(list(women)[:4])
+# ['Maria Dyshel', 'Nathalie Post', 'Zeynep Tufekci', 'Melanie Mitchel']
+
+"""
+>>> women = [w.split()[0] for w in women]
+>>> women[:7]
+['Maria', 'Nathalie', 'Zeynep', 'Melanie', 'Kathryn', 'Helen', 'Susan']
+"""
+women = [w.split()[0] for w in women]
+print(women[:7])
+['Maria', 'Nathalie', 'Zeynep', 'Melanie', 'Kathryn', 'Helen', 'Susan']
+
+
+"""
 >>> pd.Series(model.predict(vectorizer.transform(women)), index=women)
 Vinita     F
 Ivana      F
@@ -473,4 +510,40 @@ Helen      F
 Susan      F
 Joy        M
 Maria      F
+"""
+
+
+"""
+>>> sex_pred = pd.Series(model.predict(vectorizer.transform(women)),
+...                      index=women)
+>>> sex_pred
+Maria       F
+Nathalie    F
+Zeynep      F
+Melanie     F
+Kathryn     F
+Helen       F
+Susan       F
+Joy         M
+Gry         M
+Fei-Fei     M
+Rana        F
+Daphne      M
+Vinita      F
+Ivana       F
+Karolyn     F
+Bulbul      M
+Moojan      M
+Hanan       F
+Nikita      F
+"""
+
+"""
+>>> sex_pred[sex_pred != 'F']
+Joy        M
+Gry        M
+Fei-Fei    M
+Daphne     M
+Bulbul     M
+Moojan     M
 """
