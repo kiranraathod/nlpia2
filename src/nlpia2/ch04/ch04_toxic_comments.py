@@ -19,6 +19,10 @@ comment3   your stalking of my edits i've opened a thread...      0
 comment4!  straight from the smear site itself. the perso...      1
 comment5   no, i can't see it either - and i've gone back...      0
 """
+#Preprocessing
+
+
+
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import spacy
@@ -71,17 +75,16 @@ round(float(lda_tfidf.score(tfidf_docs, comments['toxic'])), 3)
 0.999
 """
 
-
-
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(tfidf_docs, \
                 comments.toxic.values, test_size=0.5, random_state=271828) # <1>
 lda_tfidf_train = LinearDiscriminantAnalysis(n_components=1)
 lda_tfidf_train = lda_tfidf_train.fit(X_train, y_train)  # <2>
 """
-round(float(lda_tfidf_train.score(X_train, y_train)), 3)
-round(float(lda_tfidf_train.score(X_test, y_test)), 3)
-
+>>> round(float(lda_tfidf_train.score(X_train, y_train)), 3)
+0.99
+>>> round(float(lda_tfidf_train.score(X_test, y_test)), 3)
+0.554
 """
 
 from sklearn.metrics import confusion_matrix
@@ -97,7 +100,14 @@ plot_confusion_matrix(lda_tfidf_train,X_test, y_test, cmap="Greys",
                       display_labels=['non-toxic', 'toxic'], colorbar=False)
 plt.show()
 
+from sklearn.metrics import f1_score
+f1_score(y_test,lda_tfidf_train.predict(X_test))
+"""
+0.1832844574780059
+"""
 
+
+### Latent Semantic Analysis
 from sklearn.decomposition import TruncatedSVD
 svd = TruncatedSVD(n_components=16, n_iter=100)  # <1>
 columns = ['topic{}'.format(i) for i in range(svd.n_components)]
@@ -136,17 +146,25 @@ topic_term_matrix = pd.DataFrame(svd.components_, columns=terms,
 """
 >>> pd.options.display.max_columns = 8
 >>> topic_term_matrix.head(4).round(3)
-"""
+>>> toxic_terms= topic_term_matrix['pathetic crazy stupid idiot hate die lying'.split()].round(3) * 100
+>>> 
 
+"""
 
 X_train_16d, X_test_16d, y_train_16d, y_test_16d = train_test_split(svd_topic_vectors, \
                                                     comments.toxic.values, test_size=0.5, random_state=271828)
-lda_svd = LinearDiscriminantAnalysis(n_components=1)
-lda_svd = lda_svd.fit(X_train_16d, y_train_16d)  # <2>
-round(float(lda_svd.score(X_train_16d, y_train_16d)), 3)
-round(float(lda_svd.score(X_test_16d, y_test_16d)), 3)
-
+lda_lsa = LinearDiscriminantAnalysis(n_components=1)
+lda_lsa = lda_lsa.fit(X_train_16d, y_train_16d)  # <2>
 """
+>>> round(float(lda_lsa.score(X_train_16d, y_train_16d)), 3)
+0.881
+>>> round(float(lda_lsa.score(X_test_16d, y_test_16d)), 3)
+0.88
+"""
+from sklearn.metrics import f1_score
+f1_score(y_test_16d, lda_lsa.predict(X_test_16d))
+"""
+# comparing to PCA 
 from sklearn.decomposition import PCA
 pca_model = PCA(n_components=16)
 tfidf_docs_16d = pca_model.fit_transform(tfidf_docs)
@@ -161,4 +179,86 @@ round(float(lda_lsa.score(X_train_16d, y_train_16d)), 3)
 round(float(lda_lsa.score(X_test_16d, y_test_16d)), 3)
 """
 
+# Hyperparameter table
+hparam_table = pd.DataFrame()
 
+tfidf_performance = {'classifier': 'LDA',
+                     'features': 'tf-idf (spacy tokenizer)',
+                     'train_accuracy': 0.99 ,
+                     'test_accuracy': 0.554,
+                     'test_precision': 0.383 ,
+                     'test_recall': 0.12,
+                     'test_f1': 0.183}
+
+hparam_table = hparam_table.append(tfidf_performance, ignore_index=True)
+
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+def hparam_rec(model, X_train, y_train, X_test, y_test, classifier_name, features):
+    return {'classifier': classifier_name,
+            'features': features,
+            'train_accuracy': float(model.score(X_train, y_train)),
+            'test_accuracy': float(model.score(X_test, y_test)),
+            'test_precision': precision_score(y_test, model.predict(X_test)),
+            'test_recall': recall_score(y_test, model.predict(X_test)),
+            'test_f1': f1_score(y_test, model.predict(X_test)) }
+
+lsa_performance = hparam_rec(lda_lsa, X_train_16d, y_train_16d, X_test_16d,y_test_16d, 'LDA', 'LSA (16 components)')
+hparam_table = hparam_table.append(lsa_performance)
+
+def evaluate_model(X,y, classifier, classifier_name, features):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=271828)
+    classifier = classifier.fit(X_train, y_train)
+    return hparam_rec(classifier, X_train, y_train, X_test,y_test,
+                      classifier_name, features)
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+counter = CountVectorizer(tokenizer=spacy_tokenizer)
+counter = counter.fit(comments.text)
+
+bow_docs = pd.DataFrame(counter.transform(comments.text)
+                        .toarray(), index=index)
+column_nums, terms = zip(*sorted(zip(counter.vocabulary_.values(),
+                                     counter.vocabulary_.keys())))
+bow_docs.columns = terms
+
+"""
+>>> comments.loc['comment0'].text
+"""
+
+
+from sklearn.decomposition import LatentDirichletAllocation as LDiA
+ldia = LDiA(n_components=16, learning_method='batch')
+ldia = ldia.fit(bow_docs)  # <1>
+ldia.components_.shape
+columns = ['topic{}'.format(i) for i in range(16)]
+ldia16_topic_vectors = ldia.transform(bow_docs)
+ldia16_topic_vectors = pd.DataFrame(ldia16_topic_vectors,
+                                    index=index, columns=columns)
+
+components = pd.DataFrame(ldia.components_.T, index=terms,
+    columns=columns)
+components.round(2).head(3)
+
+
+
+
+model_ldia16 = LinearDiscriminantAnalysis()
+ldia16_performance =evaluate_model(ldia16_topic_vectors, comments.toxic, model_ldia16, 'LDA', 'LDIA (16 components)')
+
+hparam_table = hparam_table.append(ldia16_performance, ignore_index = True)
+
+ldia32 = LDiA(n_components=32, learning_method='batch')
+ldia32_topic_vectors = ldia.fit_transform(bow_docs)
+model_ldia32 = LinearDiscriminantAnalysis()
+ldia32_performance =evaluate_model(ldia32_topic_vectors, comments.toxic, model_ldia32, 'LDA', 'LDIA (32 components)')
+
+hparam_table = hparam_table.append(ldia32_performance, ignore_index = True)
+
+words = counter.get_feature_names()
+for topic_idx, topic in enumerate(ldia.components_):
+          print(f"\nTopic #{topic_idx + 1}:")
+          print("; ".join([words[i]
+                           for i in topic.argsort()[:-6:-1]]))
