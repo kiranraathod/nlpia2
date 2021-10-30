@@ -8,6 +8,7 @@ conda activate nlpia2 \
 
 # install all of `nlpia2`'s dependences if they aren't already installed:
 conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
+    emoji \
     graphviz \
     huggingface_hub \
     jupyter \

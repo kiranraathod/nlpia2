@@ -35,6 +35,7 @@ dependencies:
   - debugpy=1.4.1=py38h295c915_0
   - decorator=5.1.0=pyhd3eb1b0_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
+  - emoji=1.6.1=pyhd8ed1ab_0
   - entrypoints=0.3=py38_0
   - expat=2.4.1=h2531618_2
   - filelock=3.0.12=pyhd3eb1b0_1
