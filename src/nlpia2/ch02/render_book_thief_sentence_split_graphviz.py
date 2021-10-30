@@ -1,9 +1,30 @@
+import os
 from graphviz import Graph
 import shutil
 from pathlib import Path
 
-REPO_DIR = Path(__file__).resolve().absolute().parent.parent.parent
-IMAGE_DIR = REPO_DIR / 'manuscript' / 'images'
+CODE_DIR = Path(__file__).resolve().absolute()
+for i in range(4):
+    if CODE_DIR.name in ['code', 'nlpia2']:
+        break
+    # print(f"NOT code dir: {CODE_DIR}")
+    CODE_DIR = CODE_DIR.parent
+
+REPO_DIR = CODE_DIR.parent
+for i in range(4):
+    if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
+        break
+    # print(f"not repo dir: {REPO_DIR}")
+    REPO_DIR = REPO_DIR.parent
+
+HOME_CODE_DIR = REPO_DIR.parent.parent
+print(f"HOME_CODE_DIR: {HOME_CODE_DIR}")
+assert HOME_CODE_DIR.name == 'code'
+MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
+assert MANUSCRIPT_DIR.is_dir()
+IMAGE_DIR = MANUSCRIPT_DIR / 'images'
+assert IMAGE_DIR.is_dir()
+SCRIPT_WORKING_DIR = os.getcwd()
 
 print()
 print('-' * 70)
