@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression, Lasso
+# from sklearn.linear_model import LogisticRegression, Lasso
+from constants import DATA_DIR
 
+df = pd.read_csv(DATA_DIR / 'baby-names-region.csv.gz')
 
-df = pd.read_csv(DATA_DIR / '.nlpia2-data/baby-names-region.csv.gz')
-
-df = df.sample(1_000_000, random_state=1989)
+# df = df.sample(1_000_000, random_state=1989)
 np.random.seed(451)
 istrain = np.random.rand(len(df)) < .9
 

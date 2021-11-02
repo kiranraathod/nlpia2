@@ -2,34 +2,36 @@
 # NOTE: does not install Anaconda3 nor miniconda
 
 # create a new environment named "nlpia2" if one doesn't already exist:
-conda activate nlpia2 \
-    || conda create -n nlpia2 -y 'python==3.8.8' \
-    && conda activate nlpia2
+conda activate nlpia2 || CONDA_DEFAULT_ENV=''
 
-# install all of `nlpia2`'s dependences if they aren't already installed:
-conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
-    emoji \
-    graphviz \
-    huggingface_hub \
-    jupyter \
-    lxml \
-    nltk \
-    pytest \
-    pytorch \
-    regex \
-    seaborn \
-    scipy \
-    scikit-learn \
-    sentence-transformers \
-    statsmodels \
-    spacy \
-    torchtext \
-    transformers \
-    xmltodict
-# python ./conda_install_spacy_en_core_web_md.py || python ./scripts/conda_install_spacy_en_core_web_md.py
+if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
+    conda create -n nlpia2 -y 'python==3.8.8'
+    conda activate nlpia2
+    # install all of `nlpia2`'s dependences if they aren't already installed:
+    conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
+        emoji \
+        graphviz \
+        huggingface_hub \
+        jupyter \
+        lxml \
+        nltk \
+        pytest \
+        pytorch \
+        regex \
+        seaborn \
+        scipy \
+        scikit-learn \
+        sentence-transformers \
+        statsmodels \
+        spacy \
+        torchtext \
+        transformers \
+        wikipedia \
+        xmltodict
 
-# python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_sm') for f in files))" || python -m spacy download en_core_web_sm
-# python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_md') for f in files))" || python -m spacy download en_core_web_md
+    # python ./conda_install_spacy_en_core_web_md.py || python ./scripts/conda_install_spacy_en_core_web_md.py
 
-
+    # python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_sm') for f in files))" || python -m spacy download en_core_web_sm
+    # python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_md') for f in files))" || python -m spacy download en_core_web_md
+fi
 

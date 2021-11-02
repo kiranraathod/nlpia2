@@ -512,7 +512,6 @@ Joy        M
 Maria      F
 """
 
-
 """
 >>> sex_pred = pd.Series(model.predict(vectorizer.transform(women)),
 ...                      index=women)
@@ -537,6 +536,29 @@ Moojan      M
 Hanan       F
 Nikita      F
 """
+sex_pred = pd.Series(model.predict(vectorizer.transform(women)),
+                     index=women)
+print(sex_pred)
+# Maria       F
+# Nathalie    F
+# Zeynep      F
+# Melanie     F
+# Kathryn     F
+# Helen       F
+# Susan       F
+# Joy         M
+# Gry         M
+# Fei-Fei     M
+# Rana        F
+# Daphne      M
+# Vinita      F
+# Ivana       F
+# Karolyn     F
+# Bulbul      M
+# Moojan      M
+# Hanan       F
+# Nikita      F
+
 
 """
 >>> sex_pred[sex_pred != 'F']
@@ -547,3 +569,10 @@ Daphne     M
 Bulbul     M
 Moojan     M
 """
+print(sex_pred[sex_pred != 'F'])
+# Joy        M
+# Gry        M
+# Fei-Fei    M
+# Daphne     M
+# Bulbul     M
+# Moojan     M

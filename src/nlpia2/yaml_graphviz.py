@@ -1,3 +1,4 @@
+import argparse
 import os
 import copy
 from graphviz import Digraph, Graph
@@ -6,51 +7,78 @@ import sys
 from pathlib import Path
 import shutil
 import logging
+from constants import DATA_DIR
 
 log = logging.getLogger(__name__)
 
 
-CODE_DIR = Path(__file__).resolve().absolute()
-for i in range(4):
-    if CODE_DIR.name in ['code', 'nlpia2']:
-        break
-    # print(f"NOT code dir: {CODE_DIR}")
-    CODE_DIR = CODE_DIR.parent
+def setup_logging(loglevel):
+    """Setup basic logging
 
-REPO_DIR = CODE_DIR.parent
-for i in range(4):
-    if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
-        break
-    # print(f"not repo dir: {REPO_DIR}")
-    REPO_DIR = REPO_DIR.parent
-
-HOME_CODE_DIR = REPO_DIR.parent.parent
-print(HOME_CODE_DIR)
-assert HOME_CODE_DIR.name == 'code'
-MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
-assert MANUSCRIPT_DIR.is_dir()
-IMAGE_DIR = MANUSCRIPT_DIR / 'images'
-assert IMAGE_DIR.is_dir()
-SCRIPT_WORKING_DIR = os.getcwd()
+    Args:
+      loglevel (int): minimum loglevel for emitting messages
+    """
+    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+    logging.basicConfig(level=loglevel, stream=sys.stdout,
+                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-FILEPATH = CODE_DIR / 'data' / 'nlp-applications-graphviz.yml'
-ENGINE = 'sfdp'  # neato, fdp, sfdp, dot
+def main(args):
+    """Main entry point allowing external calls
 
+    Args:
+      args ([str]): command line parameter list
+    """
+
+
+__version__ = '0.0.1'
 CLASSES = dict(digraph=Digraph, graph=Graph)
 
-# u = Digraph('unix', filename='unix.gv',
-#             node_attr={'color': 'lightblue2', 'style': 'filled'})
-ATTR = dict(
-    # engine='fdp',
-    rankdir='LR',
-    # layout="neato",
-    # size='6,6',
-    #     nodesep=1,
-    #     ranksep=1,
-)
-NODE_ATTR = dict(
-    shape='plaintext')
+# __file__ defined so script can be %run within ipython
+SCRIPT_WORKING_DIR = os.getcwd()
+try:
+    __file__ = __file__
+except NameError:
+    __file__ = SCRIPT_WORKING_DIR / f'{__name__}.py'
+
+
+def find_code_dir(filepath=__file__):
+    CODE_DIR = Path(filepath).resolve().absolute()
+    for i in range(4):
+        if not CODE_DIR or not CODE_DIR.name or CODE_DIR.name in ['code', 'nlpia2']:
+            break
+        # print(f"NOT code dir: {CODE_DIR}")
+        CODE_DIR = CODE_DIR.parent
+    return CODE_DIR
+
+
+CODE_DIR = find_code_dir()
+
+
+def find_repo_dir(dirpath=CODE_DIR):
+    REPO_DIR = dirpath.parent
+    for i in range(4):
+        if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
+            break
+        # print(f"not repo dir: {REPO_DIR}")
+        REPO_DIR = REPO_DIR.parent
+    return REPO_DIR
+
+
+REPO_DIR = find_repo_dir()
+
+
+def find_dest_dir(home_code_dir=REPO_DIR.parent.parent):
+    print(home_code_dir)
+    assert home_code_dir.name == 'code'
+    MANUSCRIPT_DIR = home_code_dir / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
+    assert MANUSCRIPT_DIR.is_dir()
+    dest_dir = MANUSCRIPT_DIR / 'images'
+    assert dest_dir.is_dir()
+    return dest_dir
+
+
+DEST_DIR = find_dest_dir
 
 
 def wrap_text(text, max_line_width=10):
@@ -73,7 +101,23 @@ def wrap_text(text, max_line_width=10):
     return '\n'.join(lines)
 
 
-def load_graphviz(filepath=FILEPATH, engine=ENGINE, attr=ATTR, node_attr=NODE_ATTR):
+def load_graphviz(filepath=None, engine='sfdp', attr=None, node_attr=None):
+    filepath = filepath or CODE_DIR / 'data' / 'nlp-applications-graphviz.yml'
+    engine = engine or 'sfdp'  # neato, fdp, sfdp, dot
+    # u = Digraph('unix', filename='unix.gv',
+    #             node_attr={'color': 'lightblue2', 'style': 'filled'})
+    ATTR = dict(
+        # engine='fdp',
+        rankdir='LR',
+        # layout="neato",
+        # size='6,6',
+        #     nodesep=1,
+        #     ranksep=1,
+    )
+    attr = attr or ATTR
+
+    node_attr = node_attr or dict(shape='plaintext')
+
     filepath = str(filepath)
     with open(filepath) as fin:
         y = yaml.full_load(fin)
@@ -113,7 +157,12 @@ def load_graphviz(filepath=FILEPATH, engine=ENGINE, attr=ATTR, node_attr=NODE_AT
             else:
                 g.node(wrap_text(label))
 
+    unique_edges = set()
     for e in y.get('edges', []):
+        edge_str = str(e)
+        if edge_str in unique_edges:
+            continue
+        unique_edges.add(edge_str)
         # print(e)
         if len(e) == 2:
             g.edge(wrap_text(e[0]), wrap_text(e[1]))
@@ -124,17 +173,76 @@ def load_graphviz(filepath=FILEPATH, engine=ENGINE, attr=ATTR, node_attr=NODE_AT
     return g
 
 
-if __name__ == '__main__':
-    chnum = 'ch01' if len(sys.argv) < 3 else str(sys.argv[2])
-    filepath = FILEPATH if len(sys.argv) < 2 else Path(sys.argv[1]).expanduser().resolve().absolute()
-    g = load_graphviz(filepath=filepath)
+def brittle_parse_args(args=None):
+    """ Assumes 3 cli args are YAML_FILE CHNUM DEST_DIR  """
+    args = args or sys.argv[1:]
+    dest_dir = DEST_DIR if len(args) < 3 else Path(args[2])
+    assert dest_dir.is_dir()
+    chnum = '' if len(args) < 2 else str(args[1])
+    dest_dir /= str(chnum)
+    assert dest_dir.is_dir()
+    yaml_filepath = None if len(args) < 1 else Path(args[0]).expanduser().resolve().absolute()
+    return dict(dest_dir=dest_dir, yaml_filepath=yaml_filepath)
+
+
+def parse_args(args=None):
+    """Parse command line parameters
+
+    Args:
+      args ([str]): command line parameters as list of strings
+
+    Returns:
+      argparse.Namespace: command line parameters as attributes of namespace object
+    """
+    args = args or sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description="Transpile yaml->graphviz.dot then render svg/png files")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="yaml_graphviz {ver}".format(ver=__version__))
+    parser.add_argument(
+        dest="dest_dir",
+        help="images directory to render svg and png to",
+        default=Path(DEST_DIR),
+        type=Path,
+        metavar="DEST_DIR")
+    parser.add_argument(
+        dest="yaml_file",
+        help="Path to yaml file containing graph specification for graphviz diagram",
+        type=Path,
+        metavar="YAML_FILE")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        dest="loglevel",
+        help="set loglevel to INFO",
+        action="store_const",
+        const=logging.INFO)
+    parser.add_argument(
+        "-vv",
+        "--very-verbose",
+        dest="loglevel",
+        help="set loglevel to DEBUG",
+        action="store_const",
+        const=logging.DEBUG)
+    args = parser.parse_args(args)
+    return dict(yaml_filepath=args.yaml_file,
+                dest_dir=args.dest_dir, loglevel=args.loglevel)
+
+
+def render_yaml_graphviz(yaml_filepath=None, dest_dir=DEST_DIR):
+    if yaml_filepath is None:
+        yaml_filepath = next(DATA_DIR.glob('*graphviz.yaml'))
+    assert yaml_filepath.is_file()
+    g = load_graphviz(filepath=yaml_filepath)
     name = str(g.name)
     for ext in ['svg', 'png']:
         g.render(filename=name, cleanup=1, view=0, format=ext)
         # g.save()
         # g.view()
 
-        dest = IMAGE_DIR / chnum / (name + '.' + ext)
+        dest = DEST_DIR / (name + '.' + ext)
         log.warning(f'svg filepath: {dest}')
         try:
             dest.resolve().absolute().unlink()
@@ -142,3 +250,11 @@ if __name__ == '__main__':
             pass
         shutil.move(name + '.' + ext, str(dest.resolve().absolute()))
     # g.view()
+
+
+if __name__ == '__main__':
+    # FIXME: kwargs = parse_args()
+    # kwargs = brittle_parse_args()
+    kwargs = parse_args()
+    setup_logging(kwargs.pop('loglevel'))
+    render_yaml_graphviz(**kwargs)
