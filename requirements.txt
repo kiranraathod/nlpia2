@@ -1,0 +1,27 @@
+emoji
+ffmpeg
+glcontext
+graphviz
+huggingface_hub
+jupyter
+lxml
+# manim
+# manimpango
+nltk
+pyglet
+pylatex
+pyrr
+pyopengl
+pytest
+# pytorch
+regex
+seaborn
+scipy
+scikit-learn
+sentence-transformers
+statsmodels
+spacy
+torchtext
+transformers
+wikipedia
+xmltodict
