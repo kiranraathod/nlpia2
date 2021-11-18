@@ -15,9 +15,106 @@
 ## ch1 and philosophy, wisdom, prosocial
 # translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
 -
+  text: Get up quickly--just switch on the white light of the will.
+  author: Susan Sontag
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [life, agency, work ethic, will power]
+-
+  text: Explore unfamiliar sections--on foot if wet, on bicycle if dry.
+  author: Henry Miller
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [stoicism, exploration, life, commute, conservation, electric vehicles, cycling]
+-
+  text: The blizzard doesn't last forever; it just seems so.
+  author: Ray Bradbury
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [stoicism, storms, time, suffering]
+-
+  text: You should feel slightly incompetent at what you're trying to do. The minute you start to feel like an expert, what you really are is a hack.
+  author: Michael Cunningham
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [syndee, expert, imposter syndrom, expertise, competence, self-examination]
+-
+  text: Ruptures almost always lead to a stronger project.
+  author: Anne Carson
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [project management, agile, fail fast, failure]
+-
+  text: Pay attention to what you pay attention to.
+  author: Amy Krouse Rosenthal
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [attention, screens, social media, news, qary, mindfullness]
+-
+  text: Do not overlook the little joys!
+  author: Hermann Hesse
+  tags: [life, happiness, mindfulness]
+-
+  text: To affect the qulaity of the day, that is the highest of arts.
+  author: Henry David Thoreau
+  tags: [life, happiness]
+-
+  text: What I'm really concerned about is reaching one person.
+  author: Jorge Luis Borges
+  tags: [writing, audience, relationships, collective consciousness]
+-
+  text: I write for my wife, my agent, and my editor.
+  author: Denis Johnson
+  tags: [writing, relationships, collective consciousness]
+-
+  text: You can't just write and write and put thing in a drawer. They wither without the warm sun of someone else's appreciation.
+  author: Anne Morrow Lindbergh
+  tags: [writing, audience, relationships, prosocial, collective consciousness]
+-
+  text: Better to write for yourself and have no public, than to write for the public and have no self.
+  author: cyril connolly
+  tags: [writing, authenticity]
+-
+  text: I never had an audience until I was past fifty. But I wrote all the time anyway. I had to.
+  author: William Carlos Williams
+  tags: [writing, authenticity, passion]
+-
+  text: I don't even want to please the reader, I want to change them.
+  author: Jenette Winterson
+  tags: [writing, teaching]
+-
+  text: Stepping from the title to the first lines is like stepping into a canoe. A lot of things can go wrong.
+  author: Billy Collins
+  tags: [writing, title, first impressions, mistakes]
+-
+  text: Follow the accident, fear the fixed plan--that is the rule.
+  author: John Fowles
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [oportunism, accident, failure, planning, agile]
+-
+  text: See other skies and seas.
+  author: Gustave Flaubert
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [exploration, life, travel, sailing]
+
+-
+  text: "The reason to travel: there are inner transitions we can't properly cement without a change of locations."
+  author: Alain de Botton
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [travel, digital nomad, growth, personal development, change, personality, mindfulness]
+-
+  text: Almost everything will work again if you unplug it for a few minutes -- including you.
+  author: Annie Lamott
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [life, mindfulness, meditation, screens, ai, social media, news]
+-
+  text: Life is long if you know how to use it.
+  author: Seneca
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [life]
+-
+  text: The last thing, we decide on in writing a book is what shall be the first we put in it.
+  author: Blaise Pascal
+  source: Every Day a Word Surprises Me & Other Quotes by Writers
+  tags: [writing, plot, proof, math, teaching]
+-
   text: I begin to speak only when I'm certain what I'll say isn't better left unsaid."
   author: Cato (Marcus Porcius Cato or Cato the Younger)
-  circa: 50's BC 
+  circa: 50's BC
   tags: [stoicism, inspiration, stoic, philosophy, life]
 -
   text: Make the mind tougher by exposing it to adversity.
@@ -71,12 +168,22 @@
   text: If you are pained by any external thing, it is not this thing that disturbs you, but your own judgment about it. And it is in your power to wipe out this judgment now.
   author: Marcus Aurelius
   tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
-  
+
 -
   text: "Be quiet, darling. Let pattern recognition have its way."
   author: William Gibson
   book: The Peripheral
   tags: [ml, ai, generalization, machine learning, data science, ds]
+-
+  text: "I feel hindered by a surfeit of information, oceanic to the point of meaninglessness. The shortcomings of the system are best understood as the result of taking this ocean of data, and the decision points produced by our algorithms, as a near enough substitute for perfect certainty. My own best results are often due to pretending I know relatively little, and acting accordingly, though it's easier said than done."
+  author: William Gibson
+  book: The Peripheral
+  tags: [ml, ai, information overload, machine learning, data science, ds]
+-
+  text: "It was like the pictures in a box at a yard sale, nobody remembering who those people were, or even whose family, let alone how they came to be there. It gave her a sense of things falling, down some hole that had no bottom. Whole worlds falling, and maybe hers too, and it made her want to phone Janice, who was out at the house, and see how her mother was doing."
+  author: William Gibson
+  book: The Peripheral
+  tags: [disorientation, dystopia, history, truth, post truth, family, self, life]
 -
   text: "I have already told you of the sickness and confusion that comes with time travelling."
   author: H. G. Wells
@@ -168,7 +275,7 @@
    Who would dare to supercede me
    Super-super-superwho?
   tags: [poem, industrialization, cold ware america, capitalism, superman, supercompetitor]
-  original source: "'Superman' (poem) by John Updike" 
+  original source: "'Superman' (poem) by John Updike"
   author: John Updike
   source: "_Flash Effect: Science and the Rhetorical Origins of Cold War America_ by David J. Tietge, Chapter 4, p. 91"
 -
@@ -385,16 +492,16 @@
   text: First, when people post something on social media, unless explicitly stated, they probably do not want their belief to be corrected. Usually their purpose is to have their view confirmed.
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
-- 
+-
   text: "In post modern culture, people not only have their own views, they think they are entitled to their own facts."
   author: Peter Boghossian
 -
   text: "When you choose to see the good in others, you end up finding the good in yourself."
   author: John Spence
-- 
+-
   text: "At the end of the day - the long day of your life - as people stand around your grave no one will talk about how big your house was, or how many cars you owned, or your boat or plane... they will only talk about ONE thing and ONE thing ONLY: LOVE!  How much you loved them and how much they loved you. So the goal then is to live a life of love. That is all."
   author: John Spence
-- text: "Someone else doesn't have to be wrong for you to be right." 
+- text: "Someone else doesn't have to be wrong for you to be right."
   author: John Spence
 - text: "No matter how good or bad you have it, wake up each day thankful for your life.  Someone somewhere else is desperately fighting for theirs."
   author: John Spence
@@ -447,7 +554,7 @@
   text: "Pulling a gun's trigger can be an appalling act. But if it is suicidal drawing fire to save someone, it has an utterly different meaning. Placing your hand on someone's arm can be an act of deep compassion or the first step of betrayal. The punch line? It's all about context, and the biology of context is vastly more complicated than the biology of the behavior itself."
   author: Robert M. Sapolsky
   tags: [context, ethics, behavior, biology, neuroscience, violence, morality, empathy]
-  
+
 -
   text: "Hormones influencing the sensitivity of the person to environmental stimuli."
   tags: [hormones, emotion, id, ego, superego, environment, nature nurture, behavior, neuroscience, stress, trauma, anxiety]
@@ -455,7 +562,7 @@
 -
   text: "The frontal cortex is an incredibly interesting part of the brain - ours is proportionately bigger and/or more complex than in any other species."
   tags: [neuroscience, brain, superego, frontal cortex, humans, animals, intelligence]
-  author: Robert M. Sapolsky 
+  author: Robert M. Sapolsky
 -
   text: "I'm a primate, you know? I need to be pro-social, like all of us; I need to be pro-social and affiliative. I need to sit at the campfire with other women."
   author: Wednesday Martin
@@ -471,7 +578,7 @@
   tags: prosocial AI, prosocial, cooperation, altruism, society
 -
   text: "If we fail to provide boys with pro-social models of the transition to adulthood, they may construct their own. In some cases, gang initiation rituals, street racing, and random violence may be the result."
-  author: Leonard Sax 
+  author: Leonard Sax
   tags: [prosocial, sociopathy, inequality, education, psychology]
 -
   author: "Cathy McMorris Rodgers"
@@ -517,25 +624,25 @@
   text: "We believe that economics does not necessarily have to be a zero-sum game; it can be a win-win proposition for everyone involved so long as they have the tools in which to succeed."
   tags: [business, open source, career, zero sum game, positive sum game]
   author: Ron Kind
-- 
+-
   text: "It's perhaps not so much how your amygdala is tuned that makes you politically extreme, but that your intrinsic nervousness makes you more responsive to things that might seem to threaten your particular social world. Education probably plays an important role in dampening that response by allowing the brain's frontal lobes (where much of the brain's conscious work goes on) to counteract the emotional responses with a more considered view, so explaining why education is invariably the friend of liberal politics."
   tags: [neuroscience, politics, extremism, brain, education, teaching, liberal democracy]
   author: Robin Dunbar
   title:  "How Many Friends Does One Person Need?: Dunbar's Number and Other Evolutionary Quirks"
   source: goodreads
   tags: [social networks, extremism, politics, confirmation bias, tribalism]
-- 
+-
   text: "[Dunbar's number is] the number of people you would not feel embarrassed about joining uninvited for a drink if you happened to bump into them in a bar. [...] this limit is a direct function of relative neocortex size, and that this in turn limits group size [...] the limit imposed by neocortical processing capacity is simply on the number of individuals with whom a stable inter-personal relationship can be maintained."
   tags: [neuroscience, tribalism, other, friends, social network, social networks, extremism, politics, confirmation bias, economics, dunbar's number, coop, tribalism, social network]
   author: Robin Dunbar
   title:  "How Many Friends Does One Person Need?: Dunbar's Number and Other Evolutionary Quirks"
   source: wikipedia.org
-- 
+-
   text: "Homo sapiens, it turns out, is the most cooperative species on the planet, outperforming ants, hyenas, and even the naked mole-rat when it comes to living alongside those who are beyond our next of kin."
   tags: [neuroscience, evolution, biology, homo sapien, supercooperators, altruism, economics, dunbar's number, coop, supercooperators, social network]
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
-- 
+-
   text: "Economics is the mother tongue of public policy,"
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
@@ -549,7 +656,7 @@
   text: "For over 70 years economics has been fixated on GDP, or national output, as its primary measure of progress. That fixation has been used to justify extreme inequalities of income and wealth coupled with unprecedented destruction of the living world. For the twenty-first century a far bigger goal is needed: meeting the human rights of every person within the means of our life-giving planet."
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
-  tags: [economics, regenerative economics, regenerative business, social impact, 
+  tags: [economics, regenerative economics, regenerative business, social impact,
     externalities, doughnut economics, rational agent, behavioral economics]
 -
   text: "Depicting rational economic man as an isolated individual - unaffected by the choices of others – proved highly convenient for modelling the economy, but it was long questioned even from within the discipline. At the end of the nineteenth century, the sociologist and economist Thorstein Veblen berated economic theory for depicting man as a \"self-contained globule of desire\", while the French polymath Henri Poincaré pointed out that it overlooked \"people's tendency to act like sheep\". He was right: we are not so different from herds as we might like to imagine. We follow social norms, typically preferring to do what we expect others will do and, especially if filled with fear or doubt, we tend to go with the crowd."
@@ -570,7 +677,7 @@
     "You're the reason she left. You can leave too, for all I care. I sure as hell would be better off without you."
 
     The words were just as I remembered them, but it wasn't Nicole saying them.
-    
+
     It was me.
   tags: [flawed human memory, pivotal moments in life, _Sliding Doors_ , Remem, cognitive assistants, memory assistant, Google Search, duckduckgo, life log, qary]
   book: _Exhalation_ short story "Truth of Fact, Truth of Fiction"
@@ -586,14 +693,14 @@
   title: Truth of Fact, Truth of Fiction
   author: Ted Chiang
   nlpia: ch02 about fake news and tokenizing quotes.
-- 
+-
   text: "Evolution has no foresight. Complex machinery develops its own agendas. Brains -- cheat. Feedback loops evolve to promote stable heartbeats and then stumble upon the temptation of rhythm and music. The rush evoked by fractal imagery, the algorithms used for habitat selection, metastasize into art. Thrills that once had to be earned in increments of fitness can now be had from pointless introspection. Aesthetics rise unbidden from a trillion dopamine receptors, and the system moves beyond modeling the organism. It begins to model the very process of modeling. It consumes evermore computational resources, bogs itself down with endless recursion and irrelevant simulations. Like the parasitic DNA that accretes in every natural genome, it persists and proliferates and produces nothing but itself. Metaprocesses bloom like cancer, and awaken, and call themselves I."
-  tags: [evolution, survival of the fittest, competition, cooperation, neuroscience, conciousness] 
+  tags: [evolution, survival of the fittest, competition, cooperation, neuroscience, conciousness]
   book: Blindsight
   author: Peter Watts
 -
   text: "People aren't rational. We're not thinking machines, we're -- we're feeling machines that happen to think."
-  tags: [evolution, neuroscience, emotion, conciousness] 
+  tags: [evolution, neuroscience, emotion, conciousness]
   book: Blindsight
   author: Peter Watts
 -
@@ -623,7 +730,7 @@
   text: "There is nothing which can better deserve our patronage than the promotion of science and literature. Knowledge is in every country the surest basis of public happiness."
   author: George Washington
   tags: [social media, education, democracy, science, knowledge, fake news]
-- 
+-
   text: "Is it [the answer] just a rigorous parctice of dialectic synthesis as essentially conversations with a-holes of various flavors until they are not a-holes because you become deeply empathetic with their perspective."
   tags: [Happiness quotient, HDP vs GDP]
   auth]or: Lex Frideman
@@ -670,12 +777,12 @@
 -
   text: "The problem posed by indirect speech acts is the problem of how it is possible for the speaker to say one thing and mean that but also to mean something else."
   tags: [meaning, communication, nlp, natural language, semantics]
-  author: John Searle 
+  author: John Searle
 -
   text: "If you can say it clearly, you don't understand it yourself"
   tags: [nlp, language, teaching, mind, intelligence, thought]
   concepts: [syntax doesn't suffice for semantics]
-  author: John Searle 
+  author: John Searle
 -
   text: "Why does all the information processing the brain need to feel a certain way, from the inside?"
   book: "The Conscious Mind"
@@ -691,7 +798,7 @@
   tags: [computationalism, consciousness, ai, agi, substrate independence, mind, neuroscience]
   book: "Artificial You"
   author: Susan Schneider
-- 
+-
   text: "But, in our age, conscience and duty are not ideals: an excess of either is seen as a mental illness called social-pressure personality disorder."
   tags: [ethics, morality, conscience, consciousness, social pressure, sociopathy, conformity, mob, individualism, future, intelligence, evolution]
   character: AA
@@ -712,20 +819,20 @@
   tags: [emmisary, love, first contact, alien invasion, spy, intelligence, brain, neuroscience, dictatorship, leadership]
   page: 99
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "This moment resembled the rest of his life: a dedicated watch for a slim, slim ray of hope."
   tags: [optimism, science, life, human condition]
   page: 57
   character: Cheng Xin
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "The root cause for Crisis Infantilism may well be found in the interaction between these manifestations and the tremendous inertia of human society's inherent conservatism."
   tags: [society, politics, change, alien invasion, dark forest, cooperation, fear, mob]
   page: 43
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "I crushed some weeds and added them to the water. It's the most organic drink."
   tags: [invention, consumerism, tea, selling water]
@@ -733,14 +840,14 @@
   character: Tianming
   tag: Green Tempest
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "That most lovely day of his time in college held a golden glow in his mind. ... Tianming fell in love with drizzly days, ..."
   tags: [love, youth, mind, neuroscience, memory, beauty]
   page: 39
   character: Tianming
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "He thought of \"The Judgement\" by Franz Kafka, in which a father curses his son and sentences him to death. The son agrees, as easily as someone agreeing to take out the trash or to shut the door, ..."
   tags: [life, death, suicide, respect for elders, authority, power, perfection, judging, being judged, son, childhood]
@@ -789,20 +896,20 @@
   footnote: "An introduction to how Chinese Characters really function may be found in John DeFrancis's _Chinese Language: Fact and Fantasy_"
   page: 589
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "Sophon bowed again. 'Welcome to Universe 647. I am its manager."
   page: 585
   book: "Death's End"
   tags: [physics, dao of physics, bot, AI, AGI, parallel universes, heat death, thermodynamics, entropy]
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "We're going to advance! Advance! We'll stop at nothing to advance!"
   tags: [sociopath, war, intelligence, spycraft, extraterrestrial intelligence, alien intelligence, dark forest]
   character: Wade and Cheng Xin
   page: 588
   book: "Death's End"
-  author: Cixin Liu 
+  author: Cixin Liu
 -
   text: "Reading The Shoulder Shrug between two and three o'clock each morning, post-nightmare, or during the afternoon, in the basement."
   tags: [nlp, words, language, thought, meaning, books, literature]

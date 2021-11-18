@@ -18,11 +18,13 @@ conda activate nlpia2 \
 # install all of `nlpia2`'s dependences if they aren't already installed:
 conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
     emoji \
+    'glob2==0.7' \
     graphviz \
     huggingface_hub \
     jupyter \
     lxml \
-    nltk \
+    # nltk \
+    'networkx>2.0' \
     pytest \
     pytorch \
     regex \
@@ -30,6 +32,8 @@ conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
     scipy \
     scikit-learn \
     sentence-transformers \
+    'smart_open==2.2.0' \
+    'python-lsp-server=='>=1.2.2,<1.3.0' \
     statsmodels \
     spacy \
     torchtext \
