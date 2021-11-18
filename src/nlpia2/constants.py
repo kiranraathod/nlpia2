@@ -18,7 +18,10 @@ if not DATA_DIR.is_dir():
     # try/except this and use tempfiles python module as backup
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# canonical data directory to share data between nlpia2 installations
 HOME_DATA_DIR = HOME_DIR / DATA_DIR_NAME
+if not HOME_DATA_DIR.is_dir():
+    HOME_DATA_DIR.mkdir(parents=True, exist_ok=True)
 # TODO: create data.py file
 # TODO: add download_if_necessary to data.py
 # TODO: all required data files

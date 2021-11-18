@@ -10,11 +10,18 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
     # install all of `nlpia2`'s dependences if they aren't already installed:
     conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
         emoji \
+        ffmpeg \
+        glcontext \
         graphviz \
         huggingface_hub \
         jupyter \
         lxml \
+        manimpango \
         nltk \
+        pyglet \
+        pylatex \
+        pyrr \
+        pyopengl \
         pytest \
         pytorch \
         regex \
@@ -28,10 +35,10 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
         transformers \
         wikipedia \
         xmltodict
+pip install manim manimgl
 
     # python ./conda_install_spacy_en_core_web_md.py || python ./scripts/conda_install_spacy_en_core_web_md.py
 
     # python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_sm') for f in files))" || python -m spacy download en_core_web_sm
     # python -c "import spacy; import os; from pathlib import Path; nlp=spacy.load('en_core_web_sm'); modeldir=Path(nlp._path).parent.parent; files = os.listdir(modeldir); assert(any(f.startswith('en_core_web_md') for f in files))" || python -m spacy download en_core_web_md
 fi
-

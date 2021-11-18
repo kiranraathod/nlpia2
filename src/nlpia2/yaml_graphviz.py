@@ -69,16 +69,18 @@ REPO_DIR = find_repo_dir()
 
 
 def find_dest_dir(home_code_dir=REPO_DIR.parent.parent):
-    print(home_code_dir)
+    print('find_dest')
+    print(f'home_code_dir: {home_code_dir}')
     assert home_code_dir.name == 'code'
     MANUSCRIPT_DIR = home_code_dir / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
     assert MANUSCRIPT_DIR.is_dir()
     dest_dir = MANUSCRIPT_DIR / 'images'
     assert dest_dir.is_dir()
+    print(f'dest_dir: {dest_dir}')
     return dest_dir
 
 
-DEST_DIR = find_dest_dir
+DEST_DIR = find_dest_dir()
 
 
 def wrap_text(text, max_line_width=10):
@@ -182,7 +184,8 @@ def brittle_parse_args(args=None):
     dest_dir /= str(chnum)
     assert dest_dir.is_dir()
     yaml_filepath = None if len(args) < 1 else Path(args[0]).expanduser().resolve().absolute()
-    return dict(dest_dir=dest_dir, yaml_filepath=yaml_filepath)
+    print(f'yaml_filepath: {yaml_filepath}')
+    return dict(dest_dir=dest_dir, yaml_filepath=yaml_filepath, loglevel=logging.WARNING)
 
 
 def parse_args(args=None):
@@ -202,16 +205,27 @@ def parse_args(args=None):
         action="version",
         version="yaml_graphviz {ver}".format(ver=__version__))
     parser.add_argument(
+        'yaml_file',
+        dest="yaml_file",
+        nargs='?',
+        help="Path to yaml file containing graph specification for graphviz diagram",
+        type=Path,
+        metavar="YAML_FILE")
+    parser.add_argument(
+        'dest_subdir',
+        dest="dest_subdir",
+        nargs='?',
+        help="Subdirectory within dest_dir (e.g. `ch05`)",
+        type=Path,
+        metavar="CHXX")
+    parser.add_argument(
+        '-d',
+        '--dest',
         dest="dest_dir",
         help="images directory to render svg and png to",
         default=Path(DEST_DIR),
         type=Path,
         metavar="DEST_DIR")
-    parser.add_argument(
-        dest="yaml_file",
-        help="Path to yaml file containing graph specification for graphviz diagram",
-        type=Path,
-        metavar="YAML_FILE")
     parser.add_argument(
         "-v",
         "--verbose",
@@ -228,12 +242,13 @@ def parse_args(args=None):
         const=logging.DEBUG)
     args = parser.parse_args(args)
     return dict(yaml_filepath=args.yaml_file,
-                dest_dir=args.dest_dir, loglevel=args.loglevel)
+                dest_dir=args.dest_dir,
+                loglevel=args.loglevel)
 
 
 def render_yaml_graphviz(yaml_filepath=None, dest_dir=DEST_DIR):
     if yaml_filepath is None:
-        yaml_filepath = next(DATA_DIR.glob('*graphviz.yaml'))
+        yaml_filepath = next(DATA_DIR.glob('*graphviz.yml'))
     assert yaml_filepath.is_file()
     g = load_graphviz(filepath=yaml_filepath)
     name = str(g.name)
@@ -254,7 +269,7 @@ def render_yaml_graphviz(yaml_filepath=None, dest_dir=DEST_DIR):
 
 if __name__ == '__main__':
     # FIXME: kwargs = parse_args()
-    # kwargs = brittle_parse_args()
     kwargs = parse_args()
     setup_logging(kwargs.pop('loglevel'))
+    print(kwargs)
     render_yaml_graphviz(**kwargs)
