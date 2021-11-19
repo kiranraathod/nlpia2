@@ -15,6 +15,30 @@
 ## ch1 and philosophy, wisdom, prosocial
 # translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
 -
+  text: "I was flabbergasted. I thought that when we went someplace they'd said, 'Well congratulations, you Americans finally did it.' And instead of that, unanimously, the reaction was, 'We did it. We humans finally left this planet. We did it.'"
+  author: Michael Collins
+  source: Jeffrey Kluger, CBS interview of Michael Collins
+-
+  text: "The Earth must become as it appears: blue and white, not capitalist or communist; blue and white, not rich or poor; blue and white, not envious or envied."
+  author: Michael Collins
+  source: Twitter
+  date: May 19, 2019
+  tags: [astronaught, apollo, climate change, politics, blue marble, conflict, war, capitalism, communism]
+-
+  text: "I really believe that if the political leaders of the world could see their planet from a distance of, let’s say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
+  author: Michael Collins
+  source: Twitter
+  date: May 19, 2019
+  tags: [astronaught, apollo, climate change, politics, blue marble, conflict, war]
+-
+  text: "Let me say, as I sit here before you today having walked on the Moon, that I am myself still awed by that miracle. That awe, in me and in each of us… must be the engine of future achievement, not a slow dimming light from a time once bright."
+  author: Buzz Aldrin
+  source: Daily News
+  date: May 1997
+-
+  text: "See, the world is full of things more powerful than us. But if you know how to catch a ride, you can go places,"
+  author: Neil Stephenson
+-
   text: Get up quickly--just switch on the white light of the will.
   author: Susan Sontag
   source: Every Day a Word Surprises Me & Other Quotes by Writers
