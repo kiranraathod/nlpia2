@@ -5,7 +5,7 @@ Official code repository for the book [_Natural Language Processing in Action, 2
 To get the most of this repository, you need to do two things.
 
 1. **Clone the repository** to your local machine if you want to execute the code locally or want local access to the data (recommended).
-1. **Create an environment** that has all the helpful/needed modules for Natural Language Processing In Action, 2nd Edition.
+2. **Create an environment** that has all the helpful/needed modules for Natural Language Processing In Action, 2nd Edition.
 
 ## Clone the Repository
 
@@ -21,9 +21,9 @@ Here's how we did that for this book.
 
 1. **Make sure you have Anaconda3 installed.** Make sure you can run conda from within a bash shell (terminal). The `conda --version` command should say something like '`4.10.3`.
 
-1. **Update conda itself**. Keep current the `conda` package, which manages all other packages. Your base environment is most likely called _base_ so you can execute `conda update -n base -c defaults conda` to bring that package up to date.  Even if _base_ is not the activated environment at the moment, this command as presented will update the conda package in the _base_ environment. This way, next time you use the `conda` command, in any environment, the system will use the updated _conda_ package.
+2. **Update conda itself**. Keep current the `conda` package, which manages all other packages. Your base environment is most likely called _base_ so you can execute `conda update -n base -c defaults conda` to bring that package up to date.  Even if _base_ is not the activated environment at the moment, this command as presented will update the conda package in the _base_ environment. This way, next time you use the `conda` command, in any environment, the system will use the updated _conda_ package.
 
-1. **Create a new environment and install the variety of modules needed in NLPIA 2nd Edition.**
+3. **Create a new environment and install the variety of modules needed in NLPIA 2nd Edition.**
 
 There are two ways to do that.  
 
