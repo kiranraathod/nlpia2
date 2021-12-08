@@ -35,7 +35,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
         transformers \
         wikipedia \
         xmltodict
-pip install manim manimgl
+python -m pip install manim manimgl
 
     # python ./conda_install_spacy_en_core_web_md.py || python ./scripts/conda_install_spacy_en_core_web_md.py
 
