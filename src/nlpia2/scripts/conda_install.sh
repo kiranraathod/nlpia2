@@ -9,6 +9,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
     conda activate nlpia2
     # install all of `nlpia2`'s dependences if they aren't already installed:
     conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
+        asciidoctor \
         emoji \
         ffmpeg \
         glcontext \
@@ -18,6 +19,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
         lxml \
         manimpango \
         nltk \
+        pandoc \
         pyglet \
         pylatex \
         pyrr \
@@ -35,6 +37,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
         transformers \
         wikipedia \
         xmltodict
+
 python -m pip install manim manimgl
 
     # python ./conda_install_spacy_en_core_web_md.py || python ./scripts/conda_install_spacy_en_core_web_md.py
