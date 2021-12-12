@@ -1,13 +1,5 @@
 # data science datasets and data sources data aggregators data indexes
 -
-  description: NGram Viewer 2012 data dump with up to 5-grams and their frequencies for millions of books and journals
-  url: "https://pypi.org/project/google-ngram-downloader/"  
-  see_also: Google Ngram Viewer v2012 dataset dump - [raw](https://storage.googleapis.com/books/ngrams/books/datasetsv3.html)
--
-  description: more than 100M technical journal articles indexed by sentence fragments and words
-  url: https://archive.org/details/GeneralIndex
-  see_also: Google Ngram Viewer v2012 dataset dump - [raw](https://storage.googleapis.com/books/ngrams/books/datasetsv3.html) [python api](https://pypi.org/project/google-ngram-downloader/)
--
   description: genomics and gis and other speciality datasets with juptyer notebooks
   url: https://github.com/markusschanta/awesome-jupyter#domain-specific-projects
 -
