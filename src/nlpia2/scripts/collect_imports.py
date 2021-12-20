@@ -3,17 +3,18 @@ import subprocess
 import re
 import pandas as pd
 from pathlib import Path
+import argparse
 
-dirs 		= ['nlpia-manuscript', 'nlpia2']
-df_columns  = ['Module', 'Line', 'Line #', 'Path', 'Repo Root', 'Pattern']
+DIRS 		= ['nlpia-manuscript', 'nlpia2']
+DF_COLUMNS  = ['Module', 'Line', 'Line #', 'Path', 'Repo Root', 'Pattern']
 
 ## IDENTIFY GIT REPO ROOT
 # This ensures the script will work even if it's moved around within the repository
-repo_command = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True)
-current_repo_root =Path( repo_command.stdout.strip(b'\n').decode('utf-8') )
+REPO_COMMAND = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True)
+CURRENT_REPO_ROOT =Path( REPO_COMMAND.stdout.strip(b'\n').decode('utf-8') )
 
-repos = [ (current_repo_root.parent / directory) for directory in dirs]
-manuscript_adocs = current_repo_root.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+REPOS = [ (CURRENT_REPO_ROOT.parent / directory) for directory in DIRS]
+MANUSCRIPT_ADOCS = CURRENT_REPO_ROOT.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
 
 
 ## REGULAR EXPRESSION PATTERNS
@@ -47,7 +48,7 @@ def inspect_files(root, pattern, expanded=False):
 				if m:
 					modules = m.group('from_import') or m.group('import_as') or m.group('import_direct') 
 					import_lines.append( (modules, line,  number+1, str(filepath).split(root)[1], root, pattern) )
-	modules_df =  pd.DataFrame(import_lines, columns = df_columns)
+	modules_df =  pd.DataFrame(import_lines, columns = DF_COLUMNS)
 	modules_df['Module'] = modules_df['Module'].apply(lambda x: x.split('.')[0] if '.' in x else x)
 	modules_df['Module'] = modules_df['Module'].apply(lambda x: [y.strip() for y in x.split(',')] if ',' in x else x)
 	modules_df = modules_df.explode(['Module'], ignore_index=True)
@@ -62,13 +63,27 @@ def inspect_files(root, pattern, expanded=False):
 	
 	return modules_df
 
-def full_sanity_checks(pattern="*.adoc", expanded=False):
-	for repo_root in repos:
-		df = inspect_files(repo_root, pattern, expanded)
 
+if __name__ == '__main__':
 
-def main():
-#	full_sanity_checks('*.adoc')											# checks and reports on both the nlpia2 and manuscript repos' *.adoc files
-	inspect_files(manuscript_adocs, "*.adoc", expanded=True)				# checks only the manuscript_adocs directory's adoc files
+	parser = argparse.ArgumentParser(description="%(prog)s recursively traverses repositories or subrepo directory structures, \
+		inspecting files whose names match a given name pattern, to collect package names that appear in import statements. The output \
+		lists such packages along with their counts. With the optional --expand flag, %(prog)s additionally outputs the line numbers and filenames where \
+		the imports were found.")
+	parser.add_argument("-a", "--all", dest="all", action='store_true',
+		default = False, 
+		help="exhaustively traverse both repos (nlpia-manuscript, nlpia2)")
+	parser.add_argument("-p", "--pattern", dest="pattern", metavar="",
+		default = "*.adoc",
+		help="pattern of filenames for glob to match, default is '*.adoc'" )
+	parser.add_argument("-e", "--expand", dest="expand", action='store_true',
+		default=False,
+		help="additionally prints each occurence of a package mention, along with file name and line number", )
+	args = parser.parse_args()
 
-main()
+	if args.all == False:													# checks only the manuscript_adocs directory
+		repo_root = MANUSCRIPT_ADOCS
+		df = inspect_files(repo_root, args.pattern, args.expand)
+	else:																	# otherwise, check all repos in the DIRS list
+		for repo_root in REPOS: 
+			df = inspect_files(repo_root, args.pattern, args.expand)
