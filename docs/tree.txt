@@ -1,0 +1,216 @@
+.
+├── docs
+│   ├── git-config.txt
+│   ├── tree-hal.txt
+│   └── tree.txt
+├── .git
+│   ├── branches
+│   ├── COMMIT_EDITMSG
+│   ├── config
+│   ├── description
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-commit
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── push-to-checkout.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   └── ORIG_HEAD
+├── .gitignore
+├── LICENSE
+├── LICENSE.txt
+├── .nlpia2-data
+│   ├── active-learning-repl-graphviz.yml
+│   ├── baby-names-region.csv.gz
+│   ├── cnnl-10gec_annotations.zip
+│   ├── conll14st-test-data.tar.gz
+│   ├── current-gk-history-knowledge-important-modern-dates.yml
+│   ├── datasets.yml
+│   ├── download_files_here.py
+│   ├── emojies.csv
+│   ├── fake_vs_real.csv.gz
+│   ├── fce_v2.1.bea19.tar.gz
+│   ├── glossary.ods
+│   ├── important-numbers-in-scifi.yml
+│   ├── kite_history.txt
+│   ├── kite_intro.txt
+│   ├── multilayer-perceptron-graphviz.yml
+│   ├── nlp-applications-graphviz.yml
+│   ├── nlpia-questions-by-chapter.yml
+│   ├── numeric.csv.gz
+│   ├── perceptron-graphviz.bak.yml
+│   ├── perceptron-graphviz.yml
+│   ├── quotes.yml
+│   ├── release2.3.1.tar.gz
+│   ├── richard-overy-50-key-dates-of-world-history.yml
+│   ├── subreddits subscriber.md
+│   ├── toxic_comments_small.csv
+│   ├── wikipedia_emoticon_emoji_table.csv
+│   ├── wikipedia_emoticon_emoji_table.py
+│   └── women-in-ai.yml
+├── nlpia2.egg-info
+│   ├── dependency_links.txt
+│   ├── PKG-INFO
+│   ├── requires.txt
+│   ├── SOURCES.txt
+│   └── top_level.txt
+├── NLPiA2.egg-info
+│   ├── dependency_links.txt
+│   ├── PKG-INFO
+│   ├── requires.txt
+│   ├── SOURCES.txt
+│   └── top_level.txt
+├── README.md
+├── requirements.txt
+├── setup.py
+├── src
+│   └── nlpia2
+│       ├── asc2adoc.sh
+│       ├── asc2json.sh
+│       ├── bl_erd_graph.yml
+│       ├── bl_id_graph.yml
+│       ├── bonus
+│       │   ├── ipython-sessions
+│       │   │   ├── char_trigram_index_and_language_model.ipy
+│       │   │   ├── char_trigram_language_model.py
+│       │   │   ├── quotes_language_model_first_order_markhov_chain.ipy
+│       │   │   └── quotes_language_model_first_order_markhov_chain.py
+│       │   ├── manim_graph.py
+│       │   ├── manim.yml
+│       │   └── playground.aisoma.de 7-word summary of _This is Just to Say_ poem by William Carlos Williams.png
+│       ├── ch01
+│       │   ├── NLU_NLG_graphviz.py
+│       │   ├── text-NLU-vector-graphviz.gv
+│       │   ├── text-NLU-vector-graphviz.png
+│       │   └── vector-NLG-text-graphviz.gv
+│       ├── ch01_ethnologue.py
+│       ├── ch01.ipynb
+│       ├── ch02
+│       │   ├── book_thief_sentence_split_graphviz.py
+│       │   ├── ch02.py
+│       │   ├── clean_fake_news.py
+│       │   ├── fake_news_big_data_techniques.ipy
+│       │   ├── fake_news_clean.py
+│       │   ├── fake_news_manual_counter_vectorizer_and_tfidf.ipy
+│       │   ├── fake_news_token_features.py
+│       │   ├── keyword_detector.py
+│       │   ├── README.md
+│       │   ├── render_book_thief_sentence_split_graphviz.py
+│       │   ├── render.sh
+│       │   ├── render_spacy_sentence_diagram.py
+│       │   ├── simple_fake_news_features.py
+│       │   ├── spacy_tokenizer.ipy
+│       │   ├── spacy_tokenizer.py
+│       │   └── text_readability.py
+│       ├── ch03
+│       │   ├── bias_discrimination.txt
+│       │   ├── bias_intro.txt
+│       │   ├── ch03_bot_lemmas.py
+│       │   ├── ch03_bot.py
+│       │   ├── ch03_bot_sparse.py
+│       │   └── ch03_clean_faq.py
+│       ├── ch03.ipynb
+│       ├── ch04
+│       │   └── ch04_toxic_comments.py
+│       ├── ch05
+│       │   ├── ch05-dentist-names-uk.ipynb
+│       │   ├── ch05-name-sex-index-weighted-by-count.ipynb
+│       │   ├── ch05-name-sex-index-weighted-by-count-pytorch.ipynb
+│       │   ├── ch05-name-sex-index-weighted-by-count-pytorch-tuned-learning-rate-deduped-testset.ipynb
+│       │   ├── ch05-name-sex-pytorch.ipynb
+│       │   ├── fake_news_histogram_title_len_blue_red.py
+│       │   ├── fake_news_logistic_regression_title_len_blue_red.py
+│       │   ├── fake_news_logistic_regression_title_len.py
+│       │   ├── fake_news_token_features.py
+│       │   ├── .ipynb_checkpoints
+│       │   │   ├── ch05-dentist-names-uk-checkpoint.ipynb
+│       │   │   ├── ch05-name-sex-index-weighted-by-count-checkpoint.ipynb
+│       │   │   ├── ch05-name-sex-index-weighted-by-count-pytorch-checkpoint.ipynb
+│       │   │   ├── ch05-name-sex-index-weighted-by-count-pytorch-tuned-learning-rate-deduped-testset-checkpoint.ipynb
+│       │   │   ├── ch05-name-sex-pytorch-checkpoint.ipynb
+│       │   │   ├── name-sex-index-weighted-by-freq-checkpoint.ipynb
+│       │   │   └── What is in a name-checkpoint.ipynb
+│       │   ├── kemal_syndee_unique_names_no_cheating_sample_weight.md
+│       │   ├── kemal_syndee_unique_names_no_cheating_sample_weight.py
+│       │   ├── language_model.py
+│       │   ├── manim-basic-example-scenes.ipynb
+│       │   ├── mob_programming_kemal_kazuma_labeled_female_abridged.md.py
+│       │   ├── mob_programming_kemal_kazuma_labeled_female.md
+│       │   ├── mob_programming_women_in_ai.md.py
+│       │   ├── name-sex-index-weighted-by-freq.ipynb
+│       │   ├── name_sex_logistic_regression_name_len.py
+│       │   ├── name_sex_logistic_regression_pytorch.py
+│       │   ├── name_sex.md
+│       │   ├── name_sex.py
+│       │   ├── name_sex_sample_weight.py
+│       │   ├── name_sex_tfidf_vectorizer_no_cheating.py
+│       │   ├── name_sex_tfidf_vectorizer.py
+│       │   ├── name_sex_unique_names_tfidf_vectorizer.py
+│       │   ├── pytorch_logistic_regression_explanation.py
+│       │   └── What is in a name.ipynb
+│       ├── ch12
+│       │   ├── Ch12-PytorchTransformer.ipynb
+│       │   └── inc
+│       │       ├── flashtext
+│       │       │   ├── __init__.py
+│       │       │   └── keywords.py
+│       │       ├── __init__.py
+│       │       └── preprocessing
+│       │           ├── __init__.py
+│       │           ├── json
+│       │           │   ├── contractions.json
+│       │           │   ├── misc_replacements.json
+│       │           │   └── misspellings.json
+│       │           └── preprocessing.py
+│       ├── constants.py
+│       ├── data -> /home/hobs/code/prosocialai/nlpia2/.nlpia2-data
+│       ├── first-edition
+│       │   ├── ch02.ipynb
+│       │   ├── seq2seq.py
+│       │   └── seq2seq_twitter.ipynb
+│       ├── lstm.py
+│       ├── pc_language.py
+│       ├── pug
+│       │   ├── fake_news_logistic_regression_title_len.py
+│       │   └── pytorch_logistic_regression_explanation.py
+│       ├── render_html.py
+│       ├── render_html.sh
+│       ├── review_questions
+│       │   ├── review.py
+│       │   ├── review-questions-with-answers.yml
+│       │   └── review-questions.yml
+│       ├── scrape_war_games_dialog.py
+│       ├── scripts
+│       │   ├── conda_install.sh
+│       │   ├── conda_install_spacy_en_core_md.py
+│       │   ├── conda_install_spacy_en_core_web_md.py
+│       │   ├── diagrams.py
+│       │   ├── diff_ls.sh
+│       │   ├── environment.yml
+│       │   ├── make_outline.sh
+│       │   ├── make_toc.sh
+│       │   └── rename_asc2adoc.sh
+│       ├── text-NLU-vector.py
+│       ├── unused
+│       │   └── manim_graph.py
+│       ├── vector-NLG-text.py
+│       ├── yaml_graphviz.py
+│       └── yaml_plotly.py
+└── .venv
+    └── bin
+        └── activate
+
+30 directories, 183 files
