@@ -12,11 +12,15 @@ egrep -i -h '^([=]+ |:Chapter: [0-9]+)' manuscript/adoc/Chapter*.adoc > docs/hea
 #   with open("docs/headings.adoc", 'w') as fout: \
 #     fout.writeines(lines)
 #   '
+newline=$'\n'
+
+
 sed 's/=/#/g' docs/headings.adoc > docs/headings.md
 sed 's/==== /      * /g' docs/headings.adoc > docs/outline.md
 sed -i 's/=== /    * /g' docs/outline.md
 sed -i 's/== /  * /g' docs/outline.md
-sed -i 's/= /* /g' docs/outline.md
+sed -i 's/= /'"\\${newline}"'* /g' docs/outline.md
+
 # rm -f headings.adoc
 
 # pandoc --atx-headers     --verbose     --wrap=none     --toc     --reference-links     -s -o outline.adoc     outline.md

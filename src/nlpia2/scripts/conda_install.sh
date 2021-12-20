@@ -24,6 +24,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
         pylatex \
         pyrr \
         pyopengl \
+        pytablewriter \
         pytest \
         pytorch \
         regex \
