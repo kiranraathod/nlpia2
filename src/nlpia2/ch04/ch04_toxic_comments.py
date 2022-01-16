@@ -98,7 +98,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import plot_confusion_matrix
 plot_confusion_matrix(lda_tfidf_train,X_test, y_test, cmap="Greys",
                       display_labels=['non-toxic', 'toxic'], colorbar=False)
-plt.show()
+#plt.show()
 
 from sklearn.metrics import f1_score
 f1_score(y_test,lda_tfidf_train.predict(X_test))
@@ -109,6 +109,7 @@ f1_score(y_test,lda_tfidf_train.predict(X_test))
 
 ### Latent Semantic Analysis
 from sklearn.decomposition import TruncatedSVD
+tfidf_docs_centered = tfidf_docs - tfidf_docs.mean()
 svd = TruncatedSVD(n_components=16, n_iter=100)  # <1>
 columns = ['topic{}'.format(i) for i in range(svd.n_components)]
 svd_topic_vectors = svd.fit_transform(tfidf_docs)
@@ -146,7 +147,7 @@ topic_term_matrix = pd.DataFrame(svd.components_, columns=terms,
 """
 >>> pd.options.display.max_columns = 8
 >>> topic_term_matrix.head(4).round(3)
->>> toxic_terms= topic_term_matrix['pathetic crazy stupid idiot hate die lying'.split()].round(3) * 100
+>>> toxic_terms= topic_term_matrix['pathetic crazy stupid lazy idiot hate die kill'.split()].round(3) * 100
 >>> 
 
 """
@@ -203,15 +204,14 @@ def hparam_rec(model, X_train, y_train, X_test, y_test, classifier_name, feature
             'test_recall': recall_score(y_test, model.predict(X_test)),
             'test_f1': f1_score(y_test, model.predict(X_test)) }
 
-lsa_performance = hparam_rec(lda_lsa, X_train_16d, y_train_16d, X_test_16d,y_test_16d, 'LDA', 'LSA (16 components)')
-hparam_table = hparam_table.append(lsa_performance)
+lsa_performance = hparam_rec(lda_lsa, X_train_16d, y_train_16d, X_test_16d,y_test_16d, 'LDA', 'LSA (16d)')
+hparam_table = hparam_table.append(lsa_performance,ignore_index=True)
 
 def evaluate_model(X,y, classifier, classifier_name, features):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=271828)
     classifier = classifier.fit(X_train, y_train)
     return hparam_rec(classifier, X_train, y_train, X_test,y_test,
                       classifier_name, features)
-
 
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -244,20 +244,50 @@ components.round(2).head(3)
 
 
 
-
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 model_ldia16 = LinearDiscriminantAnalysis()
-ldia16_performance =evaluate_model(ldia16_topic_vectors, comments.toxic, model_ldia16, 'LDA', 'LDIA (16 components)')
+ldia16_performance =evaluate_model(ldia16_topic_vectors, comments.toxic, model_ldia16, 'LDA', 'LDIA (16d)')
 
 hparam_table = hparam_table.append(ldia16_performance, ignore_index = True)
 
 ldia32 = LDiA(n_components=32, learning_method='batch')
 ldia32_topic_vectors = ldia.fit_transform(bow_docs)
 model_ldia32 = LinearDiscriminantAnalysis()
-ldia32_performance =evaluate_model(ldia32_topic_vectors, comments.toxic, model_ldia32, 'LDA', 'LDIA (32 components)')
+ldia32_performance =evaluate_model(ldia32_topic_vectors, comments.toxic, model_ldia32, 'LDA', 'LDIA (32d)')
 
 hparam_table = hparam_table.append(ldia32_performance, ignore_index = True)
 
 words = counter.get_feature_names()
+
+REPO_URL = 'https://gitlab.com/tangibleai/qary/-/raw/master'
+FAQ_DIR = 'src/qary/data/faq'
+FAQ_FILENAME = 'short-faqs.csv'
+DS_FAQ_URL = '/'.join([REPO_URL, FAQ_DIR, FAQ_FILENAME])
+
+df = pd.read_csv(DS_FAQ_URL)
+
+vectorizer = TfidfVectorizer()
+df['questions+answers'] = df['question'] + df['answer']
+vectorizer.fit(df['questions+answers'])
+# vectorize all the questions/answers in qa_dataset
+tfidfvectors_sparse = vectorizer.transform(df['question'])
+tfidfvectors = tfidfvectors_sparse.todense()
+svd = TruncatedSVD(n_components=16, n_iter=100)
+tfidfvectors_16d = svd.fit_transform(tfidfvectors)
+
+def bot_reply(question):
+      question_tfidf = vectorizer.transform([question]).todense()
+      question_16d = svd.transform(question_tfidf)
+      idx = question_16d.dot(tfidfvectors_16d.T).argmax()
+      print(
+            f"Your question:\n  {question}\n\n"
+            f"Most similar FAQ question:\n  {df['question'][idx]}\n\n"
+            f"Answer to that FAQ question:\n  {df['answer'][idx]}\n\n"
+           )
+
+bot_reply("How do I decrease overfitting for Logistic Regression?")
+
+
 for topic_idx, topic in enumerate(ldia.components_):
           print(f"\nTopic #{topic_idx + 1}:")
           print("; ".join([words[i]

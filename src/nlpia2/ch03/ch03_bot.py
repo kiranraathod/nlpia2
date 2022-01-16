@@ -14,7 +14,7 @@ vectorizer.fit(df['question'])
 tfidfvectors_sparse = vectorizer.transform(df['question'])
 tfidfvectors = tfidfvectors_sparse.todense()
 
-question = "What's overfitting a model?"
+question = "How do I decrease overfitting for Logistic Regression?"
 question_vector = vectorizer.transform([question]).todense()
 idx = question_vector.dot(tfidfvectors.T).argmax()
 # 51
