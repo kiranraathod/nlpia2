@@ -1,5 +1,42 @@
 # data science datasets and data sources data aggregators data indexes
 -
+  title: "Better Word Representations with Recursive Neural Networks for Morphology"
+  url: http://www-nlp.stanford.edu/~lmthang/morphoNLM/rw.zip
+  urls:
+    - "https://nlp.stanford.edu/~lmthang/morphoNLM/cwCsmRNN.words"
+    - "https://nlp.stanford.edu/~lmthang/morphoNLM/"
+  description: |+
+    [Better Word Representations with Recursive Neural Networks for Morphology](https://nlp.stanford.edu/~lmthang/morphoNLM/)
+    #### `rw/rw.txt` (92.5 kB, 2034 lines): 
+    ```text
+    squishing squirt  5.88  7 7 6 1 4 6 6 7 2 4
+    undated undatable 5.83  10  9 6 5 5 7 7 9 2 5
+    circumvents beat  5.33  7 7 3 9 8 6 3 2 0 6
+    circumvents ebb 3.25  7 4 6 4 2 0 0 3 6 0
+    ```
+    #### `rw/rw.txt` (92.5 kB): 
+    ```text
+    >>> words = open('cwCsmRNN.words').readlines()
+    >>> len(words)
+    138218
+    >>> words[1000:1005]
+    ['0kb', '0kbushel', '0keystart', '0kg', '0-kg']
+    ```
+-
+  title: "Reinforcement Learning for Personalized Drug Discovery and Design for Complex Diseases: A Systems Pharmacology Perspective"
+  description: Personalized Drug Discovery
+  authors: [Ryan K. Tan, Yang Liu, Lei Xie]
+  urls:
+    - https://arxiv.org/abs/2201.08894
+  tags: [peper, dsdh, ]
+-
+  description: AlphFold Protein Structure (Proteome) Predictions
+  urls: 
+    - https://arxiv.org/abs/2201.09647
+    - https://www.alphafold.ebi.ac.uk/download
+    - https://www.alphafold.ebi.ac.uk/
+  tags: [dsdh, paper, deepmind, meta, biology, alphafold, list, table, datasets, proteome, protein, structure]
+-
   description: genomics and gis and other speciality datasets with juptyer notebooks
   url: https://github.com/markusschanta/awesome-jupyter#domain-specific-projects
 -

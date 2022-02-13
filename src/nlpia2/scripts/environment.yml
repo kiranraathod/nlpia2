@@ -228,4 +228,3 @@ dependencies:
     - pyflakes==2.4.0
     - pytest-cov==3.0.0
     - tomli==1.2.2
-prefix: /home/hobs/anaconda3/envs/nlpia2

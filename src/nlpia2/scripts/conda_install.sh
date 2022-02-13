@@ -8,7 +8,7 @@ if [ "$CONDA_DEFAULT_ENV" != "nlpia2" ] ; then
     conda create -n nlpia2 -y 'python==3.8.8'
     conda activate nlpia2
     # install all of `nlpia2`'s dependences if they aren't already installed:
-    conda install -c defaults -c huggingface -c pytorch -c conda-forge -y \
+    conda install -c huggingface -c pytorch -c conda-forge -c defaults -y \
         asciidoctor \
         emoji \
         ffmpeg \

@@ -78,18 +78,39 @@ def svg2png(filepath, dpi=300, width="100%", height="100%", background_color="wh
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        svgfilepaths = ['manuscript/images/ch02/survival-of-adequate-sentence-diagram.svg']
-    else:
+    
+    # svgfilepaths = list(IMAGE_DIR.glob('**/*.svg'))
+    svgfilepaths = [
+        IMAGE_DIR / 'ch02' / 'survival-of-adequate-sentence-diagram.svg',
+        ]
+    svgfilepaths = [str(p) for p in svgfilepaths]    
+    if len(sys.argv) >= 2:
         svgfilepaths = sys.argv[1:]
+
+    xml = None
+    if '-x' in svgfilepaths:
+        xml = True
+        del svgfilepaths[index('-x')]
+
     for filepath in svgfilepaths:
         output = svg2png(filepath=filepath)
         if output.get('stderr') or output.get('stdout'):
             print(json.dumps(output, indent=4))
 
-    output = render_adoc(doctype='book', backend='html5', embedded=False)
+    output = render_adoc(
+        doctype='book',
+        backend='html5',
+        embedded=False)
 
     # using decode() function to convert byte string to string
     if output.get('stderr') or output.get('stdout'):
         print('output_messages:')
         print(json.dumps(output, indent=4))
+
+    if xml:
+        output = render_adoc(
+            doctype='book', 
+            backend='xhtml5', 
+            destination_dir='xml', 
+            embedded=False
+            )

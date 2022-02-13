@@ -15,6 +15,54 @@
 ## ch1 and philosophy, wisdom, prosocial
 # translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
 -
+  text: Babbage, who once declared he would gladly give up the rest of his life if he could come back in five hundred years and have a three-day guided scientific tour of the new age, would probably have been thrilled speechless a mere centure after his death -- both by the new machines and by the unexpected limiatations.
+  book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
+  author: Douglas R. Hofstadter
+-
+  text: |+
+    No one knows where the borderline between non-intelligent behavior and intelligent behavior lies; in fact, to suggest that a sharp borderline exists is probably silly. But essential elements for intelligence are certainly: 
+        to respond to situations very flexibly; to take advantage of fortuitous circumstances;
+        to make sense out of ambiguous or contradictory messages; 
+        to recognize the relative importance of different elements of a situation;
+        to find find similarities between situations despite differences which may separate them;
+        to draw distinctions between situations despite similarities which may link them;
+        to synthesize new concepts by taking old concepts and putting them together in new ways;
+        to come up with ideas which are novel.
+  book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
+  author: Douglas R. Hofstadter
+
+- 
+  text: |+
+    Every one of us is trying to find our true home. 
+    Some of us are still searching. 
+    Our true home is inside, but it's also in our loved ones around us.
+    When you're in a loving relationship, you and the other person can be a true home for each other.
+  author: Thich Nhat Hanhn
+  book: _How to Love_
+-
+  text: "Understanding someone's suffering is the best gift you can give another person."
+  author: Thich Nhat Hanhn
+  book: _How to Love_
+-
+  text: "understanding is love’s other name"
+  author: Thich Nhat Hanhn
+  book: _How to Love_
+-
+  text: "Virtual assistants and search engines shape our minds. We have to build prosocial virtual assistants that support our prosocial values before we lose our humanity to Big Tech."
+  author: Hobson Lane
+  source: NLPiA2e
+-
+  text: "Virtual assistants like Siri and Google Search don't actually assist us, they manipulate us into spending our attention and money to support some Billionaire's business model."
+  author: Hobson Lane
+  source: NLPiA2e
+-
+  text: "From a very early age [in the US] we learn to manipulate those around us. Our parents and bosses praise us and reward us raises when we shove a Big Gulp across the counter to an unwitting customer. We stop treating customers as human beings. We become drug dealers selling to users."
+  author: Hobson Lane
+  source: NLPiA2e
+-
+  text: "We are on a mission to help the social sector organizations scale their impact, increase their outreach and improve their operations using artificial intelligence (AI)."
+  author: Maria Dyshel
+-
   text: "I was flabbergasted. I thought that when we went someplace they'd said, 'Well congratulations, you Americans finally did it.' And instead of that, unanimously, the reaction was, 'We did it. We humans finally left this planet. We did it.'"
   author: Michael Collins
   source: Jeffrey Kluger, CBS interview of Michael Collins
