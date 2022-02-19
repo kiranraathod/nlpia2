@@ -14,10 +14,53 @@
 #   _Neural Darwinism_:
 ## ch1 and philosophy, wisdom, prosocial
 # translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
+
 -
-  text: Babbage, who once declared he would gladly give up the rest of his life if he could come back in five hundred years and have a three-day guided scientific tour of the new age, would probably have been thrilled speechless a mere centure after his death -- both by the new machines and by the unexpected limiatations.
+  text: We are all one. And if we don't know it, we will find out the hard way.
+  author: Bayard Rustin
+  date: 2007
+  source: 
+    - "_We Are One: The Story of Bayard Rustin_, 2007, p.46_ by Larry Dane Brimner"
+    - "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Introduction, p. xvii"
+  tags: [cooperation, competition, supercooperator, out-compete, game theory, winning, win-win, universal consciousness, collective consciousness, collective, society, community, zeitgeist movement]
+-
+  text: The single biggest problem in communication is the illusion that it has taken place.
+  author: George Bernard Shaw
+  date: 2017
+  source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Preface, p. xiii"
+  tags: [communication, delusion, thought, listening, nlp, nlu, nlg, feedback, introspection, self-awareness, zeitgeist movement]
+-
+  text: "You use a glass mirror to see your face; you use works of art to see your soul."
+  author: George Bernard Shaw
+  tags: [art, understanding, intelligence, introspection, self-awareness, reflection, inner dialog]
+-
+  text: "The unconscious self is the real genius. Your breathing goes wrong the moment your conscious self meddles with it."
+  author: George Bernard Shaw
+  tags: [unconscious, subconsious, collective subsoncious, collective consciousness, emotion, intelligence, AGI, AI, Jung]
+  date: ~1915
+-
+  text: "These 'primordial images' or 'archetypes,'' as I have called them, belong to the basic stock of the unconscious psyche and cannot be explained as personal acquisitions."
+  tags: [culture, collective unconscious, myth, archetypes, psychology, Jung]
+  author: Carl Jung
+  title: "'The Structure of the Unconscious'"
+  date: 1916
+
+
+-
+  text: True intelligence is self-awareness -- including a sense of just how wrong you likely are most of the time as a result of your biases.
+  author: George Bernard Shaw
+  source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Preface, p. xiii"
+  tags: [intelligence, humility, beneficial ai, human compatible ai, IQ, ai, agi, biases, ethical ai, delusion, self-delusion, inner dialog, communication, nlu, nlg, feedback, introspection, self-awareness, zeitgeist movement]
+-
+  text: Whatever affects one directly affects all indirectly. For some strange reason, I can never be what I ought to be until you are what you ought to be. You can never be what you ought to be until I am what I ought to be. This is the interrelated structure of reality.
+  author: Dr. Martin Luther Link Jr.
+  source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Chapter One, p. 1"
+   tags: [cooperation, partnership, reciprocity, symbiosis, friendship, activism, competition, supercooperator, out-compete, game theory, winning, win-win, universal consciousness, collective consciousness, collective, society, community, zeitgeist movement, civil rights, human rights]
+-
+  text: Babbage, who once declared he would gladly give up the rest of his life if he could come back in five hundred years and have a three-day guided scientific tour of the new age, would probably have been thrilled speechless a mere century after his death -- both by the new machines and by the unexpected limiatations.
   book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
   author: Douglas R. Hofstadter
+  tags: [technology, AI, AGI, progress, science, time travel]
 -
   text: |+
     No one knows where the borderline between non-intelligent behavior and intelligent behavior lies; in fact, to suggest that a sharp borderline exists is probably silly. But essential elements for intelligence are certainly: 
@@ -30,7 +73,7 @@
         to come up with ideas which are novel.
   book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
   author: Douglas R. Hofstadter
-
+  tags: [intelligence, IQ, AGI, general intelligence, AI, creativity, patterns, pattern recognition, beneficial AI, entropy, complexity, analogy, vector oriented reasoning, reason, rationality, discriminating, human compatible AI, IQ, ethical AI]
 - 
   text: |+
     Every one of us is trying to find our true home. 
@@ -39,39 +82,48 @@
     When you're in a loving relationship, you and the other person can be a true home for each other.
   author: Thich Nhat Hanhn
   book: _How to Love_
+  tags: [budhism, philosophy, love, home, purpose, meaning of life]
 -
   text: "Understanding someone's suffering is the best gift you can give another person."
   author: Thich Nhat Hanhn
   book: _How to Love_
+  tags: [love, budhism, philosophy, partnership, marriage, purpose, meaning of life]
 -
   text: "understanding is love’s other name"
   author: Thich Nhat Hanhn
   book: _How to Love_
+  tags: [love, understanding, communication, intelligence, listening, budhism, partnership, marriage, purpose, meaning of life]
+
 -
   text: "Virtual assistants and search engines shape our minds. We have to build prosocial virtual assistants that support our prosocial values before we lose our humanity to Big Tech."
   author: Hobson Lane
   source: NLPiA2e
+  tags: [search, information, information bubble, internet bubble, social media, virtual assistants, prosocial, society, culture, mind control, propaganda, advertisement, Big Tech, post-truth era, journalism, news]
 -
   text: "Virtual assistants like Siri and Google Search don't actually assist us, they manipulate us into spending our attention and money to support some Billionaire's business model."
   author: Hobson Lane
   source: NLPiA2e
+  tags: [search, influence, sales, manipulation, exploitation, information, information bubble, internet bubble, social media, virtual assistants, prosocial, society, culture, mind control, propaganda, advertisement, Big Tech, post-truth era, journalism, news]
 -
   text: "From a very early age [in the US] we learn to manipulate those around us. Our parents and bosses praise us and reward us raises when we shove a Big Gulp across the counter to an unwitting customer. We stop treating customers as human beings. We become drug dealers selling to users."
   author: Hobson Lane
   source: NLPiA2e
+  tags: [capitalism, greed, incentives, influence, competition, cooperation, sales, manipulation, exploitation, assistance, information, social media, virtual assistants, prosocial, society, culture, parenting, incentives]
 -
   text: "We are on a mission to help the social sector organizations scale their impact, increase their outreach and improve their operations using artificial intelligence (AI)."
   author: Maria Dyshel
+  tags: [social impact, nonprofit, social sector, outreach, impact, AI, AI for good, DS for good]
 -
   text: "I was flabbergasted. I thought that when we went someplace they'd said, 'Well congratulations, you Americans finally did it.' And instead of that, unanimously, the reaction was, 'We did it. We humans finally left this planet. We did it.'"
   author: Michael Collins
   source: Jeffrey Kluger, CBS interview of Michael Collins
+  tags: [space exploration, moon landing, space race, capitalism, patriotism, Americans, American exceptionalism, USA, humanity, citizen of the world, competition, cooperation, space travel, unifying mission, unifying vision, UN, united nations]
 -
   text: "The Earth must become as it appears: blue and white, not capitalist or communist; blue and white, not rich or poor; blue and white, not envious or envied."
   author: Michael Collins
   source: Twitter
   date: May 19, 2019
-  tags: [astronaught, apollo, climate change, politics, blue marble, conflict, war, capitalism, communism]
+  tags: [astronaught, moon landing, apollo, climate change, politics, blue marble, conflict, war, capitalism, communism, space race, space exploration]
 -
   text: "I really believe that if the political leaders of the world could see their planet from a distance of, let’s say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
   author: Michael Collins
@@ -79,18 +131,20 @@
   date: May 19, 2019
   tags: [astronaught, apollo, climate change, politics, blue marble, conflict, war]
 -
-  text: "Let me say, as I sit here before you today having walked on the Moon, that I am myself still awed by that miracle. That awe, in me and in each of us… must be the engine of future achievement, not a slow dimming light from a time once bright."
+  text: "Let me say, as I sit here before you today having walked on the Moon, that I am myself still awed by that miracle. That awe, in me and in each of us... must be the engine of future achievement, not a slow dimming light from a time once bright."
   author: Buzz Aldrin
   source: Daily News
   date: May 1997
+  tags: [awe, inspiration, apollo, humanity, progress, space travel, space exploration, moon landing, humans, cooperation]
 -
   text: "See, the world is full of things more powerful than us. But if you know how to catch a ride, you can go places,"
   author: Neil Stephenson
+  tags: [humility, oportunism, power, success, achievment, alien technology, aliens, alien civilization]
 -
   text: Get up quickly--just switch on the white light of the will.
   author: Susan Sontag
   source: Every Day a Word Surprises Me & Other Quotes by Writers
-  tags: [life, agency, work ethic, will power]
+  tags: [life, agency, work ethic, will power, free will]
 -
   text: Explore unfamiliar sections--on foot if wet, on bicycle if dry.
   author: Henry Miller

@@ -119,33 +119,45 @@ def pprint_output(output, command=None):
 if __name__ == '__main__':
     
     # svgfilepaths = list(IMAGE_DIR.glob('**/*.svg'))
-    svgfilepaths = [
+    default_svgfilepaths = [
         IMAGE_DIR / 'ch02' / 'survival-of-adequate-sentence-diagram.svg',
         ]
-    svgfilepaths = [str(p) for p in svgfilepaths]    
-    if len(sys.argv) >= 2:
-        svgfilepaths = sys.argv[1:]
+    default_svgfilepaths = [str(p) for p in default_svgfilepaths]    
 
-    flags = {'x': True, 'j': True}
-    for flag in '-x -j --xml --json'.split():
-        if flag in svgfilepaths:
+    # FIXME: argparse!!
+    if len(sys.argv) >= 2:
+        args = sys.argv[1:]
+    else:
+        args = []
+    flags = {'x': False, 'j': False, 'h': False, 's': False}
+    for flag in '-x -j -h --xml --json --html'.split():
+        if flag in args:
             f = flag.lstrip('-')[:1]
             flags[f] = True
-            del svgfilepaths[svgfilepaths.index(flag)]
+            del args[args.index(flag)]
+    # make sure dependencies are rendered
+    if flags['j']:
+        flags['x'] = flags['x'] or True
+    if flags['h'] or flags['x']:
+        flags['s'] = flags['s'] or True
     log.warning(f'flags = {flags}')
 
-    for filepath in svgfilepaths:
-        output = svg2png(filepath=filepath)
-        pprint_output(output, command='render_html()')
-
-    output = render_adoc(
+    if flags['s']:
+        for filepath in (IMAGE_DIR).glob('**/*.svg'):
+            filepath = str(filepath)
+            output = svg2png(filepath=filepath)
+            pprint_output(output, command=f'svg2png({filepath}')
+    
+    if flags['h']:
+        output = render_adoc(
         doctype='book',
         backend='html5',
+        destination_dir='html', 
         embedded=False)
-    pprint_output(output, command='render_adoc()')
+        pprint_output(output, command='render_adoc(book, backend=html5, destination_dir=html, embedded=False)')
 
     # XML required for json
-    if flags['x'] or flags['j']:
+    if flags['x']:
         print('render_html(backend=docbook) STDOUT:')
         output = render_adoc(
             doctype='book', 
@@ -153,7 +165,7 @@ if __name__ == '__main__':
             destination_dir='xml', 
             embedded=False
             )
-        pprint_output(output)
+        pprint_output(output, command='render_adoc(book, backend=docbook, destination_dir=xml, embedded=False)')
 
     if flags['j']:
         bookdict = {}
