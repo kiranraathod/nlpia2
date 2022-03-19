@@ -1,5 +1,13 @@
 # data science datasets and data sources data aggregators data indexes
 -
+  title: Open Parallel Corpora for machine translation
+  url: https://opus.nlpl.eu/index.php
+  descriptoin: terrabytes of text in 50+ languages, aligned by sentence
+- 
+  title: "List of datasets for machine learning research"
+  url: https://en.wikipedia.org/wiki/List_of_datasets_for_machine-learning_research
+  description: list of datasets used in peer-reviewed research papers
+-
   title: "Better Word Representations with Recursive Neural Networks for Morphology"
   url: http://www-nlp.stanford.edu/~lmthang/morphoNLM/rw.zip
   urls:

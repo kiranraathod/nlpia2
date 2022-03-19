@@ -13,10 +13,39 @@
 # Edelman:
 #   _Neural Darwinism_:
 ## ch1 and philosophy, wisdom, prosocial
-# translation_dict = {'’': "'", '“': '"', "–": '--', '”': '"'}
-
+# translation_dict = {'"': "'", '“': '"', "–": '--', '”': '"'}
+# Chapter 6 examples of fuzzy tagging or tag clustering or tag autocomplete/normalization or tag search
 -
-  text: We are all one. And if we don't know it, we will find out the hard way.
+  text: "Daddy is a doctor."
+  page: 68
+  author: Daniel C. Dennett
+  title: "Intuition Pumps and Other Tools for Thinking"
+-
+  text: "Teaching is the highest form of understanding."
+  author: Aristotle
+  tags: [teaching, learning, intelligence, thinking, understanding]
+-
+  text:  "When one teaches, two learn."
+  author: Robert Heinlein
+  tags: [teaching, learning]
+-
+  text: "Those who know, do. Those that understand, teach."
+  author: Aristotle
+  tags: [teaching, learning, intelligence, thinking, understanding, doers, engineers, knowledge, names, memory]
+-
+  text: "I cannot be a teacher without exposing who I am."
+  author: Paulo Freire
+  tags: [teaching, self-awareness, mindfulness, vulnerability, intelligence, thinking, understanding]
+-
+  text:  "A teacher affects eternity: he can never tell where his influence stops."
+  author: Henry Adams
+  tags: [teaching, karma, legacy, ripple effect, meaning of life]  
+-
+  text:  "I cannot teach anybody anything, I can only make them think."
+  author: Socrates
+  tags: [teaching, learning, intelligence, thinking, understanding]
+-
+  text: "We are all one. And if we don't know it, we will find out the hard way."
   author: Bayard Rustin
   date: 2007
   source: 
@@ -24,7 +53,7 @@
     - "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Introduction, p. xvii"
   tags: [cooperation, competition, supercooperator, out-compete, game theory, winning, win-win, universal consciousness, collective consciousness, collective, society, community, zeitgeist movement]
 -
-  text: The single biggest problem in communication is the illusion that it has taken place.
+  text: "The single biggest problem in communication is the illusion that it has taken place."
   author: George Bernard Shaw
   date: 2017
   source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Preface, p. xiii"
@@ -89,7 +118,7 @@
   book: _How to Love_
   tags: [love, budhism, philosophy, partnership, marriage, purpose, meaning of life]
 -
-  text: "understanding is love’s other name"
+  text: "understanding is love"s other name"
   author: Thich Nhat Hanhn
   book: _How to Love_
   tags: [love, understanding, communication, intelligence, listening, budhism, partnership, marriage, purpose, meaning of life]
@@ -125,7 +154,7 @@
   date: May 19, 2019
   tags: [astronaught, moon landing, apollo, climate change, politics, blue marble, conflict, war, capitalism, communism, space race, space exploration]
 -
-  text: "I really believe that if the political leaders of the world could see their planet from a distance of, let’s say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
+  text: "I really believe that if the political leaders of the world could see their planet from a distance of, let"s say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
   author: Michael Collins
   source: Twitter
   date: May 19, 2019
@@ -785,7 +814,8 @@
   tags: [economics, regenerative economics, regenerative business, social impact,
     externalities, doughnut economics, rational agent, behavioral economics]
 -
-  text: "Depicting rational economic man as an isolated individual - unaffected by the choices of others – proved highly convenient for modelling the economy, but it was long questioned even from within the discipline. At the end of the nineteenth century, the sociologist and economist Thorstein Veblen berated economic theory for depicting man as a \"self-contained globule of desire\", while the French polymath Henri Poincaré pointed out that it overlooked \"people's tendency to act like sheep\". He was right: we are not so different from herds as we might like to imagine. We follow social norms, typically preferring to do what we expect others will do and, especially if filled with fear or doubt, we tend to go with the crowd."
+  text: "Depicting rational economic man as an isolated individual - unaffected by the choices of others-
+  author:  proved highly convenient for modelling the economy, but it was long questioned even from within the discipline. At the end of the nineteenth century, the sociologist and economist Thorstein Veblen berated economic theory for depicting man as a \"self-contained globule of desire\", while the French polymath Henri Poincaré pointed out that it overlooked \"people's tendency to act like sheep\". He was right: we are not so different from herds as we might like to imagine. We follow social norms, typically preferring to do what we expect others will do and, especially if filled with fear or doubt, we tend to go with the crowd."
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
   tags: [economics, regenerative economics, regenerative business, social impact, externalities, doughnut economics, rational agent, behavioral economics]

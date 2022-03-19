@@ -2,7 +2,8 @@
 from pathlib import Path
 from setuptools import find_packages, setup
 
-__version__ = None
+__version__ = '0.0.8'
+
 # TODO: default requirements here and try/except with loud failure
 with Path('requirements.txt').open() as fin:
     install_requires = [req.strip() for req in fin.readlines()]
@@ -13,7 +14,6 @@ with Path('requirements.txt').open() as fin:
         req.strip() for req in install_requires
         if req.strip() and not req.lstrip().startswith('#')]
 
-__version__ = __version__ or '0.0.1'
 
 
 setup(

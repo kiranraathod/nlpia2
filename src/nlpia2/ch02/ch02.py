@@ -110,11 +110,15 @@ r"""
 ['maybe', '.']
 """
 import re
-pattern = r'\w+(?:\'\w+)?|[^\w\s]'  # <1>
-text = ("There's no such thing as survival of the fittest."
-        "Survival of the most adequate, maybe.")
-tokens = re.findall(pattern, text)
-tokens
+
+r"""
+>>> pattern = r'\w+(?:\'\w+)?|[^\w\s]'  # <1>
+>>> text = ("There's no such thing as survival of the fittest."
+            "Survival of the most adequate, maybe.")
+>>> tokens = re.findall(pattern, text)
+>>> tokens
+["There's", 'no', 'such', 'thing', 'as', 'survival', ...]
+"""
 
 
 def tokenize(text, pattern=r'\w+(?:\'\w+)?|[^\w\s]'):

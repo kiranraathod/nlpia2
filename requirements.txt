@@ -1,3 +1,4 @@
+dask
 emoji
 ffmpeg
 glcontext

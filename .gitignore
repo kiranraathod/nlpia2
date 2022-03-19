@@ -91,3 +91,5 @@ docs/**/*.html
 .env
 **/*secret*
 **/*private*
+
+.nlpia2-data/manuscript/
