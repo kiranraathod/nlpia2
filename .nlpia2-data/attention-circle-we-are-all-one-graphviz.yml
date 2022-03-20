@@ -1,0 +1,27 @@
+# /home/hobs/code/tangibleai/nlpia2/.nlpia2-data/attention-circle-we-are-all-one-graphviz.yml
+class: Graph
+name: attention-circle
+filename: attention-circle.gv
+# https://graphviz.org/docs/layouts/
+#  dot: hierarchies that look like org charts (best for Digraphs)
+#  neato: minimum energy layoud (Brownian motion? Lagrange functions?)
+#  circo: all nodes on edge of circle
+#  fdp: force-directed graph that reduces spring force instead of energy (like neato), order of "appearance" out from center (first nodes)
+#  osage: hierarchical clusters of subgraphs
+#  patchwork: squarified treemap layout
+#  sfdp: multiscale fdp for large graphs with many nodes
+engine: 'circo'
+# args:
+#     - unix
+# attr:
+#   rankdir: 'LR'
+#  size: '6,6'
+node_attr:
+  shape: plaintext  # circle plaintext box oval
+  # color: lightblue2
+  # style: filled
+# args:
+#     - unix
+
+edges:
+  - 
