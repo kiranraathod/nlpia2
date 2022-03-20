@@ -8,6 +8,11 @@ log = logging.getLogger(__name__)
 PACKAGE_DIR = Path(__file__).absolute().resolve().parent
 SRC_DIR = PACKAGE_DIR.parent
 REPO_DIR = SRC_DIR.parent
+__version__ = next(iter(
+    line for line in (REPO_DIR / 'setup.py').open() if line.startswith('__version__ = ')))
+__version__ = __version__[len('__version__ = '):].strip('"').strip("'")
+
+
 HOME_DIR = Path.home()
 DATA_DIR_NAME = '.nlpia2-data'
 DATA_DIR = PACKAGE_DIR / DATA_DIR_NAME

@@ -31,7 +31,6 @@ def main(args):
     """
 
 
-__version__ = '0.0.1'
 CLASSES = dict(digraph=Digraph, graph=Graph)
 
 # __file__ defined so script can be %run within ipython
@@ -104,6 +103,19 @@ def wrap_text(text, max_line_width=10):
 
 
 def load_graphviz(filepath=None, engine='sfdp', attr=None, node_attr=None):
+    """ Load yaml file into dictionary of graphviz args for pygraphviz
+
+    Inputs:
+      engine (https://graphviz.org/docs/layouts/):
+        dot: hierarchies that look like org charts (best for Digraphs)
+        neato: minimum energy layoud (Brownian motion? Lagrange functions?)
+        circo: all nodes on edge of circle
+        fdp: force-directed graph that reduces spring force instead of energy (like neato), order of "appearance" out from center (first nodes)
+        osage: hierarchical clusters of subgraphs
+        patchwork: squarified treemap layout
+        sfdp: multiscale fdp for large graphs with many nodes
+
+    """
     filepath = filepath or CODE_DIR / 'data' / 'nlp-applications-graphviz.yml'
     engine = engine or 'sfdp'  # neato, fdp, sfdp, dot
     # u = Digraph('unix', filename='unix.gv',
@@ -197,7 +209,6 @@ def parse_args(args=None):
     Returns:
       argparse.Namespace: command line parameters as attributes of namespace object
     """
-    args = args or sys.argv[1:]
     parser = argparse.ArgumentParser(
         description="Transpile yaml->graphviz.dot then render svg/png files")
     parser.add_argument(
@@ -205,15 +216,12 @@ def parse_args(args=None):
         action="version",
         version="yaml_graphviz {ver}".format(ver=__version__))
     parser.add_argument(
-        '-y',
-        '--yaml_file',
         dest="yaml_file",
         nargs='?',
         help="Path to yaml file containing graph specification for graphviz diagram",
         type=Path,
         metavar="YAML_FILE")
     parser.add_argument(
-        'dest_subdir',
         dest="dest_subdir",
         nargs='?',
         help="Subdirectory within dest_dir (e.g. `ch05`)",
@@ -241,6 +249,7 @@ def parse_args(args=None):
         help="set loglevel to DEBUG",
         action="store_const",
         const=logging.DEBUG)
+    args = sys.argv[1:] if args is None else args
     args = parser.parse_args(args)
     return dict(yaml_filepath=args.yaml_file,
                 dest_dir=args.dest_dir,
@@ -269,6 +278,7 @@ def render_yaml_graphviz(yaml_filepath=None, dest_dir=DEST_DIR):
 
 
 if __name__ == '__main__':
+    # FIXME: kwargs = parse_args()
     kwargs = parse_args()
     setup_logging(kwargs.pop('loglevel'))
     print(kwargs)
