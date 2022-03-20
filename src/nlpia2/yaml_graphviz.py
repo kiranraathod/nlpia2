@@ -205,7 +205,8 @@ def parse_args(args=None):
         action="version",
         version="yaml_graphviz {ver}".format(ver=__version__))
     parser.add_argument(
-        'yaml_file',
+        '-y',
+        '--yaml_file',
         dest="yaml_file",
         nargs='?',
         help="Path to yaml file containing graph specification for graphviz diagram",
@@ -268,7 +269,6 @@ def render_yaml_graphviz(yaml_filepath=None, dest_dir=DEST_DIR):
 
 
 if __name__ == '__main__':
-    # FIXME: kwargs = parse_args()
     kwargs = parse_args()
     setup_logging(kwargs.pop('loglevel'))
     print(kwargs)
