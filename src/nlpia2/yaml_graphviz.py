@@ -7,7 +7,18 @@ import sys
 from pathlib import Path
 import shutil
 import logging
-from constants import DATA_DIR
+from nlpia2.constants import DATA_DIR
+
+__version__ = None
+try:
+    from nlpia2 import __version__  # noqa
+except ImportError:
+    pass
+try:
+    from nlpia2.constants import __version__  # noqa
+except ImportError:
+    pass
+
 
 log = logging.getLogger(__name__)
 

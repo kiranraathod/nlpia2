@@ -8,6 +8,9 @@ jupyter
 lxml
 # manim
 # manimpango
+# "$pkg_name @ git+ssh://git@github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
+# "$pkg_name @ git+https://github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
+nessvec @ git+https://gitlab.com/tangibleai/nessvec.git
 nltk
 pyglet
 pylatex
@@ -24,5 +27,7 @@ statsmodels
 spacy
 torchtext
 transformers
-wikipedia
+# "$pkg_name @ git+ssh://git@github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
+# "$pkg_name @ git+https://github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
+wikipedia @ git+https://gitlab.com/tangibleai/Wikipedia.git
 xmltodict
