@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import logging
@@ -8,10 +9,29 @@ log = logging.getLogger(__name__)
 PACKAGE_DIR = Path(__file__).absolute().resolve().parent
 SRC_DIR = PACKAGE_DIR.parent
 REPO_DIR = SRC_DIR.parent
-__version__ = next(iter(
-    line for line in (REPO_DIR / 'setup.py').open() if line.startswith('__version__ = ')))
-__version__ = __version__[len('__version__ = '):].strip('"').strip("'")
 
+
+def get_version():
+    """ Look within setup.cfg for version = ... and within setup.py for __version__ = """
+
+    # setup.cfg
+    with (REPO_DIR / 'setup.cfg').open() as fin:
+        for line in fin:
+            matched = re.match(r'\s*version\s*=\s*([.0-9abrc])\b', line)
+            if matched:
+                return (matched.groups()[-1] or '').strip()
+
+    # setup.py
+    try:
+        version = next(iter(
+            line for line in (REPO_DIR / 'setup.py').open() if line.startswith('__version__ = ')))
+        return version[len('__version__ = '):].strip('"').strip("'")
+    except Exception as e:
+        print('ERROR: Unable to find version in setup.py.')
+        print(e)
+
+
+__version__ = get_version()
 
 HOME_DIR = Path.home()
 DATA_DIR_NAME = '.nlpia2-data'
