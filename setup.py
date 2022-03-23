@@ -20,8 +20,7 @@ with Path('requirements.txt').open() as fin:
     for req in install_requires:
         print(f'    {req},')
     print(']')
-    print(install_requires)
-
+    print(install_requires
 
 setup(
     url='https://gitlab.com/prosocialai/nlpia2',
