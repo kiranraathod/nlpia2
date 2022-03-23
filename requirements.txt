@@ -10,7 +10,8 @@ lxml
 # manimpango
 # "$pkg_name @ git+ssh://git@github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
 # "$pkg_name @ git+https://github.com/$org_name/$repo_name@v1.1#egg=$pkg_name"
-nessvec @ git+https://gitlab.com/tangibleai/nessvec.git
+# nessvec @ git+https://gitlab.com/tangibleai/nessvec.git@0.0.12#egg=nessvec
+nessvec
 nltk
 pyglet
 pylatex
