@@ -1,8 +1,24 @@
-# import re
+import re
 from pathlib import Path
 from setuptools import find_packages, setup
 
-__version__ = '0.0.11'
+try:
+    with open('setup.cfg') as fin:
+        for line in fin:
+            matched = re.match(r'\s*version\s*=\s*([.0-9abrc])\b', line)
+            if matched:
+                global __version__
+                __version__ = (matched.groups()[-1] or '').strip()
+                break
+except Exception as e:
+    print('ERROR in setup.py: Unable to find version in setup.cfg')
+    print(e)
+
+REPO_DIR = Path(__file__).resolve().absolute().parent
+name = REPO_DIR.name
+package_data = {
+    name: [str(p) for p in REPO_DIR.glob(f'src/{name}/data')]
+}
 
 # TODO: default requirements here and try/except with loud failure
 with Path('requirements.txt').open() as fin:
@@ -20,16 +36,10 @@ with Path('requirements.txt').open() as fin:
     for req in install_requires:
         print(f'    {req},')
     print(']')
-    print(install_requires
+    print(install_requires)
+
 
 setup(
-    url='https://gitlab.com/prosocialai/nlpia2',
-    author_email='hobson@tangibleai.com',
-    name='nlpia2',
-    packages=find_packages(where='src'),
-    install_requires=install_requires,
-    version=__version__,
-    description='Software for the Manning book Natural Language Processing in Action, 2nd Edition',
-    author='Hobson Lane (TangibleAI.com)',
-    license='Hippocratic License (MIT + Do No Harm)',
+    name=name,
+    install_requires=install_requires
 )
