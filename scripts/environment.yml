@@ -15,7 +15,6 @@ dependencies:
   - asciidoctor=2.0.16
   - beautifulsoup4=4.10.0
   - boto3=1.21.25
-  - click>=8.0.1
   - configargparse=1.5.3
   - django=4.0.3
   - ffmpeg=4.3
@@ -74,8 +73,8 @@ dependencies:
   - spacy=3.1.1
   - spacy-legacy=3.0.8
   - sphinx=4.4.0
-  - tokenizers
-  - toml
+  # - tokenizers=0.10.3
+  # - toml=0.10.2
   - torchtext=0.10.0
   - torchvision=0.2.2
   - transformers=4.11.3
