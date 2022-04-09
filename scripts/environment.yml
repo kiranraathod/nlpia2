@@ -18,15 +18,14 @@ dependencies:
   - click>=8.0.1
   - configargparse=1.5.3
   - django=4.0.3
-  - ffmpeg>=4.3
-  - gettext>=0.21.0
+  - ffmpeg=4.3
+  # - gettext>=0.21.0
   - gitpython=3.1.27
   - graphviz=2.48.0
   - h5py
   - html2text=2020.1.16
   - html5lib=1.1
-  - huggingface_hub>=0.0.17
-  # - joblib=1.0.1
+  - huggingface_hub
   - jupyter_console=6.4.3  # 5.2.0 6.0.0 6.1.0 6.2.0 **6.3.0** 6.4.0 6.4.3
   # - lxml=4.6.3=py38h9120a33_0
   # - markupsafe=2.0.1
@@ -75,8 +74,8 @@ dependencies:
   - spacy=3.1.1
   - spacy-legacy=3.0.8
   - sphinx=4.4.0
-  - tokenizers=0.10.3
-  - toml=0.10.2
+  - tokenizers
+  - toml
   - torchtext=0.10.0
   - torchvision=0.2.2
   - transformers=4.11.3
