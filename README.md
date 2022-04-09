@@ -35,10 +35,11 @@ If you have cloned the repository, as instructed above, you already have a scrip
 ### Or manually execute portions of the script as follows
 
 First, create a new environment (or activate it if it exists)
+
 ```bash
 # create a new environment named "nlpia2" if one doesn't already exist:
 conda activate nlpia2 \
-    || conda create -n nlpia2 -y 'python==3.8.8' \
+    || conda create -n nlpia2 -y 'python==3.9.7' \
     && conda activate nlpia2
 ```
 
