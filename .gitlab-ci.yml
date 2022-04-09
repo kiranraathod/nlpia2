@@ -16,10 +16,8 @@ image: python:3.9
 #  - postgres:latest
 
 py39:
-  image: python:3.9
+  image: continuumio/miniconda3:latest
   before_script:
-    - apt-get install -y git curl python-pip python-dev python3-dev build-essential doxygen miniconda
-    - apt-get update -qy
     - conda env create -n py39 -f ./scripts/environment.yml
     - source activate py39
     - python -v
