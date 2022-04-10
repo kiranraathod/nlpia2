@@ -7,9 +7,9 @@ image: python:3.9
     - apt-get install -y git curl python-pip python-dev python3-dev build-essential doxygen miniconda
     - apt-get update -qy
 
-  script:
-    - python -v
-    - conda -v
+  # script:
+  #   - python -v
+  #   - conda -v
 
     # - apt-get install -y curl
 # Pick zero or more services to be used on all builds.
