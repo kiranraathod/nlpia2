@@ -1,15 +1,10 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
-
 image: python:3.9
-# image: continuumio/miniconda3:latest
-  before_script:
-    - apt-get install -y git curl python-pip python-dev python3-dev build-essential doxygen miniconda
-    - apt-get update -qy
-
-  # script:
-  #   - python -v
-  #   - conda -v
+  - apt-get install -y git curl python-pip python-dev python3-dev build-essential graphviz doxygen miniconda
+  - apt-get update -qy
+  - python -v
+  - conda -v
 
     # - apt-get install -y curl
 # Pick zero or more services to be used on all builds.
