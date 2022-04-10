@@ -40,3 +40,4 @@ USER ${NB_UID}
 
 WORKDIR "${HOME}"
 
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]

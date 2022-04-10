@@ -89,3 +89,6 @@ Congratulations! You now have the nlpia2 repository cloned which gives you local
 `conda activate nlpia2`
 
 And off you go tackle some serious Natural Language Processing, in order to make the world a better place for all.
+
+Run a jupyter notebook server within docker:
+`jupyter-repo2docker --editable .`
