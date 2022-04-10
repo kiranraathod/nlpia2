@@ -18,8 +18,7 @@ image: python:3.9
 py39:
   image: continuumio/miniconda3:latest
   before_script:
-    - conda env create -n py39 -f ./environment.yml
-    - source activate py39
+    - conda env update -n base -f ./environment.yml
     - python -v
     # - python -m pip install --upgrade pip
     - git config --global user.email "nlpia2+gitlabcicd@totalgood.com"
