@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
-from setuptools import find_packages, setup
+# from setuptools import find_packages
+from setuptools import setup
 
 try:
     with open('setup.cfg') as fin:
@@ -20,26 +21,26 @@ package_data = {
     name: [str(p) for p in REPO_DIR.glob(f'src/{name}/data')]
 }
 
-# TODO: default requirements here and try/except with loud failure
-with Path('requirements.txt').open() as fin:
-    install_requires = [req.strip() for req in fin]
-    # r = install_requires[0]
-    # if re.match(r'^#\s*\d{1,2}[.]\d{1,4}.\d{1,4}[rd]?\s*$', r):
-    #     __version__ = req.strip().strip('#').strip()
-    install_requires = [
-        req.strip() for req in install_requires
-        if req.strip() and not req.lstrip().startswith('#')]
-    install_requires = [
-        req for req in install_requires
-        if req.strip() and not req.lstrip().startswith('#')]
-    print('install_requires = [')
-    for req in install_requires:
-        print(f'    {req},')
-    print(']')
-    print(install_requires)
+# # TODO: default requirements here and try/except with loud failure
+# with Path('requirements.txt').open() as fin:
+#     install_requires = [req.strip() for req in fin]
+#     # r = install_requires[0]
+#     # if re.match(r'^#\s*\d{1,2}[.]\d{1,4}.\d{1,4}[rd]?\s*$', r):
+#     #     __version__ = req.strip().strip('#').strip()
+#     install_requires = [
+#         req.strip() for req in install_requires
+#         if req.strip() and not req.lstrip().startswith('#')]
+#     install_requires = [
+#         req for req in install_requires
+#         if req.strip() and not req.lstrip().startswith('#')]
+#     print('install_requires = [')
+#     for req in install_requires:
+#         print(f'    {req},')
+#     print(']')
+#     print(install_requires)
 
 
 setup(
-    name=name,
-    install_requires=install_requires
+    #    name=name,
+    #    install_requires=install_requires
 )
