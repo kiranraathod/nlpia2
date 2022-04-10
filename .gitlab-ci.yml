@@ -1,14 +1,11 @@
-# This file is a template, and might need editing before it works on your project.
-# Official language image. Look for the different tagged releases at:
+# Official Python language image.
 image: python:3.9
   - apt-get install -y git curl python-pip python-dev python3-dev build-essential graphviz doxygen miniconda
   - apt-get update -qy
   - python -v
   - conda -v
 
-    # - apt-get install -y curl
-# Pick zero or more services to be used on all builds.
-# Only needed when using a docker container to run your tests in.
+# Services (typically databases)
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-service
 #services:
 #  - mysql:latest
@@ -19,8 +16,6 @@ py39:
   image: continuumio/miniconda3:latest
   before_script:
     - conda env update -n base -f ./environment.yml
-    - python -v
-    # - python -m pip install --upgrade pip
     - git config --global user.email "nlpia2+gitlabcicd@totalgood.com"
     - git config --global user.name "_NLP in Action 2nd Ed_ Contributors"
     - python -m pip install -e .
