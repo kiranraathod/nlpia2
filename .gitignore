@@ -17,6 +17,11 @@ __pycache__/*
 .coverage*
 cache_dir/
 
+# repo2docker
+.ipython
+.jupyter
+.jupyter-server-log.txt
+
 # pypi package setup files
 # pyproject must not be in root dir for `pip install -e .` to work
 pyproject.toml
