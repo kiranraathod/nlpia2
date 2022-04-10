@@ -25,6 +25,8 @@ py39:
     - git config --global user.email "nlpia2+gitlabcicd@totalgood.com"
     - git config --global user.name "_NLP in Action 2nd Ed_ Contributors"
     - python -m pip install -e .
+    - git clone https://gitlab.com/tangibleai/nessvec
+    - python -m pip install -e nessvec
   script:
     - pytest
 
