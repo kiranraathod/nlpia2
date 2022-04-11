@@ -27,11 +27,11 @@ from sklearn.linear_model import LogisticRegression  # noqa
 
 
 """
->>> from constants import DATA_DIR
+>>> from nlpia.constants import DATA_DIR
 >>> DATA_DIR
 PosixPath('.../.nlpia-data/')
 """
-from constants import DATA_DIR
+from nlpia.constants import DATA_DIR
 
 
 """

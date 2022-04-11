@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.linear_model import LogisticRegression, Lasso
-from constants import DATA_DIR
+from nlpia.constants import DATA_DIR
 
 df = pd.read_csv(DATA_DIR / 'baby-names-region.csv.gz')
 names = df.set_index('name').groupby('name')['count'].sum()
@@ -18,7 +18,7 @@ vecs = vectorizer.transform(names.index)
 
 
 """
->>> from constants import DATA_DIR
+>>> from nlpia.constants import DATA_DIR
 >>> import pandas as pd
 >>> import numpy as np
 >>> np.random.seed(451)

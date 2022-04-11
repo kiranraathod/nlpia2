@@ -1,6 +1,6 @@
 """ DEPRECATEd: use render_adoc.py and build.sh instead
 
-FIXME: `cat` *.adoc | `asciidoctor` >> *.html | `pandoc` >> *.xml | `xmltodict` >> *.json  
+FIXME: `cat` *.adoc | `asciidoctor` >> *.html | `pandoc` >> *.xml | `xmltodict` >> *.json
 
 Convert render all adoc files in the manuscript/adoc/ dir to html then xml then json and load them into a list of dictionaries.
 
@@ -21,11 +21,7 @@ done
 ```
 """
 
-import os
-import sys
-import subprocess
 from pathlib import Path
-import json
 import logging
 
 log = logging.getLogger(__name__)
@@ -45,10 +41,10 @@ for i in range(4):
     REPO_DIR = REPO_DIR.parent
 
 HOME_CODE_DIR = REPO_DIR.parent.parent
-print(HOME_CODE_DIR)
-assert HOME_CODE_DIR.name == 'code'
+# print(HOME_CODE_DIR)
+# assert HOME_CODE_DIR.name == 'code'
 MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
-assert MANUSCRIPT_DIR.is_dir()
+# assert MANUSCRIPT_DIR.is_dir()
 IMAGE_DIR = MANUSCRIPT_DIR / 'images'
-assert IMAGE_DIR.is_dir()
-SCRIPT_WORKING_DIR = os.getcwd()
+# assert IMAGE_DIR.is_dir()
+# SCRIPT_WORKING_DIR = os.getcwd()
