@@ -1,41 +1,40 @@
 import re
 from pathlib import Path
-
 import logging
+import pkg_resources
 
 log = logging.getLogger(__name__)
 
 
-PACKAGE_DIR = Path(__file__).absolute().resolve().parent
-SRC_DIR = PACKAGE_DIR.parent
+PKG_DIR = Path(__file__).absolute().resolve().parent
+PKG_NAME = PKG_DIR.name
+SRC_DIR = PKG_DIR.parent
 REPO_DIR = SRC_DIR.parent
 
 
 def get_version():
     """ Look within setup.cfg for version = ... and within setup.py for __version__ = """
+    version = '0.0.0'
+    try:
+        return pkg_resources.get_distribution(PKG_NAME)
+    except Exception as e:
+        log.error(e)
+        log.warning(f"Unable to find {PKG_NAME} version so using {version}")
+    return version
 
-    # setup.cfg
+    # setup.cfg will not exist if package install in site-packages
     with (REPO_DIR / 'setup.cfg').open() as fin:
         for line in fin:
             matched = re.match(r'\s*version\s*=\s*([.0-9abrc])\b', line)
             if matched:
                 return (matched.groups()[-1] or '').strip()
 
-    # setup.py
-    try:
-        version = next(iter(
-            line for line in (REPO_DIR / 'setup.py').open() if line.startswith('__version__ = ')))
-        return version[len('__version__ = '):].strip('"').strip("'")
-    except Exception as e:
-        print('ERROR: Unable to find version in setup.py.')
-        print(e)
-
 
 __version__ = get_version()
 
-HOME_DIR = Path.home()
+HOME_DIR = Path.home().resolve().absolute()
 DATA_DIR_NAME = '.nlpia2-data'
-DATA_DIR = PACKAGE_DIR / DATA_DIR_NAME
+DATA_DIR = PKG_DIR / DATA_DIR_NAME
 if not DATA_DIR.is_dir():
     DATA_DIR = REPO_DIR / DATA_DIR_NAME
 if not DATA_DIR.is_dir():

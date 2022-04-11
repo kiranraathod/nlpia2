@@ -82,6 +82,6 @@ dependencies:
   - xmltodict=0.12.0
   # - zeromq=4.3.4
   - pip:
-    - wikipedia @ https://gitlab.com/tangibleai/Wikipedia/-/archive/1.4.1/Wikipedia-1.4.1.zip
-    - nessvec
+    - -e git+https://gitlab.com/tangibleai/Wikipedia.git#egg=wikipedia
+    - -e git+https://gitlab.com/tangibleai/nessvec.git#egg=nessvec
 
