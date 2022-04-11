@@ -1,4 +1,4 @@
-Copyright 2020-2022 Hobson Lane and Maria Dyshel ("Licensor")
+Copyright 2019-2022 Hobson Lane and Maria Dyshel ("Licensor")
 
 Hippocratic License Version Number: 2.1.
 
