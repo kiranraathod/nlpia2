@@ -1,5 +1,15 @@
 # nlpia2
 
+<!-- [![PyPI version](https://img.shields.io/pypi/pyversions/nlpia2.svg)](https://pypi.org/project/nlpia2/)
+ [![License](https://img.shields.io/pypi/l/qary.svg)](https://pypi.python.org/pypi/qary/)
+ -->
+<!-- https://gitlab.com/username/userproject/badges/master/coverage.svg
+ -->
+[![codecov](https://codecov.io/gl/tangibleai/nlpia2/branch/master/graph/badge.svg)](https://codecov.io/gl/tangibleai/nlpia2)
+[![GitLab CI](https://gitlab.com/tangibleai/nlpia2/badges/master/pipeline.svg)](https://gitlab.com/tangibleai/nlpia2/badges/master/pipeline.svg)
+
+
+
 Official code repository for the book [_Natural Language Processing in Action, 2nd Edition_](https://proai.org/nlpia2e) by Maria Dyshel and Hobson Lane at [Tangible AI](https://tangibleai.com). It would not have happened without the generous work of [contributing authors](AUTHORS.md) and prosocial AI developers.
 
 To get the most of this repository, you need to do two things.
