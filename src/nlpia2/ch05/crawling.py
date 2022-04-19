@@ -41,6 +41,7 @@ def walk_wikipedia(pages, depth=1, delay=0.1):
                 time.sleep(delay)
                 page = get_page(title)
                 log.debug(page)
+                # FIXME: add depth_id (depth) and link_id (i) integers as attributes to page object (no tuple for values)
                 pages[title] = (depth, i, page)
                 if page:  # page is False when get_page() failed to find a valid page
                     queue.extend(list(page.links))
