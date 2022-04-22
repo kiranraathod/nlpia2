@@ -1,4 +1,9 @@
+# submodules
+src/wikipedia
+src/nessvec
+
 # Temporary and binary files
+condaenv.*.requirements.txt
 *~
 *.py[cod]
 *.so
