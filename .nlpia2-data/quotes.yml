@@ -13,8 +13,33 @@
 # Edelman:
 #   _Neural Darwinism_:
 ## ch1 and philosophy, wisdom, prosocial
-# translation_dict = {'"': "'", '“': '"', "–": '--', '”': '"'}
+# translation_dict = {'"': "'", '"': '"', "–": '--', '"': '"'}
 # Chapter 6 examples of fuzzy tagging or tag clustering or tag autocomplete/normalization or tag search
+-
+  text: "If you disagree with somebody, you want to be able to state their case better than they can. And at that point you've earned the right to disagree with them. Otherwise you should keep quiet."
+  author: Charlie Munger, Warren Buffett's business partner (see this article)
+  tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
+  source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
+-
+  text: "The man who can hold forth on every matter under debate in two contradictory ways of pleading, or can argue for and against every proposition that can be laid down—such a man is the true, the complete, and the only orator."
+  author: Roman Orator Cicero (see this article)
+  tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
+  source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
+-
+  text: "I have yet to find a more efficient and reliable way to probe the depths of a person's knowledge and seriousness about an issue than asking them to explain the other side's perspective."
+  author: Entrepreneur Ben Casnocha (see this article)
+  tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
+  source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
+-
+  text: "If you can't imagine how anyone could hold the view you are attacking, you just don't understand it yet."
+  author: Philosopher Anthony Weston in Rulebook for Arguments (see this article)
+  tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
+  source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
+-
+  text: "When you think you can nail someone with your argument, take a breath & see if you can phrase it as a face-saving question."
+  author: Career Coach Marty Nemko
+  tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
+  source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
 -
   text: "Daddy is a doctor."
   page: 68
@@ -833,7 +858,7 @@
   tags: [life, meaning, will, motivation]
 -
   text: |+
-    "You're the reason she left. You can leave too, for all I care. I sure as hell would be better off without you."
+  text: "You're the reason she left. You can leave too, for all I care. I sure as hell would be better off without you."
 
     The words were just as I remembered them, but it wasn't Nicole saying them.
 

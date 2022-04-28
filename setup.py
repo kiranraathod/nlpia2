@@ -2,6 +2,8 @@ import re
 from pathlib import Path
 # from setuptools import find_packages
 from setuptools import setup
+from setuptools.command.develop import develop
+from setuptools.command.install import install
 
 try:
     with open('setup.cfg') as fin:
@@ -40,7 +42,42 @@ package_data = {
 #     print(install_requires)
 
 
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+
+    def run(self):
+        develop.run(self)
+
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        #
+        # run shell scripts
+        # check_call("apt-get install this-package".split())
+        #
+        # or python functions
+        from spacy import cli
+        cli.download('en_core_web_md')
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+
+    def run(self):
+        install.run(self)
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        #
+        # run shell scripts
+        # check_call("apt-get install this-package".split())
+        #
+        # or python functions
+        from spacy import cli
+        cli.download('en_core_web_md')
+
+
 setup(
-    #    name=name,
-    #    install_requires=install_requires
+    # name=name,
+    # install_requires=install_requires,
+    cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+    }
 )
