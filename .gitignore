@@ -29,9 +29,9 @@ cache_dir/
 
 # pypi package setup files
 # pyproject must not be in root dir for `pip install -e .` to work
-pyproject.toml
-!scripts/pyproject.toml
-!setup.cfg
+# pyproject.toml
+# !scripts/pyproject.toml
+# !setup.cfg
 
 # Internal working cache for poetry
 poetry.lock

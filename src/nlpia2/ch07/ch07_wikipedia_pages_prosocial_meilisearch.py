@@ -1,14 +1,6 @@
 from spacy import cli
 cli.download('en_core_web_md')
-%run meilisearch_upload.py
-CLIENT?
-dir(CLIENT)
-get_indexes()
-CLIENT.create_index?
 from qary.etl.wikicrawl import *
-%run /home/hobs/code/tangibleai/qary/src/qary/etl/wikicrawl
-who
-walk_wikipedia?
 pages = {'Abundance (economics)': None}
 pages2 = walk_wikipedia(pages=pages, depth=1)
 pages2
