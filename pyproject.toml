@@ -39,55 +39,11 @@ classifiers = [
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
 "qary" = "qary.clibot:main"
 
-  # • Installing argon2-cffi (21.3.0)
-  # • Installing argon2-cffi-bindings (21.2.0)
-  # • Installing bleach (5.0.0)
-  # • Installing defusedxml (0.7.1)
-  # • Installing fastjsonschema (2.15.3)
-  # • Installing ipython-genutils (0.2.0)
-  # • Installing jsonschema (4.4.0)
-  # • Installing jupyterlab-pygments (0.2.2)
-  # • Installing jupyterlab-widgets (1.1.0)
-  # • Installing lazy-object-proxy (1.7.1)
-  # • Installing mistune (0.8.4)
-  # • Installing nbclient (0.6.0)
-  # • Installing nbconvert (6.5.0)
-  # • Installing nbformat (5.3.0)
-  # • Installing notebook (6.4.11)
-  # • Installing pandocfilters (1.5.0)
-  # • Installing pbr (5.8.1)
-  # • Installing prometheus-client (0.14.1)
-  # • Installing pyrsistent (0.18.1)
-  # • Installing send2trash (1.8.0)
-  # • Installing setuptools-scm (6.4.2)
-  # • Installing terminado (0.13.3)
-  # • Installing tinycss2 (1.1.1)
-  # • Installing widgetsnbextension (3.6.0)
-  # • Updating babel (2.9.1 -> 2.10.1)
-  # • Updating botocore (1.25.3 -> 1.25.2)
-  # • Updating catalogue (2.0.6 -> 2.0.7)
-  # • Updating click (8.0.4 -> 7.1.2)
-  # • Updating cryptography (36.0.2 -> 37.0.1)
-  # • Updating docutils (0.17.1 -> 0.15.2)
-  # • Updating jinja2 (3.1.1 -> 3.1.2)
-  # • Updating jupyter-client (7.3.0 -> 6.2.0)
-  # • Updating jupyter-core (4.9.2 -> 4.10.0)
-  # • Updating numpy (1.21.1 -> 1.22.3)
-  # • Updating pillow (9.1.0 -> 8.4.0)
-  # • Updating platformdirs (2.5.1 -> 2.5.2)
-  # • Updating pyyaml (6.0 -> 5.4.1)
-  # • Updating sacremoses (0.0.43 -> 0.0.49)
-  # • Updating scipy (1.8.0 -> 1.7.1)
-  # • Updating smmap (3.0.5 -> 5.0.0)
-  # • Updating soupsieve (2.3.1 -> 2.3.2.post1)
-  # • Updating tokenizers (0.10.3 -> 0.12.1)
-  # • Updating torch (1.9.0.post2 -> 1.11.0)
-  # • Updating typer (0.4.1 -> 0.3.2)
 [tool.poetry.dependencies]
 beautifulsoup4 = "4.11.1"
-boto3 = ">=1.22.2"
+boto3 = "1.22.2"
 botocore = "1.25.3"
-ConfigArgParse = "1.2.2"
+ConfigArgParse = "1.5.3"
 Cython = ">=0.29.28"
 django = "4.0.4"
 docutils = ">=0.17.1"
@@ -135,11 +91,11 @@ scikit-learn = "0.24.2"
 scipy = "1.8.0"
 seaborn = "^0.11.2"
 sentence_transformers = "^2.2.0"
-spacy = "^3.2.4"
+spacy = "3.2.4"
 Sphinx = "^3.0.3"
 torch = "1.11.0"
-torchtext = "0.12.0"
-torchvision = "0.12.0"
+# torchtext = "0.12.0"
+# torchvision = "0.12.0"
 tox = "^3.25.0"
 tqdm = "^4.60.0"
 # transformers = "4.11.3"  # ">=4.18.0"

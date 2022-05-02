@@ -1,6 +1,7 @@
 # submodules
 src/wikipedia
 src/nessvec
+src/nlpia2/ch08/cnn-classify-tweets-newsworthy
 
 # Temporary and binary files
 condaenv.*.requirements.txt
