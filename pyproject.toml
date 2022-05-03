@@ -45,9 +45,7 @@ generate-setup-file = false
 
 [tool.poetry.dependencies]
 python = "^3.8.3,<3.10.0"
-poetry = "^1.1.13"
-poetry-core = "^1.1.0a7"
-poetry-plugin-export = "^1.0"
+poetry = ">=1.1.13"
 
 beautifulsoup4 = "4.11.1"
 boto3 = "1.22.2"
