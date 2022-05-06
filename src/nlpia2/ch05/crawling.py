@@ -7,7 +7,7 @@ from tqdm import tqdm
 import nlpia2_wikipedia as wiki
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 def get_page(title):
