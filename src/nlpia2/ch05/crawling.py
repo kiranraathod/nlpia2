@@ -4,7 +4,7 @@ import time
 from collections import abc
 
 from tqdm import tqdm
-import nlpia2_wikipedia as wiki
+import wikipedia as wiki
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
