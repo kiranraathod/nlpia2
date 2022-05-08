@@ -52,7 +52,7 @@ generate-setup-file = false
 [tool.poetry.scripts]
 # https://python-poetry.org/docs/pyproject/#scripts
 # TODO: rename cnn-classify-text->cnn   and   main.py->cli.py
-"cnn" = "ch08.cnn.main"
+"cnn" = "ch07.cnn.main"
 
 [tool.poetry.dependencies]
 python = "^3.8.3,<3.10.0"
