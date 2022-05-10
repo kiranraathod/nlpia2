@@ -2,7 +2,7 @@
 # https://python-poetry.org/docs/pyproject/
 # https://github.com/python-poetry/poetry/blob/master/pyproject.toml
 name = "nlpia2"
-version = "0.0.16"
+version = "0.0.17"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "GPLv3"
 readme = "README.md"
