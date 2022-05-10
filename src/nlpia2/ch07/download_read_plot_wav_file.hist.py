@@ -1,4 +1,8 @@
+
+url = 'https://www.youtube.com/watch?v=snkwsU98QlQ'
+url = 'https://upload.wikimedia.org/wikipedia/commons/d/de/Hello_in_Morse_Code.wav'
 url = 'https://commons.wikimedia.org/wiki/File:1210secretmorzecode.wav'
+
 import requests
 requests.get?
 wav = requests.get(url)
@@ -20,10 +24,10 @@ wav
 wav = pd.Series(resp.content)
 wav
 chr(82
-)
+    )
 from urllib.request import urlretrieve
 f = urlretrieve(url, '1210secretmorzecode.wav')
-ls -hal
+ls - hal
 from scipy.io import wavfile
 samplerate, data = wavfile.read('1210secretmorzecode.wav')
 data
@@ -46,7 +50,8 @@ samplerate
 data
 data[0]
 data.shape
-import wave, struct
+import wave
+import struct
 
 wavefile = wave.open('sine.wav', 'r')
 
@@ -56,7 +61,8 @@ for i in range(0, length):
     data = struct.unpack("<h", wavedata)
     print(int(data[0]))
 filename = '1210secretmorzecode.wav'
-import wave, struct
+import wave
+import struct
 
 wavefile = wave.open(filename, 'r')
 
@@ -66,7 +72,8 @@ for i in range(0, length):
     data = struct.unpack("<h", wavedata)
     print(int(data[0]))
 wavedata
-import wave, struct
+import wave
+import struct
 
 wavefile = wave.open(filename, 'r')
 
@@ -119,5 +126,5 @@ plt.show()
 wav.plot()
 plt.show()
 pwd
-hist -o -p -f code/tangibleai/nlpia2/src/nlpia2/ch07/download_read_plot_wav_file.hist.md
-hist -f code/tangibleai/nlpia2/src/nlpia2/ch07/download_read_plot_wav_file.hist.py
+hist - o - p - f code / tangibleai / nlpia2 / src / nlpia2 / ch07 / download_read_plot_wav_file.hist.md
+hist - f code / tangibleai / nlpia2 / src / nlpia2 / ch07 / download_read_plot_wav_file.hist.py

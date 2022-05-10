@@ -83,9 +83,9 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 from cnn.model import CNNTextClassifier
+from cnn.language_model import nlp
 
 import pandas as pd
-import spacy
 
 DATA_DIR = Path(__file__).parent / 'data'
 
@@ -124,11 +124,10 @@ class Parameters:
 
     dropout_portion = 0.2
 
+    case_sensitive = True
+
 
 HYPERPARAMS = Parameters()
-
-
-nlp = spacy.load('en_core_web_md')
 
 
 def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
@@ -139,7 +138,7 @@ def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
     return padded
 
 
-def load_dataset_spacy(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_spacy):
+def load_dataset_spacy(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_spacy, params=HYPERPARAMS):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -175,7 +174,7 @@ def load_dataset_spacy(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokeniz
     # 6. Simplified: filter infrequent words
 
     counts = Counter(chain(*tokenized_texts))
-    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(HYPERPARAMS.vocab_size)]
+    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(params.vocab_size)]
 
     # 7. Simplified: compute reverse index
 
@@ -196,11 +195,11 @@ def load_dataset_spacy(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokeniz
         train_test_split(
             X=id_sequences,
             y=df['target'],
-            test_size=HYPERPARAMS.test_size,
+            test_size=params.test_size,
             random_state=0)))
 
 
-def load_dataset(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_re):
+def load_dataset(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_re, params=HYPERPARAMS, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -222,7 +221,7 @@ def load_dataset(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_re):
     texts = [re.sub(r'[^A-Za-z0-9.?!]+', ' ', x) for x in texts]
     texts = [tokenizer(doc) for doc in tqdm(texts)]
     counts = Counter(chain(*texts))
-    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(HYPERPARAMS.vocab_size)]
+    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(params.vocab_size)]
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
@@ -293,7 +292,8 @@ class Pipeline(Parameters):
         self.__dict__.update(load_dataset(
             filepath=self.filepath,
             usecols=list(self.usecols),
-            tokenizer=globals()[self.tokenizer]))
+            tokenizer=globals()[self.tokenizer],
+            **kwargs))
         model_kwargs = {k: v for (k, v) in vars(self).items() if not k.startswith('_')}
         log.debug(f'MODEL_KWARGS: {model_kwargs}')
         self.model = CNNTextClassifier(params=HYPERPARAMS, **model_kwargs)
@@ -386,4 +386,8 @@ def main():
 
 
 if __name__ == '__main__':
-    print(main())
+    import json
+    results = main()
+    json.dump(
+        [float(x) for x in results['predictions']],
+        open('predictions.json', 'a'), indent=2)

@@ -94,7 +94,7 @@ In the past brilliant liguists like Julie Beth Lovins needed to hand-craft algor
 Deep neural networks now make all that laborious work unnecessary.
 Neural networks directly access the meaning of words based on their statistics, without requiring brittle algorithms like stemmers and lemmatizers.
 
-Even powerful feature engineering approaches like the Latent Semantic Analysis LSA of Chapter 4 can't match the NLU capabilities of neural nets.
+Even powerful feature engineering approaches like the Latent Semantic Analysis LSA of chapter 4 can't match the NLU capabilities of neural nets.
 And the automatic learning of decision thresholds with decision trees, random forests, and boosted trees don't provide the depth of language understanding of neural nets.
 Conventional machine learning algorithms made full text search and universally accessible knowledge a reality.
 But deep learning with neural networks makes artificial intelligence and inteligent assistants possible.

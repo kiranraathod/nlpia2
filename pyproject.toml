@@ -42,7 +42,7 @@ classifiers = [
 ]
 
 [tool.poetry.build]
-generate-setup-file = false
+generate-setup-file = true
 
 # [build-system]
 # requires = ["poetry_core>=1.0.0", "setuptools>=54.0.2", "tox", "wheel"]
@@ -56,7 +56,7 @@ generate-setup-file = false
 
 [tool.poetry.dependencies]
 python = "^3.8.3,<3.10.0"
-poetry = ">=1.1.13"
+# poetry = "^1"
 
 beautifulsoup4 = "4.11.1"
 boto3 = "1.22.2"

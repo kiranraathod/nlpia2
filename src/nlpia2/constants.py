@@ -10,6 +10,9 @@ PKG_DIR = Path(__file__).absolute().resolve().parent
 PKG_NAME = PKG_DIR.name
 SRC_DIR = PKG_DIR.parent
 REPO_DIR = SRC_DIR.parent
+MANUSCRIPT_DIR = REPO_DIR.parent / 'nlpia-manuscript' / 'manuscript'
+IMAGES_DIR = MANUSCRIPT_DIR / 'images'
+ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 
 
 def get_version():
@@ -46,10 +49,13 @@ if not DATA_DIR.is_dir():
 HOME_DATA_DIR = HOME_DIR / DATA_DIR_NAME
 if not HOME_DATA_DIR.is_dir():
     HOME_DATA_DIR.mkdir(parents=True, exist_ok=True)
-# TODO: create data.py file
-# TODO: add download_if_necessary to data.py
-# TODO: all required data files
-# TODO: add list of all required data files to data.py
+
+REPO_DATA_DIR, DATA_DIR = DATA_DIR, HOME_DATA_DIR
+
+# DONE: create nlpia2/init.py
+# DONE: add maybe_download() to init.py
+# TODO: all required data files up to chapter07
+# TODO: add list of all required data files to init.py
 # TODO: ensure all files are in HOME_DATA_DIR (DATA_DIR is just a subset)
 # TODO: move DATA_DIR constant to data.py
 # DATA_FILENAMES = dict(
