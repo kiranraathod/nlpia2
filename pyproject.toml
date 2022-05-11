@@ -4,7 +4,7 @@
 name = "nlpia2"
 version = "0.0.17"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
-license = "GPLv3"
+license = "MIT"
 readme = "README.md"
 authors = [
     "Hobson Lane <hobson@tangibleai.com>",
@@ -21,9 +21,13 @@ homepage = "https://proai.org"
 repository = "https://gitlab.com/tangibleai/nlpia2"
 documentation = "https://gitlab.com/tangibleai/nlpia2"
 include = [
-    "wikipedia",
-    "data/*",
-    "data/constants/*",
+    "README.md",
+    "AUTHORS.md",
+    "CONTRIBUTING.md",
+    ]
+exclude = [
+    ".nlpia2-data/",
+    "src/nlpia2/data",
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords

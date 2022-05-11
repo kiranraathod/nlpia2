@@ -1,7 +1,6 @@
 # submodules
 src/wikipedia
 src/nessvec
-src/nlpia2/ch08/cnn-classify-text/.git
 
 # Temporary and binary files
 condaenv.*.requirements.txt
@@ -82,7 +81,8 @@ __MACOSX
 .directory
 
 # BigData and Models
-# .nlpia2-data
+.nlpia2-data
+src/nlpia2/data
 db.sqlite3
 *.bz2
 *.zip
