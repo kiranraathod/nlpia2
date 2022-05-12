@@ -24,6 +24,7 @@ include = [
     "README.md",
     "AUTHORS.md",
     "CONTRIBUTING.md",
+    "install_editable.sh",
     ]
 exclude = [
     ".nlpia2-data/",

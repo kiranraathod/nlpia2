@@ -66,7 +66,7 @@ IndexError: index out of range in self
 """
 
 from collections import Counter
-from dataclasses import dataclass
+# from dataclasses import dataclass
 from itertools import chain
 import logging
 from pathlib import Path
@@ -90,7 +90,8 @@ import pandas as pd
 DATA_DIR = Path(__file__).parent / 'data'
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
+log.setLevel(level=logging.INFO)
 
 
 def tokenize_spacy(doc):
@@ -101,30 +102,34 @@ def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-@dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False)
+# @dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False)
 class Parameters:
-    filepath: str = 'disaster-tweets.csv'
-    usecols: tuple = ('text', 'target')
-    tokenizer: str = 'tokenize_re'
 
-    seq_len: int = 35
-    vocab_size: int = 2000
+    def __init__(self):
+        self.filepath: Path = Path('disaster-tweets.csv')
+        self.usecols: tuple = ('text', 'target')
+        self.tokenizer: str = 'tokenize_re'
 
-    embedding_size: int = 64
-    kernel_lengths: tuple = (2, 3, 4, 5)
-    strides: tuple = (2, 2, 2, 2)
-    conv_output_size: int = 32
-    stride: int = 2
+        self.seq_len: int = 35
+        self.vocab_size: int = 2000
 
-    # Training parameters
-    epochs: int = 10
-    batch_size: int = 12
-    learning_rate: float = 0.001
-    test_size = 0.1
+        self.embedding_size: int = 64
+        self.kernel_lengths: list = [2, 3, 4, 5]
+        self.strides: list = [2, 2, 2, 2]
+        self.conv_output_size: int = 32
+        self.stride: int = 2
 
-    dropout_portion = 0.2
+        self.epochs: int = 10
+        self.batch_size: int = 12
+        self.learning_rate: float = 0.001
+        self.test_size: float = 0.1
 
-    case_sensitive = True
+        self.dropout_portion: float = 0.2
+
+        self.num_stopwords: int = 0
+        self.case_sensitive: bool = True
+
+        self.re_sub: str = r'[^A-Za-z0-9.?!]+'
 
 
 HYPERPARAMS = Parameters()
@@ -138,110 +143,86 @@ def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
     return padded
 
 
-def load_dataset_spacy(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_spacy, params=HYPERPARAMS):
+def update_params(params=HYPERPARAMS, **kwargs):
+    for param_name, param_val in params.__dict__.items():
+        log.info(f'DEFAULT: {param_name}: {param_val}')
+        kwarg_val = kwargs.get(param_name)
+        if kwarg_val is not None:
+            coerce_to_dest_type = type(param_val)
+            if not isinstance(param_val, str) and isinstance(kwarg_val, str):
+                kwarg_val = eval(kwarg_val)
+            setattr(params, param_name, coerce_to_dest_type(kwarg_val))
+            log.warning(f'NEW KWARGS: {param_name}: {getattr(params, param_name)} ({type(getattr(params, param_name))})')
+    params.tokenizer_fun = globals().get(params.tokenizer, tokenize_re)
+    if not params.filepath.is_file():
+        params.filepath = Path(DATA_DIR) / params.filepath
+    return params
+
+
+def load_dataset(params, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
-    2. NOPE: case folding:
-    3. NOPE: remove non-letters (nonalpha):
-    4. NOPE: remove stopwords
-    5. Simplified: tokenize with regex
-    6. Simplified: filter infrequent words
+    2. Configurable: case folding
+    3. Configurable: remove non-letters (nonalpha):
+    4. Configurable: tokenize with regex or spacy
+    5. Configurable: remove stopwords (frequent words)
+    6. Configurable: filter infrequent words
     7. Simplified: compute reverse index
     8. Simplified: transform token sequences to integer id sequences
     9. Simplified: pad token id sequences
     10. Simplified: train_test_split
     """
+    params = update_params(params, **kwargs)
 
-    if not Path(filepath).is_file():
-        filepath = DATA_DIR / filepath
+    log.warning(f'Using tokenizer={params.tokenizer_fun}')
 
-    # 1. Simplified: load the CSV
+    # 1. load the CSV
+    df = pd.read_csv(params.filepath.open(), usecols=params.usecols)
+    texts = df[params.usecols[0]].values
+    targets = df[params.usecols[1]].values
 
-    df = pd.read_csv(filepath, usecols=list(usecols))
+    # 2. optional case folding:
+    if not params.case_sensitive:
+        texts = [str.lower(x) for x in texts]
 
-    # 2. NOPE: case folding:
+    # 3. optional character (non-letter) filtering:
+    texts = [re.sub(params.re_sub, ' ', x) for x in texts]
 
-    texts = map(str.lower, df['texts'])
+    # 4. customizable tokenization:
+    texts = [params.tokenizer_fun(doc) for doc in tqdm(texts)]
 
-    # 3. NOPE: remove non-letters (nonalpha):
-    # texts = re.sub(r'[^A-Za-z]', t, ' ') for t in texts]
-    # 4. NOPE: remove stopwords
-    # 5. Simplified: tokenize with regex
-
-    tokenized_texts = map(re.compile(r'\w+').findall, texts)
-
-    # 6. Simplified: filter infrequent words
-
-    counts = Counter(chain(*tokenized_texts))
-    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(params.vocab_size)]
-
-    # 7. Simplified: compute reverse index
-
-    tok2id = dict(zip(vocab, range(len(vocab))))
-
-    # 8. Simplified: transform token sequences to integer id sequences
-
-    id_sequences = [map(tok2id.get, seq) for seq in tokenized_texts]
-
-    # 9. Simplified: pad token id sequences
-
-    id_sequences = [list(map(pad, seq)) for seq in id_sequences]
-
-    # 10. Simplified: train_test_split
-
-    return dict(zip(
-        'x_train x_test y_train y_test'.split(),
-        train_test_split(
-            X=id_sequences,
-            y=df['target'],
-            test_size=params.test_size,
-            random_state=0)))
-
-
-def load_dataset(filepath='tweets.csv', usecols=[0, -1], tokenizer=tokenize_re, params=HYPERPARAMS, **kwargs):
-    """ load and preprocess csv file: return [(token id sequences, label)...]
-
-    1. Simplified: load the CSV
-    2. NOPE: case folding:
-    3. NOPE: remove non-letters (nonalpha):
-    4. NOPE: remove stopwords
-    5. Simplified: tokenize with regex
-    6. Simplified: filter infrequent words
-    7. Simplified: compute reverse index
-    8. Simplified: transform token sequences to integer id sequences
-    9. Simplified: pad token id sequences
-    10. Simplified: train_test_split
-    """
-    if not Path(filepath).is_file():
-        filepath = Path(DATA_DIR) / filepath
-    df = pd.read_csv(filepath.open(), usecols=usecols)
-    texts = df[usecols[0]].values
-    targets = df[usecols[1]].values
-    texts = [re.sub(r'[^A-Za-z0-9.?!]+', ' ', x) for x in texts]
-    texts = [tokenizer(doc) for doc in tqdm(texts)]
+    # 5. count frequency of tokens
     counts = Counter(chain(*texts))
-    vocab = ['<PAD>'] + [x[0] for x in counts.most_common(params.vocab_size)]
+
+    # 6. configurable num_stopwords and vocab_size
+    vocab = [x[0] for x in counts.most_common(params.vocab_size + params.num_stopwords)]
+    vocab = ['<PAD>'] + list(vocab[params.num_stopwords:])
+    # id2tok = vocab
+
+    # 7. compute reverse index
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
-
     id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in texts]
 
     # 9. Simplified: pad token id sequences
-
     padded_sequences = []
     for s in id_sequences:
-        padded_sequences.append(pad(s))
+        padded_sequences.append(pad(s, pad_value=0))
     padded_sequences = torch.IntTensor(padded_sequences)
 
-    return dict(zip(
+    # 10. Configurable sampling for testset (test_size samples)
+    retval = dict(zip(
         'x_train x_test y_train y_test'.split(),
         train_test_split(
             padded_sequences,
             targets,
             test_size=HYPERPARAMS.test_size,
             random_state=0)))
+    retval['vocab'] = vocab
+    retval['tok2id'] = tok2id
+    return retval
 
 
 class DatasetMapper(Dataset):
@@ -274,29 +255,16 @@ def calculate_accuracy(y_true, y_pred):
 
 class Pipeline(Parameters):
 
-    def __init__(self, *args, **kwargs):
-        # self.x_train, self.y_train, self.x_test, self.y_test:
+    def __init__(self, **kwargs):
         super().__init__()
-        log.info(args)
         log.info(kwargs)
-        for param_name, param_val in super().__dict__.items():
-
-            log.info(f'DEFAULT: {param_name}: {param_val}')
-            kwarg_val = kwargs.get(param_name)
-            if kwarg_val is not None:
-                dest_type = type(param_val)
-                if not isinstance(param_val, str) and isinstance(kwarg_val, str):
-                    kwarg_val = eval(kwarg_val)
-                setattr(self, param_name, dest_type(kwarg_val))
-                log.warning(f'NEW KWARGS: {param_name}: {getattr(self, param_name)} ({type(getattr(self, param_name))})')
-        self.__dict__.update(load_dataset(
-            filepath=self.filepath,
-            usecols=list(self.usecols),
-            tokenizer=globals()[self.tokenizer],
-            **kwargs))
-        model_kwargs = {k: v for (k, v) in vars(self).items() if not k.startswith('_')}
-        log.debug(f'MODEL_KWARGS: {model_kwargs}')
-        self.model = CNNTextClassifier(params=HYPERPARAMS, **model_kwargs)
+        params = update_params(params=self)
+        self.__dict__.update(params.__dict__)
+        self.__dict__.update(load_dataset(params, **kwargs))
+        model_kwargs = {k: v for (k, v) in vars(self).items() if not k.startswith('_') and not k.startswith('x_') and not k.startswith('y_')}
+        log.warning(f'MODEL_KWARGS: {model_kwargs}')
+        log.warning(f'params: {params}')
+        self.model = CNNTextClassifier(params=params)  # , **model_kwargs)
 
     def train(self):
 
@@ -353,7 +321,7 @@ def parse_argv(sys_argv=sys.argv):
     argv = list(reversed(sys_argv[1:]))
 
     pipeline_args = []
-    pipeline_kwargs = dict(tokenizer='tokenize_re')
+    pipeline_kwargs = {}  # dict(tokenizer='tokenize_re')
     while len(argv):
         a = argv.pop()
         if a.startswith('--'):
@@ -374,10 +342,11 @@ def main():
 
     pipeline_args, pipeline_kwargs = parse_argv(sys.argv)
 
-    log.warning(f'args: {pipeline_args}')
+    if len(pipeline_args):
+        log.error(f'main.py does not accept positional args: {pipeline_args}')
     log.warning(f'kwargs: {pipeline_kwargs}')
 
-    pipeline = Pipeline(*pipeline_args, **pipeline_kwargs)
+    pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
     predictions = pipeline.predict()
