@@ -1,5 +1,6 @@
 import logging
 import math
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -10,22 +11,33 @@ logging.basicConfig(level=logging.WARNING)
 class CNNTextClassifier(nn.ModuleList):
 
     def __init__(self, params=None, **kwargs):
+        self.random_state = kwargs.pop('random_state', None)
+        if self.random_state is not None:
+            self.torch_random_state = self.random_state
+            self.numpy_random_state = self.random_state + 1
+        else:
+            self.torch_random_state = torch.random.initial_seed()
+            self.numpy_random_state = np.random.get_state()[1][0]
+        torch.random.manual_seed(self.torch_random_state)
+        np.random.seed(self.numpy_random_state)
         super().__init__()
 
         self.convolvers = []
         self.poolers = []
 
-        self.seq_len = getattr(params, 'seq_len', 40)
-        self.vocab_size = getattr(params, 'vocab_size', 3000)
-        self.embedding_size = getattr(params, 'embedding_size', 64)
-        self.kernel_lengths = list(getattr(params, 'kernel_lengths', [3, 4]))
+        self.seq_len = params.seq_len
+        self.vocab_size = params.vocab_size
+        self.embedding_size = params.embedding_size
+        self.kernel_lengths = list(params.kernel_lengths)
 
         self.stride = getattr(params, 'stride', 2)
         self.strides = getattr(params, 'strides')
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
+        if len(self.strides) < len(self.kernel_lengths):
+            self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strids))
 
-        self.dropout_portion = getattr(params, 'dropout_portion', .2)
+        self.dropout_portion = params.dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
         self.conv_output_size = getattr(params, 'conv_output_size', 32)
@@ -58,11 +70,6 @@ class CNNTextClassifier(nn.ModuleList):
 
         source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
         """
-        out_conv_1 = ((self.embedding_size - 1 * (self.kernel_lengths[0] - 1) - 1) / self.stride) + 1
-        out_conv_1 = math.floor(out_conv_1)
-        out_pool_1 = ((out_conv_1 - 1 * (self.kernel_lengths[0] - 1) - 1) / self.stride) + 1
-        out_pool_1 = math.floor(out_pool_1)
-
         out_pool_total = 0
         for kernel_len, stride in zip(self.kernel_lengths, self.strides):
             out_conv = ((self.embedding_size - 1 * (kernel_len - 1) - 1) / stride) + 1

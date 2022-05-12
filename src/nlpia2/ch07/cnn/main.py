@@ -82,8 +82,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from cnn.model import CNNTextClassifier
-from cnn.language_model import nlp
+from nlpia2.ch07.cnn.model import CNNTextClassifier
+from nlpia2.language_model import nlp
 
 import pandas as pd
 
@@ -117,7 +117,6 @@ class Parameters:
         self.kernel_lengths: list = [2, 3, 4, 5]
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
-        self.stride: int = 2
 
         self.epochs: int = 10
         self.batch_size: int = 12
@@ -128,6 +127,9 @@ class Parameters:
 
         self.num_stopwords: int = 0
         self.case_sensitive: bool = True
+
+        self.numpy_random_state = None
+        self.torch_random_state = None
 
         self.re_sub: str = r'[^A-Za-z0-9.?!]+'
 
@@ -173,6 +175,7 @@ def load_dataset(params, **kwargs):
     9. Simplified: pad token id sequences
     10. Simplified: train_test_split
     """
+    random_state = kwargs.pop('random_state', None)
     params = update_params(params, **kwargs)
 
     log.warning(f'Using tokenizer={params.tokenizer_fun}')
@@ -219,7 +222,7 @@ def load_dataset(params, **kwargs):
             padded_sequences,
             targets,
             test_size=HYPERPARAMS.test_size,
-            random_state=0)))
+            random_state=random_state)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
     return retval
@@ -260,13 +263,15 @@ class Pipeline(Parameters):
         log.info(kwargs)
         params = update_params(params=self)
         self.__dict__.update(params.__dict__)
-        self.__dict__.update(load_dataset(params, **kwargs))
-        model_kwargs = {k: v for (k, v) in vars(self).items() if not k.startswith('_') and not k.startswith('x_') and not k.startswith('y_')}
-        log.warning(f'MODEL_KWARGS: {model_kwargs}')
-        log.warning(f'params: {params}')
-        self.model = CNNTextClassifier(params=params)  # , **model_kwargs)
 
-    def train(self):
+        dataset = load_dataset(params, **kwargs)
+        self.x_train = dataset['x_train']
+        self.y_train = dataset['y_train']
+        self.x_test = dataset['x_test']
+        self.y_test = dataset['y_test']
+        self.model = CNNTextClassifier(params=params)
+
+    def train(self, X=None, y=None):
 
         self.trainset_mapper = DatasetMapper(self.x_train, self.y_train)
         self.testset_mapper = DatasetMapper(self.x_test, self.y_test)
@@ -302,19 +307,19 @@ class Pipeline(Parameters):
         predictions = []
 
         if X is not None:
-            X_batches = zip(X, [None] * len(X))
+            X_batches = zip([X], [[None] * len(X)])
         else:
             X_batches = list(zip(*self.loader_test))[0]
+            y_batches = list(zip(*self.loader_test))[1]
         with torch.no_grad():
-            for x_batch in X_batches:
-                y_pred = self.model(x_batch)
-                predictions += list(y_pred.detach().numpy())
-
+            for x_batch, y_batch in zip(X_batches, y_batches):
+                y_pred = self.model(x_batch).detach().numpy()
+                predictions += list(y_pred)
         return predictions
 
     def score(self, X, y):
         y_pred = self.predict(X)
-        return torch.Tensor.mean((y_pred - y)**2) ** .5
+        return np.mean((y_pred - y.detach.numpy())**2) ** .5
 
 
 def parse_argv(sys_argv=sys.argv):
