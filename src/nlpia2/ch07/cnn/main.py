@@ -64,9 +64,10 @@ IndexError: index out of range in self
 
 
 """
-
+import time
 from collections import Counter
 # from dataclasses import dataclass
+import json
 from itertools import chain
 import logging
 from pathlib import Path
@@ -87,6 +88,8 @@ from nlpia2.language_model import nlp
 
 import pandas as pd
 
+T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
+MAX_SEED = 2**32 - 1
 DATA_DIR = Path(__file__).parent / 'data'
 
 log = logging.getLogger(__name__)
@@ -128,8 +131,9 @@ class Parameters:
         self.num_stopwords: int = 0
         self.case_sensitive: bool = True
 
-        self.numpy_random_state = None
-        self.torch_random_state = None
+        self.split_random_state: int = min(max(int((time.time() - T0)), 0), MAX_SEED)
+        self.numpy_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000), 0), MAX_SEED)
+        self.torch_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000000), 0), MAX_SEED)
 
         self.re_sub: str = r'[^A-Za-z0-9.?!]+'
 
@@ -150,7 +154,10 @@ def update_params(params=HYPERPARAMS, **kwargs):
         log.info(f'DEFAULT: {param_name}: {param_val}')
         kwarg_val = kwargs.get(param_name)
         if kwarg_val is not None:
-            coerce_to_dest_type = type(param_val)
+            if param_val is None:
+                coerce_to_dest_type = int
+            else:
+                coerce_to_dest_type = type(param_val)
             if not isinstance(param_val, str) and isinstance(kwarg_val, str):
                 kwarg_val = eval(kwarg_val)
             setattr(params, param_name, coerce_to_dest_type(kwarg_val))
@@ -175,8 +182,11 @@ def load_dataset(params, **kwargs):
     9. Simplified: pad token id sequences
     10. Simplified: train_test_split
     """
-    random_state = kwargs.pop('random_state', None)
     params = update_params(params, **kwargs)
+    split_random_state = params.split_random_state
+    if split_random_state is None:
+        split_random_state = kwargs.pop('split_random_state')
+    split_random_state = int(split_random_state)
 
     log.warning(f'Using tokenizer={params.tokenizer_fun}')
 
@@ -222,7 +232,7 @@ def load_dataset(params, **kwargs):
             padded_sequences,
             targets,
             test_size=HYPERPARAMS.test_size,
-            random_state=random_state)))
+            random_state=split_random_state)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
     return retval
@@ -263,6 +273,7 @@ class Pipeline(Parameters):
         log.info(kwargs)
         params = update_params(params=self)
         self.__dict__.update(params.__dict__)
+        print(vars(self))
 
         dataset = load_dataset(params, **kwargs)
         self.x_train = dataset['x_train']
@@ -281,6 +292,7 @@ class Pipeline(Parameters):
 
         optimizer = optim.RMSprop(self.model.parameters(), lr=self.learning_rate)
 
+        self.learning_curve = []
         for epoch in range(self.epochs):
             self.model.train()
             predictions = []
@@ -296,9 +308,14 @@ class Pipeline(Parameters):
                 predictions += list(y_pred.detach().numpy())
 
             test_predictions = self.predict()
-            train_accuary = calculate_accuracy(self.y_train, predictions)
-            test_accuracy = calculate_accuracy(self.y_test, test_predictions)
-            print("Epoch: %d, loss: %.5f, Train accuracy: %.5f, Test accuracy: %.5f" % (epoch + 1, loss.item(), train_accuary, test_accuracy))
+            self.loss = loss.item()
+            self.train_accuracy = calculate_accuracy(self.y_train, predictions)
+            self.test_accuracy = calculate_accuracy(self.y_test, test_predictions)
+            self.learning_curve += [[self.loss, self.train_accuracy, self.test_accuracy]]
+            print(
+                "Epoch: %d, loss: %.5f, Train accuracy: %.5f, Test accuracy: %.5f"
+                % (epoch + 1, self.loss, self.train_accuracy, self.test_accuracy)
+            )
         return self
 
     def predict(self, X=None):
@@ -320,6 +337,34 @@ class Pipeline(Parameters):
     def score(self, X, y):
         y_pred = self.predict(X)
         return np.mean((y_pred - y.detach.numpy())**2) ** .5
+
+    def dump(self, filepath=None, indent=4):
+        js = self.dumps(indent=indent)
+        if filepath is None:
+            t = int((time.time() - T0) / 60)
+            filepath = f'disaster_tweets_cnn_pipeline_{t}.json'
+        with open(filepath, 'w') as fout:
+            fout.write(js)
+        return js
+
+    def dumps(self, indent=4):
+        hashable_dict = {}
+        for k, v in vars(self).items():
+            if v is None or isinstance(v, (str, float, int, bool)):
+                hashable_dict[k] = v
+                continue
+            if isinstance(v, (tuple, np.ndarray)):
+                v = list(v)
+            if isinstance(v, torch.Tensor):
+                v = list(v.detach().numpy())
+            if isinstance(v, list):
+                if isinstance(v[0], torch.Tensor):
+                    v = [list(x.detach().numpy()) for x in v]
+            try:
+                hashable_dict[k] = json.loads(json.dumps(v))
+            except TypeError:
+                pass
+        return json.dumps(hashable_dict, indent=indent)
 
 
 def parse_argv(sys_argv=sys.argv):
@@ -354,14 +399,16 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    predictions = pipeline.predict()
+    hyperparms = pipeline.dump()
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(hyperparms)
+    print("=" * 100)
 
-    return dict(pipeline=pipeline, predictions=predictions)
+    # predictions = pipeline.predict()
+
+    return dict(pipeline=pipeline)
 
 
 if __name__ == '__main__':
-    import json
     results = main()
-    json.dump(
-        [float(x) for x in results['predictions']],
-        open('predictions.json', 'a'), indent=2)

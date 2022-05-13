@@ -15,11 +15,26 @@ class CNNTextClassifier(nn.ModuleList):
         if self.random_state is not None:
             self.torch_random_state = self.random_state
             self.numpy_random_state = self.random_state + 1
-        else:
+        if params.torch_random_state is None:
             self.torch_random_state = torch.random.initial_seed()
+        else:
+            self.torch_random_state = params.torch_random_state
+        if params.numpy_random_state is None:
             self.numpy_random_state = np.random.get_state()[1][0]
+        else:
+            self.numpy_random_state = params.numpy_random_state
+
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
+
+        assert self.torch_random_state == torch.random.initial_seed()
+        assert self.numpy_random_state == np.random.get_state()[1][0]
+
+        log.warning("=" * 100)
+        log.warning(f"torch_random_state={self.torch_random_state}")
+        log.warning(f"numpy_random_state={self.numpy_random_state}")
+        log.warning("=" * 100)
+
         super().__init__()
 
         self.convolvers = []
