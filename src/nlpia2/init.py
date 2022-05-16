@@ -6,13 +6,14 @@ import json
 
 import pandas as pd
 
-from nlpia2.constants import *
+from nlpia2.constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
 # from qary.etl.netutils import DownloadProgressBar  # noqa
 
 log = logging.getLogger(__name__)
 
 
-DATA_URL_PREFIX = 'https://gitlab.com/tangibleai/nlplia2/-/raw/main/src/nlpia2/data/'
+DATA_URL_PREFIX = f'https://gitlab.com/tangibleai/{PKG_NAME}/-/raw/main/' \
+                  f'src/{PKG_NAME}/data/'
 DATA_URL_SUFFIX = '?inline=false'
 DATA_FILENAMES = [
     'secret_message_convolved_line_plot.csv',
@@ -22,8 +23,9 @@ DATA_FILENAMES = [
 ]
 
 
-def maybe_download(filename, url, destination_dir=DATA_DIR, expected_bytes=None, force=False):
-
+def maybe_download(url, filename=None, destination_dir=HOME_DATA_DIR, expected_bytes=None, force=False):
+    if filename is None:
+        filename = url.split('/')[-1].split('?')[0].split(':')[-1]
     destination_dir = Path(destination_dir)
     filepath = destination_dir / filename
 
@@ -51,8 +53,9 @@ def maybe_download(filename, url, destination_dir=DATA_DIR, expected_bytes=None,
 
 for relpath in DATA_FILENAMES:
     relpath = Path(relpath)
-    destination_dir = DATA_DIR / relpath.parent
+    destination_dir = HOME_DATA_DIR / relpath.parent
     url = DATA_URL_PREFIX + str(relpath) + DATA_URL_SUFFIX
+    print()
     print(f'url={url}')
     print(f'relpath={relpath}')
     print(f'relpath.name={relpath.name}')
