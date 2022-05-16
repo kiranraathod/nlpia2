@@ -16,6 +16,9 @@ DATA_URL_PREFIX = 'https://gitlab.com/tangibleai/nlplia2/-/raw/main/src/nlpia2/d
 DATA_URL_SUFFIX = '?inline=false'
 DATA_FILENAMES = [
     'secret_message_convolved_line_plot.csv',
+    'constants/nltk_stopwords_english.json',
+    'constants/tlds-from-iana.csv',
+    'constants/uri-schemes.xhtml.csv',
 ]
 
 
@@ -50,8 +53,9 @@ for relpath in DATA_FILENAMES:
     relpath = Path(relpath)
     destination_dir = DATA_DIR / relpath.parent
     url = DATA_URL_PREFIX + str(relpath) + DATA_URL_SUFFIX
-    print('url', 'relpath', 'relpath.name')
-    print(url, relpath, relpath.name)
+    print(f'url={url}')
+    print(f'relpath={relpath}')
+    print(f'relpath.name={relpath.name}')
     maybe_download(url=url, filename=relpath.name, destination_dir=destination_dir)
 
 # shutil.copytree(src=QARY_DATA_DIR, dst=conf.DATA_DIR, dirs_exist_ok=True)
