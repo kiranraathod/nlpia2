@@ -74,7 +74,6 @@ $ cat disaster*.json
 """
 import time
 from collections import Counter
-# from dataclasses import dataclass
 import json
 from itertools import chain
 import logging
@@ -89,10 +88,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-from tqdm import tqdm
 
-from nlpia2.ch07.cnn.model import CNNTextClassifier
-from nlpia2.language_model import nlp
+from model_simplified import CNNTextClassifier
 
 import pandas as pd
 
@@ -105,36 +102,22 @@ logging.basicConfig(level=logging.INFO)
 log.setLevel(level=logging.INFO)
 
 
-def tokenize_spacy(doc):
-    return [tok.text for tok in nlp(doc) if tok.text.strip()]
-
-
 def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-# @dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False)
 class Parameters:
 
     def __init__(self):
+        self.seq_len = 35
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
-
-        self.seq_len: int = 35
-        self.vocab_size: int = 2000
-
-        self.embedding_size: int = 64
-        self.kernel_lengths: list = [2, 3, 4, 5]
-        self.strides: list = [2, 2, 2, 2]
-        self.conv_output_size: int = 32
 
         self.epochs: int = 10
         self.batch_size: int = 12
         self.learning_rate: float = 0.001
         self.test_size: float = 0.1
-
-        self.dropout_portion: float = 0.2
 
         self.num_stopwords: int = 0
         self.case_sensitive: bool = True
@@ -149,7 +132,7 @@ class Parameters:
 HYPERPARAMS = Parameters()
 
 
-def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
+def pad(sequence, pad_value, seq_len):
     log.debug(f'BEFORE PADDING: {sequence}')
     padded = list(sequence)[:seq_len]
     padded = padded + [pad_value] * (seq_len - len(padded))
@@ -190,47 +173,44 @@ def load_dataset(params, **kwargs):
     9. Simplified: pad token id sequences
     10. Simplified: train_test_split
     """
-    params = update_params(params, **kwargs)
-    split_random_state = params.split_random_state
-    if split_random_state is None:
-        split_random_state = kwargs.pop('split_random_state')
-    split_random_state = int(split_random_state)
+    # .Compute your vocabulary for GloVE embeddings
 
-    log.warning(f'Using tokenizer={params.tokenizer_fun}')
+    import re
+    from nessvec.files import load_vecs_df
+    HOME_DATA_DIR = Path.home() / '.nlpia2-data'
+    PAD_TOK = '<PAD>'
 
-    # 1. load the CSV
-    df = pd.read_csv(params.filepath.open(), usecols=params.usecols)
-    texts = df[params.usecols[0]].values
-    targets = df[params.usecols[1]].values
+    df = pd.read_csv(HOME_DATA_DIR / 'disaster-tweets.csv')
+    df = df[['text', 'target']]
+    counts = Counter(chain(*[
+        re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
+    vocab = [tok for tok, count in counts.most_common(4000)[3:]]  # <2>
+    if PAD_TOK not in vocab:
+        vocab = [PAD_TOK] + vocab
 
-    # 2. optional case folding:
-    if not params.case_sensitive:
-        texts = [str.lower(x) for x in texts]
+    glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
+    vocab = [tok for tok in vocab if tok in glove.index]          # <3>
+    embeddings = glove.loc[vocab].copy()                          # <4>
 
-    # 3. optional character (non-letter) filtering:
-    texts = [re.sub(params.re_sub, ' ', x) for x in texts]
+    print(df)
+    print(f'glove.shape: {embeddings.shape}')
+    print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
 
-    # 4. customizable tokenization:
-    texts = [params.tokenizer_fun(doc) for doc in tqdm(texts)]
-
-    # 5. count frequency of tokens
-    counts = Counter(chain(*texts))
-
-    # 6. configurable num_stopwords and vocab_size
-    vocab = [x[0] for x in counts.most_common(params.vocab_size + params.num_stopwords)]
-    vocab = ['<PAD>'] + list(vocab[params.num_stopwords:])
-    # id2tok = vocab
+    # <1> tokenizing, case folding, and occurrence counting
+    # <2> ignore the 3 most frequent tokens ("t", "co", "http")
+    # <3> skip unknown embeddings; alternatively create zero vectors
+    # <4> ensure your embedding matrix is in the same order as your vocab
 
     # 7. compute reverse index
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
-    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in texts]
+    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df.text]
 
     # 9. Simplified: pad token id sequences
     padded_sequences = []
-    for s in id_sequences:
-        padded_sequences.append(pad(s, pad_value=0))
+    for seq in id_sequences:
+        padded_sequences.append(pad(seq, pad_value=vocab.index[PAD_TOK]))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
@@ -238,11 +218,11 @@ def load_dataset(params, **kwargs):
         'x_train x_test y_train y_test'.split(),
         train_test_split(
             padded_sequences,
-            targets,
-            test_size=HYPERPARAMS.test_size,
-            random_state=split_random_state)))
+            list(df.target),
+            test_size=HYPERPARAMS.test_size)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
+    retval['embeddings'] = embeddings
     return retval
 
 
@@ -288,7 +268,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(params=params)
+        self.model = CNNTextClassifier(embeddings=dataset['embeddings'])
 
     def train(self, X=None, y=None):
 

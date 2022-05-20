@@ -30,11 +30,6 @@ class CNNTextClassifier(nn.ModuleList):
         assert self.torch_random_state == torch.random.initial_seed()
         assert self.numpy_random_state == np.random.get_state()[1][0]
 
-        log.warning("=" * 100)
-        log.warning(f"torch_random_state={self.torch_random_state}")
-        log.warning(f"numpy_random_state={self.numpy_random_state}")
-        log.warning("=" * 100)
-
         super().__init__()
 
         self.convolvers = []
@@ -50,7 +45,7 @@ class CNNTextClassifier(nn.ModuleList):
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
         if len(self.strides) < len(self.kernel_lengths):
-            self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strids))
+            self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strides))
 
         self.dropout_portion = params.dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)

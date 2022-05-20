@@ -25,10 +25,13 @@ include = [
     "AUTHORS.md",
     "CONTRIBUTING.md",
     "install_editable.sh",
+    "src/nlpia2/data",
+    "src/nlpia2/data/",
+    "src/nlpia2/ch07/cnn/data/disaster-tweets.csv",
+    "src/nlpia2/ch07/cnn/data/trec.csv",
     ]
 exclude = [
     ".nlpia2-data/",
-    "src/nlpia2/data",
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords

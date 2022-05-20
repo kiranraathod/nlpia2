@@ -1,3 +1,15 @@
+# BigData and Models
+.nlpia2-data
+# src/nlpia2/data
+db.sqlite3
+*.bz2
+*.zip
+*.pkl
+*.npy
+*.pkl
+**/simple-transformers
+**/albert-large-*
+
 # submodules
 src/wikipedia
 src/nessvec
@@ -35,7 +47,6 @@ cache_dir/
 
 # Internal working cache for poetry
 poetry.lock
-
 
 # Project files
 .ropeproject
@@ -80,17 +91,6 @@ __MACOSX
 # KDE
 .directory
 
-# BigData and Models
-.nlpia2-data
-src/nlpia2/data
-db.sqlite3
-*.bz2
-*.zip
-*.pkl
-*.npy
-*.pkl
-**/simple-transformers
-**/albert-large-*
 
 # Per-project virtualenvs
 .venv*/
@@ -103,4 +103,3 @@ docs/**/*.html
 **/*secret*
 **/*private*
 
-.nlpia2-data/manuscript/

@@ -15,6 +15,13 @@ IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 
 
+SPECIAL_PUNC = {
+    "—": "-", "–": "-", "_": "-", '”': '"', "″": '"', '“': '"', '•': '*', '−': '-',
+    "’": "'", "‘": "'", "´": "'", "`": "'", '،': ',',
+    '\u200b': ' ', '\xa0': ' ', '„': '', '…': ' ... ', '\ufeff': '',
+}
+
+
 def get_version():
     """ Look within setup.cfg for version = ... and within setup.py for __version__ = """
     version = '0.0.0'
