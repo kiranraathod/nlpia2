@@ -144,15 +144,6 @@ class CNNTextClassifier(nn.ModuleList):
         assert self.torch_random_state == torch.random.initial_seed()
         assert self.numpy_random_state == np.random.get_state()[1][0]
 
-        self.dropout = nn.Dropout(dropout_portion)
-
-        if isinstance(embeddings, torch.Tensor):
-            print(f'Loading embeddings: {embeddings.size()}')
-            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False)
-        else:
-            print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
-            self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
-
         self.convolvers = []
         self.poolers = []
 
@@ -163,6 +154,14 @@ class CNNTextClassifier(nn.ModuleList):
         print(f"self.embedding_size: {self.embedding_size}")
         self.kernel_lengths = list(params.kernel_lengths)
 
+        if isinstance(embeddings, torch.Tensor):
+            print(f'Loading embeddings: {embeddings.size()}')
+            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False)
+        else:
+            print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
+            self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
+
+
         for i, kernel_len in enumerate(self.kernel_lengths):
             self.convolvers.append(nn.Conv1d(
                 in_channels=self.num_input_channels,
@@ -172,9 +171,13 @@ class CNNTextClassifier(nn.ModuleList):
                 stride=self.stride))
             self.poolers.append(nn.MaxPool1d(kernel_len, self.stride))
 
-        self.linear_layer = nn.Linear(self.num_output_channels, 1)
+        self.dropout_portion = params.dropout_portion
+        self.dropout = nn.Dropout(self.dropout_portion)
 
         print(f"conv_output_size: {conv_output_size}")
+
+        self.linear_layer = nn.Linear(self.num_output_channels, 1)
+
 
 # <1> assume a maximum text length of 35 tokens
 # <2> only one kernel layer is needed for reasonable results

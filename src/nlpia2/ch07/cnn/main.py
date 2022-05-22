@@ -224,7 +224,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(params=params)
+        self.model = CNNTextClassifier(params=params, **params.__dict__)
 
     def train(self, X=None, y=None):
 
