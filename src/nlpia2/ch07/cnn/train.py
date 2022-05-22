@@ -2,10 +2,22 @@
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
-100%|████████████████████████████████████████████████████████████████████████████████████████████| 7613/7613 [00:00<00:00, 242018.81it/s]
 Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
+
+$ python main.py --tokenizer=tokenize_spacy --stride=2 --vocab_size=4000 --kernel_lengths=[3,4,5] --text_len=40
+Epoch: 1, loss: 0.73025, Train accuracy: 0.55247, Test accuracy: 0.65748
+...
+Epoch: 10, loss: 0.39879, Train accuracy: 0.79988, Test accuracy: 0.76115
+
+$ cat disaster*.json
+{
+    "usecols": [
+        "text",
+        "target"
+    ],
+    "tokenizer": "tokenize_re",
 """
 import time
 from collections import Counter
@@ -17,6 +29,7 @@ import re
 import sys
 import numpy as np
 
+import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
 import torch.optim as optim
@@ -25,10 +38,9 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from nlpia2.ch07.cnn.model import CNNTextClassifier
+from model_simplified import CNNTextClassifier
 from nlpia2.language_model import nlp
 
-import pandas as pd
 
 T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
 MAX_SEED = 2**32 - 1
@@ -222,7 +234,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(params=params)
+        self.model = CNNTextClassifier(**params.__dict__)
 
     def train(self, X=None, y=None):
 
@@ -341,16 +353,16 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparms = pipeline.dump()
-    print("=" * 100)
-    print("=========== HYPERPARMS =============")
-    print(hyperparms)
-    print("=" * 100)
+    hyperparams = json.loads(pipeline.dump())
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline)
+    return dict(pipeline=pipeline, hyperparams=hyperparams)
 
 
 if __name__ == '__main__':
     results = main()
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(results['hyperparams'].keys())
+    print("=" * 100)

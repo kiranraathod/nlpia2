@@ -18,7 +18,6 @@ $ cat disaster*.json
         "target"
     ],
     "tokenizer": "tokenize_re",
-...
 """
 import time
 from collections import Counter
@@ -58,7 +57,7 @@ class Parameters:
 
     def __init__(self):
         self.seq_len: int = 35
-        self.filepath: Path = Path('news.csv')
+        self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
         self.kernel_lengths: list = [2, 3, 4, 5]

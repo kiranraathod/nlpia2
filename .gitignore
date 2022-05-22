@@ -94,6 +94,7 @@ __MACOSX
 
 # Per-project virtualenvs
 .venv*/
+venv/
 
 # docs html
 docs/**/*.html
