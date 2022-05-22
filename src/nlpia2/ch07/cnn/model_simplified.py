@@ -21,6 +21,7 @@ class CNNTextClassifier(nn.Module):
                 shape = embeddings.size()
             except AttributeError:
                 shape = embeddings
+        print(f'shape: {shape}')
         self.seq_len = 35                         # <1>
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
@@ -30,7 +31,12 @@ class CNNTextClassifier(nn.Module):
 
         self.dropout = nn.Dropout(.1)
 
-        self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
+        if isinstance(embeddings, torch.Tensor):
+            print(f'Loading embeddings: {embeddings.size()}')
+            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False)
+        else:
+            print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
+            self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
         self.convolvers = []
         self.poolers = []
