@@ -192,7 +192,7 @@ def load_dataset(params, seq_len=35, **kwargs):
     embed = []
     expand_glove_vocab = False
     if expand_glove_vocab:
-        new_vocab = [tok for tok in vocab if tok not in glove.index]   # <3>
+        new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
         vocab.extend(new_vocab)
         for tok in vocab:                                              # <4>
             if tok in glove.index:
@@ -200,13 +200,12 @@ def load_dataset(params, seq_len=35, **kwargs):
             else:
                 embed.append(np.zeros(embed_dims))
     else:
-        embed = glove.values
+        vocab = [tok for tok in vocab if tok in new_embeddings.index]
+        embed = glove.loc[vocab].values
     embed = torch.Tensor(np.array(embed))
 
-    vocab = [tok for tok in vocab if tok in glove.index]
-
     print(df)
-    print(f'embed: {embed}')
+    print(f'embed.size(): {embed.size()}')
     print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
 
     # <1> tokenizing, case folding, and occurrence counting
