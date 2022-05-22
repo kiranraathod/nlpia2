@@ -5,19 +5,6 @@ $ python main.py
 Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
-
-$ python main.py --tokenizer=tokenize_spacy --stride=2 --vocab_size=4000 --kernel_lengths=[3,4,5] --text_len=40
-Epoch: 1, loss: 0.73025, Train accuracy: 0.55247, Test accuracy: 0.65748
-...
-Epoch: 10, loss: 0.39879, Train accuracy: 0.79988, Test accuracy: 0.76115
-
-$ cat disaster*.json
-{
-    "usecols": [
-        "text",
-        "target"
-    ],
-    "tokenizer": "tokenize_re",
 """
 import time
 from collections import Counter
@@ -27,8 +14,8 @@ import logging
 from pathlib import Path
 import re
 import sys
-import numpy as np
 
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
@@ -59,15 +46,14 @@ def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-# @dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False)
 class Parameters:
 
     def __init__(self):
+        self.seq_len: int = 35
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
-        self.seq_len: int = 35
         self.vocab_size: int = 2000
 
         self.embedding_size: int = 64

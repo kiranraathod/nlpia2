@@ -5,19 +5,6 @@ $ python main.py
 Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
-
-$ python main.py --tokenizer=tokenize_spacy --stride=2 --vocab_size=4000 --kernel_lengths=[3,4,5] --text_len=40
-Epoch: 1, loss: 0.73025, Train accuracy: 0.55247, Test accuracy: 0.65748
-...
-Epoch: 10, loss: 0.39879, Train accuracy: 0.79988, Test accuracy: 0.76115
-
-$ cat disaster*.json
-{
-    "usecols": [
-        "text",
-        "target"
-    ],
-    "tokenizer": "tokenize_re",
 """
 import time
 from collections import Counter
@@ -27,18 +14,20 @@ import logging
 from pathlib import Path
 import re
 import sys
-import numpy as np
 
+import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 from model_simplified import CNNTextClassifier
+from nlpia2.language_model import nlp
 
-import pandas as pd
 
 T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
 MAX_SEED = 2**32 - 1
@@ -47,6 +36,10 @@ DATA_DIR = Path(__file__).parent / 'data'
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 log.setLevel(level=logging.INFO)
+
+
+def tokenize_spacy(doc):
+    return [tok.text for tok in nlp(doc) if tok.text.strip()]
 
 
 def tokenize_re(doc):
@@ -60,12 +53,20 @@ class Parameters:
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
-        self.kernel_lengths: list = [2, 3, 4, 5]
 
-        self.num_epochs: int = 30
+        self.vocab_size: int = 2000
+
+        self.embedding_size: int = 64
+        self.kernel_lengths: list = [2, 3, 4, 5]
+        self.strides: list = [2, 2, 2, 2]
+        self.conv_output_size: int = 32
+
+        self.epochs: int = 10
         self.batch_size: int = 12
         self.learning_rate: float = 0.001
         self.test_size: float = 0.1
+
+        self.dropout_portion: float = 0.2
 
         self.num_stopwords: int = 0
         self.case_sensitive: bool = True
@@ -76,7 +77,7 @@ class Parameters:
 HYPERPARAMS = Parameters()
 
 
-def pad(sequence, pad_value, seq_len):
+def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
     log.debug(f'BEFORE PADDING: {sequence}')
     padded = list(sequence)[:seq_len]
     padded = padded + [pad_value] * (seq_len - len(padded))
@@ -226,6 +227,14 @@ def calculate_accuracy(y_true, y_pred):
 class Pipeline(Parameters):
 
     def __init__(self, **kwargs):
+        """
+        win=True will set winning random seeds:
+            "split_random_state": 850753,
+            "numpy_random_state": 704,
+            "torch_random_state": 704463,
+            or 
+            python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
+        """
         super().__init__()
         log.info(kwargs)
         # params = update_params(params=self)

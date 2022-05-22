@@ -1,5 +1,12 @@
+"""
+FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
+
+$ python main.py
+Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
+...
+Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
+"""
 import logging
-import math
 import numpy as np
 import torch
 import torch.nn as nn
@@ -8,9 +15,54 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
 
 
+def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, strides):
+    """ Calculate the number of encoding dimensions output from CNN layers
+
+    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+
+    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    """
+    out_pool_total = 0
+    for kernel_len, stride in zip(kernel_lengths, strides):
+        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool_total += out_pool
+
+    # Returns "flattened" vector (input for fully connected layer)
+    return out_pool_total * desired_conv_output_size
+
+
+def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
+    """ Calculate the number of encoding dimensions output from CNN layers
+
+    From PyTorch docs:
+      L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride
+    But padding=0 and dilation=1, because we're only doing a 'valid' convolution.
+    So:
+      L_out = 1 + (L_in - (kernel_size - 1) - 1) // stride
+
+    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    """
+    out_pool_total = 0
+    for kernel_len in kernel_lengths:
+        out_conv = (
+            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool_total += out_pool
+
+    # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
+    return out_pool_total
+
+
 class CNNTextClassifier(nn.ModuleList):
 
-    def __init__(self, params=None, **kwargs):
+    def __init__(self, params=None, win=False, **kwargs):
+        """ Conv1D layers concatenated into a single 1D vector
+
+        python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
+        """
+
         self.random_state = kwargs.pop('random_state', None)
         if self.random_state is not None:
             self.torch_random_state = self.random_state
@@ -69,27 +121,13 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_len, stride))
             # setattr(self, f'pool_{i + 1}', self.poolers[i])
 
-        self.encoding_size = self.cnn_output_size()
+        self.encoding_size = cnn_output_size(
+            desired_conv_output_size=self.conv_output_size,
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            strides=self.strides,
+        )
         self.linear_layer = nn.Linear(self.encoding_size, 1)
-
-    def cnn_output_size(self):
-        """ Calculate the number of encoding dimensions output from CNN layers
-
-        Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-        Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-
-        source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-        """
-        out_pool_total = 0
-        for kernel_len, stride in zip(self.kernel_lengths, self.strides):
-            out_conv = ((self.embedding_size - 1 * (kernel_len - 1) - 1) / stride) + 1
-            out_conv = math.floor(out_conv)
-            out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) / stride) + 1
-            out_pool = math.floor(out_pool)
-            out_pool_total += out_pool
-
-        # Returns "flattened" vector (input for fully connected layer)
-        return out_pool_total * self.conv_output_size
 
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """

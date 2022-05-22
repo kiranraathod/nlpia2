@@ -38,17 +38,33 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
     out_pool_total = 0
     for kernel_len in kernel_lengths:
         out_conv = (
-            (input_seq_len - 1 * (kernel_len - 1) - 1) / stride) + 1
-        out_conv = math.floor(out_conv)
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) / stride) + 1
-        out_pool = math.floor(out_pool)
+            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
         out_pool_total += out_pool
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
     return out_pool_total
 
 
+def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, strides):
+    """ Calculate the number of encoding dimensions output from CNN layers
+
+    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+
+    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    """
+    out_pool_total = 0
+    for kernel_len, stride in zip(kernel_lengths, strides):
+        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool_total += out_pool
+
+    # Returns "flattened" vector (input for fully connected layer)
+    return out_pool_total * desired_conv_output_size
+
 # .Initialize your CNN hyperparameters
+
 
 class CNNTextClassifier(nn.ModuleList):
 
