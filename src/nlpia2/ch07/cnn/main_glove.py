@@ -1,4 +1,4 @@
-""" Closes to original implementation
+""" Closest to original implementation
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from model import CNNTextClassifier
+from model_simplified import CNNTextClassifier
 from nlpia2.language_model import nlp
 
 
