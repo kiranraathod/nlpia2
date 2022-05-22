@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.WARNING)
 
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, embeddings=(4000, 50)):
+    def __init__(self, seq_len=35, embeddings=(4000, 50)):
         super().__init__()
 
         try:
@@ -22,12 +22,13 @@ class CNNTextClassifier(nn.Module):
             except AttributeError:
                 shape = embeddings
         print(f'shape: {shape}')
-        self.seq_len = 35                         # <1>
+        self.seq_len = seq_len
+        self.num_channels = 50                          # <1>
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
         self.kernel_lengths = [2, 3, 4, 5]        # <2>
         self.stride = 2
-        self.conv_output_size = 32                # <3>
+        self.conv_output_channels = 50                # <3>
 
         self.dropout = nn.Dropout(.1)
 
@@ -41,7 +42,11 @@ class CNNTextClassifier(nn.Module):
         self.convolvers = []
         self.poolers = []
         for i, kernel_len in enumerate(self.kernel_lengths):
-            self.convolvers.append(nn.Conv1d(self.seq_len, self.conv_output_size, kernel_len, self.stride))
+            self.convolvers.append(nn.Conv1d(
+                in_channels=self.seq_len,
+                out_channels=self.conv_output_channels,
+                kernel_size=kernel_len,
+                stride=self.stride))
             self.poolers.append(nn.MaxPool1d(kernel_len, self.stride))
 
         self.encoding_size = self.cnn_output_size()
@@ -70,7 +75,7 @@ class CNNTextClassifier(nn.Module):
             out_pool_total += out_pool
 
         # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
-        return out_pool_total * self.conv_output_size
+        return out_pool_total * self.conv_output_channels
 
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """

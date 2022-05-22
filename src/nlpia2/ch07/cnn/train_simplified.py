@@ -155,7 +155,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, seq_len=35, **kwargs):
+def load_dataset(seq_len=35, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -182,27 +182,34 @@ def load_dataset(params, seq_len=35, **kwargs):
         re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
     vocab = [tok for tok, count in counts.most_common(4000)[3:]]  # <2>
     if PAD_TOK not in vocab:
-        vocab = [PAD_TOK] + vocab
+        vocab = [PAD_TOK] + list(vocab)
 
     glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
-    embed_dims = min(glove.shape)
+    num_glove_vecs, embed_dims = glove.shape
     new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
     glove = pd.concat([new_embeddings, glove])
+    print(f'glove.shape {glove.shape}')
+    print(glove)
 
-    embed = []
     expand_glove_vocab = False
     if expand_glove_vocab:
         new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
         vocab.extend(new_vocab)
+        embed = []
         for tok in vocab:                                              # <4>
             if tok in glove.index:
                 embed.append(glove.loc[tok])
             else:
                 embed.append(np.zeros(embed_dims))
     else:
-        vocab = [tok for tok in vocab if tok in new_embeddings.index]
+        vocab = [tok for tok in vocab if tok in glove.index]
+        print(f'len(vocab) {len(vocab)}')
         embed = glove.loc[vocab].values
+    embed = np.array(embed)
+    print(f'glove.shape {glove.shape}')
+    print(f'embed.shape {embed.shape}')
     embed = torch.Tensor(np.array(embed))
+    print(f'embed.size() {embed.size()}')
 
     print(df)
     print(f'embed.size(): {embed.size()}')
@@ -223,7 +230,7 @@ def load_dataset(params, seq_len=35, **kwargs):
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for seq in id_sequences:
-        padded_sequences.append(pad(seq, seq_len=seq_len, pad_value=vocab.index(PAD_TOK)))
+        padded_sequences.append(pad(seq, seq_len=35, pad_value=vocab.index(PAD_TOK)))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
@@ -232,7 +239,7 @@ def load_dataset(params, seq_len=35, **kwargs):
         train_test_split(
             padded_sequences,
             list(df.target),
-            test_size=HYPERPARAMS.test_size)))
+            test_size=.1)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
     retval['embed'] = embed
@@ -267,16 +274,18 @@ def calculate_accuracy(y_true, y_pred):
     return (true_positives + true_negatives) / len(y_true)
 
 
-class Pipeline(Parameters):
+class Pipeline():
 
     def __init__(self, **kwargs):
         super().__init__()
         log.info(kwargs)
-        params = update_params(params=self)
-        self.__dict__.update(params.__dict__)
+        # params = update_params(params=self)
+        # self.__dict__.update(params.__dict__)
         print(vars(self))
 
-        dataset = load_dataset(params, **kwargs)
+        self.seq_len = 35
+        self.num_epochs
+        dataset = load_dataset(seq_len=self.seq_len, **kwargs)
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
@@ -403,7 +412,7 @@ def main():
     hyperparms = pipeline.dump()
     print("=" * 100)
     print("=========== HYPERPARMS =============")
-    print(hyperparms)
+    print(json.loads(hyperparms).keys())
     print("=" * 100)
 
     # predictions = pipeline.predict()
