@@ -1,5 +1,17 @@
-"""
+""" 1-D Convolutional Neural Network for NLP
+
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
+
+Definitions (from PyTorch Docs):
+    in_channels: Number of channels in the input image/sequence
+    out_channels: Number of channels produced by the convolution (encoding vector length)
+    kernel_size: Size of the convolving kernel
+    stride: Stride of the convolution. Default: 1
+    padding: Padding added to both sides of the input. Default: 0
+    padding_mode: 'zeros', 'reflect', 'replicate' or 'circular'. Default: 'zeros'
+    dilation: Spacing between kernel elements. Default: 1
+    groups: Number of blocked connections from input channels to output channels. Default: 1
+    bias (bool, optional) – If True, adds a learnable bias to the output. Default: True
 
 $ python main.py
 Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
@@ -14,8 +26,11 @@ import torch.nn as nn
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
 
+#####################################################################
+# .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 
-def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, strides):
+
+def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
@@ -23,6 +38,8 @@ def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, st
 
     source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
     """
+    if desired_conv_output_size is None:
+        desired_conv_output_size = embedding_size // 2
     out_pool_total = 0
     for kernel_len, stride in zip(kernel_lengths, strides):
         out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
@@ -54,15 +71,31 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
     return out_pool_total
 
+# .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
+##########################################################################
+
 
 class CNNTextClassifier(nn.ModuleList):
 
-    def __init__(self, params=None, win=False, **kwargs):
+    def __init__(self,
+                 params=None,
+                 win=False,
+                 seq_len=35,
+                 conv_output_size=32,
+                 dropout_portion=.2,
+                 kernel_lengths=[2],
+                 stride=2,
+                 embeddings=(2000, 50),
+                 test_size=.1,
+                 **kwargs):
         """ Conv1D layers concatenated into a single 1D vector
 
         python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
         """
 
+        super().__init__()
+        if len(kwargs):
+            log.warning(f"Did not process all kwargs: {kwargs}")
         self.random_state = kwargs.pop('random_state', None)
         if self.random_state is not None:
             self.torch_random_state = self.random_state
@@ -76,23 +109,52 @@ class CNNTextClassifier(nn.ModuleList):
         else:
             self.numpy_random_state = params.numpy_random_state
 
+        try:
+            shape = embeddings.shape
+        except AttributeError:
+            try:
+                shape = embeddings.size()
+            except AttributeError:
+                shape = embeddings
+        print(f'shape: {shape}')
+
+        self.seq_len = 35  # seq_len
+        self.vocab_size = shape[0]
+        self.embedding_size = shape[1]
+        self.num_groups = 1  # self.embedding_size
+        self.num_input_channels = self.seq_len              # <1>
+        self.kernel_lengths = [2]  # kernel_lengths         # <2>
+        self.stride = 2
+        # self.output_seq_len = compute_output_seq_len(   # <3>
+        #     input_seq_len=self.seq_len,
+        #     kernel_lengths=self.kernel_lengths,
+        #     stride=self.stride,
+        # )
+
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
+
+        self.output_seq_len = lopez_cnn_output_size(   # <3>
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            strides=[self.stride] * len(kernel_lengths),
+        )
+        self.num_output_channels = self.output_seq_len
 
         assert self.torch_random_state == torch.random.initial_seed()
         assert self.numpy_random_state == np.random.get_state()[1][0]
 
-        super().__init__()
-
         self.convolvers = []
         self.poolers = []
 
-        self.seq_len = params.seq_len
-        self.vocab_size = params.vocab_size
+        # self.seq_len = params.seq_len
+        # self.vocab_size = params.vocab_size
+        print(f"self.embedding_size: {self.embedding_size}")
         self.embedding_size = params.embedding_size
+        print(f"self.embedding_size: {self.embedding_size}")
         self.kernel_lengths = list(params.kernel_lengths)
 
-        self.stride = getattr(params, 'stride', 2)
+        # self.stride = getattr(params, 'stride', 2)
         self.strides = getattr(params, 'strides')
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
@@ -121,8 +183,7 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_len, stride))
             # setattr(self, f'pool_{i + 1}', self.poolers[i])
 
-        self.encoding_size = cnn_output_size(
-            desired_conv_output_size=self.conv_output_size,
+        self.encoding_size = lopez_cnn_output_size(
             embedding_size=self.embedding_size,
             kernel_lengths=self.kernel_lengths,
             strides=self.strides,

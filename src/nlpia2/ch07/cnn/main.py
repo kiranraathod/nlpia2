@@ -1,4 +1,4 @@
-"""
+""" Closes to original implementation
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py

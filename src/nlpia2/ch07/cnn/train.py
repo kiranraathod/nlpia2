@@ -1,4 +1,4 @@
-"""
+""" Includes random state args
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
@@ -90,6 +90,10 @@ def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
 
 
 def update_params(params=HYPERPARAMS, **kwargs):
+    if kwargs.pop('win', False):
+        kwargs['split_random_state'] = 850753
+        kwargs['numpy_random_state'] = 704
+        kwargs['torch_random_state'] = 704463
     for param_name, param_val in params.__dict__.items():
         log.info(f'DEFAULT: {param_name}: {param_val}')
         kwarg_val = kwargs.get(param_name)
