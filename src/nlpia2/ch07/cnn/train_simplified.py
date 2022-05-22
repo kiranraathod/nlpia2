@@ -2,29 +2,14 @@
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
-WARNING:__main__:args: []
-WARNING:__main__:kwargs: {}
-100%|████████████████████████████████████████████████████████████████████████████████████████████| 7613/7613 [00:00<00:00, 242018.81it/s]
 Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
 
-
 $ python main.py --tokenizer=tokenize_spacy --stride=2 --vocab_size=4000 --kernel_lengths=[3,4,5] --text_len=40
-WARNING:__main__:args: []
-WARNING:__main__:kwargs: {'tokenizer': 'tokenize_spacy', 'stride': '2', 'vocab_size': '4000', 'kernel_lengths': '[3,4,5]', 'text_len': '40'}
-100%|███████████████████████████████████████████████████████████████████████████████████████████████| 7613/7613 [00:36<00:00, 207.29it/s]
 Epoch: 1, loss: 0.73025, Train accuracy: 0.55247, Test accuracy: 0.65748
 ...
 Epoch: 10, loss: 0.39879, Train accuracy: 0.79988, Test accuracy: 0.76115
-
-# FIXME
-$ python main.py --usecols=[0,-1]
-...
-  File "/home/hobs/anaconda3/envs/nlpia2/lib/python3.9/site-packages/pandas/io/parsers.py", line 1302, in _validate_usecols_names
-    raise ValueError(
-ValueError: Usecols do not match columns, columns expected but not found: [0, -1]
-
 
 $ cat disaster*.json
 {
@@ -33,44 +18,7 @@ $ cat disaster*.json
         "target"
     ],
     "tokenizer": "tokenize_re",
-    "seq_len": 35,
-    "vocab_size": 4500,
-    "embedding_size": 100,
-    "kernel_lengths": [
-        2,
-        3,
-        4,
-        5
-    ],
-    "strides": [
-        1,
-        2,
-        2,
-        3
-    ],
-    "conv_output_size": 32,
-    "epochs": 16,
-    "batch_size": 12,
-    "learning_rate": 0.001,
-    "test_size": 0.05,
-    "dropout_portion": 0.15,
-    "num_stopwords": 0,
-    "case_sensitive": false,
-    "split_random_state": 4591,
-    "numpy_random_state": 747,
-    "torch_random_state": 747917,
-    "re_sub": "[^A-Za-z0-9.?!]+",
-    "learning_curve": [
-        [
-            0.9605851769447327,
-            0.5772879871551598,
-            0.699475065616798
-        ],
-        ...
-    ],
-    "loss": 0.12689267098903656,
-    "train_accuracy": 0.8903809662822946,
-    "test_accuracy": 0.7559055118110236
+...
 """
 import time
 from collections import Counter
@@ -109,10 +57,11 @@ def tokenize_re(doc):
 class Parameters:
 
     def __init__(self):
-        self.seq_len = 35
+        self.seq_len: int = 35
         self.filepath: Path = Path('news.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
+        self.kernel_lengths: list = [2, 3, 4, 5]
 
         self.num_epochs: int = 30
         self.batch_size: int = 12
@@ -155,7 +104,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(seq_len=35, **kwargs):
+def load_dataset(expand_glove_vocab=False, seq_len=35, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -178,9 +127,10 @@ def load_dataset(seq_len=35, **kwargs):
 
     df = pd.read_csv(HOME_DATA_DIR / 'news.csv')
     df = df[['text', 'target']]
+    df['target'] = (df['target'] > 0).astype(int)
     counts = Counter(chain(*[
         re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
-    vocab = [tok for tok, count in counts.most_common(4000)[3:]]  # <2>
+    vocab = [tok for tok, count in counts.most_common(2000)[num_stopwords:]]  # <2>
     if PAD_TOK not in vocab:
         vocab = [PAD_TOK] + list(vocab)
 
@@ -274,7 +224,7 @@ def calculate_accuracy(y_true, y_pred):
     return (true_positives + true_negatives) / len(y_true)
 
 
-class Pipeline():
+class Pipeline(Parameters):
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -283,14 +233,18 @@ class Pipeline():
         # self.__dict__.update(params.__dict__)
         print(vars(self))
 
-        self.num_epochs = 30
-        self.seq_len = 35
-        dataset = load_dataset(seq_len=self.seq_len, **kwargs)
+        dataset = load_dataset(
+            expand_glove_vocab=False,
+            seq_len=self.seq_len,
+            **kwargs)
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(embeddings=dataset['embed'])
+        self.model = CNNTextClassifier(
+            seq_len=self.seq_len,
+            kernel_lengths=self.kernel_lengths,
+            embeddings=tuple(dataset['embed'].size()))
 
     def train(self, X=None, y=None):
 
@@ -409,16 +363,16 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparms = pipeline.dump()
-    print("=" * 100)
-    print("=========== HYPERPARMS =============")
-    print(json.loads(hyperparms).keys())
-    print("=" * 100)
+    hyperparms = json.loads(pipeline.dump())
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline)
+    return dict(pipeline=pipeline, hyperparams=hyperparms)
 
 
 if __name__ == '__main__':
     results = main()
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(results['hyperparams'].keys())
+    print("=" * 100)

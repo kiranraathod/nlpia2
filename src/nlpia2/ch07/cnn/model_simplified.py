@@ -9,9 +9,9 @@ logging.basicConfig(level=logging.WARNING)
 
 # .Initialize your CNN hyperparameters
 
-class CNNTextClassifier(nn.Module):
+class CNNTextClassifier(nn.ModuleList):
 
-    def __init__(self, seq_len=35, embeddings=(4000, 50)):
+    def __init__(self, seq_len=35, conv_output_size=32, dropout_portion=.2, kernel_lengths=[2, 3, 4, 5], embeddings=(4000, 50), test_size=.1):
         super().__init__()
 
         try:
@@ -23,14 +23,14 @@ class CNNTextClassifier(nn.Module):
                 shape = embeddings
         print(f'shape: {shape}')
         self.seq_len = seq_len
-        self.num_channels = 50                          # <1>
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
-        self.kernel_lengths = [2, 3, 4, 5]        # <2>
+        self.num_channels = 32  # self.embedding_size                     # <1>
+        self.kernel_lengths = kernel_lengths        # <2>
         self.stride = 2
-        self.conv_output_channels = 50                # <3>
+        self.conv_output_channels = conv_output_size                # <3>
 
-        self.dropout = nn.Dropout(.1)
+        self.dropout = nn.Dropout(dropout_portion)
 
         if isinstance(embeddings, torch.Tensor):
             print(f'Loading embeddings: {embeddings.size()}')
