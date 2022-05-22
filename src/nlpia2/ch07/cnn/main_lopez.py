@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from model_simplified import CNNTextClassifier
+from model import CNNTextClassifier
 from nlpia2.language_model import nlp
 
 
