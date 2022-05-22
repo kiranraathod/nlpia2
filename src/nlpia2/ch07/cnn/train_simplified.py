@@ -281,7 +281,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(embeddings=dataset['embed'])
+        self.model = CNNTextClassifier()  # embeddings=dataset['embed'])
 
     def train(self, X=None, y=None):
 

@@ -11,12 +11,19 @@ logging.basicConfig(level=logging.WARNING)
 
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, embeddings):
+    def __init__(self, embeddings=(4000, 50)):
         super().__init__()
 
+        try:
+            shape = embeddings.shape
+        except AttributeError:
+            try:
+                shape = embeddings.size()
+            except AttributeError:
+                shape = embeddings
         self.seq_len = 35                         # <1>
-        self.vocab_size = embeddings.shape[0]
-        self.embedding_size = embeddings.shape[1]
+        self.vocab_size = shape[0]
+        self.embedding_size = shape[1]
         self.kernel_lengths = [2, 3, 4, 5]        # <2>
         self.stride = 2
         self.conv_output_size = 32                # <3>
@@ -38,9 +45,7 @@ class CNNTextClassifier(nn.Module):
 # <2> only one kernel layer is needed for reasonable results
 # <3> the convolution output need not have the same number of channels as your embeddings
 
-
-# .Compute the shape of the CNN output
-
+    # .Compute the shape of the CNN output
     def cnn_output_size(self):
         """ Calculate the number of encoding dimensions output from CNN layers
 
