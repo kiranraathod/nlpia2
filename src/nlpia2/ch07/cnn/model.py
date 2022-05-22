@@ -161,17 +161,6 @@ class CNNTextClassifier(nn.ModuleList):
             print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
-
-        for i, kernel_len in enumerate(self.kernel_lengths):
-            self.convolvers.append(nn.Conv1d(
-                in_channels=self.num_input_channels,
-                out_channels=self.num_output_channels,
-                kernel_size=kernel_len,
-                groups=self.num_groups,
-                stride=self.stride))
-            self.poolers.append(nn.MaxPool1d(kernel_len, self.stride))
-
-        self.linear_layer = nn.Linear(self.num_output_channels, 1)
         # self.stride = getattr(params, 'stride', 2)
         self.strides = getattr(params, 'strides')
         if not self.strides:
@@ -182,8 +171,10 @@ class CNNTextClassifier(nn.ModuleList):
         self.dropout_portion = params.dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
+        print(f"conv_output_size: {conv_output_size}")
         self.conv_output_size = getattr(params, 'conv_output_size', 32)
         self.__dict__.update(kwargs)
+        print(f"self.conv_output_size: {self.conv_output_size}")
 
         for param_name, param_val in vars(self).items():
             if param_name.startswith('_'):
@@ -206,11 +197,6 @@ class CNNTextClassifier(nn.ModuleList):
             kernel_lengths=self.kernel_lengths,
             strides=self.strides,
         )
-
-        self.dropout_portion = params.dropout_portion
-        self.dropout = nn.Dropout(self.dropout_portion)
-
-        print(f"conv_output_size: {conv_output_size}")
 
         self.linear_layer = nn.Linear(self.encoding_size, 1)
 # <1> assume a maximum text length of 35 tokens
