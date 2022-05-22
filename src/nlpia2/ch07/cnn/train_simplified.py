@@ -110,7 +110,7 @@ class Parameters:
 
     def __init__(self):
         self.seq_len = 35
-        self.filepath: Path = Path('disaster-tweets.csv')
+        self.filepath: Path = Path('news.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
@@ -121,10 +121,6 @@ class Parameters:
 
         self.num_stopwords: int = 0
         self.case_sensitive: bool = True
-
-        self.split_random_state: int = min(max(int((time.time() - T0)), 0), MAX_SEED)
-        self.numpy_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000), 0), MAX_SEED)
-        self.torch_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000000), 0), MAX_SEED)
 
         self.re_sub: str = r'[^A-Za-z0-9.?!]+'
 
@@ -159,7 +155,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, **kwargs):
+def load_dataset(params, seq_len=35, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -180,7 +176,7 @@ def load_dataset(params, **kwargs):
     HOME_DATA_DIR = Path.home() / '.nlpia2-data'
     PAD_TOK = '<PAD>'
 
-    df = pd.read_csv(HOME_DATA_DIR / 'disaster-tweets.csv')
+    df = pd.read_csv(HOME_DATA_DIR / 'news.csv')
     df = df[['text', 'target']]
     counts = Counter(chain(*[
         re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
@@ -189,15 +185,33 @@ def load_dataset(params, **kwargs):
         vocab = [PAD_TOK] + vocab
 
     glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
-    vocab = [tok for tok in vocab if tok in glove.index]          # <3>
-    embeddings = glove.loc[vocab].copy()                          # <4>
+    embed_dims = min(glove.shape)
+    new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
+    glove = pd.concat([new_embeddings, glove])
+
+    embed = []
+    expand_glove_vocab = False
+    if expand_glove_vocab:
+        new_vocab = [tok for tok in vocab if tok not in glove.index]   # <3>
+        vocab.extend(new_vocab)
+        for tok in vocab:                                              # <4>
+            if tok in glove.index:
+                embed.append(glove.loc[tok])
+            else:
+                embed.append(np.zeros(embed_dims))
+    else:
+        embed = glove.values
+    embed = torch.Tensor(np.array(embed))
+
+    vocab = [tok for tok in vocab if tok in glove.index]
 
     print(df)
-    print(f'glove.shape: {embeddings.shape}')
+    print(f'embed: {embed}')
     print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
 
     # <1> tokenizing, case folding, and occurrence counting
     # <2> ignore the 3 most frequent tokens ("t", "co", "http")
+    # <3> find
     # <3> skip unknown embeddings; alternatively create zero vectors
     # <4> ensure your embedding matrix is in the same order as your vocab
 
@@ -210,7 +224,7 @@ def load_dataset(params, **kwargs):
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for seq in id_sequences:
-        padded_sequences.append(pad(seq, pad_value=vocab.index[PAD_TOK]))
+        padded_sequences.append(pad(seq, seq_len=seq_len, pad_value=vocab.index(PAD_TOK)))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
@@ -222,7 +236,7 @@ def load_dataset(params, **kwargs):
             test_size=HYPERPARAMS.test_size)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
-    retval['embeddings'] = embeddings
+    retval['embed'] = embed
     return retval
 
 
@@ -268,7 +282,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(embeddings=dataset['embeddings'])
+        self.model = CNNTextClassifier(embeddings=dataset['embed'])
 
     def train(self, X=None, y=None):
 

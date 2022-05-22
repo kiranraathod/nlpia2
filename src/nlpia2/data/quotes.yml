@@ -1,5 +1,6 @@
 # Quotes for use in NLPiA 2nd Ed
-# Canonical version: tangibleai/nlpia2/src/nlpia2/data
+# Hardlinked to canonical version: ~/code/tangibleai/nlpia2/src/nlpia2/data/quotes.yml
+# meld ~/code/tangibleai/nlpia2/src/nlpia2/data/quotes.yml ~/code/tangibleai/nlpia2/.nlpia2-data/quotes.yml ~/.nlpia2-data/quotes.yml
 #
 # Uses:
 # - Clues within the book to help readers with chatbot treasure/knowledge hunt on qary.ai etc
@@ -12,6 +13,14 @@
 # TODO:
 # - Edelman:
 #    _Neural Darwinism_: (ch1 and philosophy, wisdom, prosocial)
+-
+  author: Eleanor Roosevelt
+  tags: [great minds, ideas, gossip, politics]
+  text: Great minds discuss ideas. Average minds discuss events. Small minds talk about people.
+- 
+  author: Joseph Rain
+  text: All control, in essence, is about who controls the truth.
+  tags: [post-truth era, truth, misinformation, social media, miasma, information bubble, confirmation bias] 
 -
   text: "If you disagree with somebody, you want to be able to state their case better than they can. And at that point you've earned the right to disagree with them. Otherwise you should keep quiet."
   author: Charlie Munger, Warren Buffett's business partner (see this article)
@@ -102,15 +111,15 @@
   text: True intelligence is self-awareness -- including a sense of just how wrong you likely are most of the time as a result of your biases.
   author: George Bernard Shaw
   source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Preface, p. xiii"
-  tags: [intelligence, humility, beneficial ai, human compatible ai, IQ, ai, agi, biases, ethical ai, delusion, self-delusion, inner dialog, communication, nlu, nlg, feedback, introspection, self-awareness, zeitgeist movement]
+  tags: [intelligence, humility, beneficial ai, human compatible ai, IQ, AI, agi, biases, ethical ai, delusion, self-delusion, inner dialog, communication, NLU, NLG, feedback, introspection, self-awareness, zeitgeist movement]
 -
-  text: Whatever affects one directly affects all indirectly. For some strange reason, I can never be what I ought to be until you are what you ought to be. You can never be what you ought to be until I am what I ought to be. This is the interrelated structure of reality.
-  author: Dr. Martin Luther Link Jr.
+  text: "Whatever affects one directly affects all indirectly. For some strange reason, I can never be what I ought to be until you are what you ought to be. You can never be what you ought to be until I am what I ought to be. This is the interrelated structure of reality."
+  author: "Dr. Martin Luther Link Jr."
   source: "_The New Human Rights Movement: Reinventing the Economy to Prevent Oppression_ by Peter Joseph (Zeitgeist movement), Chapter One, p. 1"
-   tags: [cooperation, partnership, reciprocity, symbiosis, friendship, activism, competition, supercooperator, out-compete, game theory, winning, win-win, universal consciousness, collective consciousness, collective, society, community, zeitgeist movement, civil rights, human rights]
+  tags: [cooperation, partnership, reciprocity, symbiosis, friendship, activism, competition, supercooperator, out-compete, game theory, winning, win-win, universal consciousness, collective consciousness, collective, society, community, zeitgeist movement, civil rights, human rights]
 -
-  text: Babbage, who once declared he would gladly give up the rest of his life if he could come back in five hundred years and have a three-day guided scientific tour of the new age, would probably have been thrilled speechless a mere century after his death -- both by the new machines and by the unexpected limiatations.
-  book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
+  text: "Babbage, who once declared he would gladly give up the rest of his life if he could come back in five hundred years and have a three-day guided scientific tour of the new age, would probably have been thrilled speechless a mere century after his death -- both by the new machines and by the unexpected limiatations."
+  book: "_Goedel Escher Bach: An Eternal Golden Braid_ p. 26"
   author: Douglas R. Hofstadter
   tags: [technology, AI, AGI, progress, science, time travel]
 -
@@ -125,7 +134,7 @@
     to draw distinctions between situations despite similarities which may link them;
     to synthesize new concepts by taking old concepts and putting them together in new ways;
     to come up with ideas which are novel.
-  book: "Goedel Escher Bach: An Eternal Golden Braid" p. 26
+  book: "_Goedel Escher Bach: An Eternal Golden Braid_ p. 26"
   author: Douglas R. Hofstadter
   tags: [intelligence, IQ, AGI, general intelligence, AI, creativity, patterns, pattern recognition, beneficial AI, entropy, complexity, analogy, vector oriented reasoning, reason, rationality, discriminating, human compatible AI, IQ, ethical AI]
 - 
@@ -143,7 +152,7 @@
   book: _How to Love_
   tags: [love, budhism, philosophy, partnership, marriage, purpose, meaning of life]
 -
-  text: "understanding is love"s other name"
+  text: "Understanding is love's other name."
   author: Thich Nhat Hanhn
   book: _How to Love_
   tags: [love, understanding, communication, intelligence, listening, budhism, partnership, marriage, purpose, meaning of life]
@@ -179,7 +188,7 @@
   date: May 19, 2019
   tags: [astronaught, moon landing, apollo, climate change, politics, blue marble, conflict, war, capitalism, communism, space race, space exploration]
 -
-  text: "I really believe that if the political leaders of the world could see their planet from a distance of, let"s say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
+  text: "I really believe that if the political leaders of the world could see their planet from a distance of, let's say 100,000 miles, their outlook would be fundamentally changed. The all-important border would be invisible, that noisy argument suddenly silenced."
   author: Michael Collins
   source: Twitter
   date: May 19, 2019
@@ -862,7 +871,7 @@
   tags: [life, meaning, will, motivation]
 -
   text: |+
-  text: "You're the reason she left. You can leave too, for all I care. I sure as hell would be better off without you."
+    "You're the reason she left. You can leave too, for all I care. I sure as hell would be better off without you."
 
     The words were just as I remembered them, but it wasn't Nicole saying them.
 

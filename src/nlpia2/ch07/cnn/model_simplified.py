@@ -21,7 +21,7 @@ class CNNTextClassifier(nn.Module):
         self.stride = 2
         self.conv_output_size = 32                # <3>
 
-        self.dropout = nn.Dropout(.2)
+        self.dropout = nn.Dropout(.1)
 
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
 
