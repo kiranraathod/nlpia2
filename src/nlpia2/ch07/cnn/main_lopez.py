@@ -1,4 +1,4 @@
-""" Model params hard coded
+""" Closes to original implementation
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from model_simplified import CNNTextClassifier
+from model import CNNTextClassifier
 from nlpia2.language_model import nlp
 
 
@@ -44,46 +44,6 @@ def tokenize_spacy(doc):
 
 def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
-
-
-def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, strides):
-    """ Calculate the number of encoding dimensions output from CNN layers
-
-    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-
-    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-    """
-    out_pool_total = 0
-    for kernel_len, stride in zip(kernel_lengths, strides):
-        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool_total += out_pool
-
-    # Returns "flattened" vector (input for fully connected layer)
-    return out_pool_total * desired_conv_output_size
-
-
-def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
-    """ Calculate the number of encoding dimensions output from CNN layers
-
-    From PyTorch docs:
-      L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride
-    But padding=0 and dilation=1, because we're only doing a 'valid' convolution.
-    So:
-      L_out = 1 + (L_in - (kernel_size - 1) - 1) // stride
-
-    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-    """
-    out_pool_total = 0
-    for kernel_len in kernel_lengths:
-        out_conv = (
-            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool_total += out_pool
-
-    # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
-    return out_pool_total
 
 
 class Parameters:
@@ -152,7 +112,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, expand_glove_vocab=False, seq_len=35, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
+def load_dataset(params, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -172,69 +132,41 @@ def load_dataset(params, expand_glove_vocab=False, seq_len=35, vocab_size=2000, 
         split_random_state = kwargs.pop('split_random_state')
     split_random_state = int(split_random_state)
 
-    # .Compute your vocabulary for GloVE embeddings
+    log.warning(f'Using tokenizer={params.tokenizer_fun}')
 
-    import re
-    from nessvec.files import load_vecs_df
-    HOME_DATA_DIR = Path.home() / '.nlpia2-data'
-    PAD_TOK = '<PAD>'
+    # 1. load the CSV
+    df = pd.read_csv(params.filepath.open(), usecols=params.usecols)
+    texts = df[params.usecols[0]].values
+    targets = df[params.usecols[1]].values
 
-    df = pd.read_csv(HOME_DATA_DIR / 'disaster-tweets.csv')
-    df = df[['text', 'target']]
-    df['target'] = (df['target'] > 0).astype(int)
-    counts = Counter(chain(*[
-        re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
-    vocab = [tok for tok, count in counts.most_common(2000)[num_stopwords:]]  # <2>
-    if PAD_TOK not in vocab:
-        vocab = [PAD_TOK] + list(vocab)
+    # 2. optional case folding:
+    if not params.case_sensitive:
+        texts = [str.lower(x) for x in texts]
 
-    glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
-    num_glove_vecs, embed_dims = glove.shape
-    new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
-    glove = pd.concat([new_embeddings, glove])
-    print(f'glove.shape {glove.shape}')
-    print(glove)
+    # 3. optional character (non-letter) filtering:
+    texts = [re.sub(params.re_sub, ' ', x) for x in texts]
 
-    expand_glove_vocab = False
-    if expand_glove_vocab:
-        new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
-        vocab.extend(new_vocab)
-        embed = []
-        for tok in vocab:                                              # <4>
-            if tok in glove.index:
-                embed.append(glove.loc[tok])
-            else:
-                embed.append(np.zeros(embed_dims))
-    else:
-        vocab = [tok for tok in vocab if tok in glove.index]
-        print(f'len(vocab) {len(vocab)}')
-        embed = glove.loc[vocab].values
-    embed = np.array(embed)
-    print(f'glove.shape {glove.shape}')
-    print(f'embed.shape {embed.shape}')
-    embed = torch.Tensor(np.array(embed))
-    print(f'embed.size() {embed.size()}')
+    # 4. customizable tokenization:
+    texts = [params.tokenizer_fun(doc) for doc in tqdm(texts)]
 
-    print(df)
-    print(f'embed.size(): {embed.size()}')
-    print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
+    # 5. count frequency of tokens
+    counts = Counter(chain(*texts))
 
-    # <1> tokenizing, case folding, and occurrence counting
-    # <2> ignore the 3 most frequent tokens ("t", "co", "http")
-    # <3> find
-    # <3> skip unknown embeddings; alternatively create zero vectors
-    # <4> ensure your embedding matrix is in the same order as your vocab
+    # 6. configurable num_stopwords and vocab_size
+    vocab = [x[0] for x in counts.most_common(params.vocab_size + params.num_stopwords)]
+    vocab = ['<PAD>'] + list(vocab[params.num_stopwords:])
+    # id2tok = vocab
 
     # 7. compute reverse index
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
-    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df.text]
+    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in texts]
 
     # 9. Simplified: pad token id sequences
     padded_sequences = []
-    for seq in id_sequences:
-        padded_sequences.append(pad(seq, seq_len=35, pad_value=vocab.index(PAD_TOK)))
+    for s in id_sequences:
+        padded_sequences.append(pad(s, pad_value=0))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
@@ -242,11 +174,11 @@ def load_dataset(params, expand_glove_vocab=False, seq_len=35, vocab_size=2000, 
         'x_train x_test y_train y_test'.split(),
         train_test_split(
             padded_sequences,
-            list(df['target']),
-            test_size=.1)))
+            targets,
+            test_size=HYPERPARAMS.test_size,
+            random_state=split_random_state)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
-    retval['embed'] = embed
     return retval
 
 
@@ -281,32 +213,18 @@ def calculate_accuracy(y_true, y_pred):
 class Pipeline(Parameters):
 
     def __init__(self, **kwargs):
-        """
-        win=True will set winning random seeds:
-            "split_random_state": 850753,
-            "numpy_random_state": 704,
-            "torch_random_state": 704463,
-            or
-            python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
-        """
         super().__init__()
         log.info(kwargs)
-        # params = update_params(params=self)
-        # self.__dict__.update(params.__dict__)
+        params = update_params(params=self)
+        self.__dict__.update(params.__dict__)
         print(vars(self))
 
-        dataset = load_dataset(
-            expand_glove_vocab=False,
-            seq_len=self.seq_len,
-            **kwargs)
+        dataset = load_dataset(params, **kwargs)
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(
-            seq_len=self.seq_len,
-            kernel_lengths=self.kernel_lengths,
-            embeddings=tuple(dataset['embed'].size()))
+        self.model = CNNTextClassifier(params=params, **params.__dict__)
 
     def train(self, X=None, y=None):
 
@@ -319,7 +237,7 @@ class Pipeline(Parameters):
         optimizer = optim.RMSprop(self.model.parameters(), lr=self.learning_rate)
 
         self.learning_curve = []
-        for epoch in range(self.num_epochs):
+        for epoch in range(self.epochs):
             self.model.train()
             predictions = []
             for x_batch, y_batch in self.loader_train:
@@ -425,16 +343,16 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparms = json.loads(pipeline.dump())
+    hyperparms = pipeline.dump()
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(hyperparms)
+    print("=" * 100)
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline, hyperparams=hyperparms)
+    return dict(pipeline=pipeline)
 
 
 if __name__ == '__main__':
     results = main()
-    print("=" * 100)
-    print("=========== HYPERPARMS =============")
-    print(results['hyperparams'].keys())
-    print("=" * 100)
