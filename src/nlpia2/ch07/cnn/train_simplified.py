@@ -114,7 +114,7 @@ class Parameters:
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
-        self.epochs: int = 10
+        self.num_epochs: int = 30
         self.batch_size: int = 12
         self.learning_rate: float = 0.001
         self.test_size: float = 0.1
@@ -283,8 +283,8 @@ class Pipeline():
         # self.__dict__.update(params.__dict__)
         print(vars(self))
 
+        self.num_epochs = 30
         self.seq_len = 35
-        self.num_epochs
         dataset = load_dataset(seq_len=self.seq_len, **kwargs)
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
@@ -303,7 +303,7 @@ class Pipeline():
         optimizer = optim.RMSprop(self.model.parameters(), lr=self.learning_rate)
 
         self.learning_curve = []
-        for epoch in range(self.epochs):
+        for epoch in range(self.num_epochs):
             self.model.train()
             predictions = []
             for x_batch, y_batch in self.loader_train:
