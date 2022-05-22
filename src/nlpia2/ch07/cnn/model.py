@@ -150,8 +150,8 @@ class CNNTextClassifier(nn.ModuleList):
         # self.seq_len = params.seq_len
         # self.vocab_size = params.vocab_size
         print(f"self.embedding_size: {self.embedding_size}")
-        self.embedding_size = params.embedding_size
-        print(f"self.embedding_size: {self.embedding_size}")
+        # self.embedding_size = params.embedding_size
+        # print(f"self.embedding_size: {self.embedding_size}")
         self.kernel_lengths = list(params.kernel_lengths)
 
         if isinstance(embeddings, torch.Tensor):
