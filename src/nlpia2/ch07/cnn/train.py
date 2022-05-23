@@ -343,7 +343,7 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparams = json.load(pipeline.dump())
+    hyperparams = json.loads(pipeline.dump())
     print("=" * 100)
     print("=========== HYPERPARMS =============")
     print(hyperparams)

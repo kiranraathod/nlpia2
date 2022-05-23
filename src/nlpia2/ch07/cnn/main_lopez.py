@@ -343,15 +343,10 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparms = pipeline.dump()
-    print("=" * 100)
-    print("=========== HYPERPARMS =============")
-    print(hyperparms)
-    print("=" * 100)
-
+    hyperparams = json.loads(pipeline.dump())
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline, hyperparams=HYPERPARAMS)
+    return dict(pipeline=pipeline, hyperparams=hyperparams)
 
 
 if __name__ == '__main__':
