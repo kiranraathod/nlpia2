@@ -78,7 +78,7 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
 class CNNTextClassifier(nn.ModuleList):
 
     def __init__(self,
-
+                 params,
                  random_state=None,
                  torch_random_state=None,
                  numpy_random_state=None,
@@ -132,8 +132,11 @@ class CNNTextClassifier(nn.ModuleList):
         self.in_channels = self.seq_len              # <1>
         self.out_channels = self.in_channels
         self.groups = self.in_channels
-        self.kernel_lengths = [2]  # kernel_lengths         # <2>
+        self.kernel_lengths = kernel_lengths         # <2>
         self.stride = 2
+        self.strides = strides
+        if self.strides is None or not len(self.strides) == len(self.kernel_lengths):
+            self.strides = [self.stride] * len(self.kernel_lengths)
         # self.output_seq_len = compute_output_seq_len(   # <3>
         #     input_seq_len=self.seq_len,
         #     kernel_lengths=self.kernel_lengths,
@@ -143,11 +146,15 @@ class CNNTextClassifier(nn.ModuleList):
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
 
-        self.output_seq_len = lopez_cnn_output_size(   # <3>
-            embedding_size=self.embedding_size,
+        kwargs = dict(   # <3>
+            embedding_size=self.in_channels,
             kernel_lengths=self.kernel_lengths,
-            strides=[self.stride] * len(kernel_lengths),
+            strides=self.strides)
+        print(f"output_seq_len = lopez_cnn_output_size(**{kwargs}")
+        self.output_seq_len = lopez_cnn_output_size(   # <3>
+            **kwargs
         )
+        print(f"output_seq_len: {self.output_seq_len}")
         self.num_output_channels = self.output_seq_len
 
         assert self.torch_random_state == torch.random.initial_seed()
@@ -197,13 +204,19 @@ class CNNTextClassifier(nn.ModuleList):
 
         # default: 4 CNN layers with max pooling
         for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
-            self.convolvers.append(nn.Conv1d(
+            kwargs = dict(
                 in_channels=self.in_channels,
                 out_channels=self.conv_output_size,
                 kernel_size=kernel_size,
                 stride=stride,
-                groups=self.groups))
+                groups=self.groups,
+            )
+            print(f"Conv1d(kwargs={kwargs})")
+            self.convolvers.append(nn.Conv1d(
+                **kwargs))
+            print(self.convolvers[-1])
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
+            print(self.poolers[-1])
 
         self.encoding_size = lopez_cnn_output_size(
             embedding_size=self.embedding_size,

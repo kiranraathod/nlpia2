@@ -56,7 +56,7 @@ class Parameters:
 
         self.vocab_size: int = 2000
 
-        self.embedding_size: int = 50
+        self.embedding_size: int = 64
         self.kernel_lengths: list = [2, 3, 4, 5]
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
@@ -112,7 +112,13 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, expand_glove_vocab=False, seq_len=32, vocab_size=2000, embedding_size=50, num_stopwords=0, **kwargs):
+def load_dataset(
+        params,
+        seq_len=32,
+        vocab_size=2000,
+        embedding_size=64,
+        num_stopwords=0,
+        expand_glove_vocab=False, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -224,7 +230,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(**params.__dict__)
+        self.model = CNNTextClassifier(params=params, **params.__dict__)
 
     def train(self, X=None, y=None):
 
@@ -346,7 +352,7 @@ def main():
     hyperparams = json.loads(pipeline.dump())
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline, hyperparams=hyperparams.__dict__)
+    return dict(pipeline=pipeline, hyperparams=hyperparams)
 
 
 if __name__ == '__main__':
