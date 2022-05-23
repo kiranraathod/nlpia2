@@ -30,27 +30,7 @@ logging.basicConfig(level=logging.WARNING)
 # .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 
 
-def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None):
-    """ Calculate the number of encoding dimensions output from CNN layers
-
-    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-
-    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-    """
-    if desired_conv_output_size is None:
-        desired_conv_output_size = embedding_size // 2
-    out_pool_total = 0
-    for kernel_len, stride in zip(kernel_lengths, strides):
-        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool_total += out_pool
-
-    # Returns "flattened" vector (input for fully connected layer)
-    return out_pool_total * desired_conv_output_size
-
-
-def compute_output_seq_len(input_seq_len, kernel_lengths, strides):
+def calc_output_seq_len(in_seq_len, kernel_lengths, strides, dilation=1):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     From PyTorch docs:
@@ -66,12 +46,12 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, strides):
     out_pool_total = 0
     for kernel_len, stride in zip(kernel_lengths, strides):
         out_conv = (
-            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+            (in_seq_len - dilation * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - dilation * (kernel_len - 1) - 1) // stride) + 1
         out_pool_total += out_pool
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
-    return out_pool_total * input_seq_len // 2
+    return out_pool_total * in_seq_len // (sum(strides) // len(strides))
 
 # .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 ##########################################################################
@@ -88,7 +68,7 @@ class CNNTextClassifier(nn.ModuleList):
                  seq_len=32,
                  in_channels=50,
                  out_channels=50,
-                 dropout_portion=.2,
+                 dropout_portion=.15,
                  kernel_lengths=[2],
                  groups=None,
                  stride=2,
@@ -131,9 +111,9 @@ class CNNTextClassifier(nn.ModuleList):
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
 
-        self.in_channels = in_channels              # <1>
-        self.out_channels = out_channels
-        self.groups = groups
+        self.in_channels = seq_len              # <1>
+        self.out_channels = self.in_channels
+        self.groups = self.in_channels
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
@@ -191,10 +171,12 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
             print(f"self.poolers[-1]: {self.poolers[-1]}")
 
-        self.encoding_size = lopez_cnn_output_size(
-            embedding_size=self.embedding_size,
-            kernel_lengths=self.kernel_lengths,
-            strides=self.strides,
+        calcoutkwargs = dict(in_seq_len=self.embedding_size,
+                             kernel_lengths=self.kernel_lengths,
+                             strides=self.strides)
+        print(calcoutkwargs)
+        self.encoding_size = calc_output_seq_len(
+            **calcoutkwargs,
         )
         print(f"self.encoding_size = {self.encoding_size}")
 
