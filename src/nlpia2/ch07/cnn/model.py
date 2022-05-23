@@ -93,7 +93,7 @@ class CNNTextClassifier(nn.ModuleList):
                  groups=None,
                  stride=2,
                  strides=None,
-                 embeddings=(2000, 50),
+                 embeddings=(2000, 64),
                  test_size=.1,
                  **kwargs):
         """ Conv1D layers concatenated into a single 1D vector
@@ -172,13 +172,6 @@ class CNNTextClassifier(nn.ModuleList):
 
         self.dropout_portion = dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
-
-        for param_name, param_val in vars(self).items():
-            if param_name.startswith('_'):
-                continue
-            if param_name in kwargs:
-                setattr(self, param_name, kwargs[param_name])
-            log.info(f'MODEL: {param_name}: {getattr(self, param_name)} ({type(getattr(self, param_name))})')
 
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
 
