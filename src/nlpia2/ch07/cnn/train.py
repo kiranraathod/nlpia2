@@ -224,7 +224,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(params=params, **params.__dict__)
+        self.model = CNNTextClassifier(**params.__dict__)
 
     def train(self, X=None, y=None):
 
@@ -344,11 +344,6 @@ def main():
 
     pipeline = pipeline.train()
     hyperparams = json.loads(pipeline.dump())
-    print("=" * 100)
-    print("=========== HYPERPARMS =============")
-    print(hyperparams)
-    print("=" * 100)
-
     # predictions = pipeline.predict()
 
     return dict(pipeline=pipeline, hyperparams=hyperparams.__dict__)

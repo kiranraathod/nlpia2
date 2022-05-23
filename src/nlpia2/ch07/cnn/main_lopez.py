@@ -112,7 +112,13 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, expand_glove_vocab=False, seq_len=32, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
+def load_dataset(
+        params,
+        seq_len=32,
+        vocab_size=2000,
+        embedding_size=64,
+        num_stopwords=0,
+        expand_glove_vocab=False, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV

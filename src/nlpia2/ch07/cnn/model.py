@@ -78,7 +78,11 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
 class CNNTextClassifier(nn.ModuleList):
 
     def __init__(self,
-                 params=None,          # deleteme
+
+                 random_state=None,
+                 torch_random_state=None,
+                 numpy_random_state=None,
+
                  win=False,
                  seq_len=32,
                  conv_output_size=32,  # deleteme
@@ -86,6 +90,7 @@ class CNNTextClassifier(nn.ModuleList):
                  kernel_lengths=[2],
                  groups=None,
                  stride=2,
+                 strides=None,
                  embeddings=(2000, 50),
                  test_size=.1,
                  **kwargs):
@@ -97,18 +102,19 @@ class CNNTextClassifier(nn.ModuleList):
         super().__init__()
         if len(kwargs):
             log.warning(f"Did not process all kwargs: {kwargs}")
-        self.random_state = kwargs.pop('random_state', None)
+
+        self.random_state = random_state
         if self.random_state is not None:
             self.torch_random_state = self.random_state
             self.numpy_random_state = self.random_state + 1
-        if params.torch_random_state is None:
+        if torch_random_state is None:
             self.torch_random_state = torch.random.initial_seed()
         else:
-            self.torch_random_state = params.torch_random_state
-        if params.numpy_random_state is None:
+            self.torch_random_state = torch_random_state
+        if numpy_random_state is None:
             self.numpy_random_state = np.random.get_state()[1][0]
         else:
-            self.numpy_random_state = params.numpy_random_state
+            self.numpy_random_state = numpy_random_state
 
         try:
             shape = embeddings.shape
@@ -155,7 +161,7 @@ class CNNTextClassifier(nn.ModuleList):
         print(f"self.embedding_size: {self.embedding_size}")
         # self.embedding_size = params.embedding_size
         # print(f"self.embedding_size: {self.embedding_size}")
-        self.kernel_lengths = list(params.kernel_lengths)
+        self.kernel_lengths = list(kernel_lengths)
 
         if isinstance(embeddings, torch.Tensor):
             print(f'Loading embeddings: {embeddings.size()}')
@@ -165,17 +171,17 @@ class CNNTextClassifier(nn.ModuleList):
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
         # self.stride = getattr(params, 'stride', 2)
-        self.strides = getattr(params, 'strides')
+        self.strides = strides
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
         if len(self.strides) < len(self.kernel_lengths):
             self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strides))
 
-        self.dropout_portion = params.dropout_portion
+        self.dropout_portion = dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
         print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
-        self.conv_output_size = getattr(params, 'conv_output_size', 32)
+        self.conv_output_size = conv_output_size
         print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
         self.__dict__.update(kwargs)
         print(f"self.conv_output_size: {self.conv_output_size}")
