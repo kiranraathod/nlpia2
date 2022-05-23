@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.WARNING)
 
 
 def calc_output_seq_len(in_seq_len, kernel_lengths, strides, dilation=1):
-    """ Calculate the number of encoding dimensions output from CNN layers
+    """ Calculate the number of encoding dimensions output from a concatenated CNN
 
     From PyTorch docs:
       L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride
@@ -47,7 +47,8 @@ def calc_output_seq_len(in_seq_len, kernel_lengths, strides, dilation=1):
     for kernel_len, stride in zip(kernel_lengths, strides):
         out_conv = (
             (in_seq_len - dilation * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - dilation * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = (
+            (out_conv - dilation * (kernel_len - 1) - 1) // stride) + 1
         out_pool_total += out_pool
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
@@ -80,11 +81,11 @@ class CNNTextClassifier(nn.ModuleList):
 
         python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
         """
-
         super().__init__()
         if len(kwargs):
             log.warning(f"Did not process all kwargs: {kwargs}")
 
+        self.first_time = True
         self.random_state = random_state
         if self.random_state is not None:
             self.torch_random_state = self.random_state
@@ -186,26 +187,28 @@ class CNNTextClassifier(nn.ModuleList):
 # <3> the convolution output need not have the same number of channels as your embeddings
 
     def forward(self, x):
-        """ Takes sequence of integers (token indices) and outputs binary class label """
+        """ Input is sequence of ints (token indices). Output is a single binary class label """
 
-        x = self.embedding(x)
-
+        X = self.embedding(x)
         conv_outputs = []
         for (conv, pool) in zip(self.convolvers, self.poolers):
-            z = conv(x)
+            z = conv(X)
             z = torch.relu(z)
             z = pool(z)
             conv_outputs.append(z)
 
-        # The output of each convolutional layer is concatenated into a unique vector
-        union = torch.cat(conv_outputs, 2)
-        union = union.reshape(union.size(0), -1)
+        if self.first_time:
+            print(f"conv_outputs: {[co.size() for co in conv_outputs]}")
+        encoding = torch.cat(conv_outputs, 2)
+        if self.first_time:
+            print(f"encoding.size(): {encoding.size()}")
+        encoding = encoding.reshape(encoding.size(0), -1)
+        if self.first_time:
+            print(f"reshaped encoding.size(): {encoding.size()}")
 
-        # The "flattened" vector is passed through a fully connected layer
-        out = self.linear_layer(union)
-        # Dropout is applied
-        out = self.dropout(out)
-        # Activation function is applied
-        out = torch.sigmoid(out)
+        encoding = self.dropout(encoding)
+        predictions = self.linear_layer(encoding)
+        predictions = torch.sigmoid(predictions)
 
-        return out.squeeze()
+        self.first_time = False
+        return predictions.squeeze()
