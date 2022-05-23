@@ -78,12 +78,13 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
 class CNNTextClassifier(nn.ModuleList):
 
     def __init__(self,
-                 params=None,
+                 params=None,          # deleteme
                  win=False,
-                 seq_len=35,
-                 conv_output_size=32,
+                 seq_len=32,
+                 conv_output_size=32,  # deleteme
                  dropout_portion=.2,
                  kernel_lengths=[2],
+                 groups=None,
                  stride=2,
                  embeddings=(2000, 50),
                  test_size=.1,
@@ -118,11 +119,13 @@ class CNNTextClassifier(nn.ModuleList):
                 shape = embeddings
         print(f'shape: {shape}')
 
-        self.seq_len = 35  # seq_len
+        self.seq_len = 32  # seq_len
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
-        self.num_groups = 1  # self.embedding_size
-        self.num_input_channels = self.seq_len              # <1>
+
+        self.in_channels = self.seq_len              # <1>
+        self.out_channels = self.in_channels
+        self.groups = self.in_channels
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         # self.output_seq_len = compute_output_seq_len(   # <3>
@@ -171,8 +174,9 @@ class CNNTextClassifier(nn.ModuleList):
         self.dropout_portion = params.dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
-        print(f"conv_output_size: {conv_output_size}")
+        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
         self.conv_output_size = getattr(params, 'conv_output_size', 32)
+        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
         self.__dict__.update(kwargs)
         print(f"self.conv_output_size: {self.conv_output_size}")
 
@@ -186,11 +190,14 @@ class CNNTextClassifier(nn.ModuleList):
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
 
         # default: 4 CNN layers with max pooling
-        for i, (kernel_len, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
-            self.convolvers.append(nn.Conv1d(self.seq_len, self.conv_output_size, kernel_len, stride))
-            # setattr(self, f'conv_{i + 1}', self.convolvers[i])
-            self.poolers.append(nn.MaxPool1d(kernel_len, stride))
-            # setattr(self, f'pool_{i + 1}', self.poolers[i])
+        for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
+            self.convolvers.append(nn.Conv1d(
+                in_channels=self.in_channels,
+                out_channels=self.conv_output_size,
+                kernel_size=kernel_size,
+                stride=stride,
+                groups=self.groups))
+            self.poolers.append(nn.MaxPool1d(kernel_size, stride))
 
         self.encoding_size = lopez_cnn_output_size(
             embedding_size=self.embedding_size,
@@ -199,7 +206,7 @@ class CNNTextClassifier(nn.ModuleList):
         )
 
         self.linear_layer = nn.Linear(self.encoding_size, 1)
-# <1> assume a maximum text length of 35 tokens
+# <1> assume a maximum text length of 32 tokens
 # <2> only one kernel layer is needed for reasonable results
 # <3> the convolution output need not have the same number of channels as your embeddings
 

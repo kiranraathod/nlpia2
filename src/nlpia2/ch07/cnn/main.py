@@ -49,7 +49,7 @@ def tokenize_re(doc):
 class Parameters:
 
     def __init__(self):
-        self.seq_len: int = 35
+        self.seq_len: int = 32
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
@@ -166,7 +166,7 @@ def load_dataset(params, **kwargs):
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for s in id_sequences:
-        padded_sequences.append(pad(s, pad_value=0))
+        padded_sequences.append(pad(s, pad_value=0, seq_len=params.seq_len))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
