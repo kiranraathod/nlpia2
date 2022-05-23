@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from model_simplified import CNNTextClassifier
+from model import CNNTextClassifier
 from nlpia2.language_model import nlp
 
 
@@ -49,14 +49,14 @@ def tokenize_re(doc):
 class Parameters:
 
     def __init__(self):
-        self.seq_len: int = 35
+        self.seq_len: int = 32
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
         self.vocab_size: int = 2000
 
-        self.embedding_size: int = 64
+        self.embedding_size: int = 50
         self.kernel_lengths: list = [2, 3, 4, 5]
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
@@ -112,7 +112,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, expand_glove_vocab=False, seq_len=35, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
+def load_dataset(params, expand_glove_vocab=False, seq_len=32, vocab_size=2000, embedding_size=50, num_stopwords=0, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -166,7 +166,7 @@ def load_dataset(params, expand_glove_vocab=False, seq_len=35, vocab_size=2000, 
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for s in id_sequences:
-        padded_sequences.append(pad(s, pad_value=0))
+        padded_sequences.append(pad(s, pad_value=0, seq_len=params.seq_len))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
@@ -343,11 +343,15 @@ def main():
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
-    hyperparams = json.loads(pipeline.dump())
+    hyperparams = json.load(pipeline.dump())
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(hyperparams)
+    print("=" * 100)
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline, hyperparams=hyperparams)
+    return dict(pipeline=pipeline, hyperparams=hyperparams.__dict__)
 
 
 if __name__ == '__main__':

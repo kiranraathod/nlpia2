@@ -112,7 +112,7 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
-def load_dataset(params, **kwargs):
+def load_dataset(params, expand_glove_vocab=False, seq_len=32, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -351,8 +351,12 @@ def main():
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline)
+    return dict(pipeline=pipeline, hyperparams=HYPERPARAMS)
 
 
 if __name__ == '__main__':
     results = main()
+    print("=" * 100)
+    print("=========== HYPERPARMS =============")
+    print(results['hyperparams'].keys())
+    print("=" * 100)
