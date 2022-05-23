@@ -152,10 +152,7 @@ class CNNTextClassifier(nn.ModuleList):
             strides=self.strides)
         print(f"output_seq_len = lopez_cnn_output_size(**{calcoutpkwargs}")
         self.output_seq_len = lopez_cnn_output_size(   # <3>
-            embedding_size=self.embedding_size,
-            kernel_lengths=self.kernel_lengths,
-            strides=[self.stride] * len(kernel_lengths),
-        )
+            **calcoutpkwargs)
         print(f"output_seq_len: {self.output_seq_len}")
         self.num_output_channels = self.output_seq_len
 
@@ -206,19 +203,19 @@ class CNNTextClassifier(nn.ModuleList):
 
         # default: 4 CNN layers with max pooling
         for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
-            kwargs = dict(
+            convkwargs = dict(
                 in_channels=self.in_channels,
                 out_channels=self.conv_output_size,
                 kernel_size=kernel_size,
                 stride=stride,
                 groups=self.groups,
             )
-            print(f"Conv1d(kwargs={kwargs})")
+            print(f"Conv1d(kwargs={convkwargs})")
             self.convolvers.append(nn.Conv1d(
-                **kwargs))
+                **convkwargs))
             print(self.convolvers[-1])
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
-            print(self.poolers[-1])
+            print(f"self.poolers[-1]: {self.poolers[-1]}")
 
         self.encoding_size = lopez_cnn_output_size(
             embedding_size=self.embedding_size,

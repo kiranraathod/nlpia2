@@ -152,10 +152,7 @@ class CNNTextClassifier(nn.ModuleList):
             strides=self.strides)
         print(f"output_seq_len = lopez_cnn_output_size(**{calcoutpkwargs}")
         self.output_seq_len = lopez_cnn_output_size(   # <3>
-            embedding_size=self.embedding_size,
-            kernel_lengths=self.kernel_lengths,
-            strides=[self.stride] * len(kernel_lengths),
-        )
+            **calcoutpkwargs)
         print(f"output_seq_len: {self.output_seq_len}")
         self.num_output_channels = self.output_seq_len
 
@@ -170,7 +167,7 @@ class CNNTextClassifier(nn.ModuleList):
         print(f"self.embedding_size: {self.embedding_size}")
         # self.embedding_size = params.embedding_size
         # print(f"self.embedding_size: {self.embedding_size}")
-        self.kernel_lengths = list(params.kernel_lengths)
+        self.kernel_lengths = list(kernel_lengths)
 
         if isinstance(embeddings, torch.Tensor):
             print(f'Loading embeddings: {embeddings.size()}')
@@ -180,17 +177,17 @@ class CNNTextClassifier(nn.ModuleList):
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
         # self.stride = getattr(params, 'stride', 2)
-        self.strides = getattr(params, 'strides')
+        self.strides = strides
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
         if len(self.strides) < len(self.kernel_lengths):
             self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strides))
 
-        self.dropout_portion = params.dropout_portion
+        self.dropout_portion = dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
         print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
-        self.conv_output_size = getattr(params, 'conv_output_size', 32)
+        self.conv_output_size = conv_output_size
         print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
         self.__dict__.update(kwargs)
         print(f"self.conv_output_size: {self.conv_output_size}")
@@ -206,13 +203,19 @@ class CNNTextClassifier(nn.ModuleList):
 
         # default: 4 CNN layers with max pooling
         for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
-            self.convolvers.append(nn.Conv1d(
+            convkwargs = dict(
                 in_channels=self.in_channels,
                 out_channels=self.conv_output_size,
                 kernel_size=kernel_size,
                 stride=stride,
-                groups=self.groups))
+                groups=self.groups,
+            )
+            print(f"Conv1d(kwargs={convkwargs})")
+            self.convolvers.append(nn.Conv1d(
+                **convkwargs))
+            print(self.convolvers[-1])
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
+            print(f"self.poolers[-1]: {self.poolers[-1]}")
 
         self.encoding_size = lopez_cnn_output_size(
             embedding_size=self.embedding_size,
