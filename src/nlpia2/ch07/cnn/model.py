@@ -171,7 +171,7 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
             print(f"self.poolers[-1]: {self.poolers[-1]}")
 
-        calcoutkwargs = dict(in_seq_len=self.embedding_size,
+        calcoutkwargs = dict(in_seq_len=self.seq_len * 2,
                              kernel_lengths=self.kernel_lengths,
                              strides=self.strides)
         print(calcoutkwargs)
