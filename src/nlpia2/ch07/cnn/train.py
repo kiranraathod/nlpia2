@@ -61,9 +61,10 @@ class Parameters:
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
 
-        self.in_channels: int = 50
-        self.out_channels: int = 50
-        self.groups: int = 50
+        self.in_channels: int = 32
+        self.planes: int = 1  # not sure if the is correct terminology
+        self.out_channels: int = self.planes * self.in_channels
+        self.groups: int = self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
 
         self.epochs: int = 10
         self.batch_size: int = 12
