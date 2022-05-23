@@ -54,9 +54,7 @@ class Parameters:
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
-        self.vocab_size: int = 2000
-
-        self.embedding_size: int = 64
+        self.embeddings: tuple = (2000, 64)
         self.kernel_lengths: list = [2, 3, 4, 5]
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
@@ -81,6 +79,18 @@ class Parameters:
         self.torch_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000000), 0), MAX_SEED)
 
         self.re_sub: str = r'[^A-Za-z0-9.?!]+'
+
+        print(f"embeddings={self.embeddings}")
+        try:
+            shape = self.embeddings.shape
+        except AttributeError:
+            try:
+                shape = self.embeddings.size()
+            except AttributeError:
+                shape = self.embeddings
+        print(f'shape: {shape}')
+        self.vocab_size = shape[0]
+        self.embedding_size = shape[1]
 
 
 HYPERPARAMS = Parameters()
@@ -164,7 +174,7 @@ def load_dataset(
     counts = Counter(chain(*texts))
 
     # 6. configurable num_stopwords and vocab_size
-    vocab = [x[0] for x in counts.most_common(params.vocab_size + params.num_stopwords)]
+    vocab = [x[0] for x in counts.most_common(vocab_size + params.num_stopwords)]
     vocab = ['<PAD>'] + list(vocab[params.num_stopwords:])
     # id2tok = vocab
 
@@ -231,6 +241,7 @@ class Pipeline(Parameters):
         print(vars(self))
 
         dataset = load_dataset(params, **kwargs)
+
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']

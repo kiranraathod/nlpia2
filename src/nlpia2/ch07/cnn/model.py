@@ -98,6 +98,7 @@ class CNNTextClassifier(nn.ModuleList):
         else:
             self.numpy_random_state = numpy_random_state
 
+        print(f"embeddings={embeddings}")
         try:
             shape = embeddings.shape
         except AttributeError:
@@ -106,11 +107,10 @@ class CNNTextClassifier(nn.ModuleList):
             except AttributeError:
                 shape = embeddings
         print(f'shape: {shape}')
-
-        self.seq_len = seq_len
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
 
+        self.seq_len = seq_len
         self.in_channels = seq_len              # <1>
         self.out_channels = self.in_channels
         self.groups = self.in_channels
