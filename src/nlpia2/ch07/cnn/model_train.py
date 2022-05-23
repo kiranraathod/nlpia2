@@ -132,7 +132,7 @@ class CNNTextClassifier(nn.ModuleList):
         self.in_channels = self.seq_len              # <1>
         self.out_channels = self.in_channels
         self.groups = self.in_channels
-        self.kernel_lengths = kernel_lengths         # <2>
+        self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
         if self.strides is None or not len(self.strides) == len(self.kernel_lengths):
