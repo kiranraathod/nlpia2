@@ -102,18 +102,19 @@ class CNNTextClassifier(nn.ModuleList):
         super().__init__()
         if len(kwargs):
             log.warning(f"Did not process all kwargs: {kwargs}")
-        self.random_state = kwargs.pop('random_state', None)
+
+        self.random_state = random_state
         if self.random_state is not None:
             self.torch_random_state = self.random_state
             self.numpy_random_state = self.random_state + 1
-        if params.torch_random_state is None:
+        if torch_random_state is None:
             self.torch_random_state = torch.random.initial_seed()
         else:
-            self.torch_random_state = params.torch_random_state
-        if params.numpy_random_state is None:
+            self.torch_random_state = torch_random_state
+        if numpy_random_state is None:
             self.numpy_random_state = np.random.get_state()[1][0]
         else:
-            self.numpy_random_state = params.numpy_random_state
+            self.numpy_random_state = numpy_random_state
 
         try:
             shape = embeddings.shape
@@ -133,6 +134,9 @@ class CNNTextClassifier(nn.ModuleList):
         self.groups = self.in_channels
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
+        self.strides = strides
+        if self.strides is None or not len(self.strides) == len(self.kernel_lengths):
+            self.strides = [self.stride] * len(self.kernel_lengths)
         # self.output_seq_len = compute_output_seq_len(   # <3>
         #     input_seq_len=self.seq_len,
         #     kernel_lengths=self.kernel_lengths,
@@ -142,11 +146,17 @@ class CNNTextClassifier(nn.ModuleList):
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
 
+        calcoutpkwargs = dict(   # <3>
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            strides=self.strides)
+        print(f"output_seq_len = lopez_cnn_output_size(**{calcoutpkwargs}")
         self.output_seq_len = lopez_cnn_output_size(   # <3>
             embedding_size=self.embedding_size,
             kernel_lengths=self.kernel_lengths,
             strides=[self.stride] * len(kernel_lengths),
         )
+        print(f"output_seq_len: {self.output_seq_len}")
         self.num_output_channels = self.output_seq_len
 
         assert self.torch_random_state == torch.random.initial_seed()

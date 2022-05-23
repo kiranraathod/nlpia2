@@ -146,13 +146,15 @@ class CNNTextClassifier(nn.ModuleList):
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
 
-        kwargs = dict(   # <3>
-            embedding_size=self.in_channels,
+        calcoutpkwargs = dict(   # <3>
+            embedding_size=self.embedding_size,
             kernel_lengths=self.kernel_lengths,
             strides=self.strides)
-        print(f"output_seq_len = lopez_cnn_output_size(**{kwargs}")
+        print(f"output_seq_len = lopez_cnn_output_size(**{calcoutpkwargs}")
         self.output_seq_len = lopez_cnn_output_size(   # <3>
-            **kwargs
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            strides=[self.stride] * len(kernel_lengths),
         )
         print(f"output_seq_len: {self.output_seq_len}")
         self.num_output_channels = self.output_seq_len
