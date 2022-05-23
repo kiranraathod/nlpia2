@@ -148,16 +148,6 @@ class CNNTextClassifier(nn.ModuleList):
         torch.random.manual_seed(self.torch_random_state)
         np.random.seed(self.numpy_random_state)
 
-        calcoutpkwargs = dict(   # <3>
-            input_seq_len=self.embedding_size,
-            kernel_lengths=self.kernel_lengths,
-            strides=self.strides)
-        print(f"output_seq_len = compute_output_seq_len(**{calcoutpkwargs}")
-        self.output_seq_len = compute_output_seq_len(   # <3>
-            **calcoutpkwargs)
-        print(f"output_seq_len: {self.output_seq_len}")
-        self.num_output_channels = self.output_seq_len
-
         assert self.torch_random_state == torch.random.initial_seed()
         assert self.numpy_random_state == np.random.get_state()[1][0]
 
@@ -182,11 +172,6 @@ class CNNTextClassifier(nn.ModuleList):
 
         self.dropout_portion = dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
-
-        print(f"conv_output_size (out_channels): {None} ({self.out_channels})")
-        print(f"conv_output_size (out_channels): {None} ({self.out_channels})")
-        # self.__dict__.update(kwargs)
-        # print(f"self.conv_output_size: {self.conv_output_size}")
 
         for param_name, param_val in vars(self).items():
             if param_name.startswith('_'):
@@ -218,6 +203,7 @@ class CNNTextClassifier(nn.ModuleList):
             kernel_lengths=self.kernel_lengths,
             strides=self.strides,
         )
+        print(f"self.encoding_size = {self.encoding_size}")
 
         self.linear_layer = nn.Linear(self.encoding_size, 1)
 # <1> assume a maximum text length of 32 tokens
