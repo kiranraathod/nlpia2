@@ -78,14 +78,14 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
 class CNNTextClassifier(nn.ModuleList):
 
     def __init__(self,
-                 params,
                  random_state=None,
                  torch_random_state=None,
                  numpy_random_state=None,
 
                  win=False,
                  seq_len=32,
-                 conv_output_size=32,  # deleteme
+                 in_channels=50,
+                 out_channels=50,
                  dropout_portion=.2,
                  kernel_lengths=[2],
                  groups=None,
@@ -125,13 +125,13 @@ class CNNTextClassifier(nn.ModuleList):
                 shape = embeddings
         print(f'shape: {shape}')
 
-        self.seq_len = 32  # seq_len
+        self.seq_len = seq_len
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
 
-        self.in_channels = self.seq_len              # <1>
-        self.out_channels = self.in_channels
-        self.groups = self.in_channels
+        self.in_channels = in_channels              # <1>
+        self.out_channels = out_channels
+        self.groups = groups
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
@@ -162,11 +162,7 @@ class CNNTextClassifier(nn.ModuleList):
         self.convolvers = []
         self.poolers = []
 
-        # self.seq_len = params.seq_len
-        # self.vocab_size = params.vocab_size
         print(f"self.embedding_size: {self.embedding_size}")
-        # self.embedding_size = params.embedding_size
-        # print(f"self.embedding_size: {self.embedding_size}")
         self.kernel_lengths = list(kernel_lengths)
 
         if isinstance(embeddings, torch.Tensor):
@@ -176,7 +172,6 @@ class CNNTextClassifier(nn.ModuleList):
             print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
-        # self.stride = getattr(params, 'stride', 2)
         self.strides = strides
         if not self.strides:
             self.strides = [self.stride] * len(self.kernel_lengths)
@@ -186,11 +181,10 @@ class CNNTextClassifier(nn.ModuleList):
         self.dropout_portion = dropout_portion
         self.dropout = nn.Dropout(self.dropout_portion)
 
-        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
-        self.conv_output_size = conv_output_size
-        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
-        self.__dict__.update(kwargs)
-        print(f"self.conv_output_size: {self.conv_output_size}")
+        print(f"conv_output_size (out_channels): {None} ({self.out_channels})")
+        print(f"conv_output_size (out_channels): {None} ({self.out_channels})")
+        # self.__dict__.update(kwargs)
+        # print(f"self.conv_output_size: {self.conv_output_size}")
 
         for param_name, param_val in vars(self).items():
             if param_name.startswith('_'):
@@ -205,7 +199,7 @@ class CNNTextClassifier(nn.ModuleList):
         for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
             convkwargs = dict(
                 in_channels=self.in_channels,
-                out_channels=self.conv_output_size,
+                out_channels=self.out_channels,
                 kernel_size=kernel_size,
                 stride=stride,
                 groups=self.groups,

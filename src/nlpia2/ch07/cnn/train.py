@@ -61,6 +61,10 @@ class Parameters:
         self.strides: list = [2, 2, 2, 2]
         self.conv_output_size: int = 32
 
+        self.in_channels: int = 50
+        self.out_channels: int = 50
+        self.groups: int = 50
+
         self.epochs: int = 10
         self.batch_size: int = 12
         self.learning_rate: float = 0.001
@@ -230,7 +234,7 @@ class Pipeline(Parameters):
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(params=params, **params.__dict__)
+        self.model = CNNTextClassifier(**params.__dict__)
 
     def train(self, X=None, y=None):
 
