@@ -1,0 +1,255 @@
+""" 1-D Convolutional Neural Network for NLP
+
+FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
+
+Definitions (from PyTorch Docs):
+    in_channels: Number of channels in the input image/sequence
+    out_channels: Number of channels produced by the convolution (encoding vector length)
+    kernel_size: Size of the convolving kernel
+    stride: Stride of the convolution. Default: 1
+    padding: Padding added to both sides of the input. Default: 0
+    padding_mode: 'zeros', 'reflect', 'replicate' or 'circular'. Default: 'zeros'
+    dilation: Spacing between kernel elements. Default: 1
+    groups: Number of blocked connections from input channels to output channels. Default: 1
+    bias (bool, optional) – If True, adds a learnable bias to the output. Default: True
+
+$ python main.py
+Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
+...
+Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
+"""
+import logging
+import numpy as np
+import torch
+import torch.nn as nn
+
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.WARNING)
+
+#####################################################################
+# .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
+
+
+def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None):
+    """ Calculate the number of encoding dimensions output from CNN layers
+
+    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+
+    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    """
+    if desired_conv_output_size is None:
+        desired_conv_output_size = embedding_size // 2
+    out_pool_total = 0
+    for kernel_len, stride in zip(kernel_lengths, strides):
+        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool_total += out_pool
+
+    # Returns "flattened" vector (input for fully connected layer)
+    return out_pool_total * desired_conv_output_size
+
+
+def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
+    """ Calculate the number of encoding dimensions output from CNN layers
+
+    From PyTorch docs:
+      L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride
+    But padding=0 and dilation=1, because we're only doing a 'valid' convolution.
+    So:
+      L_out = 1 + (L_in - (kernel_size - 1) - 1) // stride
+
+    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
+    """
+    out_pool_total = 0
+    for kernel_len in kernel_lengths:
+        out_conv = (
+            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+        out_pool_total += out_pool
+
+    # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
+    return out_pool_total
+
+# .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
+##########################################################################
+
+
+class CNNTextClassifier(nn.ModuleList):
+
+    def __init__(self,
+                 params,
+                 random_state=None,
+                 torch_random_state=None,
+                 numpy_random_state=None,
+
+                 win=False,
+                 seq_len=32,
+                 conv_output_size=32,  # deleteme
+                 dropout_portion=.2,
+                 kernel_lengths=[2],
+                 groups=None,
+                 stride=2,
+                 strides=None,
+                 embeddings=(2000, 50),
+                 test_size=.1,
+                 **kwargs):
+        """ Conv1D layers concatenated into a single 1D vector
+
+        python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
+        """
+
+        super().__init__()
+        if len(kwargs):
+            log.warning(f"Did not process all kwargs: {kwargs}")
+
+        self.random_state = random_state
+        if self.random_state is not None:
+            self.torch_random_state = self.random_state
+            self.numpy_random_state = self.random_state + 1
+        if torch_random_state is None:
+            self.torch_random_state = torch.random.initial_seed()
+        else:
+            self.torch_random_state = torch_random_state
+        if numpy_random_state is None:
+            self.numpy_random_state = np.random.get_state()[1][0]
+        else:
+            self.numpy_random_state = numpy_random_state
+
+        try:
+            shape = embeddings.shape
+        except AttributeError:
+            try:
+                shape = embeddings.size()
+            except AttributeError:
+                shape = embeddings
+        print(f'shape: {shape}')
+
+        self.seq_len = 32  # seq_len
+        self.vocab_size = shape[0]
+        self.embedding_size = shape[1]
+
+        self.in_channels = self.seq_len              # <1>
+        self.out_channels = self.in_channels
+        self.groups = self.in_channels
+        self.kernel_lengths = kernel_lengths         # <2>
+        self.stride = 2
+        self.strides = strides
+        if self.strides is None or not len(self.strides) == len(self.kernel_lengths):
+            self.strides = [self.stride] * len(self.kernel_lengths)
+        # self.output_seq_len = compute_output_seq_len(   # <3>
+        #     input_seq_len=self.seq_len,
+        #     kernel_lengths=self.kernel_lengths,
+        #     stride=self.stride,
+        # )
+
+        torch.random.manual_seed(self.torch_random_state)
+        np.random.seed(self.numpy_random_state)
+
+        kwargs = dict(   # <3>
+            embedding_size=self.in_channels,
+            kernel_lengths=self.kernel_lengths,
+            strides=self.strides)
+        print(f"output_seq_len = lopez_cnn_output_size(**{kwargs}")
+        self.output_seq_len = lopez_cnn_output_size(   # <3>
+            **kwargs
+        )
+        print(f"output_seq_len: {self.output_seq_len}")
+        self.num_output_channels = self.output_seq_len
+
+        assert self.torch_random_state == torch.random.initial_seed()
+        assert self.numpy_random_state == np.random.get_state()[1][0]
+
+        self.convolvers = []
+        self.poolers = []
+
+        # self.seq_len = params.seq_len
+        # self.vocab_size = params.vocab_size
+        print(f"self.embedding_size: {self.embedding_size}")
+        # self.embedding_size = params.embedding_size
+        # print(f"self.embedding_size: {self.embedding_size}")
+        self.kernel_lengths = list(kernel_lengths)
+
+        if isinstance(embeddings, torch.Tensor):
+            print(f'Loading embeddings: {embeddings.size()}')
+            self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False)
+        else:
+            print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
+            self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
+
+        # self.stride = getattr(params, 'stride', 2)
+        self.strides = strides
+        if not self.strides:
+            self.strides = [self.stride] * len(self.kernel_lengths)
+        if len(self.strides) < len(self.kernel_lengths):
+            self.strides = list(self.strides) + [self.stride] * (len(self.kernel_lengths) - len(self.strides))
+
+        self.dropout_portion = dropout_portion
+        self.dropout = nn.Dropout(self.dropout_portion)
+
+        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
+        self.conv_output_size = conv_output_size
+        print(f"conv_output_size (out_channels): {conv_output_size} ({self.out_channels})")
+        self.__dict__.update(kwargs)
+        print(f"self.conv_output_size: {self.conv_output_size}")
+
+        for param_name, param_val in vars(self).items():
+            if param_name.startswith('_'):
+                continue
+            if param_name in kwargs:
+                setattr(self, param_name, kwargs[param_name])
+            log.info(f'MODEL: {param_name}: {getattr(self, param_name)} ({type(getattr(self, param_name))})')
+
+        self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
+
+        # default: 4 CNN layers with max pooling
+        for i, (kernel_size, stride) in enumerate(zip(self.kernel_lengths, self.strides)):
+            kwargs = dict(
+                in_channels=self.in_channels,
+                out_channels=self.conv_output_size,
+                kernel_size=kernel_size,
+                stride=stride,
+                groups=self.groups,
+            )
+            print(f"Conv1d(kwargs={kwargs})")
+            self.convolvers.append(nn.Conv1d(
+                **kwargs))
+            print(self.convolvers[-1])
+            self.poolers.append(nn.MaxPool1d(kernel_size, stride))
+            print(self.poolers[-1])
+
+        self.encoding_size = lopez_cnn_output_size(
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            strides=self.strides,
+        )
+
+        self.linear_layer = nn.Linear(self.encoding_size, 1)
+# <1> assume a maximum text length of 32 tokens
+# <2> only one kernel layer is needed for reasonable results
+# <3> the convolution output need not have the same number of channels as your embeddings
+
+    def forward(self, x):
+        """ Takes sequence of integers (token indices) and outputs binary class label """
+
+        x = self.embedding(x)
+
+        conv_outputs = []
+        for (conv, pool) in zip(self.convolvers, self.poolers):
+            z = conv(x)
+            z = torch.relu(z)
+            z = pool(z)
+            conv_outputs.append(z)
+
+        # The output of each convolutional layer is concatenated into a unique vector
+        union = torch.cat(conv_outputs, 2)
+        union = union.reshape(union.size(0), -1)
+
+        # The "flattened" vector is passed through a fully connected layer
+        out = self.linear_layer(union)
+        # Dropout is applied
+        out = self.dropout(out)
+        # Activation function is applied
+        out = torch.sigmoid(out)
+
+        return out.squeeze()

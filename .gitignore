@@ -23,6 +23,7 @@ condaenv.*.requirements.txt
 !.isort.cfg
 *.orig
 *.log
+disaster_tweets_cnn_pipeline*.json
 *.pot
 .pytest_cache/*
 __pycache__/*
