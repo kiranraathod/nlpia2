@@ -43,18 +43,18 @@ class MinimalCNN(nn.Module):
 if __name__ == "__main__":
     num_examples = 7
     seq_len = 5
-    embedding_dims = 1
+    embedding_size = 1
 
-    dataset = torch.arange(0, num_examples * seq_len * embedding_dims, dtype=torch.float)
-    dataset.resize_(num_examples, seq_len, embedding_dims)
+    dataset = torch.arange(0, num_examples * seq_len * embedding_size, dtype=torch.float)
+    dataset.resize_(num_examples, seq_len, embedding_size)
 
     x = torch.arange(
-        num_examples * seq_len * embedding_dims,
+        num_examples * seq_len * embedding_size,
         dtype=torch.float
     )
-    x.resize_(num_examples, seq_len, embedding_dims)
+    x.resize_(num_examples, seq_len, embedding_size)
 
-    lin = nn.Linear(embedding_dims * seq_len, 1)
+    lin = nn.Linear(embedding_size * seq_len, 1)
 
     kernel_size = 2
     stride = 1
