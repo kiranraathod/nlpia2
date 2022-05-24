@@ -14,6 +14,17 @@
 # - Edelman:
 #    _Neural Darwinism_: (ch1 and philosophy, wisdom, prosocial)
 -
+  text: "It's no use, Mr. James—it's turtles all the way down."
+  author: J. R. Ross
+  source: _Constraints on Variables in Syntax_, 1967
+  tags: [recursion, rnn, philosophy, debate, logic, argument, ch8]
+-
+  text: "If everything must have a cause, then God must have a cause. If there can be anything without a cause, it may just as well be the world as God, so that there cannot be any validity in that argument."
+  author: Bertrand Russell
+  source: "'Why I Am Not a Christian' a lecture in 1927" 
+  url: https://en.wikipedia.org/wiki/Turtles_all_the_way_down
+  tags: [religion, god, recursion, rnn, philosophy, debate, logic, argument, ch8]
+-
   author: Eleanor Roosevelt
   tags: [great minds, ideas, gossip, politics]
   text: Great minds discuss ideas. Average minds discuss events. Small minds talk about people.
