@@ -1,4 +1,12 @@
-url: https://pytorch3d.readthedocs.io/en/latest/overview.html
-tags: [data science, ML]
-https://flask-mqtt.readthedocs.io/en/latest/ (should be Python and backend probably)
-https://huey.readthedocs.io/en/latest/guide.html (should probably be backend and devops maybe)
+-
+  url: https://pytorch3d.readthedocs.io/en/latest/overview.html
+  tags: [data science, ML]
+-
+  url: https://flask-mqtt.readthedocs.io/en/latest/
+  tags: [Python, backend]
+-
+  url: https://huey.readthedocs.io/en/latest/guide.html
+  tags: [backend, devops]
+-
+  url: https://django.readthedocs.io/
+  tags: [backend, python, web, webapp, framework]

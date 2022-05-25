@@ -8,6 +8,7 @@ from torch import nn
 from pathlib import Path
 from matplotlib import pyplot as plt
 
+
 num_examples = 7
 seq_len = 5
 embedding_size = 1
