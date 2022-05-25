@@ -29,7 +29,10 @@ dataset = torch.from_numpy(df.values).resize(num_examples, seq_len, embedding_si
 x = dataset[0]
 x.resize_(seq_len, embedding_size)
 
-lin = nn.Linear(embedding_size * seq_len, 1)
+conv = nn.Conv1d(in_channels=embedding_size, out_channels=1, groups=None, stride=1, kernel_size=2)
+print(conv.weight)
+
+# lin = nn.Linear(embedding_size * seq_len, 1)
 
 kernel_size = 2
 stride = 1
