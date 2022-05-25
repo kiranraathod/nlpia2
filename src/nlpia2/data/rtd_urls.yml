@@ -10,3 +10,11 @@
 -
   url: https://django.readthedocs.io/
   tags: [backend, python, web, webapp, framework]
+-
+  url: https://github.com/jonfaustman/django-frontend
+  tags: [django, backend, frontend]
+  robots: True
+-
+  url: "https://readthedocs.org/projects/javascript-avanzado/"
+  tags: [orphan]
+
