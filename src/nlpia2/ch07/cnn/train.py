@@ -416,6 +416,44 @@ if __name__ == '__main__':
     Epoch: 9, loss: 0.29812, Train accuracy: 0.86177, Test accuracy: 0.78215
     Epoch: 10, loss: 0.11444, Train accuracy: 0.87272, Test accuracy: 0.79003
     ```
+
+    It's not entirely train_test_split luck because randomizing split_random_state
+    still gets OK results:
+
+    ```
+    python train.py \
+        --conv_output_size=32 \
+        --groups=1 \
+        --embedding_size=50 \
+        --in_channels=32 \
+        --epochs=20 \
+        --numpy_random_state=433 \
+        --torch_random_state=433994
+
+    INFO:__main__:DEFAULT: split_random_state: 1461995
+    WARNING:__main__:NEW KWARGS: numpy_random_state: 433 (<class 'int'>)
+    WARNING:__main__:NEW KWARGS: torch_random_state: 433994 (<class 'int'>)
+
+    Epoch: 1, loss: 0.80616, Train accuracy: 0.58999, Test accuracy: 0.68635
+    Epoch: 2, loss: 0.79108, Train accuracy: 0.67465, Test accuracy: 0.68504
+    Epoch: 3, loss: 0.53284, Train accuracy: 0.72530, Test accuracy: 0.69816
+    Epoch: 4, loss: 0.55834, Train accuracy: 0.76368, Test accuracy: 0.70341
+    Epoch: 5, loss: 0.58383, Train accuracy: 0.79054, Test accuracy: 0.71654
+    Epoch: 6, loss: 0.53005, Train accuracy: 0.80572, Test accuracy: 0.71785
+    Epoch: 7, loss: 0.53331, Train accuracy: 0.82514, Test accuracy: 0.72047
+    Epoch: 8, loss: 0.36223, Train accuracy: 0.84688, Test accuracy: 0.73360
+    Epoch: 9, loss: 0.23334, Train accuracy: 0.85345, Test accuracy: 0.75984
+    Epoch: 10, loss: 0.37311, Train accuracy: 0.86878, Test accuracy: 0.75984
+    Epoch: 11, loss: 0.16161, Train accuracy: 0.88046, Test accuracy: 0.77034
+    Epoch: 12, loss: 0.17307, Train accuracy: 0.89155, Test accuracy: 0.76378
+    Epoch: 13, loss: 0.24728, Train accuracy: 0.90220, Test accuracy: 0.76509
+    Epoch: 14, loss: 0.24151, Train accuracy: 0.90804, Test accuracy: 0.75853
+    Epoch: 15, loss: 0.45944, Train accuracy: 0.91680, Test accuracy: 0.76378
+    Epoch: 16, loss: 0.06032, Train accuracy: 0.92527, Test accuracy: 0.76509
+    Epoch: 17, loss: 0.16179, Train accuracy: 0.92746, Test accuracy: 0.76640
+    Epoch: 18, loss: 0.13890, Train accuracy: 0.93359, Test accuracy: 0.76115
+    Epoch: 19, loss: 0.15811, Train accuracy: 0.93913, Test accuracy: 0.75066
+    Epoch: 20, loss: 0.05061, Train accuracy: 0.93665, Test accuracy: 0.76115
     """
     results = main()
     print("=" * 100)
