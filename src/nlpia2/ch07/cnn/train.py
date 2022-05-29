@@ -62,7 +62,7 @@ class Parameters:
         self.in_channels: int = 32
         self.planes: int = 1  # not sure if the is correct terminology
         self.out_channels: int = self.planes * self.in_channels
-        self.groups: int = self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
+        self.groups: int = 1  # self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
 
         self.epochs: int = 10
         self.batch_size: int = 12
@@ -372,6 +372,51 @@ def main():
 
 
 if __name__ == '__main__':
+    """ Train a 1-D 4-kernel CNN on disaster-tweets.csv
+
+    These CLI args achieved 79% accuracy once (but sometimes no better than 70%):
+
+    ```bash
+    $ python train.py \
+        --conv_output_size=32 \
+        --groups=1 \
+        --embedding_size=50 \
+        --in_channels=32 \
+        --epochs=20 \
+        --numpy_random_state=433 \
+        --torch_random_state=433994 \
+        --split_random_state=1460940
+        
+
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 2, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(2,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 3, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(3,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 4, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(4,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=4, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 5, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(5,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=5, stride=2, padding=0, dilation=1, ceil_mode=False)
+    {'in_seq_len': 64, 'kernel_lengths': [2, 3, 4, 5], 'strides': [2, 2, 2, 2]}
+    self.encoding_size = 1856
+    conv_outputs: [torch.Size([12, 32, 16]), torch.Size([12, 32, 15]), torch.Size([12, 32, 14]), torch.Size([12, 32, 13])]
+    encoding.size(): torch.Size([12, 32, 58])
+    reshaped encoding.size(): torch.Size([12, 1856])
+    Epoch: 1, loss: 0.66147, Train accuracy: 0.61392, Test accuracy: 0.63648
+    Epoch: 2, loss: 0.55146, Train accuracy: 0.68837, Test accuracy: 0.70997
+    Epoch: 3, loss: 0.47055, Train accuracy: 0.73391, Test accuracy: 0.73885
+    Epoch: 4, loss: 0.35673, Train accuracy: 0.77230, Test accuracy: 0.76509
+    Epoch: 5, loss: 0.28001, Train accuracy: 0.79521, Test accuracy: 0.77822
+    Epoch: 6, loss: 0.35333, Train accuracy: 0.81711, Test accuracy: 0.78346
+    Epoch: 7, loss: 0.22455, Train accuracy: 0.83389, Test accuracy: 0.78215
+    Epoch: 8, loss: 0.24332, Train accuracy: 0.84761, Test accuracy: 0.77953
+    Epoch: 9, loss: 0.29812, Train accuracy: 0.86177, Test accuracy: 0.78215
+    Epoch: 10, loss: 0.11444, Train accuracy: 0.87272, Test accuracy: 0.79003
+    ```
+    """
     results = main()
     print("=" * 100)
     print("=========== HYPERPARMS =============")

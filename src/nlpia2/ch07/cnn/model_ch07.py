@@ -50,7 +50,7 @@ def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_
     return out_pool_total * desired_conv_output_size
 
 
-def compute_output_seq_len(input_seq_len=35, kernel_lengths=[2], stride=1):
+def compute_output_seq_len(embedding_size=50, kernel_lengths=[2], stride=1, **kwargs):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     From PyTorch docs:
@@ -64,8 +64,8 @@ def compute_output_seq_len(input_seq_len=35, kernel_lengths=[2], stride=1):
     out_pool_total = 0
     for kernel_len in kernel_lengths:
         out_conv = (
-            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
+            (embedding_size - (kernel_len - 1) - 1) // stride) + 1
+        out_pool = ((out_conv - (kernel_len - 1) - 1) // stride) + 1
         out_pool_total += out_pool
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
@@ -92,15 +92,17 @@ class CNNTextClassifier(nn.Module):
 
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
 
-        self.conv_output_size = self.embedding_size
+        self.conv_output_size = 35  # self.embedding_size
         self.convolvers = []
         self.poolers = []
-        for i, kernel_len in enumerate(self.kernel_lengths):
+        for i, kernel_size in enumerate(self.kernel_lengths):
             self.convolvers.append(
-                nn.Conv1d(self.seq_len, self.conv_output_size,
-                          kernel_len, self.stride))
+                nn.Conv1d(in_channels=34,
+                          out_channels=34,
+                          kernel_size=kernel_size,
+                          stride=self.stride))
             self.poolers.append(
-                nn.MaxPool1d(kernel_len, self.stride))  # <7>
+                nn.MaxPool1d(kernel_size, self.stride))  # <7>
 
         # self.conv_output_size = lopez_cnn_output_size()  # <8>
         self.conv_output_size = compute_output_seq_len()  # <8>
@@ -121,19 +123,30 @@ class CNNTextClassifier(nn.Module):
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """
 
-        x = self.embedding(x)
+        x = self.embedding(x).transpose(1, 2)
 
         conv_outputs = []
         for (conv, pool) in zip(self.convolvers, self.poolers):
+            print(f"x.size(): {x.size()}")
             z = conv(x)
+            print(f"conv(x).size(): {z.size()}")
             z = torch.relu(z)  # <1>
+            print(f"conv(x).size().relu(): {z.size()}")
             z = pool(z)        # <2>
+            print(f"pool(relu(conv(x).size())): {z.size()}")
             conv_outputs.append(z)
 
         cat = torch.cat(conv_outputs, 2)    # <3>
+        print(f"cat: {cat.size()}")
         enc = cat.reshape(cat.size(0), -1)  # <4>
+        print(f"enc: {enc.size()}")
 
         sparse_enc = self.dropout(enc)       # <5>
+        print(f"sparse_enc: {sparse_enc.size()}")
+
+        # FIXME: .linear(input, self.weight, self.bias)
+        # RuntimeError: mat1 and mat2 shapes cannot be multiplied (10x1155 and 48x1)
+
         out = self.linear_layer(sparse_enc)  # <6>
         out = torch.sigmoid(out)
 

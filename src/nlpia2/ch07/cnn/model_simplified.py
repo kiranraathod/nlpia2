@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.WARNING)
 # .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 
 
-def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None):
+def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None, **kwargs):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
@@ -161,7 +161,6 @@ class CNNTextClassifier(nn.ModuleList):
             print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
-
         for i, kernel_len in enumerate(self.kernel_lengths):
             self.convolvers.append(nn.Conv1d(
                 in_channels=self.num_input_channels,
@@ -182,6 +181,7 @@ class CNNTextClassifier(nn.ModuleList):
 # <1> assume a maximum text length of 35 tokens
 # <2> only one kernel layer is needed for reasonable results
 # <3> the convolution output need not have the same number of channels as your embeddings
+
 
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """

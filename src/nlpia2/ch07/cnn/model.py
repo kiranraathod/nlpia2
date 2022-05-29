@@ -112,9 +112,9 @@ class CNNTextClassifier(nn.ModuleList):
         self.embedding_size = shape[1]
 
         self.seq_len = seq_len
-        self.in_channels = seq_len              # <1>
+        self.in_channels = in_channels             # <1> seq_len
         self.out_channels = self.in_channels
-        self.groups = self.in_channels
+        self.groups = groups
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
@@ -172,7 +172,7 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
             print(f"self.poolers[-1]: {self.poolers[-1]}")
 
-        calcoutkwargs = dict(in_seq_len=self.seq_len * 2,
+        calcoutkwargs = dict(in_seq_len=self.in_channels * 2,  # seq_len
                              kernel_lengths=self.kernel_lengths,
                              strides=self.strides)
         print(calcoutkwargs)

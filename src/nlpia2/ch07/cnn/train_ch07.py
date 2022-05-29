@@ -26,7 +26,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm  # noqa
 
 from model_ch07 import CNNTextClassifier
-from nlpia2.language_model import nlp
+from model_ch07 import compute_output_seq_len  # noqa
 
 
 T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
@@ -38,91 +38,25 @@ logging.basicConfig(level=logging.INFO)
 log.setLevel(level=logging.INFO)
 
 
-def tokenize_spacy(doc):
-    return [tok.text for tok in nlp(doc) if tok.text.strip()]
-
-
 def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-def cnn_output_size(desired_conv_output_size, embedding_size, kernel_lengths, strides):
-    """ Calculate the number of encoding dimensions output from CNN layers
-
-    Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-
-    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-    """
-    out_pool_total = 0
-    for kernel_len, stride in zip(kernel_lengths, strides):
-        out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool_total += out_pool
-
-    # Returns "flattened" vector (input for fully connected layer)
-    return out_pool_total * desired_conv_output_size
+hyperparams = dict(
+    expand_glove_vocab=False,
+    seq_len=35,
+    vocab_size=3000,
+    embedding_size=50,
+    num_stopwords=0,
+    kernel_lengths=[2],
+    strides=[1],
+    batch_size=10,
+    learning_rate=0.01,
+    num_epochs=10,
+)
 
 
-def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
-    """ Calculate the number of encoding dimensions output from CNN layers
-
-    From PyTorch docs:
-      L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride
-    But padding=0 and dilation=1, because we're only doing a 'valid' convolution.
-    So:
-      L_out = 1 + (L_in - (kernel_size - 1) - 1) // stride
-
-    source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-    """
-    out_pool_total = 0
-    for kernel_len in kernel_lengths:
-        out_conv = (
-            (input_seq_len - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - 1 * (kernel_len - 1) - 1) // stride) + 1
-        out_pool_total += out_pool
-
-    # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
-    return out_pool_total
-
-
-class Parameters:
-
-    def __init__(self):
-        self.seq_len: int = 35
-        self.num_epochs: int = 10
-        self.filepath: Path = Path('disaster-tweets.csv')
-        self.usecols: tuple = ('text', 'target')
-        self.tokenizer: str = 'tokenize_re'
-
-        self.vocab_size: int = 3000
-
-        self.embedding_size: int = 50
-        self.kernel_lengths: list = [2]  # , 3, 4, 5]
-        self.strides: list = [2]  # , 2, 2, 2]
-        self.conv_output_size: int = 32
-
-        self.epochs: int = 10
-        self.batch_size: int = 12
-        self.learning_rate: float = 0.001
-        self.test_size: float = 0.1
-
-        self.dropout_portion: float = 0.2
-
-        self.num_stopwords: int = 0
-        self.case_sensitive: bool = True
-
-        self.split_random_state: int = min(max(int((time.time() - T0)), 0), MAX_SEED)
-        self.numpy_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000), 0), MAX_SEED)
-        self.torch_random_state: int = min(max(int((time.time() - T0 - self.split_random_state) * 1000000), 0), MAX_SEED)
-
-        self.re_sub: str = r'[^A-Za-z0-9.?!]+'
-
-
-HYPERPARAMS = Parameters()
-
-
-def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
+def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
     log.debug(f'BEFORE PADDING: {sequence}')
     padded = list(sequence)[:seq_len]
     padded = padded + [pad_value] * (seq_len - len(padded))
@@ -130,30 +64,14 @@ def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
     return padded
 
 
-def update_params(params=HYPERPARAMS, **kwargs):
-    if kwargs.pop('win', False):
-        kwargs['split_random_state'] = 850753
-        kwargs['numpy_random_state'] = 704
-        kwargs['torch_random_state'] = 704463
-    for param_name, param_val in params.__dict__.items():
-        log.info(f'DEFAULT: {param_name}: {param_val}')
-        kwarg_val = kwargs.get(param_name)
-        if kwarg_val is not None:
-            if param_val is None:
-                coerce_to_dest_type = int
-            else:
-                coerce_to_dest_type = type(param_val)
-            if not isinstance(param_val, str) and isinstance(kwarg_val, str):
-                kwarg_val = eval(kwarg_val)
-            setattr(params, param_name, coerce_to_dest_type(kwarg_val))
-            log.warning(f'NEW KWARGS: {param_name}: {getattr(params, param_name)} ({type(getattr(params, param_name))})')
-    params.tokenizer_fun = globals().get(params.tokenizer, tokenize_re)
-    if not params.filepath.is_file():
-        params.filepath = Path(DATA_DIR) / params.filepath
-    return params
-
-
-def load_dataset(expand_glove_vocab=False, seq_len=35, vocab_size=2000, embedding_size=64, num_stopwords=0, **kwargs):
+def load_dataset(
+    expand_glove_vocab=hyperparams['expand_glove_vocab'],
+    seq_len=hyperparams['seq_len'],
+    vocab_size=hyperparams['vocab_size'],
+    embedding_size=hyperparams['embedding_size'],
+    num_stopwords=hyperparams['num_stopwords'],
+    **kwargs,
+):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
     1. Simplified: load the CSV
@@ -272,7 +190,7 @@ def calculate_accuracy(y_true, y_pred):
     return (true_positives + true_negatives) / len(y_true)
 
 
-class Pipeline(Parameters):
+class Pipeline:
 
     def __init__(self, **kwargs):
         """
@@ -284,15 +202,10 @@ class Pipeline(Parameters):
             python train.py --split_random_state=850753 --numpy_random_state=704 --torch_random_state=704463
         """
         super().__init__()
-        log.info(kwargs)
-        # params = update_params(params=self)
-        # self.__dict__.update(params.__dict__)
+        self.__dict__.update(kwargs)
         print(vars(self))
 
-        dataset = load_dataset(
-            expand_glove_vocab=False,
-            seq_len=self.seq_len,
-            **kwargs)
+        dataset = load_dataset(**kwargs)
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
@@ -410,13 +323,13 @@ def parse_argv(sys_argv=sys.argv):
 
 def main():
 
-    pipeline_args, pipeline_kwargs = parse_argv(sys.argv)
+    cli_args, cli_kwargs = parse_argv(sys.argv)
+    if len(cli_args):
+        log.error(f'main.py does not accept positional args: {cli_args}')
+    log.warning(f'kwargs: {cli_kwargs}')
 
-    if len(pipeline_args):
-        log.error(f'main.py does not accept positional args: {pipeline_args}')
-    log.warning(f'kwargs: {pipeline_kwargs}')
-
-    pipeline = Pipeline(**pipeline_kwargs)
+    hyperparams.update(cli_kwargs)
+    pipeline = Pipeline(**hyperparams)
 
     pipeline = pipeline.train()
     hyperparms = json.loads(pipeline.dump())
@@ -427,7 +340,22 @@ def main():
 
 
 if __name__ == '__main__':
-    results = main()
+
+    # results = main()
+    cli_args, cli_kwargs = parse_argv(sys.argv)
+    if len(cli_args):
+        log.error(f'main.py does not accept positional args: {cli_args}')
+    log.warning(f'kwargs: {cli_kwargs}')
+
+    hyperparams.update(cli_kwargs)
+    pipeline = Pipeline(**hyperparams)
+
+    pipeline = pipeline.train()
+    hyperparms = json.loads(pipeline.dump())
+
+    # predictions = pipeline.predict()
+
+    results = dict(pipeline=pipeline, hyperparams=hyperparms)
     print("=" * 100)
     print("=========== HYPERPARMS =============")
     print(results['hyperparams'].keys())
