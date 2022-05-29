@@ -23,7 +23,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-from tqdm import tqdm
+from tqdm import tqdm  # noqa
 
 from model_ch07 import CNNTextClassifier
 from nlpia2.language_model import nlp
@@ -90,15 +90,16 @@ class Parameters:
 
     def __init__(self):
         self.seq_len: int = 35
+        self.num_epochs: int = 10
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
 
-        self.vocab_size: int = 2000
+        self.vocab_size: int = 3000
 
-        self.embedding_size: int = 64
-        self.kernel_lengths: list = [2, 3, 4, 5]
-        self.strides: list = [2, 2, 2, 2]
+        self.embedding_size: int = 50
+        self.kernel_lengths: list = [2]  # , 3, 4, 5]
+        self.strides: list = [2]  # , 2, 2, 2]
         self.conv_output_size: int = 32
 
         self.epochs: int = 10

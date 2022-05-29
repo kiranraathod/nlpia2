@@ -19,7 +19,7 @@ Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
 """
 import logging
-import numpy as np
+import numpy as np  # noqa
 import torch
 import torch.nn as nn
 
@@ -50,7 +50,7 @@ def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_
     return out_pool_total * desired_conv_output_size
 
 
-def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
+def compute_output_seq_len(input_seq_len=35, kernel_lengths=[2], stride=1):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     From PyTorch docs:
@@ -80,18 +80,19 @@ def compute_output_seq_len(input_seq_len, kernel_lengths, stride):
 # ----
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, embeddings):
+    def __init__(self, **kwargs):
         super().__init__()
 
         self.seq_len = 35                          # <1>
-        self.vocab_size = embeddings.shape[0]      # <2>
-        self.embedding_size = embeddings.shape[1]  # <3>
+        self.vocab_size = 3000                     # <2>
+        self.embedding_size = 50                   # <3>
         self.kernel_lengths = [2]                  # <4>
-        self.stride = 2                            # <5>
+        self.stride = 1                            # <5>
         self.dropout = nn.Dropout(.2)              # <6>
 
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
 
+        self.conv_output_size = self.embedding_size
         self.convolvers = []
         self.poolers = []
         for i, kernel_len in enumerate(self.kernel_lengths):
@@ -101,7 +102,8 @@ class CNNTextClassifier(nn.Module):
             self.poolers.append(
                 nn.MaxPool1d(kernel_len, self.stride))  # <7>
 
-        self.conv_output_size = self.cnn_output_size()  # <8>
+        # self.conv_output_size = lopez_cnn_output_size()  # <8>
+        self.conv_output_size = compute_output_seq_len()  # <8>
         self.linear_layer = nn.Linear(self.conv_output_size, 1)
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens
@@ -142,4 +144,4 @@ class CNNTextClassifier(nn.Module):
 # <4> flatten the output tensor to create an encoding vector
 # <5> dropout (zero out) some encoding dimensions to make it sparse
 # <6> output a linear (weighted) combination of the encoding values
-# <7> for a binary class squash the output between 0 and 1 
+# <7> for a binary class squash the output between 0 and 1
