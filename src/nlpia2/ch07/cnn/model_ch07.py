@@ -110,8 +110,8 @@ class CNNTextClassifier(nn.Module):
 
         # FIXME: mimic the successful train.py and model.py architecture here
         self.seq_len = 40                          # <1>
-        self.vocab_size = 8000                     # <2>
-        self.embedding_size = 32                   # <3>
+        self.vocab_size = 10000                     # <2>
+        self.embedding_size = 50                   # <3>
         self.out_channels = 5
         self.kernel_lengths = [2, 3, 4, 5, 6]                  # <4>
         self.stride = 1                            # <5>

@@ -45,14 +45,14 @@ def tokenize_re(doc):
 hyperparams = dict(
     expand_glove_vocab=False,
     seq_len=40,
-    vocab_size=8000,
+    vocab_size=10000,
     embedding_size=50,
-    num_stopwords=0,
+    num_stopwords=3,
     kernel_lengths=[2],
     strides=[2],
     batch_size=16,
     learning_rate=0.003,
-    num_epochs=55,
+    num_epochs=75,
 )
 
 
