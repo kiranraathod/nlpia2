@@ -108,7 +108,7 @@ class CNNTextClassifier(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        # FIXME: mimic the successful train.py and model.py architecture here
+        # best overfitting was 81% train 
         self.seq_len = 40                          # <1>
         self.vocab_size = 10000                     # <2>
         self.embedding_size = 50                   # <3>
