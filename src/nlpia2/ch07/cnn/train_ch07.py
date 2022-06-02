@@ -44,8 +44,8 @@ def tokenize_re(doc):
 
 hyperparams = dict(
     expand_glove_vocab=False,
-    seq_len=32,
-    vocab_size=2000,
+    seq_len=40,
+    vocab_size=8000,
     embedding_size=32,
     num_stopwords=0,
     kernel_lengths=[2],
@@ -149,7 +149,7 @@ def load_dataset(
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for seq in id_sequences:
-        padded_sequences.append(pad(seq, seq_len=35, pad_value=vocab.index(PAD_TOK)))
+        padded_sequences.append(pad(seq, seq_len=seq_len, pad_value=vocab.index(PAD_TOK)))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
