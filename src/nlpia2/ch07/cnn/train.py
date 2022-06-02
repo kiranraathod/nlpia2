@@ -1,4 +1,8 @@
-""" Includes random state args
+""" Based on Fernando Lopez main.py
+
+
+
+Includes random state args
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
@@ -55,8 +59,8 @@ class Parameters:
         self.tokenizer: str = 'tokenize_re'
 
         self.embeddings: tuple = (2000, 64)
-        self.kernel_lengths: list = [2, 3, 4, 5]
-        self.strides: list = [2, 2, 2, 2]
+        self.kernel_lengths: list = [2]  # [2, 3, 4, 5]
+        self.strides: list = [2]  # [2, 2, 2, 2]
         self.conv_output_size: int = 32
 
         self.in_channels: int = 32
@@ -285,6 +289,7 @@ class Pipeline(Parameters):
         return self
 
     def predict(self, X=None):
+        """ FIXME: look for evaluate functions that turn grad and dropout off during evaluation """
 
         self.model.eval()  # evaluation mode
         predictions = []
@@ -386,7 +391,7 @@ if __name__ == '__main__':
         --numpy_random_state=433 \
         --torch_random_state=433994 \
         --split_random_state=1460940
-        
+
 
     Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 2, 'stride': 2, 'groups': 1})
     Conv1d(32, 32, kernel_size=(2,), stride=(2,))

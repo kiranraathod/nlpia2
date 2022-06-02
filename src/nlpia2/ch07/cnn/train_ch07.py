@@ -26,7 +26,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm  # noqa
 
 from model_ch07 import CNNTextClassifier
-from model_ch07 import compute_output_seq_len  # noqa
+from model_ch07 import calc_output_seq_len  # noqa
 
 
 T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
@@ -44,15 +44,15 @@ def tokenize_re(doc):
 
 hyperparams = dict(
     expand_glove_vocab=False,
-    seq_len=35,
-    vocab_size=3000,
-    embedding_size=50,
+    seq_len=32,
+    vocab_size=2000,
+    embedding_size=32,
     num_stopwords=0,
     kernel_lengths=[2],
-    strides=[1],
-    batch_size=10,
-    learning_rate=0.01,
-    num_epochs=10,
+    strides=[2],
+    batch_size=16,
+    learning_rate=0.003,
+    num_epochs=55,
 )
 
 
@@ -65,6 +65,7 @@ def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
 
 
 def load_dataset(
+    use_glove=False,
     expand_glove_vocab=hyperparams['expand_glove_vocab'],
     seq_len=hyperparams['seq_len'],
     vocab_size=hyperparams['vocab_size'],
@@ -85,12 +86,12 @@ def load_dataset(
     9. Simplified: pad token id sequences
     10. Simplified: train_test_split
     """
-
     import re
     from nessvec.files import load_vecs_df
     HOME_DATA_DIR = Path.home() / '.nlpia2-data'
     PAD_TOK = '<PAD>'
 
+    retval = {}
     df = pd.read_csv(HOME_DATA_DIR / 'disaster-tweets.csv')
     df = df[['text', 'target']]
     df['target'] = (df['target'] > 0).astype(int)
@@ -100,36 +101,38 @@ def load_dataset(
     if PAD_TOK not in vocab:
         vocab = [PAD_TOK] + list(vocab)
 
-    glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
-    num_glove_vecs, embed_dims = glove.shape
-    new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
-    glove = pd.concat([new_embeddings, glove])
-    print(f'glove.shape {glove.shape}')
-    print(glove)
+    if use_glove:
+        glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
+        num_glove_vecs, embed_dims = glove.shape
+        new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
+        glove = pd.concat([new_embeddings, glove])
+        print(f'glove.shape {glove.shape}')
+        print(glove)
 
-    expand_glove_vocab = False
-    if expand_glove_vocab:
-        new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
-        vocab.extend(new_vocab)
-        embed = []
-        for tok in vocab:                                              # <4>
-            if tok in glove.index:
-                embed.append(glove.loc[tok])
-            else:
-                embed.append(np.zeros(embed_dims))
-    else:
-        vocab = [tok for tok in vocab if tok in glove.index]
-        print(f'len(vocab) {len(vocab)}')
-        embed = glove.loc[vocab].values
-    embed = np.array(embed)
-    print(f'glove.shape {glove.shape}')
-    print(f'embed.shape {embed.shape}')
-    embed = torch.Tensor(np.array(embed))
-    print(f'embed.size() {embed.size()}')
+        expand_glove_vocab = False
+        if expand_glove_vocab:
+            new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
+            vocab.extend(new_vocab)
+            embed = []
+            for tok in vocab:                                              # <4>
+                if tok in glove.index:
+                    embed.append(glove.loc[tok])
+                else:
+                    embed.append(np.zeros(embed_dims))
+        else:
+            vocab = [tok for tok in vocab if tok in glove.index]
+            print(f'len(vocab) {len(vocab)}')
+            embed = glove.loc[vocab].values
+        embed = np.array(embed)
+        print(f'glove.shape {glove.shape}')
+        print(f'embed.shape {embed.shape}')
+        embed = torch.Tensor(np.array(embed))
+        print(f'embed.size() {embed.size()}')
 
-    print(df)
-    print(f'embed.size(): {embed.size()}')
-    print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
+        print(df)
+        print(f'embed.size(): {embed.size()}')
+        print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
+        retval['embed'] = embed
 
     # <1> tokenizing, case folding, and occurrence counting
     # <2> ignore the 3 most frequent tokens ("t", "co", "http")
@@ -150,15 +153,14 @@ def load_dataset(
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
-    retval = dict(zip(
+    retval.update(dict(zip(
         'x_train x_test y_train y_test'.split(),
         train_test_split(
             padded_sequences,
             list(df['target']),
-            test_size=.1)))
+            test_size=.1))))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
-    retval['embed'] = embed
     return retval
 
 
@@ -213,7 +215,7 @@ class Pipeline:
         self.model = CNNTextClassifier(
             seq_len=self.seq_len,
             kernel_lengths=self.kernel_lengths,
-            embeddings=tuple(dataset['embed'].size()))
+            embeddings=(self.vocab_size, self.embedding_size))  # tuple(dataset['embed'].size()))
 
     def train(self, X=None, y=None):
 
@@ -231,8 +233,11 @@ class Pipeline:
             predictions = []
             for x_batch, y_batch in self.loader_train:
                 y_batch = y_batch.type(torch.FloatTensor)
+                # print(f'y_batch: {y_batch}')
                 y_pred = self.model(x_batch)
+                # print(f'y_pred: {y_pred}')
                 loss = F.binary_cross_entropy(y_pred, y_batch)
+                # print(f'loss: {loss}')
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()

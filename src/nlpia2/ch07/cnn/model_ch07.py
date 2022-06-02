@@ -1,5 +1,19 @@
 """ 1-D Convolutional Neural Network for NLP
 
+## References
+- best diagrams: https://arxiv.org/pdf/1510.03820.pdf
+- Christopher Manning (Stanford NLP):
+  https://cuuduongthancong.com/dlf/3400312/xu-ly-ngon-ngu-tu-nhien/christopher-manning/cs224n-2020-lecture11-convnets.pdf
+- Zhang and Wallace (2015) A Sensitivity Analysis of (and Practitioners’ Guide to) CNN for Sentence Classification:
+  https://arxiv.org/pdf/1510.03820.pdf
+- Yoon Kim: https://arxiv.org/pdf/1408.5882.pdf
+- data.csv for text classification: https://github.com/zackhy/TextClassification
+- Discriminative neural sentence modeling: https://arxiv.org/pdf/1504.01106v5.pdf
+- diagrams like mine: https://sumanshuarora.medium.com/understanding-pytorch-conv1d-shapes-for-text-classification-c1e1857f8533
+- confirmation you need to transpose embeddings: https://stackoverflow.com/questions/62372938/understanding-input-shape-to-pytorch-conv1d
+- detailed pooling match examples: https://machinelearningmastery.com/pooling-layers-for-convolutional-neural-networks/
+- pooling over channels: https://stackoverflow.com/questions/46562612/pytorch-maxpooling-over-channels-dimension
+
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 Definitions (from PyTorch Docs):
@@ -30,16 +44,16 @@ logging.basicConfig(level=logging.WARNING)
 # .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 
 
-def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_output_size=None):
+def lopez_calc_output_seq_len(embedding_size, kernel_lengths, strides, desired_output_channels=None):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     Convolved_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
-    Pooled_Features = ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
+    Pooled_Features =    ((embedding_size + (2 * padding) - dilation * (kernel - 1) - 1) / stride) + 1
 
     source: https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
     """
-    if desired_conv_output_size is None:
-        desired_conv_output_size = embedding_size // 2
+    if desired_output_channels is None:
+        desired_output_channels = embedding_size // 2  # FIXME: stride instead of 2
     out_pool_total = 0
     for kernel_len, stride in zip(kernel_lengths, strides):
         out_conv = ((embedding_size - 1 * (kernel_len - 1) - 1) // stride) + 1
@@ -47,10 +61,15 @@ def lopez_cnn_output_size(embedding_size, kernel_lengths, strides, desired_conv_
         out_pool_total += out_pool
 
     # Returns "flattened" vector (input for fully connected layer)
-    return out_pool_total * desired_conv_output_size
+    return out_pool_total * desired_output_channels
 
 
-def compute_output_seq_len(embedding_size=50, kernel_lengths=[2], stride=1, **kwargs):
+def calc_conv_output_seq_len(seq_len, kernel_len, stride=1, dilation=1, padding=0):
+    """ L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride """
+    return 1 + (seq_len + 2 * padding - dilation * (kernel_len - 1) - 1) // stride
+
+
+def calc_output_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     From PyTorch docs:
@@ -63,9 +82,14 @@ def compute_output_seq_len(embedding_size=50, kernel_lengths=[2], stride=1, **kw
     """
     out_pool_total = 0
     for kernel_len in kernel_lengths:
-        out_conv = (
-            (embedding_size - (kernel_len - 1) - 1) // stride) + 1
-        out_pool = ((out_conv - (kernel_len - 1) - 1) // stride) + 1
+        conv_output_len = calc_conv_output_seq_len(
+            seq_len=seq_len, kernel_len=kernel_len, stride=stride,
+            dilation=dilation, padding=padding
+        )
+        out_pool = calc_conv_output_seq_len(
+            seq_len=conv_output_len, kernel_len=kernel_len, stride=stride,
+            dilation=dilation, padding=padding
+        )
         out_pool_total += out_pool
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
@@ -83,30 +107,50 @@ class CNNTextClassifier(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self.seq_len = 35                          # <1>
-        self.vocab_size = 3000                     # <2>
+        # FIXME: mimic the successful train.py and model.py architecture here
+        self.seq_len = 40                          # <1>
+        self.vocab_size = 8000                     # <2>
         self.embedding_size = 50                   # <3>
-        self.kernel_lengths = [2]                  # <4>
+        self.out_channels = 4
+        self.kernel_lengths = [2, 3, 4, 5, 6]                  # <4>
         self.stride = 1                            # <5>
-        self.dropout = nn.Dropout(.2)              # <6>
+        self.dropout = nn.Dropout(.15)              # <6>
 
         self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
+        print(f'embedding: {self.embedding}')
+        print(f'embedding.weight.shape: {self.embedding.weight.shape}')
 
-        self.conv_output_size = 35  # self.embedding_size
+        # convolution
+        # self.conv_output_size = (self.seq_len - self.kernel_lengths[0] + 1) // self.stride  # self.embedding_size
+        # pooling
+        # self.conv_output_size = (self.conv_output_size - self.kernel_lengths[0] + 1) // self.stride  # self.embedding_size
+        # self.conv_output_size *= self.embedding_size
         self.convolvers = []
         self.poolers = []
-        for i, kernel_size in enumerate(self.kernel_lengths):
+        self.pool_lengths = []
+        for i, kernel_len in enumerate(self.kernel_lengths):
             self.convolvers.append(
-                nn.Conv1d(in_channels=34,
-                          out_channels=34,
-                          kernel_size=kernel_size,
+                nn.Conv1d(in_channels=self.embedding_size,
+                          out_channels=self.out_channels,
+                          kernel_size=kernel_len,
                           stride=self.stride))
+            print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
+            conv_output_len = calc_conv_output_seq_len(
+                seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)
+            print(f'conv_output_len: {conv_output_len}')
             self.poolers.append(
-                nn.MaxPool1d(kernel_size, self.stride))  # <7>
-
-        # self.conv_output_size = lopez_cnn_output_size()  # <8>
-        self.conv_output_size = compute_output_seq_len()  # <8>
-        self.linear_layer = nn.Linear(self.conv_output_size, 1)
+                nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))  # <7>
+            pool_output_len = calc_conv_output_seq_len(
+                seq_len=conv_output_len, kernel_len=conv_output_len, stride=self.stride)
+            print(f'pool_output_len: {pool_output_len}')
+            self.pool_lengths.append(pool_output_len)
+            # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
+            print(f'poolers[{i}]: {self.poolers[-1]}')
+        print(f'sum(self.pool_lengths): {sum(self.pool_lengths)}')
+        self.conv_output_size = calc_output_seq_len(seq_len=self.seq_len, kernel_lengths=self.kernel_lengths)  # <8>
+        print(f'calc_output_seq_len: {self.conv_output_size}')
+        self.linear_layer = nn.Linear(self.out_channels * sum(self.pool_lengths), 1)
+        print(f'linear_layer: {self.linear_layer}')
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens
 # <2> `V`: number of unique tokens (words) in your vocabulary
@@ -123,32 +167,41 @@ class CNNTextClassifier(nn.Module):
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """
 
-        x = self.embedding(x).transpose(1, 2)
+        e = self.embedding(x)
+        # print(f"x.size(): {x.size()}")
+        # if you transpose then you can make the in_channels = embedding size
+        # print(f"e.shape: {e.shape}")
+        e = e.transpose(1, 2)
+        # print(f"e.transpose(1,2).shape: {e.shape}")
 
         conv_outputs = []
         for (conv, pool) in zip(self.convolvers, self.poolers):
-            print(f"x.size(): {x.size()}")
-            z = conv(x)
-            print(f"conv(x).size(): {z.size()}")
+            z = conv(e)
+            # print(f"conv(x).size(): {z.size()}")
             z = torch.relu(z)  # <1>
-            print(f"conv(x).size().relu(): {z.size()}")
+            # print(f"conv(x).size().relu(): {z.size()}")
+            # torch.max(z, dim=1) # chris manning
             z = pool(z)        # <2>
-            print(f"pool(relu(conv(x).size())): {z.size()}")
+            # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
+
+            # print(f"z = pool(relu(conv(x).size())): {z.size()}")
             conv_outputs.append(z)
 
         cat = torch.cat(conv_outputs, 2)    # <3>
-        print(f"cat: {cat.size()}")
+        # print(f"cat: {cat.size()}")
         enc = cat.reshape(cat.size(0), -1)  # <4>
-        print(f"enc: {enc.size()}")
+        # print(f"enc: {enc.size()}")
 
-        sparse_enc = self.dropout(enc)       # <5>
-        print(f"sparse_enc: {sparse_enc.size()}")
+        sparse_enc = self.dropout(enc)      # <5>
+        # print(f"sparse_enc: {sparse_enc.size()}")
 
         # FIXME: .linear(input, self.weight, self.bias)
         # RuntimeError: mat1 and mat2 shapes cannot be multiplied (10x1155 and 48x1)
 
         out = self.linear_layer(sparse_enc)  # <6>
+        # print(f"linear out: {out.shape}")
         out = torch.sigmoid(out)
+        # print(f"sigmoid out: {out.shape}")
 
         return out.squeeze()
 # <1> each convolution layer gets its own activation function
