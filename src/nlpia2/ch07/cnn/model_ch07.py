@@ -13,6 +13,7 @@
 - confirmation you need to transpose embeddings: https://stackoverflow.com/questions/62372938/understanding-input-shape-to-pytorch-conv1d
 - detailed pooling match examples: https://machinelearningmastery.com/pooling-layers-for-convolutional-neural-networks/
 - pooling over channels: https://stackoverflow.com/questions/46562612/pytorch-maxpooling-over-channels-dimension
+- compare learning curves with and without dropout
 
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
