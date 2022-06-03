@@ -98,7 +98,7 @@ def load_dataset(
     df['target'] = (df['target'] > 0).astype(int)
     counts = Counter(chain(*[
         re.findall(r'[\w]+', t.lower()) for t in df['text']]))    # <1>
-    vocab = [tok for tok, count in counts.most_common(2000)[num_stopwords:]]  # <2>
+    vocab = [tok for tok, count in counts.most_common(vocab_size + num_stopwords)[num_stopwords:]]  # <2>
     if PAD_TOK not in vocab:
         vocab = [PAD_TOK] + list(vocab)
 
@@ -112,7 +112,7 @@ def load_dataset(
 
         expand_glove_vocab = True
         if expand_glove_vocab:
-            new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
+            new_vocab = [tok for tok in vocab if tok not in glove.index]   # <3>
             vocab.extend(new_vocab)
             embed = []
             for tok in vocab:                                              # <4>
@@ -124,13 +124,13 @@ def load_dataset(
             vocab = [tok for tok in vocab if tok in glove.index]
             print(f'len(vocab) {len(vocab)}')
             embed = glove.loc[vocab].values
-        embed = np.array(embed)
+        df_glove = pd.DataFrame(embed, index=vocab)
+        print(f'df_glove before tensor: {df_glove}')
+        embed = np.array(embed, dtype=np.float32)
         print(f'glove.shape {glove.shape}')
-        print(f'embed.shape {embed.shape}')
-        embed = torch.Tensor(np.array(embed))
+        print(f'embed.shape {embed.shape} (after filtering')
+        embed = torch.tensor(embed, dtype=torch.float32)
         print(f'embed.size() {embed.size()}')
-
-        print(df)
         print(f'embed.size(): {embed.size()}')
         print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
         retval['embed'] = embed
@@ -145,7 +145,7 @@ def load_dataset(
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
-    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df.text]
+    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df['text']]
 
     # 9. Simplified: pad token id sequences
     padded_sequences = []
@@ -215,7 +215,7 @@ class Pipeline:
         self.y_test = dataset['y_test']
         if hyperparams['use_glove']:
             self.model = CNNTextClassifier(
-                embeddings=dataset['embed'].values
+                embeddings=dataset['embed']
             )  # tuple(dataset['embed'].size()))
         else:
             self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
