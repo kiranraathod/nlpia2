@@ -6,7 +6,7 @@ Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
 """
-import time
+# import time
 from collections import Counter
 import json
 from itertools import chain
@@ -42,7 +42,7 @@ def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-hyperparams = dict(
+hyperp = dict(
     use_glove=True,
     expand_glove_vocab=True,
     seq_len=40,
@@ -57,7 +57,7 @@ hyperparams = dict(
 )
 
 
-def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
+def pad(sequence, seq_len, pad_value=0):
     log.debug(f'BEFORE PADDING: {sequence}')
     padded = list(sequence)[:seq_len]
     padded = padded + [pad_value] * (seq_len - len(padded))
@@ -67,11 +67,11 @@ def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
 
 def load_dataset(
     use_glove=True,
-    expand_glove_vocab=hyperparams['expand_glove_vocab'],
-    seq_len=hyperparams['seq_len'],
-    vocab_size=hyperparams['vocab_size'],
-    embedding_size=hyperparams['embedding_size'],
-    num_stopwords=hyperparams['num_stopwords'],
+    expand_glove_vocab=hyperp['expand_glove_vocab'],
+    seq_len=hyperp['seq_len'],
+    vocab_size=hyperp['vocab_size'],
+    embedding_size=hyperp['embedding_size'],
+    num_stopwords=hyperp['num_stopwords'],
     **kwargs,
 ):
     """ load and preprocess csv file: return [(token id sequences, label)...]
@@ -194,7 +194,7 @@ def calculate_accuracy(y_true, y_pred):
     return (true_positives + true_negatives) / len(y_true)
 
 
-class Pipeline:
+class Trainer:
 
     def __init__(self, **kwargs):
         """
@@ -214,10 +214,14 @@ class Pipeline:
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        if hyperparams['use_glove']:
+        if hyperp['use_glove']:
             self.model = CNNTextClassifier(
-                embeddings=dataset['embed']
-            )  # tuple(dataset['embed'].size()))
+                embeddings=dataset['embed'],
+                out_channels=hyperp['out_channels'],
+                seq_len=hyperp['seq_len'],
+                kernel_lengths=hyperp['kernel_lengths'],
+                strides=hyperp['strides']
+            )
         else:
             self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
 
@@ -260,54 +264,6 @@ class Pipeline:
             )
         return self
 
-    def predict(self, X=None):
-
-        self.model.eval()  # evaluation mode
-        predictions = []
-
-        if X is not None:
-            X_batches = zip([X], [[None] * len(X)])
-        else:
-            X_batches = list(zip(*self.loader_test))[0]
-            y_batches = list(zip(*self.loader_test))[1]
-        with torch.no_grad():
-            for x_batch, y_batch in zip(X_batches, y_batches):
-                y_pred = self.model(x_batch).detach().numpy()
-                predictions += list(y_pred)
-        return predictions
-
-    def score(self, X, y):
-        y_pred = self.predict(X)
-        return np.mean((y_pred - y.detach.numpy())**2) ** .5
-
-    def dump(self, filepath=None, indent=4):
-        js = self.dumps(indent=indent)
-        if filepath is None:
-            t = int((time.time() - T0) / 60)
-            filepath = f'disaster_tweets_cnn_pipeline_{t}.json'
-        with open(filepath, 'w') as fout:
-            fout.write(js)
-        return js
-
-    def dumps(self, indent=4):
-        hashable_dict = {}
-        for k, v in vars(self).items():
-            if v is None or isinstance(v, (str, float, int, bool)):
-                hashable_dict[k] = v
-                continue
-            if isinstance(v, (tuple, np.ndarray)):
-                v = list(v)
-            if isinstance(v, torch.Tensor):
-                v = list(v.detach().numpy())
-            if isinstance(v, list):
-                if isinstance(v[0], torch.Tensor):
-                    v = [list(x.detach().numpy()) for x in v]
-            try:
-                hashable_dict[k] = json.loads(json.dumps(v))
-            except TypeError:
-                pass
-        return json.dumps(hashable_dict, indent=indent)
-
 
 def parse_argv(sys_argv=sys.argv):
     argv = list(reversed(sys_argv[1:]))
@@ -337,8 +293,8 @@ def main():
         log.error(f'main.py does not accept positional args: {cli_args}')
     log.warning(f'kwargs: {cli_kwargs}')
 
-    hyperparams.update(cli_kwargs)
-    pipeline = Pipeline(**hyperparams)
+    hyperp.update(cli_kwargs)
+    pipeline = Trainer(**hyperp)
 
     pipeline = pipeline.train()
     hyperparms = json.loads(pipeline.dump())
@@ -356,16 +312,16 @@ if __name__ == '__main__':
         log.error(f'main.py does not accept positional args: {cli_args}')
     log.warning(f'kwargs: {cli_kwargs}')
 
-    hyperparams.update(cli_kwargs)
-    pipeline = Pipeline(**hyperparams)
+    hyperp.update(cli_kwargs)
+    pipeline = Trainer(**hyperp)
 
     pipeline = pipeline.train()
-    hyperparms = json.loads(pipeline.dump())
+    hyperp = json.loads(pipeline.dump())
 
     # predictions = pipeline.predict()
 
-    results = dict(pipeline=pipeline, hyperparams=hyperparms)
+    results = dict(pipeline=pipeline, hyperp=hyperp)
     print("=" * 100)
     print("=========== HYPERPARMS =============")
-    print(results['hyperparams'].keys())
+    print(results['hyperp'].keys())
     print("=" * 100)

@@ -1,6 +1,6 @@
 """ 1-D Convolutional Neural Network for NLP
 
-## References
+# References
 - best diagrams: https://arxiv.org/pdf/1510.03820.pdf
 - Christopher Manning (Stanford NLP):
   https://cuuduongthancong.com/dlf/3400312/xu-ly-ngon-ngu-tu-nhien/christopher-manning/cs224n-2020-lecture11-convnets.pdf
@@ -100,24 +100,61 @@ def total_out_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
 ##########################################################################
 
 
+def listify(x, n=None):
+    """ Convert a scalar or generator to a list
+
+    >>> listify(2.7)
+    [2.7]
+    >>> listify(range(1, 4), n=7)
+    [1, 2, 3, 1, 2, 3, 1]
+    >>> listify(range(2, 7), n=1)
+    [2]
+    """
+    if n is None:
+        if isinstance(x, (int, float)):
+            return [x]
+        if isinstance(x, str):
+            x = float(x)
+            try:
+                return [int(x)]
+            except ValueError:
+                return [float(x)]
+        return list(x)
+    x = listify(x)
+    len_x = len(x)
+    return [x[i % len_x] for i in range(n)]
+    # raise NotImplementedError("Use numpy resize or torch.squeeze and unsqueeze()")
+
+
 # .CNN hyperparameters
 # [source,python]
 # ----
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, embeddings=torch.rand(20000, 50)):
+    def __init__(self,
+                 embeddings=torch.rand(20000, 50),
+                 out_channels=None,
+                 seq_len=40,
+                 kernel_lengths=(1, 2, 3, 4, 5, 6),
+                 strides=1,
+                 stride=None,
+                 ):
         super().__init__()
 
-        self.seq_len = 40                               # <1>
+        self.seq_len = seq_len                          # <1>
         self.vocab_size = embeddings.shape[0]           # <2>
         self.embedding_size = embeddings.shape[1]       # <3>
-        self.out_channels = 14                          # <4>
-        self.kernel_lengths = [1, 2, 3, 4, 5, 6]        # <5>
-        self.stride = 1                                 # <6>
+        self.out_channels = out_channels                # <4>
+        kernel_lengths = listify(kernel_lengths)
+        self.kernel_lengths = listify(kernel_lengths)   # <5>
+        if stride is not None:
+            strides = stride
+        strides = listify(strides, n=len(kernel_lengths))
+        self.strides = strides                          # <6>
         self.dropout = nn.Dropout(.4)                   # <7>
         self.pool_stride = self.stride                  # <8>
 # ----
-# <1> `N_`: assume a maximum text length of 35 tokens
+# <1> `N_`: assume a maximum text length of 40 tokens
 # <2> `V`: number of unique tokens (words) in your vocabulary
 # <3> `E`: number of dimensions in your word embeddings
 # <4> `K`: number of weights in each kernel
