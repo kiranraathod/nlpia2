@@ -111,10 +111,10 @@ class CNNTextClassifier(nn.Module):
         self.seq_len = 40                               # <1>
         self.vocab_size = embeddings.shape[0]           # <2>
         self.embedding_size = embeddings.shape[1]       # <3>
-        self.out_channels = 12                          # <4>
-        self.kernel_lengths = [2, 3, 4, 5, 6]           # <5>
+        self.out_channels = 14                          # <4>
+        self.kernel_lengths = [1, 2, 3, 4, 5, 6]        # <5>
         self.stride = 1                                 # <6>
-        self.dropout = nn.Dropout(.07)                    # <7>
+        self.dropout = nn.Dropout(.4)                   # <7>
         self.pool_stride = self.stride                  # <8>
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens

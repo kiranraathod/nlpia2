@@ -49,11 +49,11 @@ hyperparams = dict(
     vocab_size=20000,
     embedding_size=50,
     num_stopwords=3,
-    kernel_lengths=[2, 3, 4, 5, 6],
-    strides=[1, 1, 1, 1, 1],
-    batch_size=48,
+    kernel_lengths=[1, 2, 3, 4, 5, 6],
+    strides=[1, 1, 1, 1, 1, 1],
+    batch_size=24,
     learning_rate=0.001,
-    num_epochs=200,
+    num_epochs=400,
 )
 
 
