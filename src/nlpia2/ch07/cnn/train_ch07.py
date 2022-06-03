@@ -51,7 +51,7 @@ hyperparams = dict(
     num_stopwords=3,
     kernel_lengths=[2, 3, 4, 5, 6],
     strides=[1, 1, 1, 1, 1],
-    batch_size=32,
+    batch_size=48,
     learning_rate=0.001,
     num_epochs=100,
 )
@@ -119,7 +119,8 @@ def load_dataset(
                 if tok in glove.index:
                     embed.append(glove.loc[tok])
                 else:
-                    embed.append(np.zeros(embed_dims))
+                    embed.append(.1 * np.rand.randn(embed_dims))
+                    # embed.append(np.zeros(embed_dims))
         else:
             vocab = [tok for tok in vocab if tok in glove.index]
             print(f'len(vocab) {len(vocab)}')
