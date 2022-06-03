@@ -65,12 +65,12 @@ def lopez_calc_output_seq_len(embedding_size, kernel_lengths, strides, desired_o
     return out_pool_total * desired_output_channels
 
 
-def calc_conv_output_seq_len(seq_len, kernel_len, stride=1, dilation=1, padding=0):
+def calc_conv_out_seq_len(seq_len, kernel_len, stride=1, dilation=1, padding=0):
     """ L_out = 1 + (L_in + 2 * padding - dilation * (kernel_size - 1) - 1) / stride """
     return 1 + (seq_len + 2 * padding - dilation * (kernel_len - 1) - 1) // stride
 
 
-def calc_output_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
+def total_out_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
     """ Calculate the number of encoding dimensions output from CNN layers
 
     From PyTorch docs:
@@ -83,11 +83,11 @@ def calc_output_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0
     """
     out_pool_total = 0
     for kernel_len in kernel_lengths:
-        conv_output_len = calc_conv_output_seq_len(
+        conv_output_len = calc_conv_out_seq_len(
             seq_len=seq_len, kernel_len=kernel_len, stride=stride,
             dilation=dilation, padding=padding
         )
-        out_pool = calc_conv_output_seq_len(
+        out_pool = calc_conv_out_seq_len(
             seq_len=conv_output_len, kernel_len=kernel_len, stride=stride,
             dilation=dilation, padding=padding
         )
@@ -108,16 +108,34 @@ class CNNTextClassifier(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
-        # best overfitting was 81% train 
-        self.seq_len = 40                          # <1>
-        self.vocab_size = 10000                     # <2>
-        self.embedding_size = 50                   # <3>
-        self.out_channels = 5
-        self.kernel_lengths = [2, 3, 4, 5, 6]                  # <4>
-        self.stride = 1                            # <5>
-        self.dropout = nn.Dropout(0)              # <6>
+        self.seq_len = 40                               # <1>
+        self.vocab_size = 10000                         # <2>
+        self.embedding_size = 50                        # <3>
+        self.out_channels = 5                           # <4>
+        self.kernel_lengths = [2, 3, 4, 5, 6]           # <5>
+        self.stride = 1                                 # <6>
+        self.dropout = nn.Dropout(0)                    # <7>
+        self.pool_stride = self.stride                  # <8>
+        self.conv_out_seq_len = total_out_seq_len(  # <9>
+            seq_len=self.seq_len,
+            kernel_lengths=self.kernel_lengths,
+            stride=self.stride,
+        )
 
-        self.embedding = nn.Embedding(self.vocab_size + 1, self.embedding_size, padding_idx=0)
+# ----
+# <1> `N_`: assume a maximum text length of 35 tokens
+# <2> `V`: number of unique tokens (words) in your vocabulary
+# <3> `E`: number of dimensions in your word embeddings
+# <4> `K`: number of weights in each kernel
+# <5> `S`: number of time steps (tokens) to slide the kernel forward with each step
+# <6> `D`: portion of convolution output to
+# <7> `P`: each convolution layer gets its own pooling function
+# <8> `C`: the total convolutional output size depends on how many and what shape convolutions you choose
+
+        self.embedding = nn.Embedding(
+            self.vocab_size + 1,
+            self.embedding_size,
+            padding_idx=0)
         print(f'embedding: {self.embedding}')
         print(f'embedding.weight.shape: {self.embedding.weight.shape}')
 
@@ -136,31 +154,23 @@ class CNNTextClassifier(nn.Module):
                           kernel_size=kernel_len,
                           stride=self.stride))
             print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
-            conv_output_len = calc_conv_output_seq_len(
+            conv_output_len = calc_conv_out_seq_len(
                 seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)
             print(f'conv_output_len: {conv_output_len}')
             self.poolers.append(
                 nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))  # <7>
-            pool_output_len = calc_conv_output_seq_len(
+            pool_output_len = calc_conv_out_seq_len(
                 seq_len=conv_output_len, kernel_len=conv_output_len, stride=self.stride)
             print(f'pool_output_len: {pool_output_len}')
             self.pool_lengths.append(pool_output_len)
             # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
             print(f'poolers[{i}]: {self.poolers[-1]}')
         print(f'sum(self.pool_lengths): {sum(self.pool_lengths)}')
-        self.conv_output_size = calc_output_seq_len(seq_len=self.seq_len, kernel_lengths=self.kernel_lengths)  # <8>
-        print(f'calc_output_seq_len: {self.conv_output_size}')
+        self.conv_output_size = total_out_seq_len(seq_len=self.seq_len, kernel_lengths=self.kernel_lengths)  # <8>
+        assert sum(self.pool_lengths) == self.conv_out_seq_len
+        print(f'total_out_seq_len: {self.conv_output_size}')
         self.linear_layer = nn.Linear(self.out_channels * sum(self.pool_lengths), 1)
         print(f'linear_layer: {self.linear_layer}')
-# ----
-# <1> `N_`: assume a maximum text length of 35 tokens
-# <2> `V`: number of unique tokens (words) in your vocabulary
-# <3> `E`: number of dimensions in your word embeddings
-# <4> `K`: number of weights in each kernel
-# <5> `S`: number of time steps (tokens) to slide the kernel forward with each step
-# <6> `D`: portion of convolution output to
-# <7> `P`: each convolution layer gets its own pooling function
-# <8> `C`: the total convolutional output size depends on how many and what shape convolutions you choose
 
 # .Stacking the CNN layers
 # [source,python]
