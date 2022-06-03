@@ -189,7 +189,7 @@ class CNNTextClassifier(nn.Module):
                 nn.Conv1d(in_channels=self.embedding_size,
                           out_channels=self.out_channels,
                           kernel_size=kernel_len,
-                          stride=self.stride))
+                          stride=self.strides[i]))
             print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
             conv_output_len = calc_conv_out_seq_len(
                 seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)

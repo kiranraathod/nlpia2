@@ -135,6 +135,8 @@ def load_dataset(
         print(f'embed.size() {embed.size()}')
         print(f'embed.size(): {embed.size()}')
         print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
+    else:
+        embed = torch.random.randn((vocab_size, embedding_size))
         retval['embed'] = embed
 
     # <1> tokenizing, case folding, and occurrence counting
@@ -195,7 +197,22 @@ def calculate_accuracy(y_true, y_pred):
     return (true_positives + true_negatives) / len(y_true)
 
 
-class Trainer:
+dataset = load_dataset(**hyperp)
+x_train = dataset['x_train']
+y_train = dataset['y_train']
+x_test = dataset['x_test']
+y_test = dataset['y_test']
+
+model = CNNTextClassifier(
+    embeddings=dataset['embed'],
+    out_channels=hyperp['out_channels'],
+    seq_len=hyperp['seq_len'],
+    kernel_lengths=hyperp['kernel_lengths'],
+    strides=hyperp['strides']
+)
+
+
+class Pipeline:
 
     def __init__(self, **kwargs):
         """
@@ -211,22 +228,6 @@ class Trainer:
         print(vars(self))
 
         dataset = load_dataset(**kwargs)
-        self.x_train = dataset['x_train']
-        self.y_train = dataset['y_train']
-        self.x_test = dataset['x_test']
-        self.y_test = dataset['y_test']
-        if hyperp['use_glove']:
-            self.model = CNNTextClassifier(
-                embeddings=dataset['embed'],
-                out_channels=hyperp['out_channels'],
-                seq_len=hyperp['seq_len'],
-                kernel_lengths=hyperp['kernel_lengths'],
-                strides=hyperp['strides']
-            )
-        else:
-            self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
-
-    def train(self, X=None, y=None):
 
         self.trainset_mapper = DatasetMapper(self.x_train, self.y_train)
         self.testset_mapper = DatasetMapper(self.x_test, self.y_test)
@@ -254,7 +255,8 @@ class Trainer:
                 # Save predictions
                 predictions += list(y_pred.detach().numpy())
 
-            test_predictions = self.predict()
+            for x_batch, y_batch in self.loader_test:
+                test_predictions = self.predict()
             self.loss = loss.item()
             self.train_accuracy = calculate_accuracy(self.y_train, predictions)
             self.test_accuracy = calculate_accuracy(self.y_test, test_predictions)
@@ -264,6 +266,23 @@ class Trainer:
                 % (epoch + 1, self.loss, self.train_accuracy, self.test_accuracy)
             )
         return self
+
+    def predict(self, X=None):
+
+        self.model.eval()  # evaluation mode
+        predictions = []
+
+        if X is not None:
+            X_batches = zip([X], [[None] * len(X)])
+        else:
+            X_batches = list(zip(*self.loader_test))[0]
+            y_batches = list(zip(*self.loader_test))[1]
+        with torch.no_grad():
+            for x_batch, y_batch in zip(X_batches, y_batches):
+                y_pred = self.model(x_batch).detach().numpy()
+                predictions += list(y_pred)
+        return predictions
+
 
 
 def parse_argv(sys_argv=sys.argv):
