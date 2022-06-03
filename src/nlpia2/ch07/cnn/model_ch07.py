@@ -111,7 +111,7 @@ class CNNTextClassifier(nn.Module):
         self.seq_len = 40                               # <1>
         self.vocab_size = embeddings.shape[0]           # <2>
         self.embedding_size = embeddings.shape[1]       # <3>
-        self.out_channels = 5                           # <4>
+        self.out_channels = 4                           # <4>
         self.kernel_lengths = [2, 3, 4, 5, 6]           # <5>
         self.stride = 1                                 # <6>
         self.dropout = nn.Dropout(0)                    # <7>
@@ -126,7 +126,7 @@ class CNNTextClassifier(nn.Module):
 # <7> `P`: each convolution layer gets its own pooling function
 # <8> `C`: the total convolutional output size depends on how many and what shape convolutions you choose
 
-# .CNN embedding
+# .Initialize CNN embedding
 # [source,python]
 # ----
         self.embed = nn.Embedding(
@@ -141,11 +141,9 @@ class CNNTextClassifier(nn.Module):
 # <2> for pretrained 50-D GloVe vectors set embedding_size to 50
 # <3> pretrained embeddings must include a padding token embedding (usually zeros)
 
-        # convolution
-        # self.conv_output_size = (self.seq_len - self.kernel_lengths[0] + 1) // self.stride  # self.embedding_size
-        # pooling
-        # self.conv_output_size = (self.conv_output_size - self.kernel_lengths[0] + 1) // self.stride  # self.embedding_size
-        # self.conv_output_size *= self.embedding_size
+# .Construct convolution and pooling layers
+# [source,python]
+# ----
         self.convolvers = []
         self.poolers = []
         total_out_len = 0
@@ -169,8 +167,9 @@ class CNNTextClassifier(nn.Module):
         print(f'total_out_len: {total_out_len}')
         self.linear_layer = nn.Linear(self.out_channels * total_out_len, 1)
         print(f'linear_layer: {self.linear_layer}')
+# ----
 
-# .Stacking the CNN layers
+# .Running the CNN forward
 # [source,python]
 # ----
     def forward(self, x):

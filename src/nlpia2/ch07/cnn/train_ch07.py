@@ -43,15 +43,16 @@ def tokenize_re(doc):
 
 
 hyperparams = dict(
-    expand_glove_vocab=False,
+    use_glove=True,
+    expand_glove_vocab=True,
     seq_len=40,
     vocab_size=10000,
     embedding_size=50,
     num_stopwords=3,
-    kernel_lengths=[2],
-    strides=[2],
+    kernel_lengths=[2, 3, 4, 5, 6],
+    strides=[1, 1, 1, 1, 1],
     batch_size=16,
-    learning_rate=0.003,
+    learning_rate=0.0042,
     num_epochs=75,
 )
 
@@ -65,7 +66,7 @@ def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
 
 
 def load_dataset(
-    use_glove=False,
+    use_glove=True,
     expand_glove_vocab=hyperparams['expand_glove_vocab'],
     seq_len=hyperparams['seq_len'],
     vocab_size=hyperparams['vocab_size'],
@@ -109,7 +110,7 @@ def load_dataset(
         print(f'glove.shape {glove.shape}')
         print(glove)
 
-        expand_glove_vocab = False
+        expand_glove_vocab = True
         if expand_glove_vocab:
             new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
             vocab.extend(new_vocab)
@@ -212,7 +213,12 @@ class Pipeline:
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
+        if hyperparams['use_glove']:
+            self.model = CNNTextClassifier(
+                embeddings=dataset['embed'].values
+            )  # tuple(dataset['embed'].size()))
+        else:
+            self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
 
     def train(self, X=None, y=None):
 
