@@ -26,7 +26,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm  # noqa
 
 from model_ch07 import CNNTextClassifier
-from model_ch07 import calc_output_seq_len  # noqa
+# from model_ch07 import calc_conv_out_seq_len  # noqa
 
 
 T0 = 1652404117  # number of seconds since 1970-01-01 as of May 12, 2022
@@ -212,10 +212,7 @@ class Pipeline:
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(
-            seq_len=self.seq_len,
-            kernel_lengths=self.kernel_lengths,
-            embeddings=(self.vocab_size, self.embedding_size))  # tuple(dataset['embed'].size()))
+        self.model = CNNTextClassifier()  # tuple(dataset['embed'].size()))
 
     def train(self, X=None, y=None):
 

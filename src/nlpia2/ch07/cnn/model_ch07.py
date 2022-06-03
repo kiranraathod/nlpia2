@@ -105,23 +105,17 @@ def total_out_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
 # ----
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, **kwargs):
+    def __init__(self, embeddings=torch.rand(10000, 50)):
         super().__init__()
 
         self.seq_len = 40                               # <1>
-        self.vocab_size = 10000                         # <2>
-        self.embedding_size = 50                        # <3>
+        self.vocab_size = embeddings.shape[0]           # <2>
+        self.embedding_size = embeddings.shape[1]       # <3>
         self.out_channels = 5                           # <4>
         self.kernel_lengths = [2, 3, 4, 5, 6]           # <5>
         self.stride = 1                                 # <6>
         self.dropout = nn.Dropout(0)                    # <7>
         self.pool_stride = self.stride                  # <8>
-        self.conv_out_seq_len = total_out_seq_len(  # <9>
-            seq_len=self.seq_len,
-            kernel_lengths=self.kernel_lengths,
-            stride=self.stride,
-        )
-
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens
 # <2> `V`: number of unique tokens (words) in your vocabulary
@@ -132,12 +126,20 @@ class CNNTextClassifier(nn.Module):
 # <7> `P`: each convolution layer gets its own pooling function
 # <8> `C`: the total convolutional output size depends on how many and what shape convolutions you choose
 
-        self.embedding = nn.Embedding(
-            self.vocab_size + 1,
-            self.embedding_size,
+# .CNN embedding
+# [source,python]
+# ----
+        self.embed = nn.Embedding(
+            self.vocab_size,                            # <1>
+            self.embedding_size,                        # <2>
             padding_idx=0)
-        print(f'embedding: {self.embedding}')
-        print(f'embedding.weight.shape: {self.embedding.weight.shape}')
+        state = self.embed.state_dict()
+        state['weight'] = embeddings                    # <3>
+        self.embed.load_state_dict(state)
+# ----
+# <1> vocab_size includes a row vector for the padding token
+# <2> for pretrained 50-D GloVe vectors set embedding_size to 50
+# <3> pretrained embeddings must include a padding token embedding (usually zeros)
 
         # convolution
         # self.conv_output_size = (self.seq_len - self.kernel_lengths[0] + 1) // self.stride  # self.embedding_size
@@ -146,7 +148,7 @@ class CNNTextClassifier(nn.Module):
         # self.conv_output_size *= self.embedding_size
         self.convolvers = []
         self.poolers = []
-        self.pool_lengths = []
+        total_out_len = 0
         for i, kernel_len in enumerate(self.kernel_lengths):
             self.convolvers.append(
                 nn.Conv1d(in_channels=self.embedding_size,
@@ -159,17 +161,13 @@ class CNNTextClassifier(nn.Module):
             print(f'conv_output_len: {conv_output_len}')
             self.poolers.append(
                 nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))  # <7>
-            pool_output_len = calc_conv_out_seq_len(
+            total_out_len += calc_conv_out_seq_len(
                 seq_len=conv_output_len, kernel_len=conv_output_len, stride=self.stride)
-            print(f'pool_output_len: {pool_output_len}')
-            self.pool_lengths.append(pool_output_len)
+            print(f'total_out_len: {total_out_len}')
             # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
             print(f'poolers[{i}]: {self.poolers[-1]}')
-        print(f'sum(self.pool_lengths): {sum(self.pool_lengths)}')
-        self.conv_output_size = total_out_seq_len(seq_len=self.seq_len, kernel_lengths=self.kernel_lengths)  # <8>
-        assert sum(self.pool_lengths) == self.conv_out_seq_len
-        print(f'total_out_seq_len: {self.conv_output_size}')
-        self.linear_layer = nn.Linear(self.out_channels * sum(self.pool_lengths), 1)
+        print(f'total_out_len: {total_out_len}')
+        self.linear_layer = nn.Linear(self.out_channels * total_out_len, 1)
         print(f'linear_layer: {self.linear_layer}')
 
 # .Stacking the CNN layers
@@ -178,7 +176,7 @@ class CNNTextClassifier(nn.Module):
     def forward(self, x):
         """ Takes sequence of integers (token indices) and outputs binary class label """
 
-        e = self.embedding(x)
+        e = self.embed(x)
         # print(f"x.size(): {x.size()}")
         # if you transpose then you can make the in_channels = embedding size
         # print(f"e.shape: {e.shape}")
