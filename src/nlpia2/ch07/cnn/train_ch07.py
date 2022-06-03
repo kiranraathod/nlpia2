@@ -119,7 +119,7 @@ def load_dataset(
                 if tok in glove.index:
                     embed.append(glove.loc[tok])
                 else:
-                    embed.append(.1 * np.rand.randn(embed_dims))
+                    embed.append(.1 * np.random.randn(embed_dims))
                     # embed.append(np.zeros(embed_dims))
         else:
             vocab = [tok for tok in vocab if tok in glove.index]
