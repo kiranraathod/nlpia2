@@ -105,16 +105,16 @@ def total_out_seq_len(seq_len, kernel_lengths, stride=1, dilation=1, padding=0):
 # ----
 class CNNTextClassifier(nn.Module):
 
-    def __init__(self, embeddings=torch.rand(10000, 50)):
+    def __init__(self, embeddings=torch.rand(5000, 50)):
         super().__init__()
 
         self.seq_len = 40                               # <1>
         self.vocab_size = embeddings.shape[0]           # <2>
         self.embedding_size = embeddings.shape[1]       # <3>
-        self.out_channels = 4                           # <4>
+        self.out_channels = 7                           # <4>
         self.kernel_lengths = [2, 3, 4, 5, 6]           # <5>
         self.stride = 1                                 # <6>
-        self.dropout = nn.Dropout(0)                    # <7>
+        self.dropout = nn.Dropout(.15)                    # <7>
         self.pool_stride = self.stride                  # <8>
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens

@@ -46,13 +46,13 @@ hyperparams = dict(
     use_glove=True,
     expand_glove_vocab=True,
     seq_len=40,
-    vocab_size=10000,
+    vocab_size=5000,
     embedding_size=50,
     num_stopwords=3,
     kernel_lengths=[2, 3, 4, 5, 6],
     strides=[1, 1, 1, 1, 1],
     batch_size=16,
-    learning_rate=0.0042,
+    learning_rate=0.0021,
     num_epochs=75,
 )
 
