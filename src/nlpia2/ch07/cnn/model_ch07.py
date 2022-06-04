@@ -144,7 +144,7 @@ class CNNTextClassifier(nn.Module):
         self.seq_len = seq_len                          # <1>
         self.vocab_size = embeddings.shape[0]           # <2>
         self.embedding_size = embeddings.shape[1]       # <3>
-        self.out_channels = out_channels                # <4>
+        self.out_channels = out_channels or self.embedding_size  # <4>
         kernel_lengths = listify(kernel_lengths)
         self.kernel_lengths = listify(kernel_lengths)   # <5>
         if stride is not None:
@@ -152,7 +152,7 @@ class CNNTextClassifier(nn.Module):
         strides = listify(strides, n=len(kernel_lengths))
         self.strides = strides                          # <6>
         self.dropout = nn.Dropout(.4)                   # <7>
-        self.pool_stride = self.stride                  # <8>
+        self.pool_strides = self.strides                  # <8>
 # ----
 # <1> `N_`: assume a maximum text length of 40 tokens
 # <2> `V`: number of unique tokens (words) in your vocabulary
@@ -185,19 +185,21 @@ class CNNTextClassifier(nn.Module):
         self.poolers = []
         total_out_len = 0
         for i, kernel_len in enumerate(self.kernel_lengths):
+            stride = self.strides[i]
+            pool_stride = self.pool_strides[i]
             self.convolvers.append(
                 nn.Conv1d(in_channels=self.embedding_size,
                           out_channels=self.out_channels,
                           kernel_size=kernel_len,
-                          stride=self.strides[i]))
+                          stride=stride))
             print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
             conv_output_len = calc_conv_out_seq_len(
-                seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)
+                seq_len=self.seq_len, kernel_len=kernel_len, stride=stride)
             print(f'conv_output_len: {conv_output_len}')
             self.poolers.append(
-                nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))  # <7>
+                nn.MaxPool1d(kernel_size=conv_output_len, stride=pool_stride))  # <7>
             total_out_len += calc_conv_out_seq_len(
-                seq_len=conv_output_len, kernel_len=conv_output_len, stride=self.stride)
+                seq_len=conv_output_len, kernel_len=conv_output_len, stride=pool_stride)
             print(f'total_out_len: {total_out_len}')
             # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
             print(f'poolers[{i}]: {self.poolers[-1]}')
