@@ -53,7 +53,10 @@ hyperp = dict(
     kernel_lengths=[1, 2, 3, 4, 5, 6],
     strides=[1, 1, 1, 1, 1, 1],
     batch_size=24,
-    learning_rate=0.001,
+    learning_rate=0.002,
+    # lots of dropout can cause the training accuracy to be worse than the test acc
+    # low dropout can cause the model to overfit, so dropout should be incrementally increased
+    dropout=0,
     num_epochs=400,
 )
 
@@ -68,25 +71,38 @@ def pad(sequence, seq_len, pad_value=0):
 
 def load_dataset(
     use_glove=True,
-    expand_glove_vocab=hyperp['expand_glove_vocab'],
-    seq_len=hyperp['seq_len'],
-    vocab_size=hyperp['vocab_size'],
-    embedding_size=hyperp['embedding_size'],
-    num_stopwords=hyperp['num_stopwords'],
+    expand_glove_vocab=bool(hyperp['expand_glove_vocab']),
+    seq_len=int(hyperp['seq_len']),
+    vocab_size=int(hyperp['vocab_size']),
+    embedding_size=int(hyperp['embedding_size']),
+    num_stopwords=int(hyperp['num_stopwords']),
     **kwargs,
 ):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
-    1. Simplified: load the CSV
-    2. Configurable: case folding
-    3. Configurable: remove non-letters (nonalpha):
-    4. Configurable: tokenize with regex or spacy
-    5. Configurable: remove stopwords (frequent words)
-    6. Configurable: filter infrequent words
-    7. Simplified: compute reverse index
-    8. Simplified: transform token sequences to integer id sequences
-    9. Simplified: pad token id sequences
-    10. Simplified: train_test_split
+    1. load the CSV
+    2. optionally fold the character case with lower()
+    3. optionally remove punctuation characters (non-alpha chars)
+    4. tokenize with regex or spacy (configurable)
+    5. optionally remove stopwords (most frequent words)
+    6. optionally remove infrequent words
+    7. compute a reverse index (token->id)
+    8. transform token sequences to `int` id sequences
+    9. pad token id sequences so they are all the same length
+    10. split your texts into training and test (validation) sets
+
+    To be fully rigorous with your pipeline hygene you need to do train_test_split before
+    tokenization and token filtering/folding, because this creates your vocabulary.
+    And you don't want to let your model "cheat" by seeing the words in your test set that
+    are not in your training set.
+    So step 10 should be between step 1 and 2 and most of the other steps can be skipped for the test set.
+
+    1, 10
+    Then on trainset: 2, 3, 4, 5, 6, 7, 8, 9
+    Then on testset: 2, 3, 4
+    Then on the testset remove all words not in the vocab from the trainset
+    Skip 8 on the testset because that's the vocab from trainset
+    Just 9 (pad) is needed to complete your testset preprocessing.
     """
     import re
     from nessvec.files import load_vecs_df
@@ -103,6 +119,8 @@ def load_dataset(
     if PAD_TOK not in vocab:
         vocab = [PAD_TOK] + list(vocab)
 
+    # FIXME: Compare with and without glove by shuffling or not shuffling the index
+    # Will also confirm that the word vocab and index are correct
     if use_glove:
         glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
         num_glove_vecs, embed_dims = glove.shape
@@ -111,33 +129,39 @@ def load_dataset(
         print(f'glove.shape {glove.shape}')
         print(glove)
 
-        expand_glove_vocab = True
+        # <3> If your vocab of popular words contains words that glove does not
+        #     you can expand your vocabulary by creating random vectors for each of these words
+        # Because these words are really common in your domain (dataset) they are probably
+        #     important for you language model to understand.
         if expand_glove_vocab:
-            new_vocab = [tok for tok in vocab if tok not in glove.index]   # <3>
-            vocab.extend(new_vocab)
+            nonglove_words = [tok for tok in vocab if tok not in glove.index]   # <3>
+            vocab.extend(nonglove_words)
             embed = []
+            # create the new vocabulary (TODO: should be simple concat(df[nonglove_vocab], df[vocab]))
             for tok in vocab:                                              # <4>
                 if tok in glove.index:
                     embed.append(glove.loc[tok])
                 else:
                     embed.append(.1 * np.random.randn(embed_dims))
                     # embed.append(np.zeros(embed_dims))
+            vocab = vocab[:vocab_size]
+            embed = embed[:vocab_size]
         else:
             vocab = [tok for tok in vocab if tok in glove.index]
             print(f'len(vocab) {len(vocab)}')
             embed = glove.loc[vocab].values
-        df_glove = pd.DataFrame(embed, index=vocab)
-        print(f'df_glove before tensor: {df_glove}')
-        embed = np.array(embed, dtype=np.float32)
+        embed = pd.DataFrame(embed, index=vocab)
+        print(f'df_glove before tensor: {embed}')
         print(f'glove.shape {glove.shape}')
         print(f'embed.shape {embed.shape} (after filtering')
-        embed = torch.tensor(embed, dtype=torch.float32)
+        embed = torch.tensor(embed.values, dtype=torch.float32)
         print(f'embed.size() {embed.size()}')
         print(f'embed.size(): {embed.size()}')
         print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
-    else:
-        embed = torch.random.randn((vocab_size, embedding_size))
         retval['embed'] = embed
+    else:
+        retval['embed'] = torch.random.randn((vocab_size, embedding_size))
+    assert 'embed' in retval, f'retval not in {retval.keys()}'
 
     # <1> tokenizing, case folding, and occurrence counting
     # <2> ignore the 3 most frequent tokens ("t", "co", "http")
@@ -217,7 +241,13 @@ class Pipeline:
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
-        self.model = CNNTextClassifier(**hyperp)  # tuple(dataset['embed'].size()))
+        self.model = CNNTextClassifier(
+            embeddings=dataset['embed'],
+            out_channels=None,
+            seq_len=hyperp['seq_len'],
+            kernel_lengths=hyperp['kernel_lengths'],
+            strides=hyperp['strides'],
+        )
 
     def train(self, X=None, y=None):
 
@@ -311,7 +341,7 @@ def parse_argv(sys_argv=sys.argv):
     argv = list(reversed(sys_argv[1:]))
 
     pipeline_args = []
-    pipeline_kwargs = {}  # dict(tokenizer='tokenize_re')
+    pipe_kwargs = {}  # dict(tokenizer='tokenize_re')
     while len(argv):
         a = argv.pop()
         if a.startswith('--'):
@@ -321,11 +351,18 @@ def parse_argv(sys_argv=sys.argv):
             else:
                 k = a.lstrip('-')
                 v = argv.pop()
-            pipeline_kwargs[k] = v
+            pipe_kwargs[k] = v
         else:
             pipeline_args.append(a)
-
-    return pipeline_args, pipeline_kwargs
+    for k in pipe_kwargs:
+        pipe_kwargs[k] = type(hyperp[k])(pipe_kwargs[k])
+    # hyperp['use_glove'] = bool(int(hyperp['use_glove'])),
+    # hyperp['expand_glove_vocab'] = bool(int(hyperp['expand_glove_vocab'])),
+    # hyperp['seq_len'] = int(hyperp['seq_len']),
+    # hyperp['vocab_size'] = int(hyperp['vocab_size']),
+    # hyperp['embedding_size'] = int(hyperp['embedding_size']),
+    # hyperp['num_stopwords'] = int(hyperp['num_stopwords'])
+    return pipeline_args, pipe_kwargs
 
 
 def main():
@@ -336,7 +373,8 @@ def main():
     log.warning(f'kwargs: {cli_kwargs}')
 
     hyperp.update(cli_kwargs)
-    pipeline = Pipeline(**hyperp)
+    pipeline = Pipeline(
+        **hyperp)
 
     pipeline = pipeline.train()
     hyperparms = json.loads(pipeline.dump())

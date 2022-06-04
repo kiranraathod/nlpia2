@@ -132,6 +132,7 @@ def listify(x, n=None):
 class CNNTextClassifier(nn.Module):
 
     def __init__(self,
+                 dropout=0,
                  embeddings=torch.rand(20000, 50),
                  out_channels=None,
                  seq_len=40,
@@ -151,8 +152,8 @@ class CNNTextClassifier(nn.Module):
             strides = stride
         strides = listify(strides, n=len(kernel_lengths))
         self.strides = strides                          # <6>
-        self.dropout = nn.Dropout(.4)                   # <7>
-        self.pool_strides = self.strides                  # <8>
+        self.dropout = nn.Dropout(dropout)              # <7>
+        self.pool_strides = self.strides                # <8>
 # ----
 # <1> `N_`: assume a maximum text length of 40 tokens
 # <2> `V`: number of unique tokens (words) in your vocabulary
