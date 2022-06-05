@@ -54,6 +54,7 @@ hyperp = dict(
     strides=[1, 1, 1, 1, 1, 1],
     batch_size=24,
     learning_rate=0.002,
+    # TODO:
     # lots of dropout can cause the training accuracy to be worse than the test acc
     # low dropout can cause the model to overfit, so dropout should be incrementally increased
     dropout=0,
