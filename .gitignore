@@ -105,3 +105,6 @@ docs/**/*.html
 **/*secret*
 **/*private*
 
+# Big Data
+src/nlpia2/data/meuller/*.pdf
+

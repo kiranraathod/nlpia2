@@ -2,6 +2,9 @@
 # ARGV.each do|a|
 #   puts "Argument: #{a}"
 # end
+require 'asciidoctor'
+require 'yaml'
+
 chapter_path = 'manuscript/adoc/Chapter 07 -- Getting Words in Order with Convolutional Neural Networks (CNNs).adoc'    # replace 
 
 if ARGV.length == 1
@@ -54,9 +57,6 @@ end
 # e PyTorch or Keras packages themselves!\n"}
 # ```
 
-
-require 'asciidoctor'
-
 puts "Processing '#{chapter_path}'."
 struct_path = chapter_path[0..-5] + 'struct.adoc'
 puts "Writing summary to:\n    #{struct_path}\n\n"
@@ -90,22 +90,25 @@ struct_output.write("++++
 # LightBlue, Gainsboro
 
 (Asciidoctor.load_file chapter_path).find_by.each do |block|
-  if block.context == :paragraph & block.lines.length > 2
-    yaml_output.write("-\n")
-    struct_output.write("[.first-sentence]\n")
-    yaml_output.write("  first-sentence: |+\n")
 
-    struct_output.write(block.lines[0] + "\n\n")
-    yaml_output.write("    " + block.lines[0] + "\n")
+  if block.context == :paragraph
+    # if block.lines.length > 2
+      yaml_output.write("-\n")
+      struct_output.write("[.first-sentence]\n")
+      yaml_output.write("  first-sentence: |+\n")
 
-    struct_output.write("[.last-sentence]\n")
-    yaml_output.write("  last-sentence: |+\n")
+      struct_output.write(block.lines[0] + "\n\n")
+      yaml_output.write("    " + block.lines[0] + "\n")
 
-    last_line_i = block.lines.length - 1
-    if last_line_i > 0
-      struct_output.write(block.lines[last_line_i] + "\n\n")
-      yaml_output.write("    " + block.lines[last_line_i] + "\n")
-    end
+      struct_output.write("[.last-sentence]\n")
+      yaml_output.write("  last-sentence: |+\n")
+
+      last_line_i = block.lines.length - 1
+      if last_line_i > 0
+        struct_output.write(block.lines[last_line_i] + "\n\n")
+        yaml_output.write("    " + block.lines[last_line_i] + "\n")
+      end
+    # end
 
   elsif block.context == :section
     struct_output.write("=" * (block.level+1) + " " + block.title + "\n")
@@ -113,6 +116,7 @@ struct_output.write("++++
     yaml_output.write("  block_type: section\n")
     yaml_output.write("  level: #{block.level+1}\n")
     yaml_output.write("  section_title: \"#{block.title}\"\n")
+
   elsif block.title?
     struct_output.write("."+block.title+"\n\n")
     yaml_output.write("-\n")
@@ -121,6 +125,9 @@ struct_output.write("++++
     yaml_output.write("  section_title: \"#{block.title}\"\n")
 
   end
+
+  # YAML.dump(block)
+  
 end
 
 struct_output.close()
