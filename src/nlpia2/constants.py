@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 
 
 PKG_DIR = Path(__file__).absolute().resolve().parent
+SRC_DATA_DIR = PKG_DIR / 'data'
 PKG_NAME = PKG_DIR.name
 SRC_DIR = PKG_DIR.parent
 REPO_DIR = SRC_DIR.parent

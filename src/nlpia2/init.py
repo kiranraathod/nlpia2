@@ -1,12 +1,15 @@
 # init.py
-from urllib.request import urlretrieve
-from pathlib import Path
-import logging
 import json
+import logging
+from pathlib import Path
+import shutil
+from urllib.request import urlretrieve, urljoin
 
 import pandas as pd
 
 from nlpia2.constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
+from nlpia2.constants import SRC_DATA_DIR
+
 # from qary.etl.netutils import DownloadProgressBar  # noqa
 
 # logging.basicConfig(level=logging.INFO)
@@ -31,14 +34,43 @@ BIG_DATA_FILENAME_URLs = {
 }
 
 
-def maybe_download(url, filename=None, destination_dir=HOME_DATA_DIR, expected_bytes=None, force=False):
-    """ Download a file only if it has not yet been cached locally in ~/.nlpia2-data/ (HOME_DATA_DIR)
+def maybe_download(
+        url=None, filename=None, filepath=None,
+        destination_dir=None, expected_bytes=None,
+        force=False):
+    """ Download a file only if it has not yet been cached locally in ~/.qary-data/ HOME_DATA_DIR
+    """
+    assert filepath is None or filename is None, f"Cannot specify both filepath='{filepath}' and filename='{filename}', they are synonymous."
+    filename = filepath if filename is None else filename
+    log.warning(f'filename: {filename}')
+    src_filepath = SRC_DATA_DIR / filename
+    log.warning(f'src_filepath: {src_filepath}')
+    home_filepath = HOME_DATA_DIR / filename
+    log.warning(f'home_filepath: {home_filepath}')
+    log.warning(f'src_filepath.is_file(): {src_filepath.is_file()}')
+    if not home_filepath.parent.is_dir():
+        home_filepath.parent.mkdir(exist_ok=True, parents=True)
+    if filename and src_filepath.is_file() and not (HOME_DATA_DIR / filename).is_file():
+        assert src_filepath.is_file()
+        shutil.copy(
+            src=src_filepath,
+            dst=home_filepath,
+            follow_symlinks=True)
+        assert home_filepath.is_file()
+        return home_filepath
 
-    FIXME: meld these same changes with qary.init.maybe_download """
-    if filename is None:
+    if url is None:
+        try:
+            url = urljoin(str(DATA_URL_PREFIX), str(filename))
+        except ValueError:
+            log.warning('maybe_download() positional arguments deprecated. please specify url or filename (relative file path)')
+            filename, url = url, None
+    if filename is None and url is not None:
         filename = url.split('/')[-1].split('?')[0].split(':')[-1]
-    destination_dir = Path(destination_dir)
+    if destination_dir is None:
+        destination_dir = Path(HOME_DATA_DIR)
     filepath = destination_dir / filename
+    destination_dir, filename = filepath.parent, filepath.name
 
     if not destination_dir.exists():
         destination_dir.mkdir(parents=True, exist_ok=True)  # FIXME add , reporthook=DownloadProgressBar())
