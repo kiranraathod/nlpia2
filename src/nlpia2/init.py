@@ -50,7 +50,11 @@ def maybe_download(
     log.warning(f'src_filepath.is_file(): {src_filepath.is_file()}')
     if not home_filepath.parent.is_dir():
         home_filepath.parent.mkdir(exist_ok=True, parents=True)
-    if filename and src_filepath.is_file() and not (HOME_DATA_DIR / filename).is_file():
+    if filename and src_filepath.is_file():
+        if home_filepath.is_file():
+            return home_filepath
+
+        log.warning(f'Need to copy {src_filepath} to {home_filepath}')
         assert src_filepath.is_file()
         shutil.copy(
             src=src_filepath,

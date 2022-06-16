@@ -34,17 +34,15 @@ import time
 import torch
 import torch.nn as nn
 from io import open
-import unicodedata
-import string
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 import seaborn as sns
 
 
-from nlpia2.string_normalizers import Asciifier, ASCII_NAME_LETTERS
+from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 
-name_char_vocab_size = len(ASCII_NAME_LETTERS) + 1  # Plus EOS marker
+name_char_vocab_size = len(ASCII_NAME_CHARS) + 1  # Plus EOS marker
 
-asciify = Asciifier(include=ASCII_NAME_LETTERS)
+asciify = Asciifier(include=ASCII_NAME_CHARS)
 
 
 def find_files(path, pattern):
@@ -54,9 +52,9 @@ def find_files(path, pattern):
 
 
 # Read a file and split into lines
-def readLines(filename):
+def read_lines(filename):
     with open(filename, encoding='utf-8') as some_file:
-        return [unicode2ascii(line.rstrip()) for line in some_file]
+        return [asciify(line.rstrip()) for line in some_file]
 
 
 # Build the category_lines dictionary, a list of lines per category
@@ -79,13 +77,13 @@ if n_categories == 0:
                        'the current directory.')
 
 print('# categories:', n_categories, all_categories)
-print(unicode2ascii("O'Néàl"))
+print(asciify("O'Néàl"))
 
 
 # Find letter index from all_letters, e.g. "a" = 0
 
 
-def letterToIndex(letter):
+letter2index =
     return all_letters.find(letter)
 
 # Just for demonstration, turn a letter into a <1 x n_letters> Tensor
