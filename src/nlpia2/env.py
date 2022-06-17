@@ -4,7 +4,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().absolute().parent
 
 
-find_env(path=BASE_DIR):
+def find_env_file(path=BASE_DIR):
     path = Path(path)
     if path.is_file():
         return path
@@ -12,15 +12,21 @@ find_env(path=BASE_DIR):
         path = path / '.env'
     if path.is_file():
         return path
-    base_dirs = [path.parent path.parent.parent path.parent.parent.parent]
+    base_dirs = [
+        path.parent, path.parent.parent, path.parent.parent.parent
+    ]
     base_dirs += [
         Path(d).expanduser().resolve().absolute()
         for d in '~ ~/.ssh ~.ssh/qary ~/.ssh'.split()
     ]
-    for base_dir in BASE_DIRS:
+    for base_dir in base_dirs:
         env_path = base_dir / '.env'
         if env_path.is_file():
             return env_path
+    return None
+
+
+ENV_PATH = find_env_file(path=__file__.parent)
 
 
 def get_env(env_path=ENV_PATH):

@@ -14,6 +14,46 @@
 # - Edelman:
 #    _Neural Darwinism_: (ch1 and philosophy, wisdom, prosocial)
 -
+  text: "Those who know do not talk. Those who talk do not know."
+  author: Lao Tzu, Tao Te Ching, 56(?)
+  tags: [wisdom, blow hard, quite, silence, creativity, boredom]
+-
+  text: "The monotony and solitude of a quiet life stimulate the creative mind."
+  author: Einstien
+  tags: [solitude, quite, silence, creativity, boredom]
+-
+  text: "A fool is known by his speech, and a wise man by silence."
+  author: "Pythagoras"
+  tags: ["silence", "wisdom", "depth", "profound", "intelligence", "mindfulness", "listening", "perceptivity"]  
+-
+  text: "The quieter we become, the more we are able to hear."
+  author: "Jalāl, Al-Dīn Rūmī (Jalal Al-Din Muhammad(?) Rumi)"
+  tags: ["sufi", "poet", "silence", "Rumi", "mindfulness", "listening", "empathy", "perceptivity", "depth"]
+-
+  text: "The most beautiful thing we can experience is the mysterious. It is the source of all true art and science."
+  author: Albert Einstein
+  source: Living Philosophies
+  tags: [silence, pause, suspense, mystery, art, creativity, science]
+- 
+  text: "All profound things and emotions of things are preceded, and attended by Silence."
+  tags: ["silence", "profound", "intelligence", "mindfulness", "listening", "perceptivity"]
+  author: Herman Melville
+-
+  text: "we can retain the hypothesis that the cortex is the seat of 'consciousness as experience' by positing that being conscious in the behavioral sense of being awake and responsive is significantly different from having consciousness in the phenomenological sense -- that is, being a subject of experience."
+  tags: [consciousness, experience, prefrontal cortex, cortex, neuroscience]
+  author: Mark Solms
+  book: "_The Hidden Spring: A Journey to the Source of Consciousness_"
+-
+  text: "What you experience all the time is fluctuating pulses of feeling in response to your movement through the world, as you check whether everything is as you expected to find it - and as you try to close the gap, somehow, when it isn't."
+  tags: [consciousness, prediction, active learning, neuroscience]
+  author: Mark Solms
+  book: "_The Hidden Spring: A Journey to the Source of Consciousness_"
+-
+  author: David Chalmers
+  source: "[1995 paper](http://consc.net/papers/facing.html)"
+  text: "The really hard problem of consciousness is the problem of _experience_."
+  tags: [consciousness, qualia, experience, animal consciousness, artificial intelligence, emotion]
+-
   text: "It's no use, Mr. James—it's turtles all the way down."
   author: J. R. Ross
   source: _Constraints on Variables in Syntax_, 1967
@@ -479,6 +519,15 @@
   author: John Updike
   source: "_Flash Effect: Science and the Rhetorical Origins of Cold War America_ by David J. Tietge, Chapter 4, p. 91"
 -
+  text: "Unnecessary noise is the most cruel absence of care that can be inflicted on sick or well"
+  author: Florence Nightingale
+-
+  text: "If you rebuke a fool, you become a fool. If you rebuke you become wiser."
+-
+  text: "Release is what I'm truly craving here, and release comes from emptiness. The emptiness of silence, of lonely landscapes, of closed eyes, of lying down in a dark, quiet room. The drop in tension that happens when we take a vacation somewhere calm, the instant of zero gravity during orgasm, the psychic leap of a good joke when it flips the world on its head for a splinter of a second. Such void cuts off the fascist flow of constant information and allows us to recalibrate. To think better. To question for a second, our baseline. It is really, really important to do that."
+  author: George Michelsen Foy
+  book: "Why we Need Silence to Survive"
+-
   text: "The right word is always a power, and communicates its definiteness to our action."
   author: George Eliot
   tags: [nlp, nlpia, ch1, words, power of words, power of pen, communication, thought]
@@ -490,6 +539,8 @@
   text: "The right word may be effective, but no word was ever as effective as a rightly timed pause."
   author: Mark Twain
   tags: [nlp, nlpia, ch1, ch6, ch7, stop-words, word sequence, n-gram, rnn, words, power of words, power of pen, communication, thought]
+-
+  text: "These are life's unscripted moments, when there's no clear indication fo what to say or do next. It's a well-established finding in psychology research that not-knowing tends to make people uneasy."
 -
   text: "A powerful agent is the right word. Whenever we come upon one of those intensely right words in a book or newspaper the resulting effect is physical as well as spiritual, and electrically prompt."
   author: Mark Twain
