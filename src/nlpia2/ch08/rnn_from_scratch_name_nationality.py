@@ -11,7 +11,7 @@ Future work:
   - classify first names or full names for nationality
   - classify company names as nonprofits, for profits
   - regressor to estimate business size based on their name only
-  - named entity recognizer to identify 
+  - named entity recognizer to identify
 
 Exercises suggested by Shawn Robertson:
   - Try with a different dataset of line -> category, for example:
@@ -65,8 +65,7 @@ for filepath in find_files(SRC_DATA_DIR / 'names', '*.txt'):
     categories.append(category)
     labeled_lines += list(zip(lines, [category] * len(lines)))
 
-df = pd.DataFrame(labeled_lines, columns=('line', 'category'))
-all_chars = df['name']
+df = pd.DataFrame(labeled_lines, columns=('name', 'category'))
 n_categories = len(categories)
 
 if n_categories == 0:
@@ -81,8 +80,8 @@ print(asciify("O'Néàl"))
 # Find letter index from all_letters, e.g. "a" = 0
 
 
-i2char = list(set(chain(*list(df['line']))))
-char2i = dict(zip(i2char, range(i2char)))
+all_chars = i2char = list(set(chain(*list(df['name']))))
+char2i = dict(zip(i2char, range(len(i2char))))
 vocab_size = len(i2char)
 
 # Just for demonstration, turn a letter into a <1 x n_letters> Tensor
@@ -94,27 +93,28 @@ def one_hot_tensor(c, char2i=char2i):
     >>> one_hot_tensor("A")
     """
     tensor = torch.zeros(1, len(char2i))
-    tensor[0][char2i(c)] = 1
+    tensor[0][char2i[c]] = 1
     return tensor
 
 
-def one_hot_sequence(line):
+def one_hot_sequence(line, char2i=char2i):
     """ One-hot sequence encoding of a line (str) with one row vector for each character
 
     >>> one_hot_sequence("Abba")
     """
     tensor = torch.zeros(len(line), 1, len(char2i))
     for i, c in enumerate(line):
-        tensor[i][0][char2i(c)] = 1
+        tensor[i][0][char2i[c]] = 1
     return tensor
 
 
 class RNN(nn.Module):
     def __init__(self,
                  input_size,
-                 hidden_size,
-                 output_size):
+                 hidden_size=128,
+                 output_size=None):
         super(RNN, self).__init__()
+        self.hidden_size = hidden_size
         self.hidden = hidden_size
 
         self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
@@ -124,6 +124,7 @@ class RNN(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, letter_vec, hidden=None):
+        """ Only do forward inference for one time step """
         if hidden is None:
             torch.zeros(1, self.hidden_size)
 
@@ -136,6 +137,13 @@ class RNN(nn.Module):
         output = self.softmax(output)
         return output, hidden
 
+    def evaluate(self, line_tensor):
+        self.hidden = torch.zeros(1, self.hidden_size)
+
+        for i in range(line_tensor.size()[0]):
+            output, hidden = self.__call__(line_tensor[i], self.hidden)
+
+        return output
 
 # class RNN(nn.Module):
 #     def __init__(self, input_size, hidden_size, output_size):
@@ -160,7 +168,12 @@ class RNN(nn.Module):
 
 rnn = RNN(vocab_size, hidden_size=128, output_size=n_categories)
 
-output, next_hidden = rnn(char2i('A'))
+# FIXME: 
+# --> 131 input_combined = torch.cat((letter_vec, hidden), 1)
+#     132 hidden = self.i2h(input_combined)
+#     133 output = self.i2o(input_combined)
+# TypeError: expected Tensor as element 1 in argument 0, but got NoneType
+output, next_hidden = rnn(one_hot_sequence('A', char2i=char2i))
 
 
 def output2category(output):
@@ -225,20 +238,21 @@ def timeSince(since):
 start = time.time()
 
 
-for iter in range(1, 100 + 1):
+NUM_SAMPLES = 10000
+for it in range(1, NUM_SAMPLES + 1):
     category, line, category_tensor, line_tensor = sample()
-    output, loss = train(category_tensor, line_tensor)
+    output, loss = train_example(category_tensor, line_tensor)
     current_loss += loss
 
     # Print iter number, loss, name and guess
-    if iter % print_every == 0:
-        guess, guess_i = categoryFromOutput(output)
+    if not it % 100:
+        guess, guess_i = output2category(output)
         correct = '✓' if guess == category else '✗ (%s)' % category
-        print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / n_iters * 100, timeSince(start), loss, line, guess, correct))
+        print('%d %d%% (%s) %.4f %s / %s %s' % (it, it / NUM_SAMPLES * 100, timeSince(start), loss, line, guess, correct))
 
     # Add current loss avg to list of losses
-    if iter % plot_every == 0:
-        all_losses.append(current_loss / plot_every)
+    if not it % 100 == 0:
+        all_losses.append(current_loss / 100)
         current_loss = 0
 
 
@@ -256,20 +270,11 @@ n_confusion = 10000
 # Just return an output given a line
 
 
-def evaluate(line_tensor):
-    hidden = torch.zeros(1, self.hidden_size)
-
-    for i in range(line_tensor.size()[0]):
-        output, hidden = rnn(line_tensor[i], hidden)
-
-    return output
-
-
 # Go through a bunch of examples and record which are correctly guessed
 for i in range(n_confusion):
-    category, line, category_tensor, line_tensor = randomTrainingExample()
-    output = evaluate(line_tensor)
-    guess, guess_i = categoryFromOutput(output)
+    category, line, category_tensor, line_tensor = sample()
+    output = rnn.evaluate(line_tensor)
+    guess, guess_i = output2category(output)
     category_i = categories.index(category)
     confusion[category_i][guess_i] += 1
 
