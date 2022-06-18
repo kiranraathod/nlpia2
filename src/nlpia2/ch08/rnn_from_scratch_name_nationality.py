@@ -115,7 +115,6 @@ class RNN(nn.Module):
                  output_size=None):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
-        self.hidden = hidden_size
 
         self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
         self.i2o = nn.Linear(n_categories + input_size + hidden_size, output_size)
@@ -123,25 +122,21 @@ class RNN(nn.Module):
         self.dropout = nn.Dropout(0.1)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, letter_vec, hidden=None):
+    def forward(self, letter_vec, hidden):
         """ Only do forward inference for one time step """
-        if hidden is None:
-            torch.zeros(1, self.hidden_size)
-
-        input_combined = torch.cat((letter_vec, hidden), 1)
-        hidden = self.i2h(input_combined)
-        output = self.i2o(input_combined)
+        print(f'letter_vec: {letter_vec.shape}\nhidden: {hidden.shape}')
+        cat_input_hidden = torch.cat((letter_vec, hidden), 1)
+        hidden = self.i2h(cat_input_hidden)
+        output = self.i2o(cat_input_hidden)
         output_combined = torch.cat((hidden, output), 1)
         output = self.o2o(output_combined)
         output = self.dropout(output)
         output = self.softmax(output)
         return output, hidden
 
-    def evaluate(self, line_tensor):
-        self.hidden = torch.zeros(1, self.hidden_size)
-
+    def evaluate(self, line_tensor, hidden):
         for i in range(line_tensor.size()[0]):
-            output, hidden = self.__call__(line_tensor[i], self.hidden)
+            output, hidden = self.__call__(line_tensor[i], hidden)
 
         return output
 
@@ -168,12 +163,9 @@ class RNN(nn.Module):
 
 rnn = RNN(vocab_size, hidden_size=128, output_size=n_categories)
 
-# FIXME: 
-# --> 131 input_combined = torch.cat((letter_vec, hidden), 1)
-#     132 hidden = self.i2h(input_combined)
-#     133 output = self.i2o(input_combined)
-# TypeError: expected Tensor as element 1 in argument 0, but got NoneType
-output, next_hidden = rnn(one_hot_sequence('A', char2i=char2i))
+next_output, next_hidden = rnn(
+    one_hot_sequence('A', char2i=char2i),
+    hidden=torch.zeros(1, 1, rnn.hidden_size))
 
 
 def output2category(output):
@@ -182,7 +174,7 @@ def output2category(output):
     return categories[category_i], category_i
 
 
-print(output2category(output))
+print(output2category(next_output))
 
 groups = df.groupby('categories')
 
