@@ -69,41 +69,64 @@ We'll end up with a dictionary of lists of names per language,
 ``{language: [names ...]}``. The generic variables "category" and "line"
 (for language and name in our case) are used for later extensibility.
 """
-from __future__ import unicode_literals, print_function, division
-from io import open
-import glob
+from itertools import chain
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import os
+from pathlib import Path
+import random
+import time
+import torch
+import torch.nn as nn
 
-def findFiles(path): return glob.glob(path)
+import pandas as pd
+from nlpia2.init import SRC_DATA_DIR, maybe_download
+import seaborn as sns
 
-print(findFiles('data/names/*.txt'))
+from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 
-import unicodedata
-import string
+name_char_vocab_size = len(ASCII_NAME_CHARS) + 1  # Plus EOS marker
 
-all_letters = string.ascii_letters + " .,;'"
-n_letters = len(all_letters)
+# Transcode Unicode str ASCII without embelishments, diacritics (https://stackoverflow.com/a/518232/2809427)
+asciify = Asciifier(include=ASCII_NAME_CHARS)
 
-# Turn a Unicode string to plain ASCII, thanks to https://stackoverflow.com/a/518232/2809427
-def unicodeToAscii(s):
-    return ''.join(
-        c for c in unicodedata.normalize('NFD', s)
-        if unicodedata.category(c) != 'Mn'
-        and c in all_letters
-    )
 
-print(unicodeToAscii('Ślusàrski'))
+def find_files(path, pattern):
+    return Path(path).glob(pattern)
+
+
+# all_letters = ''.join(set(ASCII_NAME_CHARS).union(set(" .,;'")))
+char2i = {c: i for i, c in enumerate(ASCII_NAME_CHARS)}
+
+# !curl -O https://download.pytorch.org/tutorial/data.zip; unzip data.zip
+
+print(f'asciify("O’Néàl") => {asciify("O’Néàl")}')
 
 # Build the category_lines dictionary, a list of names per language
 category_lines = {}
 all_categories = []
+labeled_lines = []
+categories = []
+for filepath in find_files(SRC_DATA_DIR / 'names', '*.txt'):
+    filename = Path(filepath).name
+    filepath = maybe_download(filename=Path('names') / filename)
+    with filepath.open() as fin:
+        lines = [asciify(line.rstrip()) for line in fin]
+    category = Path(filename).with_suffix('')
+    categories.append(category)
+    labeled_lines += list(zip(lines, [category] * len(lines)))
 
-# Read a file and split into lines
+n_categories = len(categories)
+
+df = pd.DataFrame(labeled_lines, columns=('name', 'category'))
+
+
 def readLines(filename):
     lines = open(filename, encoding='utf-8').read().strip().split('\n')
-    return [unicodeToAscii(line) for line in lines]
+    return [asciify(line) for line in lines]
 
-for filename in findFiles('data/names/*.txt'):
+
+for filename in find_files(path='data/names', pattern='*.txt'):
     category = os.path.splitext(os.path.basename(filename))[0]
     all_categories.append(category)
     lines = readLines(filename)
@@ -140,29 +163,34 @@ print(category_lines['Italian'][:5])
 # batches - we're just using a batch size of 1 here.
 #
 
-import torch
-
 # Find letter index from all_letters, e.g. "a" = 0
-def letterToIndex(letter):
-    return all_letters.find(letter)
+
+
+def letterToIndex(c):
+    return char2i[c]
 
 # Just for demonstration, turn a letter into a <1 x n_letters> Tensor
-def letterToTensor(letter):
-    tensor = torch.zeros(1, n_letters)
+
+
+def encode_one_hot_vec(letter):
+    tensor = torch.zeros(1, len(ASCII_NAME_CHARS))
     tensor[0][letterToIndex(letter)] = 1
     return tensor
 
 # Turn a line into a <line_length x 1 x n_letters>,
 # or an array of one-hot letter vectors
-def lineToTensor(line):
-    tensor = torch.zeros(len(line), 1, n_letters)
+
+
+def encode_one_hot_seq(line):
+    tensor = torch.zeros(len(line), 1, len(ASCII_NAME_CHARS))
     for li, letter in enumerate(line):
         tensor[li][0][letterToIndex(letter)] = 1
     return tensor
 
-print(letterToTensor('J'))
 
-print(lineToTensor('Jones').size())
+print(encode_one_hot_vec('A'))
+
+print(encode_one_hot_seq('Abe').size())
 
 
 ######################################################################
@@ -186,7 +214,6 @@ print(lineToTensor('Jones').size())
 #
 #
 
-import torch.nn as nn
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -198,8 +225,8 @@ class RNN(nn.Module):
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, input, hidden):
-        combined = torch.cat((input, hidden), 1)
+    def forward(self, char_tens, hidden):
+        combined = torch.cat((char_tens, hidden), 1)
         hidden = self.i2h(combined)
         output = self.i2o(combined)
         output = self.softmax(output)
@@ -208,8 +235,9 @@ class RNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, self.hidden_size)
 
+
 n_hidden = 128
-rnn = RNN(n_letters, n_hidden, n_categories)
+rnn = RNN(len(ASCII_NAME_CHARS), n_hidden, n_categories)
 
 
 ######################################################################
@@ -220,7 +248,7 @@ rnn = RNN(n_letters, n_hidden, n_categories)
 # step).
 #
 
-input = letterToTensor('A')
+input = encode_one_hot_vec('A')
 hidden = torch.zeros(1, n_hidden)
 
 output, next_hidden = rnn(input, hidden)
@@ -228,17 +256,27 @@ output, next_hidden = rnn(input, hidden)
 
 ######################################################################
 # For the sake of efficiency we don't want to be creating a new Tensor for
-# every step, so we will use ``lineToTensor`` instead of
-# ``letterToTensor`` and use slices. This could be further optimized by
+# every step, so we will use ``encode_one_hot_seq`` instead of
+# ``one_hot_encode`` and use slices. This could be further optimized by
 # pre-computing batches of Tensors.
 #
 
-input = lineToTensor('Albert')
-hidden = torch.zeros(1, n_hidden)
+def categoryFromOutput(output):
+    top_n, top_i = output.topk(1)
+    category_i = top_i[0].item()
+    return all_categories[category_i], category_i
 
-output, next_hidden = rnn(input[0], hidden)
-print(output)
 
+def output_from_str(s):
+    global rnn
+
+    input = encode_one_hot_seq(s)
+    hidden = torch.zeros(1, n_hidden)
+
+    output, next_hidden = rnn(input[0], hidden)
+    print(output)
+
+    return categoryFromOutput(output)
 
 ######################################################################
 # As you can see the output is a ``<1 x n_categories>`` Tensor, where
@@ -264,6 +302,7 @@ def categoryFromOutput(output):
     category_i = top_i[0].item()
     return all_categories[category_i], category_i
 
+
 print(categoryFromOutput(output))
 
 
@@ -272,17 +311,18 @@ print(categoryFromOutput(output))
 # language):
 #
 
-import random
+def randomChoice(lines):
+    return random.choice(lines)
+    # return l[random.randint(0, len(l) - 1)]
 
-def randomChoice(l):
-    return l[random.randint(0, len(l) - 1)]
 
 def randomTrainingExample():
     category = randomChoice(all_categories)
     line = randomChoice(category_lines[category])
     category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
-    line_tensor = lineToTensor(line)
+    line_tensor = encode_one_hot_seq(line)
     return category, line, category_tensor, line_tensor
+
 
 for i in range(10):
     category, line, category_tensor, line_tensor = randomTrainingExample()
@@ -317,7 +357,8 @@ criterion = nn.NLLLoss()
 # -  Return the output and loss
 #
 
-learning_rate = 0.005 # If you set this too high, it might explode. If too low, it might not learn
+learning_rate = 0.005  # If you set this too high, it might explode. If too low, it might not learn
+
 
 def train(category_tensor, line_tensor):
     hidden = rnn.initHidden()
@@ -345,25 +386,23 @@ def train(category_tensor, line_tensor):
 # average of the loss.
 #
 
-import time
-import math
-
 n_iters = 100000
 print_every = 5000
 plot_every = 1000
-
 
 
 # Keep track of losses for plotting
 current_loss = 0
 all_losses = []
 
+
 def timeSince(since):
     now = time.time()
     s = now - since
-    m = math.floor(s / 60)
+    m = s // 60
     s -= m * 60
     return '%dm %ds' % (m, s)
+
 
 start = time.time()
 
@@ -392,9 +431,6 @@ for iter in range(1, n_iters + 1):
 # learning:
 #
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-
 plt.figure()
 plt.plot(all_losses)
 
@@ -415,6 +451,8 @@ confusion = torch.zeros(n_categories, n_categories)
 n_confusion = 10000
 
 # Just return an output given a line
+
+
 def evaluate(line_tensor):
     hidden = rnn.initHidden()
 
@@ -422,6 +460,7 @@ def evaluate(line_tensor):
         output, hidden = rnn(line_tensor[i], hidden)
 
     return output
+
 
 # Go through a bunch of examples and record which are correctly guessed
 for i in range(n_confusion):
@@ -469,7 +508,7 @@ plt.show()
 def predict(input_line, n_predictions=3):
     print('\n> %s' % input_line)
     with torch.no_grad():
-        output = evaluate(lineToTensor(input_line))
+        output = evaluate(encode_one_hot_seq(input_line))
 
         # Get top N categories
         topv, topi = output.topk(n_predictions, 1, True)
@@ -480,6 +519,7 @@ def predict(input_line, n_predictions=3):
             category_index = topi[0][i].item()
             print('(%.2f) %s' % (value, all_categories[category_index]))
             predictions.append([value, all_categories[category_index]])
+
 
 predict('Dovesky')
 predict('Jackson')

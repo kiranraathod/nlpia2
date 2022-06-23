@@ -42,13 +42,12 @@ from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 
 name_char_vocab_size = len(ASCII_NAME_CHARS) + 1  # Plus EOS marker
 
+# Transcode Unicode str ASCII without embelishments, diacritics (https://stackoverflow.com/a/518232/2809427)
 asciify = Asciifier(include=ASCII_NAME_CHARS)
 
 
 def find_files(path, pattern):
     return Path(path).glob(pattern)
-
-# Turn a Unicode string to plain ASCII, thanks to https://stackoverflow.com/a/518232/2809427
 
 
 # !curl -O https://download.pytorch.org/tutorial/data.zip; unzip data.zip
@@ -73,8 +72,8 @@ if n_categories == 0:
                        'from https://download.pytorch.org/tutorial/data.zip and extract it to '
                        'the current directory.')
 
-print('# categories:', n_categories, categories)
-print(asciify("O'Néàl"))
+print(f'{n_categories} categories:\n{categories}')
+print(f'asciify("O’Néàl") => {asciify("O’Néàl")}')
 
 
 # Find letter index from all_letters, e.g. "a" = 0
