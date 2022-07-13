@@ -14,6 +14,26 @@
 # - Edelman:
 #    _Neural Darwinism_: (ch1 and philosophy, wisdom, prosocial)
 -
+    author: Eleanor Roosevelt
+    tags: [intelligence, greatness, ideas, gossip]
+    text: Great minds discuss ideas. Average minds discuss events. Small minds talk about people.
+-
+    tags: [post-truth, marketing, advertisement, politics, power, control, 1984, misinformation, disinformation, honesty, truth, democracy]
+    author: Joseph Rain
+    text: All control, in essence, is about who controls the truth.
+-
+  text: "Notes on paper, or on a computer screen [...] do not make contemporary physics or other kinds of intellectual endeavor easier, they make it possible ... no matter how internal processes are implemented [...you..] need to understand the extent to which the mind is reliant upon external scaffolding."
+  author: Levy
+  date: 2011
+  source:
+      title: "_How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking -- for Students, Academics and Nonfiction Book Writers"
+      author: Sönke Ahrens
+      date: 2017
+-
+  text: "One cannot think without writing."
+  date: 1992
+  author: Luhmann
+-
   text: "It's no use, Mr. James—it's turtles all the way down."
   author: J. R. Ross
   source: _Constraints on Variables in Syntax_, 1967
