@@ -22,11 +22,15 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import pandas as pd
-
+# seaborn creates a poor heatmap for confusion matrices
+# import seaborn
 
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 from persistence import save_model, load_model_meta
+
+# seaborn.set_style()
+# seaborn.set_theme()
 
 
 class RNN(nn.Module):
@@ -59,7 +63,8 @@ except IOError:
         'categories': [
             "Arabic", "Irish", "Spanish", "French", "German", "English",
             "Korean", "Vietnamese", "Scottish", "Japanese", "Polish",
-            "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese"
+            "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese",
+            "India", "Etheopia", "Nigeria", "Nepal",
         ],
         'char2i': {
             "g": 0, "J": 1, "j": 2, "l": 3, "X": 4, "e": 5, "L": 6, "H": 7, " ": 8,
@@ -124,6 +129,22 @@ def load_dataset(data_dir=SRC_DATA_DIR, categories=CATEGORIES):
             lines = [asciify(line.rstrip()) for line in fin]
             labeled_lines += list(zip(lines, [category] * len(lines)))
     return pd.DataFrame(labeled_lines, columns=('name', 'category'))
+
+
+def dataset_confusion(df, normalize=True, fillna='0'):
+    """ Given a df with columns name & category, assume "truth" is most popular category for a name """
+    confusion = {c: Counter() for c in sorted(df['category'].unique())}
+    for i, g in df.groupby('name'):
+        counts = Counter(g['category'])
+        confusion[counts.most_common()[0][0]] += counts
+    confusion = pd.DataFrame(confusion)
+    confusion = confusion[confusion.index]
+    if normalize:
+        confusion /= confusion.sum(axis=1)
+    if fillna is not None:
+        confusion.fillna(fillna, inplace=True)
+    confusion.index.name = 'most_common'
+    return confusion
 
 
 def encode_one_hot_vec(letter, char2i=CHAR2I):
@@ -229,26 +250,28 @@ def confusion_df(truth, pred, categories=CATEGORIES):
     return pd.DataFrame(confusion)
 
 
-def plot_confusion(df, categories=CATEGORIES):
+def predict_confusion(df, categories=CATEGORIES):
     df_conf = confusion_df(
         truth=df['name'],
         pred=df['name'].apply(predict_category).values,
         categories=categories,
     )
+    return df_conf
+
+
+def plot_confusion(df_conf):
+    df_conf = df_conf.replace('', 0)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     cax = ax.matshow(df_conf.values)
     fig.colorbar(cax)
 
-    # Set up axes
     ax.set_xticklabels([''] + list(df_conf.columns), rotation=90)
     ax.set_yticklabels([''] + list(df_conf.index))
 
-    # Force label at every tick
     ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
-    # sphinx_gallery_thumbnail_number = 2
     plt.show()
 
 
