@@ -123,6 +123,7 @@ Anselmetti
 Anselmi
 Antonelli
 Antonini
+Antonini
 Antonino
 Aquila
 Aquino
@@ -142,6 +143,7 @@ Arrighetti
 Arrighi
 Arrigucci
 Aucciello
+Aurelius
 Azzarà
 Baggi
 Baggio
@@ -417,6 +419,7 @@ Mazza
 Merlo
 Messana
 Micheli
+Micali
 Milani
 Milano
 Modugno
@@ -624,6 +627,7 @@ Sessa
 Sgro
 Siena
 Silvestri
+Silvio
 Sinagra
 Sinagra
 Soldati

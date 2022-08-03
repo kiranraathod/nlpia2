@@ -19,6 +19,7 @@ import time
 
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import pandas as pd
@@ -64,7 +65,7 @@ except IOError:
             "Arabic", "Irish", "Spanish", "French", "German", "English",
             "Korean", "Vietnamese", "Scottish", "Japanese", "Polish",
             "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese",
-            "India", "Etheopia", "Nigeria", "Nepal",
+            "Indian", "Ethiopian", "Nigerian", "Nepalese",
         ],
         'char2i': {
             "g": 0, "J": 1, "j": 2, "l": 3, "X": 4, "e": 5, "L": 6, "H": 7, " ": 8,
@@ -86,49 +87,80 @@ except IOError:
     )
     save_model(MODEL_PATH, **META)
 
-print(f"Loaded META:\n{META}")
-# globals().update(META)
+
 CATEGORIES = META['categories']
 n_categories = META.get('n_categories', len(CATEGORIES))
 assert n_categories == len(CATEGORIES)
 n_hidden = META.get('n_hidden', 128)
 CHAR2I = META['char2i']
+
+
+# FIXME, get rid of this global rnn model
 rnn = META.get('model', None)
-print(f"Loaded model:\n{rnn}")
+
 if rnn is None:
     rnn = RNN(
         len(META['char2i']),
         n_hidden=n_hidden,
         n_categories=n_categories,
     )
+
 if 'state_dict' in META:
     rnn.load_state_dict(META['state_dict'])
-    print(f"Loaded state_dict:\n{rnn}")
 
 
 asciify = Asciifier(include=ASCII_NAME_CHARS)
 
 
-def load_dataset(data_dir=SRC_DATA_DIR, categories=CATEGORIES):
-    # !curl -O https://download.pytorch.org/tutorial/data.zip; unzip data.zip
+def load_names_from_text(data_dir=SRC_DATA_DIR, categories=None, dedupe=False):
+    """ load names (lines of text) from text files if filename is among categories provided
 
-    # Build the category_lines dictionary, a list of names per language
-    # category_lines = {}
-    labeled_lines = []
-    print(f"Looking for files for {len(categories)} categories: {categories}")
-    for i, filepath in enumerate((SRC_DATA_DIR / 'names').glob('*.txt')):
+    Inputs:
+      categories (list of str): None will load all categories
+
+    Returns:
+      DataFrame with columns=['name', 'category', 'count']
+
+    ```python
+    !curl - O https: // download.pytorch.org / tutorial / data.zip
+    !unzip data.zip
+    load_names_from_text(data_dir=Path.cwd())
+    ```
+
+    >>> df = load_names_from_text(dedupe=True, categories=None)
+    >>> df['category'].unique()
+    >>> len(df) > 10000
+    True
+    >>> df2 = load_names_from_text(dedupe=False, categories=None)
+    >>> len(df2) > len(df)
+    21516
+    >>> df['count'].sum() == len(df2)
+    True
+    >>> df.columns[:-1] == df2.columns
+    array([ True,  True])
+    """
+    name_label_counts = []
+    print(f"Looking for files for {len(categories or [])} categories: {categories}")
+    data_dir = Path(data_dir) / 'names'
+    if not data_dir.is_dir():
+        data_dir = data_dir.parent
+    for i, filepath in enumerate(data_dir.glob('*.txt')):
         filepath = Path(filepath)
         print(f"Loading file {i}: {filepath}.")
         category = filepath.with_suffix('').name
-        if category not in categories:
+        if categories and category not in categories:
             print(f"The path {filepath} looks like a new category.")
             print(f"Add it to the {filepath.with_suffix('.meta.json')} and rerun.")
             continue
         filepath = maybe_download(filename=filepath)
         with filepath.open() as fin:
             lines = [asciify(line.rstrip()) for line in fin]
-            labeled_lines += list(zip(lines, [category] * len(lines)))
-    return pd.DataFrame(labeled_lines, columns=('name', 'category'))
+            name_label_counts += list(zip(lines, [category] * len(lines)))
+    columns = ['name', 'category']
+    if dedupe:
+        name_label_counts = [[k[0], k[1], v] for (k, v) in Counter(name_label_counts).items()]
+        columns += ['count']
+    return pd.DataFrame(name_label_counts, columns=columns)
 
 
 def dataset_confusion(df, normalize=True, fillna='0'):
@@ -148,14 +180,14 @@ def dataset_confusion(df, normalize=True, fillna='0'):
 
 
 def encode_one_hot_vec(letter, char2i=CHAR2I):
-    """ one-hot encode a single char """
+    """ one - hot encode a single char """
     tensor = torch.zeros(1, len(char2i))
     tensor[0][char2i[letter]] = 1
     return tensor
 
 
 def encode_one_hot_seq(line, char2i=CHAR2I):
-    """ one-hot encode each char in a str => matrix of size (len(str), len(alphabet)) """
+    """ one - hot encode each char in a str = > matrix of size(len(str), len(alphabet)) """
     tensor = torch.zeros(len(line), 1, len(ASCII_NAME_CHARS))
     for pos, letter in enumerate(line):
         tensor[pos][0][char2i[letter]] = 1
@@ -181,6 +213,19 @@ def output_from_str(s, char2i=CHAR2I, categories=CATEGORIES):
     return category_from_output(output, categories=categories)
 
 
+def sample_groupby(df, num_samples=1, groupby='category', char2i=CHAR2I, replace=True, shuffle=True):
+    """ balanced sampling of all categories """
+    if sample_groupby.groups is None:
+        sample_groupby.groups = df.groupby(groupby)
+    df_sample = sample_groupby.groups.sample(num_samples, replace=replace)
+    if shuffle:
+        df_sample = df_sample.sample(len(df_sample))
+    return df_sample
+
+
+sample_groupby.groups = None
+
+
 def random_example(df, categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
     line = None
@@ -200,27 +245,50 @@ def random_example(df, categories=CATEGORIES, char2i=CHAR2I):
 
 def train_sample(category_tensor, line_tensor, model=rnn,
                  criterion=nn.NLLLoss(), lr=.005,
-                 char2i=CHAR2I, chategories=CATEGORIES):
-    """ train for one epoch (one batch of example tensors) """
+                 char2i=CHAR2I, categories=CATEGORIES):
+    """ train for one epoch(one batch of example tensors) """
     hidden = model.init_hidden()
 
     model.zero_grad()
 
     for i in range(line_tensor.size()[0]):
         output, hidden = model(line_tensor[i], hidden)
-
+    # print(f"output: {output}")
+    # print(f"category_tensor: {category_tensor}")
     loss = criterion(output, category_tensor)
+    # print(f"loss: {loss}")
     loss.backward()
 
     # Add parameters' gradients to their values, multiplied by learning rate
-    for p in rnn.parameters():
+    for p in model.parameters():
         p.data.add_(p.grad.data, alpha=-lr)
 
     return model, output, loss.item()
 
 
+CRITERION = nn.NLLLoss()
+
+
+def train_batch(df_batch, model=rnn, criterion=CRITERION, lr=.005, char2i=CHAR2I, categories=CATEGORIES):
+    """ train for one epoch(one batch of example tensors) """
+    output_losses = []
+    for i, row in df_batch.iterrows():
+        category_tensor = torch.tensor([categories.index(row['category'])], dtype=torch.long)
+        line_tensor = encode_one_hot_seq(row['name'], char2i=char2i)
+        model, output, loss = train_sample(
+            category_tensor,
+            line_tensor,
+            model=model,
+            criterion=criterion,
+            lr=lr,
+            char2i=CHAR2I,
+            categories=CATEGORIES)
+        output_losses.append((output, loss))
+    return model, output_losses
+
+
 def time_elapsed(t0):
-    """ Compute time since t0 (t0 = time.time() in seconds) """
+    """ Compute time since t0(t0=time.time() in seconds) """
     secs = time.time() - t0
     mins = secs // 60
     secs = int(secs - mins * 60)
@@ -287,9 +355,10 @@ def topk_predictions(text, topk=3, categories=CATEGORIES, char2i=CHAR2I, model=r
     return pd.DataFrame(predictions, columns='rank text log_loss category'.split())
 
 
-def print_predictions(text, n_predictions=3, categories=CATEGORIES):
-    preds_df = topk_predictions(text=text, topk=n_predictions, categories=categories)
-    print(preds_df)
+def print_predictions(text, n_predictions=3, categories=CATEGORIES, model=rnn):
+    preds_df = topk_predictions(text=text, topk=n_predictions, categories=categories, model=model)
+    if n_predictions > 1:
+        print(preds_df)
     return preds_df
 
 
@@ -305,17 +374,46 @@ def print_example_tensor(text="O’Néàl", category="Irish", char2i=CHAR2I):
     print(f"input_tensor.size(): {input_tensor.size()}")
 
 
-def print_dataset_samples(df, n_samples=10):
-    # hidden = torch.zeros(1, n_hidden)
-    # output, next_hidden = rnn(inpt, hidden)
+def print_dataset_samples(df, num_samples=3, replace=True):
+    print(sample_groupby(df, num_samples=num_samples, groupby='category', replace=replace))
 
-    for i in range(n_samples):
-        category, text, category_tensor, text_tensor = random_example(df)
-        print(f"category:{category} text:{text} text_tens.shape:{text_tensor.shape}")
+
+def load_name_counts(filepath=SRC_DATA_DIR / 'names' / 'name_counts.csv.gz'):
+    return pd.read_csv(filepath)
+
+
+def train_batches(df=None, model=None, n_iters=5000, print_every=100, char2i=CHAR2I, categories=None):
+    df = load_name_counts() if df is None else df
+    categories = list(df['category'].unique())
+    model = RNN(vocab_size=len(CHAR2I), n_hidden=128, n_categories=len(categories)) if model is None else model
+    output_losses = []
+
+    start = time.time()
+
+    for it in tqdm(range(1, n_iters + 1)):
+        df_batch = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
+        model, batch_output_losses = train_batch(df_batch, model=model, char2i=char2i, categories=categories, lr=.005)
+        output_losses += batch_output_losses
+
+        # Print iteration number, loss, name and guess
+        if not it % print_every:
+            predictions = [category_from_output(output, categories=categories) for output, loss in output_losses]
+            predictions = pd.DataFrame(
+                [list(row) for row in predictions],
+                columns='pred pred_i'.split())
+            df_batch['pred'] = predictions['pred']
+            df_batch['pred_i'] = predictions['pred_i']
+            print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)}')
+            print(df_batch)
+
+            output_losses.extend([list(x) for x in batch_output_losses])
+
+    train_time = time_elapsed(start)
+    return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
 def train(df=None, model=rnn, n_iters=70000, print_every=1000, char2i=CHAR2I, categories=CATEGORIES):
-    df = df if df is not None else load_dataset()
+    df = df if df is not None else load_names_from_text()
     current_loss = 0
     all_losses = []
     plot_every = print_every
@@ -323,8 +421,9 @@ def train(df=None, model=rnn, n_iters=70000, print_every=1000, char2i=CHAR2I, ca
     start = time.time()
 
     for it in range(1, n_iters + 1):
+        # df_sample = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
         category, line, category_tensor, line_tensor = random_example(df)
-        model, output, loss = train_sample(category_tensor, line_tensor, model=model, char2i=char2i, chategories=categories, lr=.005)
+        model, output, loss = train_sample(category_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
         current_loss += loss
 
         # Print iteration number, loss, name and guess
@@ -395,6 +494,7 @@ def save_results(**results):
 
 
 if __name__ == '__main__':
-    df = load_dataset()
-    results = train(df=df)
-    save_results(**results)
+    # df = load_names_from_text()
+    # results = train(df=df)
+    # save_results(**results)
+    pass
