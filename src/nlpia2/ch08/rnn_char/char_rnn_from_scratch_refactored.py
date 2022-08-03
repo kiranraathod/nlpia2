@@ -14,7 +14,6 @@
 from collections import Counter
 import copy
 from pathlib import Path
-import random
 import time
 
 import torch
@@ -110,6 +109,12 @@ if 'state_dict' in META:
 
 
 asciify = Asciifier(include=ASCII_NAME_CHARS)
+
+
+def dedupe_mapping_df(df, key_column='name', value_column='category'):
+    key_value_tuples = list(zip(df[key_column], [value_column]))
+    key_value_counts = [[k[0], k[1], v] for (k, v) in Counter(key_value_tuples).items()]
+    return pd.DataFrame(key_value_counts, columns=[key_column, value_column, 'count'])
 
 
 def load_names_from_text(data_dir=SRC_DATA_DIR, categories=None, dedupe=False):
@@ -228,16 +233,14 @@ sample_groupby.groups = None
 
 def random_example(df, categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
-    line = None
-    while not line:
-        category = random.choice(categories)
-        is_category = df['category'] == category
-        num_matches = sum(is_category)
-        if num_matches:
-            i = random.choice(range(num_matches))
-            row = df[is_category].iloc[i]
-            break
+    # ANTIPATTERN
+    # random_example.df = getattr(random_example, 'df', df)
+    # if 'count' not in df.columns:
+    #     random_exmaple.df = dedupe_mapping_df(df)
+    groups = df.groupby('category')
+    row = groups.sample(1).sample(1)
     name = row['name']
+    category = row['category']
     category_tensor = torch.tensor([categories.index(category)], dtype=torch.long)
     line_tensor = encode_one_hot_seq(name, char2i=char2i)
     return category, name, category_tensor, line_tensor
@@ -256,7 +259,7 @@ def train_sample(category_tensor, line_tensor, model=rnn,
     # print(f"output: {output}")
     # print(f"category_tensor: {category_tensor}")
     loss = criterion(output, category_tensor)
-    # print(f"loss: {loss}")
+    # print(f"loss: {loss.item()}")
     loss.backward()
 
     # Add parameters' gradients to their values, multiplied by learning rate
@@ -269,7 +272,7 @@ def train_sample(category_tensor, line_tensor, model=rnn,
 CRITERION = nn.NLLLoss()
 
 
-def train_batch(df_batch, model=rnn, criterion=CRITERION, lr=.005, char2i=CHAR2I, categories=CATEGORIES):
+def train_batch(df_batch, model, categories, criterion=CRITERION, lr=.005, char2i=CHAR2I):
     """ train for one epoch(one batch of example tensors) """
     output_losses = []
     for i, row in df_batch.iterrows():
