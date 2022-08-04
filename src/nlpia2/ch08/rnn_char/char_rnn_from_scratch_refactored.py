@@ -27,7 +27,7 @@ import pandas as pd
 
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
-from persistence import save_model, load_model_meta
+from persistence import save_model  # , load_model_meta
 
 # seaborn.set_style()
 # seaborn.set_theme()
@@ -56,35 +56,36 @@ class RNN(nn.Module):
 
 
 MODEL_PATH = Path(__file__).with_suffix('').name
-try:
-    META = load_model_meta(MODEL_PATH)
-except IOError:
-    META = {
-        'categories': [
-            "Arabic", "Irish", "Spanish", "French", "German", "English",
-            "Korean", "Vietnamese", "Scottish", "Japanese", "Polish",
-            "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese",
-            "Indian", "Ethiopian", "Nigerian", "Nepalese",
-        ],
-        'char2i': {
-            "g": 0, "J": 1, "j": 2, "l": 3, "X": 4, "e": 5, "L": 6, "H": 7, " ": 8,
-            "'": 9, "w": 10, "O": 11, "U": 12, "E": 13, "c": 14, "F": 15, "a": 16,
-            "Q": 17, "y": 18, "u": 19, "I": 20, "W": 21, ",": 22, "p": 23, "b": 24,
-            "z": 25, "G": 26, "T": 27, "t": 28, "q": 29, "S": 30, "m": 31, "d": 32,
-            "K": 33, "n": 34, "i": 35, "x": 36, "Y": 37, "M": 38, "R": 39, "r": 40,
-            "N": 41, "-": 42, "f": 43, "Z": 44, "s": 45, "D": 46, "P": 47, "o": 48,
-            ";": 49, "v": 50, "k": 51, "V": 52, "h": 53, "C": 54, "A": 55, ".": 56,
-            "B": 57
-        }
+
+# META = load_model_meta(MODEL_PATH)
+
+META = {
+    'categories': [
+        "Arabic", "Irish", "Spanish", "French", "German", "English",
+        "Korean", "Vietnamese", "Scottish", "Japanese", "Polish",
+        "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese",
+        "Indian", "Ethiopian", "Nigerian", "Nepalese",
+    ],
+    'char2i': {
+        "g": 0, "J": 1, "j": 2, "l": 3, "X": 4, "e": 5, "L": 6, "H": 7, " ": 8,
+        "'": 9, "w": 10, "O": 11, "U": 12, "E": 13, "c": 14, "F": 15, "a": 16,
+        "Q": 17, "y": 18, "u": 19, "I": 20, "W": 21, ",": 22, "p": 23, "b": 24,
+        "z": 25, "G": 26, "T": 27, "t": 28, "q": 29, "S": 30, "m": 31, "d": 32,
+        "K": 33, "n": 34, "i": 35, "x": 36, "Y": 37, "M": 38, "R": 39, "r": 40,
+        "N": 41, "-": 42, "f": 43, "Z": 44, "s": 45, "D": 46, "P": 47, "o": 48,
+        ";": 49, "v": 50, "k": 51, "V": 52, "h": 53, "C": 54, "A": 55, ".": 56,
+        "B": 57
     }
-    META['n_hidden'] = 128
-    META['n_categories'] = len(META['categories'])
-    META["model"] = RNN(
-        len(META['char2i']),
-        n_hidden=META['n_hidden'],
-        n_categories=META['n_categories']
-    )
-    save_model(MODEL_PATH, **META)
+}
+META['n_hidden'] = 128
+META['n_categories'] = len(META['categories'])
+META["model"] = RNN(
+    len(META['char2i']),
+    n_hidden=META['n_hidden'],
+    n_categories=META['n_categories']
+)
+
+# save_model(MODEL_PATH, **META)
 
 
 CATEGORIES = META['categories']
@@ -231,19 +232,33 @@ def sample_groupby(df, num_samples=1, groupby='category', char2i=CHAR2I, replace
 sample_groupby.groups = None
 
 
-def random_example(df, categories=CATEGORIES, char2i=CHAR2I):
+def random_example(groups, categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
     # ANTIPATTERN
     # random_example.df = getattr(random_example, 'df', df)
     # if 'count' not in df.columns:
     #     random_exmaple.df = dedupe_mapping_df(df)
-    groups = df.groupby('category')
     row = groups.sample(1).sample(1)
-    name = row['name']
-    category = row['category']
+    name = row['name'].iloc[0]
+    category = row['category'].iloc[0]
     category_tensor = torch.tensor([categories.index(category)], dtype=torch.long)
     line_tensor = encode_one_hot_seq(name, char2i=char2i)
     return category, name, category_tensor, line_tensor
+
+
+def stratified_random_examples(groups, categories=CATEGORIES, char2i=CHAR2I):
+    """ balanced sampling of all categories """
+    rows = groups.sample(1)
+    names = rows['name'].values
+    cats = rows['category'].values
+    cat_tensors = [
+        torch.tensor([categories.index(c)], dtype=torch.long) for c in
+        cats
+    ]
+    line_tensors = [
+        encode_one_hot_seq(n, char2i=char2i) for n in names
+    ]
+    return cats, names, cat_tensors, line_tensors
 
 
 def train_sample(category_tensor, line_tensor, model=rnn,
@@ -415,25 +430,30 @@ def train_batches(df=None, model=None, n_iters=5000, print_every=100, char2i=CHA
     return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def train(df=None, model=rnn, n_iters=70000, print_every=1000, char2i=CHAR2I, categories=CATEGORIES):
+def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
+    df = df[df['category'].isin(categories)].copy().reset_index()
+    # groups = [pd.DataFrame(g.copy()) for i, g in df.groupby('category')]
+    groups = df.groupby('category')
+
     current_loss = 0
     all_losses = []
     plot_every = print_every
 
     start = time.time()
 
-    for it in range(1, n_iters + 1):
+    for it in range(n_iters):
         # df_sample = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
-        category, line, category_tensor, line_tensor = random_example(df)
-        model, output, loss = train_sample(category_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
-        current_loss += loss
+        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, categories=categories)
+        for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
+            model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
+            current_loss += loss
 
-        # Print iteration number, loss, name and guess
-        if not it % print_every:
-            guess, guess_i = category_from_output(output, categories=categories)
-            correct = '✓' if guess == category else '✗ (%s)' % category
-            print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
+            # Print iteration number, loss, name and guess
+            if not it % print_every:
+                guess, guess_i = category_from_output(output, categories=categories)
+                correct = '✓' if guess == cat else '✗ (%s)' % cat
+                print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
 
         # Add current loss avg to list of losses
         if not it % plot_every:
