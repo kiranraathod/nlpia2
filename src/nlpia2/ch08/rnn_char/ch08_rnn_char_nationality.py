@@ -537,8 +537,9 @@ def save_results(**results):
 
 if __name__ == '__main__':
     repo = 'tangibleai/nlpia2'
-    filepath = 'src/nlpia2/data/surname_nationality_counts.csv'
-    url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}?inline=false"
+    filepath = 'src/nlpia2/data/surname_nationalities.csv'
+    suffix = '?inline=false'
+    url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}{suffix}"
     df = pd.read_csv(url)
     print(df)
     ans = input("Ready to start training (Y/N) [N]? ")
