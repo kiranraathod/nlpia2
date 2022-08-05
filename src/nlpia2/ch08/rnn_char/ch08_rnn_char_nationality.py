@@ -426,6 +426,40 @@ def train_batches(df=None, model=None, target='nationality', n_iters=5000, print
     return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
+def preprocess_surname_nationality_df(df, target_col='nationality', text_col='surname'):
+    new_rows = []
+    # Some Ukranian names have Russian alternatives e.g. surname='Markevych (Russian: Markevich)'
+    # With the Russian invasion of Ukraine it is important to distinguish between the two
+    # (the nationalities and the languages of Russia and Ukraine)
+    # issus = df['surname'].str.contains(r'(', regex=False)
+    # retain only the Ukranian spelling for Ukranian names:
+    df[target_col] = df[target_col].apply(lambda x: asciify(x))
+    print(df)
+    df[text_col] = df[text_col].str.split('(').apply(lambda x: x[0].strip())
+    print(df)
+    df[text_col] = df[text_col].apply(lambda x: asciify(x))
+    print(df)
+    df[text_col] = df[text_col].str.strip().str.strip(',')
+    print(df)
+    ismulti = ~df[text_col].str.match(r"^[- A-Za-z']+$")
+    print(f"sum(ismulti): {sum(ismulti)}")
+    if sum(ismulti) > 0:
+        for i, row in df[ismulti].iterrows():
+            base_row = row.to_dict()
+            print(base_row)
+            for name in row[text_col].split(','):
+                name = name.strip().strip(',')
+                new_row = copy.copy(base_row)
+                new_row.update({text_col: name})
+                new_rows.append(new_row)
+        new_rows = pd.DataFrame(new_rows)
+        print('NEW ROWS')
+        print(new_rows)
+        df = df.drop(ismulti, axis=0)
+        df = pd.concat([df, new_rows])
+    return df
+
+
 def train_fast(df=None, model=rnn, n_iters=1000, print_every=1000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
     df = df[df[target_col].isin(categories)].copy().reset_index()
@@ -504,6 +538,8 @@ def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
         df1['nationality'] = nationality
         dfs.append(df1)
     dftot = pd.concat(dfs)
+    dftot = preprocess_surname_nationality_df(dftot)
+    print(f"dftot.shape: {dftot.shape}")
     df = load_names_from_text(dedupe=True, categories=None)
     df = pd.concat([dftot, df])
 
