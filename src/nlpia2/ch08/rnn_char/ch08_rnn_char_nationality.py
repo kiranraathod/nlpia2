@@ -243,13 +243,14 @@ def random_example(groups, target='nationality', text_col='surname', categories=
 
 
 def stratified_random_examples(
-        groups, num_samples_per_group=1, replace=True,
+        groups, num_samples_per_group=1, replace=True, shuffle=True,
         target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
-    rows = groups.sample(num_samples_per_group, replace=replace)
-    rows = rows.sample(len(rows))
-    names = rows[text_col].values
-    cats = rows[target].values
+    df = groups.sample(num_samples_per_group, replace=replace)
+    if shuffle:
+        df = df.sample(len(df))
+    names = df[text_col].values
+    cats = df[target].values
     tqdm_fun = tqdm if len(cats) > 10000 else iter
     cat_tensors = [
         torch.tensor([categories.index(c)], dtype=torch.long) for c in
@@ -506,21 +507,18 @@ def train(df=None, model=rnn, n_iters=5000, print_every=100, char2i=CHAR2I, targ
     start = time.time()
 
     for it in range(n_iters):
-        # df_sample = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
-        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=10, categories=categories)
+        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=1, categories=categories)
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
             model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
             current_loss += loss
 
-            if not it % print_every:
+            if not (it + 1) % print_every:
                 guess, guess_i = category_from_output(output, categories=categories)
                 correct = '✓' if guess == cat else '✗ (%s)' % cat
-                print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
+                print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
 
-        # Add current loss avg to list of losses
-        if not it % plot_every:
-            all_losses.append(current_loss / plot_every)
-            current_loss = 0
+                all_losses.append(current_loss / plot_every)
+                current_loss = 0
 
     train_time = time_elapsed(start)
     return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
@@ -618,12 +616,12 @@ if __name__ == '__main__':
     print(df)
     categories = list(df['nationality'].unique())
     print(categories)
-    rnn = RNN(
+    model = RNN(
         len(META['char2i']),
         n_hidden=n_hidden,
         n_categories=len(categories),
     )
     ans = input("Ready to start training (Y/N) [N]? ")
     if ans.lower().strip().startswith('y'):
-        results = train(df, model=rnn, categories=categories)
+        results = train(df, model=model, categories=categories)
         save_results(**results)
