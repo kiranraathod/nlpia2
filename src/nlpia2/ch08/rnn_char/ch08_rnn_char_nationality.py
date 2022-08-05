@@ -242,17 +242,21 @@ def random_example(groups, target='nationality', text_col='surname', categories=
     return category, name, category_tensor, line_tensor
 
 
-def stratified_random_examples(groups, num_samples_per_group=1, target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
+def stratified_random_examples(
+        groups, num_samples_per_group=1, replace=True,
+        target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
-    rows = groups.sample(num_samples_per_group)
+    rows = groups.sample(num_samples_per_group, replace=replace)
+    rows = rows.sample(len(rows))
     names = rows[text_col].values
     cats = rows[target].values
+    tqdm_fun = tqdm if len(cats) > 10000 else iter
     cat_tensors = [
         torch.tensor([categories.index(c)], dtype=torch.long) for c in
-        cats
+        tqdm_fun(cats)
     ]
     line_tensors = [
-        encode_one_hot_seq(n, char2i=char2i) for n in names
+        encode_one_hot_seq(n, char2i=char2i) for n in tqdm_fun(names)
     ]
     return cats, names, cat_tensors, line_tensors
 
@@ -295,8 +299,8 @@ def train_batch(df_batch, model, categories, target='nationality', text_col='sur
             model=model,
             criterion=criterion,
             lr=lr,
-            char2i=CHAR2I,
-            categories=CATEGORIES)
+            char2i=char2i,
+            categories=categories)
         output_losses.append((output, loss))
     return model, output_losses
 
@@ -460,36 +464,37 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
     return df
 
 
-def train_fast(df=None, model=rnn, n_iters=1000, print_every=1000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
+def train_fast(df=None, model=rnn, n_iters=100000, print_every=10000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
     df = df[df[target_col].isin(categories)].copy().reset_index()
     groups = df.groupby(target_col)
 
     current_loss = 0
     all_losses = []
-    plot_every = print_every
 
     start = time.time()
 
+    num_samples_per_group = int(n_iters // len(categories)) + 1
+    print(f'num_samples_per_group: {num_samples_per_group}')
     cats, lines, category_tensors, line_tensors = stratified_random_examples(
-        groups, num_samples_per_group=int(n_iters // len(categories)) + 1, categories=categories)
-    for it, (cat, line, cat_tensor, line_tensor) in enumerate(zip(cats, lines, category_tensors, line_tensors)):
+        groups, num_samples_per_group=num_samples_per_group, categories=categories, replace=True)
+    for it, (cat, line, cat_tensor, line_tensor) in tqdm(enumerate(zip(cats, lines, category_tensors, line_tensors))):
         model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
         current_loss += loss
 
-        if not it + 1 % print_every:
+        if not (it + 1) % print_every:
             guess, guess_i = category_from_output(output, categories=categories)
             is_correct = '✓' if guess == cat else f'✗ \t (should be {cat.upper()})'
             print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line}: {guess} {is_correct}')
 
-            all_losses.append(current_loss / plot_every)
+            all_losses.append(current_loss / print_every)
             current_loss = 0
 
     train_time = time_elapsed(start)
     return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, target='nationality', categories=CATEGORIES):
+def train(df=None, model=rnn, n_iters=5000, print_every=100, char2i=CHAR2I, target='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
     df = df[df[target].isin(categories)].copy().reset_index()
     groups = df.groupby(target)
@@ -502,7 +507,7 @@ def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, ta
 
     for it in range(n_iters):
         # df_sample = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
-        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, categories=categories)
+        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=10, categories=categories)
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
             model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
             current_loss += loss
@@ -611,7 +616,14 @@ if __name__ == '__main__':
     url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}{suffix}"
     df = pd.read_csv(url)
     print(df)
+    categories = list(df['nationality'].unique())
+    print(categories)
+    rnn = RNN(
+        len(META['char2i']),
+        n_hidden=n_hidden,
+        n_categories=len(categories),
+    )
     ans = input("Ready to start training (Y/N) [N]? ")
     if ans.lower().strip().startswith('y'):
-        results = train(df)
+        results = train(df, model=rnn, categories=categories)
         save_results(**results)
