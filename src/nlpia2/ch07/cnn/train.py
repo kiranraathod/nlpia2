@@ -1,4 +1,8 @@
-""" Includes random state args
+""" Based on Fernando Lopez main.py
+
+
+
+Includes random state args
 FIXME: Verify predict and compute_accuracy() functions by comparing to older versions in git
 
 $ python main.py
@@ -55,14 +59,14 @@ class Parameters:
         self.tokenizer: str = 'tokenize_re'
 
         self.embeddings: tuple = (2000, 64)
-        self.kernel_lengths: list = [2, 3, 4, 5]
-        self.strides: list = [2, 2, 2, 2]
+        self.kernel_lengths: list = [2]  # [2, 3, 4, 5]
+        self.strides: list = [2]  # [2, 2, 2, 2]
         self.conv_output_size: int = 32
 
         self.in_channels: int = 32
         self.planes: int = 1  # not sure if the is correct terminology
         self.out_channels: int = self.planes * self.in_channels
-        self.groups: int = self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
+        self.groups: int = 1  # self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
 
         self.epochs: int = 10
         self.batch_size: int = 12
@@ -285,6 +289,7 @@ class Pipeline(Parameters):
         return self
 
     def predict(self, X=None):
+        """ FIXME: look for evaluate functions that turn grad and dropout off during evaluation """
 
         self.model.eval()  # evaluation mode
         predictions = []
@@ -372,6 +377,89 @@ def main():
 
 
 if __name__ == '__main__':
+    """ Train a 1-D 4-kernel CNN on disaster-tweets.csv
+
+    These CLI args achieved 79% accuracy once (but sometimes no better than 70%):
+
+    ```bash
+    $ python train.py \
+        --conv_output_size=32 \
+        --groups=1 \
+        --embedding_size=50 \
+        --in_channels=32 \
+        --epochs=20 \
+        --numpy_random_state=433 \
+        --torch_random_state=433994 \
+        --split_random_state=1460940
+
+
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 2, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(2,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 3, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(3,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 4, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(4,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=4, stride=2, padding=0, dilation=1, ceil_mode=False)
+    Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 5, 'stride': 2, 'groups': 1})
+    Conv1d(32, 32, kernel_size=(5,), stride=(2,))
+    self.poolers[-1]: MaxPool1d(kernel_size=5, stride=2, padding=0, dilation=1, ceil_mode=False)
+    {'in_seq_len': 64, 'kernel_lengths': [2, 3, 4, 5], 'strides': [2, 2, 2, 2]}
+    self.encoding_size = 1856
+    conv_outputs: [torch.Size([12, 32, 16]), torch.Size([12, 32, 15]), torch.Size([12, 32, 14]), torch.Size([12, 32, 13])]
+    encoding.size(): torch.Size([12, 32, 58])
+    reshaped encoding.size(): torch.Size([12, 1856])
+    Epoch: 1, loss: 0.66147, Train accuracy: 0.61392, Test accuracy: 0.63648
+    Epoch: 2, loss: 0.55146, Train accuracy: 0.68837, Test accuracy: 0.70997
+    Epoch: 3, loss: 0.47055, Train accuracy: 0.73391, Test accuracy: 0.73885
+    Epoch: 4, loss: 0.35673, Train accuracy: 0.77230, Test accuracy: 0.76509
+    Epoch: 5, loss: 0.28001, Train accuracy: 0.79521, Test accuracy: 0.77822
+    Epoch: 6, loss: 0.35333, Train accuracy: 0.81711, Test accuracy: 0.78346
+    Epoch: 7, loss: 0.22455, Train accuracy: 0.83389, Test accuracy: 0.78215
+    Epoch: 8, loss: 0.24332, Train accuracy: 0.84761, Test accuracy: 0.77953
+    Epoch: 9, loss: 0.29812, Train accuracy: 0.86177, Test accuracy: 0.78215
+    Epoch: 10, loss: 0.11444, Train accuracy: 0.87272, Test accuracy: 0.79003
+    ```
+
+    It's not entirely train_test_split luck because randomizing split_random_state
+    still gets OK results:
+
+    ```
+    python train.py \
+        --conv_output_size=32 \
+        --groups=1 \
+        --embedding_size=50 \
+        --in_channels=32 \
+        --epochs=20 \
+        --numpy_random_state=433 \
+        --torch_random_state=433994
+
+    INFO:__main__:DEFAULT: split_random_state: 1461995
+    WARNING:__main__:NEW KWARGS: numpy_random_state: 433 (<class 'int'>)
+    WARNING:__main__:NEW KWARGS: torch_random_state: 433994 (<class 'int'>)
+
+    Epoch: 1, loss: 0.80616, Train accuracy: 0.58999, Test accuracy: 0.68635
+    Epoch: 2, loss: 0.79108, Train accuracy: 0.67465, Test accuracy: 0.68504
+    Epoch: 3, loss: 0.53284, Train accuracy: 0.72530, Test accuracy: 0.69816
+    Epoch: 4, loss: 0.55834, Train accuracy: 0.76368, Test accuracy: 0.70341
+    Epoch: 5, loss: 0.58383, Train accuracy: 0.79054, Test accuracy: 0.71654
+    Epoch: 6, loss: 0.53005, Train accuracy: 0.80572, Test accuracy: 0.71785
+    Epoch: 7, loss: 0.53331, Train accuracy: 0.82514, Test accuracy: 0.72047
+    Epoch: 8, loss: 0.36223, Train accuracy: 0.84688, Test accuracy: 0.73360
+    Epoch: 9, loss: 0.23334, Train accuracy: 0.85345, Test accuracy: 0.75984
+    Epoch: 10, loss: 0.37311, Train accuracy: 0.86878, Test accuracy: 0.75984
+    Epoch: 11, loss: 0.16161, Train accuracy: 0.88046, Test accuracy: 0.77034
+    Epoch: 12, loss: 0.17307, Train accuracy: 0.89155, Test accuracy: 0.76378
+    Epoch: 13, loss: 0.24728, Train accuracy: 0.90220, Test accuracy: 0.76509
+    Epoch: 14, loss: 0.24151, Train accuracy: 0.90804, Test accuracy: 0.75853
+    Epoch: 15, loss: 0.45944, Train accuracy: 0.91680, Test accuracy: 0.76378
+    Epoch: 16, loss: 0.06032, Train accuracy: 0.92527, Test accuracy: 0.76509
+    Epoch: 17, loss: 0.16179, Train accuracy: 0.92746, Test accuracy: 0.76640
+    Epoch: 18, loss: 0.13890, Train accuracy: 0.93359, Test accuracy: 0.76115
+    Epoch: 19, loss: 0.15811, Train accuracy: 0.93913, Test accuracy: 0.75066
+    Epoch: 20, loss: 0.05061, Train accuracy: 0.93665, Test accuracy: 0.76115
+    """
     results = main()
     print("=" * 100)
     print("=========== HYPERPARMS =============")

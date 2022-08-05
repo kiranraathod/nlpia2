@@ -44,15 +44,20 @@ def calc_output_seq_len(in_seq_len, kernel_lengths, strides, dilation=1):
     if isinstance(strides, int):
         strides = [strides] * len(kernel_lengths)
     out_pool_total = 0
-    for kernel_len, stride in zip(kernel_lengths, strides):
+    for i, (kernel_len, stride) in enumerate(zip(kernel_lengths, strides)):
         out_conv = (
             (in_seq_len - dilation * (kernel_len - 1) - 1) // stride) + 1
+        log.warning(f"out_conv[{i}]({kernel_len}, {stride}): {out_conv}")
         out_pool = (
             (out_conv - dilation * (kernel_len - 1) - 1) // stride) + 1
+        log.warning(f"out_pool[{i}]: {out_pool}")
         out_pool_total += out_pool
+        log.warning(f"out_pool_total[{i}]: {out_pool_total}")
 
     # return the len of a "flattened" vector that is passed into a fully connected (Linear) layer
-    return out_pool_total * in_seq_len // (sum(strides) // len(strides))
+    out_pool_total = out_pool_total * in_seq_len // (sum(strides) // len(strides))
+    log.warning(f"out_pool_total (FINAL return value): {out_pool_total}")
+    return out_pool_total
 
 # .Compute the shape of the CNN output (the number of the output encoding vector dimensions)
 ##########################################################################
@@ -112,9 +117,9 @@ class CNNTextClassifier(nn.ModuleList):
         self.embedding_size = shape[1]
 
         self.seq_len = seq_len
-        self.in_channels = seq_len              # <1>
+        self.in_channels = in_channels             # <1> seq_len
         self.out_channels = self.in_channels
-        self.groups = self.in_channels
+        self.groups = groups
         self.kernel_lengths = [2]  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
@@ -172,7 +177,7 @@ class CNNTextClassifier(nn.ModuleList):
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
             print(f"self.poolers[-1]: {self.poolers[-1]}")
 
-        calcoutkwargs = dict(in_seq_len=self.seq_len * 2,
+        calcoutkwargs = dict(in_seq_len=self.in_channels * 2,  # seq_len
                              kernel_lengths=self.kernel_lengths,
                              strides=self.strides)
         print(calcoutkwargs)

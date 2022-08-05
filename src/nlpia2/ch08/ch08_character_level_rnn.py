@@ -1,4 +1,4 @@
-""" Character-based RNN from scratch with pytorch
+""" UNUSED! Character-based RNN from scratch with pytorch
 
 References:
     - https://blog.floydhub.com/a-beginners-guide-on-recurrent-neural-networks-with-pytorch/

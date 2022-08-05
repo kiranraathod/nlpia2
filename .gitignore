@@ -1,5 +1,8 @@
 # BigData and Models
 .nlpia2-data
+# todo move these to .nlpia2-data and create index with URLs in data sources.yml
+src/nlpia2/data/big
+
 # src/nlpia2/data
 db.sqlite3
 *.bz2
@@ -105,3 +108,8 @@ docs/**/*.html
 **/*secret*
 **/*private*
 
+# Big Data
+src/nlpia2/data/meuller/*.pdf
+
+# other git repos
+src/nlpia2/ch08/nlpia-rnn/

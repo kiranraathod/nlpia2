@@ -151,13 +151,12 @@ nlp = spacy.load('en_core_web_md')
 spacy.cli.download('en_core_web_md')
 nlp = spacy.load('en_core_web_md')
 from nlpia2.init import maybe_download, DATA_DIR, HOME_DATA_DIR
-maybe_download('quotes.yml')
-quotes = maybe_download('quotes.yml')
+quotes = maybe_download(filename='quotes.yml')
 for q in quotes:
     print(q['text'])
-quotes = yaml.full_load(maybe_download('quotes.yml').open())
+quotes = yaml.full_load(maybe_download(filename='quotes.yml').open())
 import yaml
-quotes = yaml.full_load(maybe_download('quotes.yml').open())
+quotes = yaml.full_load(maybe_download(filename='quotes.yml').open())
 for q in quotes:
     print(q['text'])
 for q in quotes:
@@ -218,14 +217,14 @@ df.sort_values('len')
 len(df)
 df.sort_values('len')[:5]
 np.array(quotes)[df.sort_values('len')[:5].index.values]
-hist -o -p -f find-short-adverby-quote.yml
-hist -o -p -f find-short-adverby-quote.hist.md
-hist -f find-short-adverby-quote.hist.py
+hist - o - p - f find - short - adverby - quote.yml
+hist - o - p - f find - short - adverby - quote.hist.md
+hist - f find - short - adverby - quote.hist.py
 hist
-ls -hal
-rm find-short-adverby-quote.yml
-more find-short-adverby-quote.hist.py
-more find-short-adverby-quote.hist.md
+ls - hal
+rm find - short - adverby - quote.yml
+more find - short - adverby - quote.hist.py
+more find - short - adverby - quote.hist.md
 df
 df.index[3]
 pd.options.display.max_rows = 7
@@ -234,38 +233,38 @@ pd.options.display.max_columns = 7
 df
 df = df.sort_values('len')
 shortest5 = df[:5].index.values]
-shortest5 = df[:5].index.values
+shortest5 = df[: 5].index.values
 shortest5
 quotes[92]
-hist -o -p -f 'find-short-adverby-quote-and-minimalcnn.hist.md'
-hist -f 'find-short-adverby-quote-and-minimalcnn.hist.py'
+hist - o - p - f 'find-short-adverby-quote-and-minimalcnn.hist.md'
+hist - f 'find-short-adverby-quote-and-minimalcnn.hist.py'
 more 'find-short-adverby-quote-and-minimalcnn.hist.py'
-ls find*
-hist -o -p -f find-short-adverby-quote-minimalcnn.hist.md
-hist -f find-short-adverby-quote-minimalcnn.hist.py
+ls find *
+hist - o - p - f find - short - adverby - quote - minimalcnn.hist.md
+hist - f find - short - adverby - quote - minimalcnn.hist.py
 ls
-ls find*
-rm find-short-adverby-quote.hist.md
-rm find-short-adverby-quote.hist.py
-more find-short-adverby-quote-minimalcnn.hist.md
+ls find *
+rm find - short - adverby - quote.hist.md
+rm find - short - adverby - quote.hist.py
+more find - short - adverby - quote - minimalcnn.hist.md
 quotes[92]
 df.iloc[92]
 df.loc[92]
 df.loc[92].dropna()
-df.loc[92].dropna()[-5:]
-df.loc[92].dropna()[-7:]
+df.loc[92].dropna()[-5: ]
+df.loc[92].dropna()[-7: ]
 list(df.loc[92].dropna())
-quote = quotes[92]
-doc = nlp(quote['text'])
+quote= quotes[92]
+doc= nlp(quote['text'])
 quote['tags']
 [(t.text, t.pos_, t.pos_ == 'ADV') for t in doc]
-tagged_quote = [(t.text, t.pos_, int(t.pos_ == 'ADV')) for t in doc]
+tagged_quote= [(t.text, t.pos_, int(t.pos_ == 'ADV')) for t in doc]
 tagged_quote
-tagged_quote = [(int(t.pos_ == 'ADV'), t.pos_, t.text) for t in doc]
+tagged_quote= [(int(t.pos_ == 'ADV'), t.pos_, t.text) for t in doc]
 tagged_quote
 pd.DataFrame(tagged_quote)
-pd.options.display.max_rows = 21
+pd.options.display.max_rows= 21
 pd.DataFrame(tagged_quote)
 pd.DataFrame(tagged_quote, columns='is_adv pos word'.split())
 pd.DataFrame(tagged_quote, columns='is_adv POS word'.split())
-hist -f find-short-adverby-quote-minimalcnn.hist.py
+hist - f find - short - adverby - quote - minimalcnn.hist.py

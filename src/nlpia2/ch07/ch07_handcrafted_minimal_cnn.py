@@ -13,14 +13,15 @@ from matplotlib import pyplot as plt
 num_channels = 1
 # embedding_size = 1
 
-kernel = [.5, -.5]
+kernel = [-2, 3]
 kernel_size = len(kernel)
 stride = 1
 
-x = [1, 1, 1, 0, 0, 0, 1, 1, 1]
-seq_len = len(x)
+sentence_len = 11
+pad_len = 4
+seq_len = sentence_len + pad_len
 
-x = np.array(x, np.float32)
+x = np.array(list(range(sentence_len)) + [0] * pad_len, np.float32)
 x = torch.tensor(x)
 print()
 print(f"x.resize_({num_channels}, {num_channels}, {seq_len})")
@@ -28,27 +29,6 @@ print(x.resize_(num_channels, num_channels, seq_len))
 print()
 print('x')
 print(x)
-
-# dataset = torch.arange(
-#     num_examples * seq_len * embedding_size,
-#     dtype=torch.float)
-# dataset.resize_(num_examples, seq_len, embedding_size)
-
-# data = np.arange(
-#     num_examples * seq_len * num_channels,
-#     dtype=np.float32,
-# )
-# data = data.reshape(num_examples, seq_len * num_channels)
-# df = pd.DataFrame(data)
-
-# IMAGES_DIR = Path.home() / 'code' / 'tangibleai' / 'nlpia-manuscript' / 'manuscript' / 'images' / 'ch07'
-# dfi.export(df, IMAGES_DIR / 'df-minimal-cnn-dataset.png', max_rows=7)
-
-# dataset = torch.from_numpy(df.values)
-# dataset.resize_(num_examples, seq_len, num_channels)
-
-# x = dataset[0]
-# x.resize_(seq_len, num_channels)
 
 conv = nn.Conv1d(
     in_channels=num_channels,
@@ -98,18 +78,6 @@ pool = nn.MaxPool1d(pool_size, pool_stride)
 print(f"pool = nn.MaxPool1d({pool_size}, {pool_stride})")
 print(pool)
 
-pool.forward(x)
-print('x = pool.forward(y): ')
-print(x)
-
-# lin = nn.Linear(embedding_size * seq_len, 1)
-
-kernel_size = 2
-stride = 1
-
-# cnn = MinimalCNN(
-#     stride=stride,
-#     kernel_size=kernel_size,
-#     seq_len=seq_len)
-# print(cnn.conv.weight.size())
-# cnn.forward(x)
+y = pool.forward(x)
+print('y = pool.forward(x): ')
+print(y)

@@ -1,24 +1,16 @@
 import json
+import os
 from pathlib import Path
 
 import meilisearch
 import spacy
+from nlpia2.env import get_env
 
 
 spacy_en = spacy.load("en_core_web_md")
+ENV = get_env()
 
-
-ENV = {}
-with Path('~/.ssh/qary/.env').expanduser().open() as fin:
-    for line in fin:
-        kv = [s.strip() for s in line.split('=')]
-        if line.strip() and len(kv) == 2 and all([len(s) for s in kv]):
-            ENV[kv[0].upper()] = kv[1]
-
-
-ENV_PATH = Path('~').expanduser() / '.ssh' / 'qary' / '.env'
-ENV_TEXT = ENV_PATH.open().read()
-MEILI_MASTER_KEY = ENV_TEXT.split('=')[1].strip()
+MEILI_MASTER_KEY = ENV.get('MEILI_MASTER_KEY', os.environ['MEILI_MASTER_KEY'])
 MEILI_URL = 'https://search.qary.ai'
 
 
