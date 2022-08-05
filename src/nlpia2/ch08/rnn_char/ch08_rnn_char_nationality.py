@@ -113,7 +113,7 @@ def dedupe_mapping_df(df, key_column='name', value_column='category'):
     return pd.DataFrame(key_value_counts, columns=[key_column, value_column, 'count'])
 
 
-def load_names_from_text(data_dir=SRC_DATA_DIR, categories=None, dedupe=False):
+def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=None, target='nationality', dedupe=False):
     """ load names (lines of text) from text files if filename is among categories provided
 
     Inputs:
@@ -150,25 +150,25 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, categories=None, dedupe=False):
         print(f"Loading file {i}: {filepath}.")
         category = filepath.with_suffix('').name
         if categories and category not in categories:
-            print(f"The path {filepath} looks like a new category.")
+            print(f"The path {filepath} looks like a new {target}.")
             print(f"Add it to the {filepath.with_suffix('.meta.json')} and rerun.")
             continue
         filepath = maybe_download(filename=filepath)
         with filepath.open() as fin:
             lines = [asciify(line.rstrip()) for line in fin]
-            name_label_counts += list(zip(lines, [category] * len(lines)))
-    columns = ['name', 'category']
+            name_label_counts += list(zip(lines, [target] * len(lines)))
+    columns = [text_col, target]
     if dedupe:
         name_label_counts = [[k[0], k[1], v] for (k, v) in Counter(name_label_counts).items()]
         columns += ['count']
     return pd.DataFrame(name_label_counts, columns=columns)
 
 
-def dataset_confusion(df, normalize=True, fillna='0'):
+def dataset_confusion(df, normalize=True, fillna='0', target='nationality'):
     """ Given a df with columns name & category, assume "truth" is most popular category for a name """
-    confusion = {c: Counter() for c in sorted(df['category'].unique())}
+    confusion = {c: Counter() for c in sorted(df[target].unique())}
     for i, g in df.groupby('name'):
-        counts = Counter(g['category'])
+        counts = Counter(g[target])
         confusion[counts.most_common()[0][0]] += counts
     confusion = pd.DataFrame(confusion)
     confusion = confusion[confusion.index]
@@ -214,7 +214,7 @@ def output_from_str(s, char2i=CHAR2I, categories=CATEGORIES):
     return category_from_output(output, categories=categories)
 
 
-def sample_groupby(df, num_samples=1, groupby='category', char2i=CHAR2I, replace=True, shuffle=True):
+def sample_groupby(df, num_samples=1, groupby='nationality', char2i=CHAR2I, replace=True, shuffle=True):
     """ balanced sampling of all categories """
     if sample_groupby.groups is None:
         sample_groupby.groups = df.groupby(groupby)
@@ -227,7 +227,7 @@ def sample_groupby(df, num_samples=1, groupby='category', char2i=CHAR2I, replace
 sample_groupby.groups = None
 
 
-def random_example(groups, categories=CATEGORIES, char2i=CHAR2I):
+def random_example(groups, target='nationality', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
     # ANTIPATTERN
     # random_example.df = getattr(random_example, 'df', df)
@@ -235,17 +235,17 @@ def random_example(groups, categories=CATEGORIES, char2i=CHAR2I):
     #     random_exmaple.df = dedupe_mapping_df(df)
     row = groups.sample(1).sample(1)
     name = row['name'].iloc[0]
-    category = row['category'].iloc[0]
+    category = row[target].iloc[0]
     category_tensor = torch.tensor([categories.index(category)], dtype=torch.long)
     line_tensor = encode_one_hot_seq(name, char2i=char2i)
     return category, name, category_tensor, line_tensor
 
 
-def stratified_random_examples(groups, categories=CATEGORIES, char2i=CHAR2I):
+def stratified_random_examples(groups, target='nationality', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
     rows = groups.sample(1)
     names = rows['name'].values
-    cats = rows['category'].values
+    cats = rows[target].values
     cat_tensors = [
         torch.tensor([categories.index(c)], dtype=torch.long) for c in
         cats
@@ -282,11 +282,11 @@ def train_sample(category_tensor, line_tensor, model=rnn,
 CRITERION = nn.NLLLoss()
 
 
-def train_batch(df_batch, model, categories, criterion=CRITERION, lr=.005, char2i=CHAR2I):
+def train_batch(df_batch, model, categories, target='nationality', criterion=CRITERION, lr=.005, char2i=CHAR2I):
     """ train for one epoch(one batch of example tensors) """
     output_losses = []
     for i, row in df_batch.iterrows():
-        category_tensor = torch.tensor([categories.index(row['category'])], dtype=torch.long)
+        category_tensor = torch.tensor([categories.index(row[target])], dtype=torch.long)
         line_tensor = encode_one_hot_seq(row['name'], char2i=char2i)
         model, output, loss = train_sample(
             category_tensor,
@@ -356,7 +356,7 @@ def plot_confusion(df_conf):
     plt.show()
 
 
-def topk_predictions(text, topk=3, categories=CATEGORIES, char2i=CHAR2I, model=rnn):
+def topk_predictions(text, topk=3, target='nationality', categories=CATEGORIES, char2i=CHAR2I, model=rnn):
     with torch.no_grad():
         output = evaluate_tensor(encode_one_hot_seq(text, char2i=char2i), model=model)
         topvalues, topindices = output.topk(topk, 1, True)
@@ -365,7 +365,7 @@ def topk_predictions(text, topk=3, categories=CATEGORIES, char2i=CHAR2I, model=r
         for rank, (log_loss_tens, category_index) in enumerate(zip(topvalues[0], topindices[0])):
             predictions.append(
                 [rank, text, log_loss_tens.item(), categories[category_index]])
-    return pd.DataFrame(predictions, columns='rank text log_loss category'.split())
+    return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target])
 
 
 def print_predictions(text, n_predictions=3, categories=CATEGORIES, model=rnn):
@@ -375,7 +375,7 @@ def print_predictions(text, n_predictions=3, categories=CATEGORIES, model=rnn):
     return preds_df
 
 
-def print_example_tensor(text="O’Néàl", category="Irish", char2i=CHAR2I):
+def print_example_tensor(text="O’Néàl", char2i=CHAR2I):
 
     # Transcode Unicode str ASCII without embellishments, diacritics (https://stackoverflow.com/a/518232/2809427)
     ascii_text = asciify(text)
@@ -387,15 +387,15 @@ def print_example_tensor(text="O’Néàl", category="Irish", char2i=CHAR2I):
     print(f"input_tensor.size(): {input_tensor.size()}")
 
 
-def print_dataset_samples(df, num_samples=3, replace=True):
-    print(sample_groupby(df, num_samples=num_samples, groupby='category', replace=replace))
+def print_dataset_samples(df, num_samples=3, replace=True, target='nationality'):
+    print(sample_groupby(df, num_samples=num_samples, groupby=target, replace=replace))
 
 
 def load_name_counts(filepath=SRC_DATA_DIR / 'names' / 'name_counts.csv.gz'):
     return pd.read_csv(filepath)
 
 
-def train_batches(df=None, model=None, n_iters=5000, print_every=100, char2i=CHAR2I, categories=None):
+def train_batches(df=None, model=None, target='nationality', n_iters=5000, print_every=100, char2i=CHAR2I, categories=None):
     df = load_name_counts() if df is None else df
     categories = list(df['category'].unique())
     model = RNN(vocab_size=len(CHAR2I), n_hidden=128, n_categories=len(categories)) if model is None else model
@@ -404,7 +404,7 @@ def train_batches(df=None, model=None, n_iters=5000, print_every=100, char2i=CHA
     start = time.time()
 
     for it in tqdm(range(1, n_iters + 1)):
-        df_batch = sample_groupby(df, num_samples=1, groupby='category', replace=True, shuffle=True)
+        df_batch = sample_groupby(df, num_samples=1, groupby=target, replace=True, shuffle=True)
         model, batch_output_losses = train_batch(df_batch, model=model, char2i=char2i, categories=categories, lr=.005)
         output_losses += batch_output_losses
 
@@ -425,11 +425,10 @@ def train_batches(df=None, model=None, n_iters=5000, print_every=100, char2i=CHA
     return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, categories=CATEGORIES):
+def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, target='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
-    df = df[df['category'].isin(categories)].copy().reset_index()
-    # groups = [pd.DataFrame(g.copy()) for i, g in df.groupby('category')]
-    groups = df.groupby('category')
+    df = df[df[target].isin(categories)].copy().reset_index()
+    groups = df.groupby(target)
 
     current_loss = 0
     all_losses = []
@@ -444,7 +443,6 @@ def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, ca
             model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
             current_loss += loss
 
-            # Print iteration number, loss, name and guess
             if not it % print_every:
                 guess, guess_i = category_from_output(output, categories=categories)
                 correct = '✓' if guess == cat else '✗ (%s)' % cat
@@ -459,7 +457,9 @@ def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, ca
     return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames'):
+def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
+                               html_text_col='surname', textfile_text_col='name', html_target='nationality', textfile_target='category'):
+    """ FIXME: use html_text_col='surname', textfile_text_col='name', html_target='nationality', textfile_target='category' """
     html_dir = Path.home(html_dir)
     filepaths = list(html_dir.glob('Most Common *.html'))
     dfs = []
@@ -475,7 +475,12 @@ def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames'):
         dfs.append(df1)
     dftot = pd.concat(dfs)
     df = load_names_from_text(dedupe=True, categories=None)
-    return pd.concat([dftot, df])
+    df = pd.concat([dftot, df])
+    df['surname'] = df['surname'].fillna(df['name'][df['surname'].isna()]).values
+    df = df.drop(columns=['name'])
+    df['nationality'] = df['nationality'].fillna(df['category'][df['nationality'].isna()]).values
+    df = df.drop(columns=['category'])
+    return df
 
 
 def plot_training_curve(losses):
@@ -531,7 +536,12 @@ def save_results(**results):
 
 
 if __name__ == '__main__':
-    # df = load_names_from_text()
-    # results = train(df=df)
-    # save_results(**results)
-    pass
+    repo = 'tangibleai/nlpia2'
+    filepath = 'src/nlpia2/data/surname_nationality_counts.csv'
+    url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}?inline=false"
+    df = pd.read_csv(url)
+    print(df)
+    ans = input("Ready to start training (Y/N) [N]? ")
+    if ans.lower().strip().startswith('y'):
+        results = train(df)
+        save_results(**results)
