@@ -25,7 +25,8 @@ import pandas as pd
 
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
-from persistence import save_model  # , load_model_meta
+
+from persistence import save_model  # , load_model_meta  # noqa
 
 
 class RNN(nn.Module):
@@ -107,7 +108,7 @@ if 'state_dict' in META:
 asciify = Asciifier(include=ASCII_NAME_CHARS)
 
 
-def dedupe_mapping_df(df, key_column='name', value_column='category'):
+def dedupe_mapping_df(df, key_column='surname', value_column='nationality'):
     key_value_tuples = list(zip(df[key_column], [value_column]))
     key_value_counts = [[k[0], k[1], v] for (k, v) in Counter(key_value_tuples).items()]
     return pd.DataFrame(key_value_counts, columns=[key_column, value_column, 'count'])
@@ -120,7 +121,7 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=N
       categories (list of str): None will load all categories
 
     Returns:
-      DataFrame with columns=['name', 'category', 'count']
+      DataFrame with columns=['surname', 'nationality', 'count']
 
     ```python
     !curl - O https: // download.pytorch.org / tutorial / data.zip
@@ -150,13 +151,13 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=N
         print(f"Loading file {i}: {filepath}.")
         category = filepath.with_suffix('').name
         if categories and category not in categories:
-            print(f"The path {filepath} looks like a new {target}.")
+            print(f"The path {filepath} looks like a new {category}.")
             print(f"Add it to the {filepath.with_suffix('.meta.json')} and rerun.")
             continue
         filepath = maybe_download(filename=filepath)
         with filepath.open() as fin:
             lines = [asciify(line.rstrip()) for line in fin]
-            name_label_counts += list(zip(lines, [target] * len(lines)))
+            name_label_counts += list(zip(lines, [category] * len(lines)))
     columns = [text_col, target]
     if dedupe:
         name_label_counts = [[k[0], k[1], v] for (k, v) in Counter(name_label_counts).items()]
@@ -164,10 +165,10 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=N
     return pd.DataFrame(name_label_counts, columns=columns)
 
 
-def dataset_confusion(df, normalize=True, fillna='0', target='nationality'):
+def dataset_confusion(df, normalize=True, fillna='0', text_col='surname', target='nationality'):
     """ Given a df with columns name & category, assume "truth" is most popular category for a name """
     confusion = {c: Counter() for c in sorted(df[target].unique())}
-    for i, g in df.groupby('name'):
+    for i, g in df.groupby(text_col):
         counts = Counter(g[target])
         confusion[counts.most_common()[0][0]] += counts
     confusion = pd.DataFrame(confusion)
@@ -227,24 +228,24 @@ def sample_groupby(df, num_samples=1, groupby='nationality', char2i=CHAR2I, repl
 sample_groupby.groups = None
 
 
-def random_example(groups, target='nationality', categories=CATEGORIES, char2i=CHAR2I):
+def random_example(groups, target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
     # ANTIPATTERN
     # random_example.df = getattr(random_example, 'df', df)
     # if 'count' not in df.columns:
     #     random_exmaple.df = dedupe_mapping_df(df)
     row = groups.sample(1).sample(1)
-    name = row['name'].iloc[0]
+    name = row[text_col].iloc[0]
     category = row[target].iloc[0]
     category_tensor = torch.tensor([categories.index(category)], dtype=torch.long)
     line_tensor = encode_one_hot_seq(name, char2i=char2i)
     return category, name, category_tensor, line_tensor
 
 
-def stratified_random_examples(groups, target='nationality', categories=CATEGORIES, char2i=CHAR2I):
+def stratified_random_examples(groups, num_samples_per_group=1, target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
     """ balanced sampling of all categories """
-    rows = groups.sample(1)
-    names = rows['name'].values
+    rows = groups.sample(num_samples_per_group)
+    names = rows[text_col].values
     cats = rows[target].values
     cat_tensors = [
         torch.tensor([categories.index(c)], dtype=torch.long) for c in
@@ -282,12 +283,12 @@ def train_sample(category_tensor, line_tensor, model=rnn,
 CRITERION = nn.NLLLoss()
 
 
-def train_batch(df_batch, model, categories, target='nationality', criterion=CRITERION, lr=.005, char2i=CHAR2I):
+def train_batch(df_batch, model, categories, target='nationality', text_col='surname', criterion=CRITERION, lr=.005, char2i=CHAR2I):
     """ train for one epoch(one batch of example tensors) """
     output_losses = []
     for i, row in df_batch.iterrows():
         category_tensor = torch.tensor([categories.index(row[target])], dtype=torch.long)
-        line_tensor = encode_one_hot_seq(row['name'], char2i=char2i)
+        line_tensor = encode_one_hot_seq(row[text_col], char2i=char2i)
         model, output, loss = train_sample(
             category_tensor,
             line_tensor,
@@ -331,10 +332,10 @@ def confusion_df(truth, pred, categories=CATEGORIES):
     return pd.DataFrame(confusion)
 
 
-def predict_confusion(df, categories=CATEGORIES):
+def predict_confusion(df, categories=CATEGORIES, target='nationality', text_col='surname'):
     df_conf = confusion_df(
-        truth=df['name'],
-        pred=df['name'].apply(predict_category).values,
+        truth=df[target],
+        pred=df[text_col].apply(predict_category).values,
         categories=categories,
     )
     return df_conf
@@ -356,7 +357,7 @@ def plot_confusion(df_conf):
     plt.show()
 
 
-def topk_predictions(text, topk=3, target='nationality', categories=CATEGORIES, char2i=CHAR2I, model=rnn):
+def topk_predictions(text, target_col_label='nationality', topk=3, categories=CATEGORIES, char2i=CHAR2I, model=rnn):
     with torch.no_grad():
         output = evaluate_tensor(encode_one_hot_seq(text, char2i=char2i), model=model)
         topvalues, topindices = output.topk(topk, 1, True)
@@ -365,11 +366,11 @@ def topk_predictions(text, topk=3, target='nationality', categories=CATEGORIES, 
         for rank, (log_loss_tens, category_index) in enumerate(zip(topvalues[0], topindices[0])):
             predictions.append(
                 [rank, text, log_loss_tens.item(), categories[category_index]])
-    return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target])
+    return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target_col_label])
 
 
-def print_predictions(text, n_predictions=3, categories=CATEGORIES, model=rnn):
-    preds_df = topk_predictions(text=text, topk=n_predictions, categories=categories, model=model)
+def print_predictions(text, target_col_label='nationality', n_predictions=3, categories=CATEGORIES, model=rnn):
+    preds_df = topk_predictions(text=text, target_col_label=target_col_label, topk=n_predictions, categories=categories, model=model)
     if n_predictions > 1:
         print(preds_df)
     return preds_df
@@ -425,6 +426,35 @@ def train_batches(df=None, model=None, target='nationality', n_iters=5000, print
     return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
+def train_fast(df=None, model=rnn, n_iters=1000, print_every=1000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
+    df = df if df is not None else load_names_from_text()
+    df = df[df[target_col].isin(categories)].copy().reset_index()
+    groups = df.groupby(target_col)
+
+    current_loss = 0
+    all_losses = []
+    plot_every = print_every
+
+    start = time.time()
+
+    cats, lines, category_tensors, line_tensors = stratified_random_examples(
+        groups, num_samples_per_group=int(n_iters // len(categories)) + 1, categories=categories)
+    for it, (cat, line, cat_tensor, line_tensor) in enumerate(zip(cats, lines, category_tensors, line_tensors)):
+        model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
+        current_loss += loss
+
+        if not it + 1 % print_every:
+            guess, guess_i = category_from_output(output, categories=categories)
+            is_correct = '✓' if guess == cat else f'✗ \t (should be {cat.upper()})'
+            print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line}: {guess} {is_correct}')
+
+            all_losses.append(current_loss / plot_every)
+            current_loss = 0
+
+    train_time = time_elapsed(start)
+    return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
+
+
 def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, target='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
     df = df[df[target].isin(categories)].copy().reset_index()
@@ -458,9 +488,9 @@ def train(df=None, model=rnn, n_iters=50000, print_every=1000, char2i=CHAR2I, ta
 
 
 def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
-                               html_text_col='surname', textfile_text_col='name', html_target='nationality', textfile_target='category'):
+                               html_text_col='surname', textfile_text_col='surname', html_target='nationality', textfile_target='category'):
     """ FIXME: use html_text_col='surname', textfile_text_col='name', html_target='nationality', textfile_target='category' """
-    html_dir = Path.home(html_dir)
+    html_dir = Path(html_dir)
     filepaths = list(html_dir.glob('Most Common *.html'))
     dfs = []
     for fp in filepaths:
@@ -476,10 +506,13 @@ def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
     dftot = pd.concat(dfs)
     df = load_names_from_text(dedupe=True, categories=None)
     df = pd.concat([dftot, df])
-    df['surname'] = df['surname'].fillna(df['name'][df['surname'].isna()]).values
-    df = df.drop(columns=['name'])
-    df['nationality'] = df['nationality'].fillna(df['category'][df['nationality'].isna()]).values
-    df = df.drop(columns=['category'])
+
+    if textfile_text_col != html_text_col:
+        df[html_text_col] = df[html_text_col].fillna(df[textfile_text_col][df[html_text_col].isna()]).values
+        df = df.drop(columns=[textfile_text_col])
+    if textfile_target != html_target:
+        df[html_target] = df[html_target].fillna(df[textfile_target][df[html_target].isna()]).values
+        df = df.drop(columns=[textfile_target])
     return df
 
 
