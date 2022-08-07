@@ -22,6 +22,8 @@ STRAIGHT_SINGLE_QUOTES = "'" * len(CURLY_SINGLE_QUOTES)
 CURLY_DOUBLE_QUOTES = '“”'
 STRAIGHT_DOUBLE_QUOTES = '"' * len(CURLY_DOUBLE_QUOTES)
 
+from nlpia2.string_encoding import ENCODINGS  # noqa
+
 
 def normalize_newlines(s):
     s = s.replace(ASCII_VERTICAL_TAB, '\n')
@@ -101,3 +103,55 @@ class Asciifier:
 
     def __call__(self, text):
         return unidecode(unicodedata.normalize('NFD', text)).translate(self.translation_table)
+
+
+class TaggedStr(str):
+    decoded_with_ = None
+
+    def __init__(self, *args, **kwargs):
+        # FIXME: can't used named kwarg when initializing a string?
+        self.decoded_with_ = kwargs.pop('decoded_with_', None)
+        super().__init__()
+
+
+asciify = Asciifier()
+
+
+class Decoder:
+    r"""
+    https://docs.python.org/3/library/codecs.html#standard-encodings
+
+    `errors`:
+      strict  Raise UnicodeError (or a subclass), this is th...
+      ignore  Ignore the malformed data and continue without...
+      replace  Replace with a replacement marker. On encoding...
+      backslashreplace  Replace with backslashed escape sequences. On ...
+      surrogateescape  On decoding, replace byte with individual surr...,
+      xmlcharrefreplace  Replace with XML/HTML numeric character refere...
+      namereplace  Replace with \N{...} escape sequences, what ap...,
+    """
+
+    def __init__(self,
+                 encodings=['utf-8', 'latin_1', 'ascii']  # python default, windows default
+                 + ['iso8859_{i}' for i in range(2, 17)]  # various latin_# flavors
+                 + ['utf-16', 'utf-64'],
+                 errors='backslashreplace'
+                 ):
+        self.encodings = ENCODINGS if encodings == 'all' else encodings
+        self.errors = errors
+
+    def __call__(self, byts):
+        for enc in self.encodings:
+            try:
+                s = byts.decode(enc)
+                s = TaggedStr(s)
+                s.decoded_with_ = enc
+                return s
+            except UnicodeDecodeError:
+                pass
+        s = byts.decode(errors=self.errors)
+        s.decoder_ = 'undefined (errors={self.errors})'
+        return s
+
+
+try_decode = Decoder()
