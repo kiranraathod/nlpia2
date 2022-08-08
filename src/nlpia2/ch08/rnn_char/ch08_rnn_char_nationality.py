@@ -98,7 +98,7 @@ class RNN(nn.Module):
         return tensor
 
     def evaluate_tensor(self, text_tensor):
-        # FIXME: this seems to be affecting convergence or something else about train_sample is unstable
+        FIXME: this seems to be affecting convergence or something else about train_sample is unstable
         with torch.no_grad():
             hidden = torch.zeros(1, self.n_hidden)
             for i in range(text_tensor.shape[0]):
