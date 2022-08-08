@@ -3,6 +3,11 @@ from pathlib import Path
 import logging
 import pkg_resources
 
+# TODO: move constants.py->constants/__init__.py and constants_*.py to constants/*.py
+from .constants_stopwords import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
+from .constants_tlds import TLDS, tld_iana, TLDS_POPULAR, tld_popular
+from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana
+
 log = logging.getLogger(__name__)
 
 
@@ -10,17 +15,37 @@ PKG_DIR = Path(__file__).absolute().resolve().parent
 SRC_DATA_DIR = PKG_DIR / 'data'
 PKG_NAME = PKG_DIR.name
 SRC_DIR = PKG_DIR.parent
-REPO_DIR = SRC_DIR.parent
+REPO_DIR = SRC_DIR.parent if SRC_DIR.name != PKG_NAME else SRC_DIR
 MANUSCRIPT_DIR = REPO_DIR.parent / 'nlpia-manuscript' / 'manuscript'
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 
+HOME_DIR = Path.home().resolve().absolute()
+DATA_DIR_NAME = '.nlpia2-data'
+DATA_DIR = PKG_DIR / DATA_DIR_NAME
+if not DATA_DIR.is_dir():
+    DATA_DIR = REPO_DIR / DATA_DIR_NAME
+if not DATA_DIR.is_dir():
+    DATA_DIR = HOME_DIR / DATA_DIR_NAME
+    # try/except this and use tempfiles python module as backup
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+LOG_DIR = Path(DATA_DIR) / 'log'
+CONSTANTS_DIR = Path(DATA_DIR) / 'constants'
+HISTORY_PATH = Path(DATA_DIR) / 'history.yml'
+Path(LOG_DIR).mkdir(exist_ok=True)
+Path(CONSTANTS_DIR).mkdir(exist_ok=True)
+
+QUESTIONWORDS = set('who what when were why which how'.split() + ['how come', 'why does', 'can i', 'can you', 'which way'])
+QUESTION_STOPWORDS = QUESTIONWORDS | set(STOPWORDS)
 
 SPECIAL_PUNC = {
     "—": "-", "–": "-", "_": "-", '”': '"', "″": '"', '“': '"', '•': '*', '−': '-',
     "’": "'", "‘": "'", "´": "'", "`": "'", '،': ',',
     '\u200b': ' ', '\xa0': ' ', '„': '', '…': ' ... ', '\ufeff': '',
 }
+
+
 
 
 def get_version():
@@ -43,15 +68,7 @@ def get_version():
 
 __version__ = get_version()
 
-HOME_DIR = Path.home().resolve().absolute()
-DATA_DIR_NAME = '.nlpia2-data'
-DATA_DIR = PKG_DIR / DATA_DIR_NAME
-if not DATA_DIR.is_dir():
-    DATA_DIR = REPO_DIR / DATA_DIR_NAME
-if not DATA_DIR.is_dir():
-    DATA_DIR = HOME_DIR / DATA_DIR_NAME
-    # try/except this and use tempfiles python module as backup
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # canonical data directory to share data between nlpia2 installations
 HOME_DATA_DIR = HOME_DIR / DATA_DIR_NAME

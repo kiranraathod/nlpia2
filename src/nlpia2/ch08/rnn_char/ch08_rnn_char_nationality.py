@@ -60,24 +60,21 @@ CHAR2I = META['char2i']
 
 
 class RNN(nn.Module):
-    def __init__(self, n_hidden=128, vocab_size=58, n_categories=20, categories=None, char2i=None):
+    def __init__(self, n_hidden=128, categories=None, char2i=None):
+        super().__init__()
         self.categories = categories
-        if self.categories is None:
-            self.n_categories = n_categories
-            self.categories = [str(i) for i in range(self.n_categories)]
         self.n_categories = len(self.categories)  # <1> n_categories = n_outputs (one-hot)
+        print(f'RNN.categories: {self.categories}')
+        print(f'RNN.n_categories: {self.n_categories}')
 
-        self.char2i = char2i
-        if self.char2i is None:
-            self.vocab_size = vocab_size
-            self.char2i = dict(list(CHAR2I.items())[:self.vocab_size])
+        self.char2i = dict(char2i)
         self.vocab_size = len(self.char2i)
 
         self.n_hidden = n_hidden
 
-        super().__init__()
-        self.i2h = nn.Linear(vocab_size + n_hidden, n_hidden)
-        self.i2o = nn.Linear(vocab_size + n_hidden, n_categories)
+
+        self.i2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
+        self.i2o = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, char_tens, hidden):  # <2> x = input = char_tens
@@ -87,15 +84,65 @@ class RNN(nn.Module):
         output = self.softmax(output)
         return output, hidden
 
+    def encode_one_hot_vec(self, character):
+        """ one - hot encode a single char """
+        tensor = torch.zeros(1, len(self.char2i))
+        tensor[0][self.char2i[character]] = 1
+        return tensor
+
+    def encode_one_hot_seq(self, text):
+        """ one - hot encode each char in a str = > matrix of size(len(str), len(alphabet)) """
+        tensor = torch.zeros(len(text), 1, len(ASCII_NAME_CHARS))
+        for pos, letter in enumerate(text):
+            tensor[pos][0][self.char2i[letter]] = 1
+        return tensor
+
+    def evaluate_tensor(self, text_tensor):
+        hidden = torch.zeros(1, self.n_hidden)
+        for i in range(text_tensor.shape[0]):
+            output, hidden = self(text_tensor[i], hidden)
+        return output
+
+    def category_from_output(self, output_tensor):
+        top_n, top_i = output_tensor.topk(1)
+        category_i = top_i[0].item()
+        return self.categories[category_i], category_i
+
+    def predict_category(self, text):
+        pred_i = self.predict_category_index(text)
+        return self.categories[pred_i]
+
+    def predict_category_index(self, text):
+        tensor = self.encode_one_hot_seq(text)
+        return self.evaluate_tensor(tensor).topk(1)[1][0].item()
+
+    def predict_category_and_index(self, text):
+        tensor = self.encode_one_hot_seq(text)
+        pred_i = self.evaluate_tensor(tensor).topk(1)[1][0].item(),
+        return pred_i, self.categories[pred_i]
+
     def load(self, filepath):
         meta = load_model_meta(filepath=filepath)
         self.__init__(n_hidden=meta['n_hidden'], char2i=meta.get('char2i', None), categories=meta.get('categories', None))
 
     def save(self, filepath):
-        return save_model(
-            model=self, n_hidden=self.n_hidden,
-            n_categories=self.n_categories, vocab_size=self.vocab_size,
-            char2i=self.char2i, categories=self.categories)
+        """ Save met to filepath.meta.json & state_dict to filepath.state_dict.pickle """
+        filepath = Path(filepath)
+        filedir = filepath.parent
+        meta = dict(
+            model=self,
+            state_dict_filename=filepath.with_suffix('.state_dict.pickle').name,
+            n_hidden=self.n_hidden,
+            categories=self.categories,
+            n_categories=self.n_categories,
+            char2i=self.char2i,
+            vocab_size=self.vocab_size)
+        state_dict = self.state_dict()
+        with filepath.with_suffix('.meta.json').open('wt') as fout:
+            json.dump(meta, fout, indent=4)
+        with (filedir / meta['state_dict_filename']).open('wb') as fout:
+            torch.save(state_dict, fout)
+        return filepath
 
 
 META["model"] = RNN(n_hidden=META['n_hidden'],
@@ -103,20 +150,6 @@ META["model"] = RNN(n_hidden=META['n_hidden'],
                     categories=META['categories']
                     )
 
-
-# FIXME, get rid of this global rnn model
-rnn = META.get('model', None)
-
-if rnn is None:
-    rnn = RNN(
-        len(META['char2i']),
-        n_hidden=META['n_hidden'],
-        char2i=CHAR2I,
-        categories=CATEGORIES,
-    )
-
-if 'state_dict' in META:
-    rnn.load_state_dict(META['state_dict'])
 
 
 asciify = Asciifier(include=ASCII_NAME_CHARS)
@@ -210,10 +243,10 @@ def encode_one_hot_seq(line, char2i=CHAR2I):
     return tensor
 
 
-def category_from_output(output, categories=CATEGORIES):
-    top_n, top_i = output.topk(1)
-    category_i = top_i[0].item()
-    return categories[category_i], category_i
+# def category_from_output(output, categories=CATEGORIES):
+#     top_n, top_i = output.topk(1)
+#     category_i = top_i[0].item()
+#     return categories[category_i], category_i
 
 
 def sample_groupby(df, num_samples=1, groupby='nationality', char2i=CHAR2I, replace=True, shuffle=True):
@@ -263,7 +296,7 @@ def stratified_random_examples(
     return cats, names, cat_tensors, line_tensors
 
 
-def train_sample(category_tensor, char_seq_tens, model=rnn,
+def train_sample(model, category_tensor, char_seq_tens,
                  criterion=nn.NLLLoss(), lr=.005):
     """ train for one epoch(one batch of example tensors) """
     hidden = torch.zeros(1, model.n_hidden)
@@ -293,13 +326,11 @@ def train_batch(df_batch, model, categories, target='nationality', text_col='sur
         category_tensor = torch.tensor([categories.index(row[target])], dtype=torch.long)
         line_tensor = encode_one_hot_seq(row[text_col], char2i=char2i)
         model, output, loss = train_sample(
-            category_tensor,
-            line_tensor,
             model=model,
+            category_tensor=category_tensor,
+            char_seq_tens=line_tensor,
             criterion=criterion,
-            lr=lr,
-            char2i=char2i,
-            categories=categories)
+            lr=lr)
         output_losses.append((output, loss))
     return model, output_losses
 
@@ -311,19 +342,6 @@ def time_elapsed(t0):
     secs = int(secs - mins * 60)
     mins = int(mins)
     return f'{mins:02d}:{secs:02d}'
-
-
-def evaluate_tensor(line_tensor, model=rnn):
-    hidden = torch.zeros(1, model.n_hidden)
-    for i in range(line_tensor.size()[0]):
-        output, hidden = model(line_tensor[i], hidden)
-    return output
-
-
-def predict_category(name, categories=CATEGORIES, char2i=CHAR2I, model=rnn):
-    tensor = encode_one_hot_seq(name, char2i=char2i)
-    pred_i = evaluate_tensor(tensor, model=model).topk(1)[1][0].item()
-    return categories[pred_i]
 
 
 def confusion_df(truth, pred, categories=CATEGORIES):
@@ -338,7 +356,7 @@ def confusion_df(truth, pred, categories=CATEGORIES):
 def predict_confusion(df, categories=CATEGORIES, target='nationality', text_col='surname'):
     df_conf = confusion_df(
         truth=df[target],
-        pred=df[text_col].apply(predict_category).values,
+        pred=df[text_col].apply(model.predict_category).values,
         categories=categories,
     )
     return df_conf
@@ -360,9 +378,9 @@ def plot_confusion(df_conf):
     plt.show()
 
 
-def topk_predictions(text, target_col_label='nationality', topk=3, categories=CATEGORIES, char2i=CHAR2I, model=rnn):
+def topk_predictions(text, target_col_label='nationality', topk=3, model):
     with torch.no_grad():
-        output = evaluate_tensor(encode_one_hot_seq(text, char2i=char2i), model=model)
+        output = model.evaluate_tensor(encode_one_hot_seq(text))
         topvalues, topindices = output.topk(topk, 1, True)
         predictions = []
         # TODO: try this:
@@ -374,7 +392,7 @@ def topk_predictions(text, target_col_label='nationality', topk=3, categories=CA
 
 def predict(model, text, char2i, categories):
     with torch.no_grad():
-        output = evaluate_tensor(encode_one_hot_seq(text, char2i=char2i), model=model)
+        output = model.evaluate_tensor(model.encode_one_hot_seq(text))
         topvalues, topindices = output.topk(1, 1, True)
         (log_loss_tens, category_index) = topindices[0]
         return categories[category_index]
@@ -382,14 +400,14 @@ def predict(model, text, char2i, categories):
 
 def predict_proba(model, text, char2i, categories):
     with torch.no_grad():
-        output = evaluate_tensor(encode_one_hot_seq(text, char2i=char2i), model=model)
+        output = model.evaluate_tensor(model.encode_one_hot_seq(text))
         topvalues, topindices = output.topk(1, 1, True)
         (log_loss_tens, category_index) = topindices[0]
         return np.exp(log_loss_tens.item())
 
 
-def print_predictions(text, target_col_label='nationality', n_predictions=3, categories=CATEGORIES, model=rnn):
-    preds_df = topk_predictions(text=text, target_col_label=target_col_label, topk=n_predictions, categories=categories, model=model)
+def print_predictions(text, target_col_label='nationality', n_predictions=3, model):
+    preds_df = topk_predictions(text=text, target_col_label=target_col_label, topk=n_predictions, model=model)
     if n_predictions > 1:
         print(preds_df)
     return preds_df
@@ -430,7 +448,7 @@ def train_batches(df=None, model=None, target='nationality', n_iters=5000, print
 
         # Print iteration number, loss, name and guess
         if not it % print_every:
-            predictions = [category_from_output(output, categories=categories) for output, loss in output_losses]
+            predictions = [model.category_from_output(output) for output, loss in output_losses]
             predictions = pd.DataFrame(
                 [list(row) for row in predictions],
                 columns='pred pred_i'.split())
@@ -442,7 +460,7 @@ def train_batches(df=None, model=None, target='nationality', n_iters=5000, print
             output_losses.extend([list(x) for x in batch_output_losses])
 
     train_time = time_elapsed(start)
-    return dict(model=rnn, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
+    return dict(model=model, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
 def preprocess_surname_nationality_df(df, target_col='nationality', text_col='surname'):
@@ -479,7 +497,7 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
     return df
 
 
-def train_fast(df=None, model=rnn, n_iters=100000, print_every=10000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
+def train_fast(df, model, n_iters=100000, print_every=10000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
     df = df if df is not None else load_names_from_text()
     df = df[df[target_col].isin(categories)].copy().reset_index()
     groups = df.groupby(target_col)
@@ -493,12 +511,13 @@ def train_fast(df=None, model=rnn, n_iters=100000, print_every=10000, char2i=CHA
     print(f'num_samples_per_group: {num_samples_per_group}')
     cats, lines, category_tensors, line_tensors = stratified_random_examples(
         groups, num_samples_per_group=num_samples_per_group, categories=categories, replace=True)
+
     for it, (cat, line, cat_tensor, line_tensor) in tqdm(enumerate(zip(cats, lines, category_tensors, line_tensors))):
-        model, output, loss = train_sample(cat_tensor, line_tensor, model=model, char2i=char2i, categories=categories, lr=.005)
+        model, output, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=.005)
         current_loss += loss
 
         if not (it + 1) % print_every:
-            guess, guess_i = category_from_output(output, categories=categories)
+            guess, guess_i = model.category_from_output(output)
             is_correct = '✓' if guess == cat else f'✗ \t (should be {cat.upper()})'
             print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line}: {guess} {is_correct}')
 
@@ -506,36 +525,59 @@ def train_fast(df=None, model=rnn, n_iters=100000, print_every=10000, char2i=CHA
             current_loss = 0
 
     train_time = time_elapsed(start)
-    return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
+    return dict(model=model, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def train(df=None, model=rnn, n_iters=5000, print_every=100, target='nationality'):
+def train(model, df, n_iters=5000, print_every=100, target='nationality', text_col='surname', lr=.005):
     df = df if df is not None else load_names_from_text()
-    df = df[df[target].isin(model.categories)].copy().reset_index()
-    groups = df.groupby(target)
+    isdataset = df[target].isin(model.categories)
+    isvalidationset = np.random.rand(len(isdataset)) < .1  # 10% validation set
 
-    current_loss = 0
-    all_losses = []
+    df_train = df[isdataset & ~isvalidationset].copy()
+    df_val = df[isdataset & isvalidationset].copy()
+    groups = df_train.groupby(target)
+
+    mean_train_losses = []
+    mean_train_accuracies = []
+    mean_val_accuracies = []
+
     plot_every = print_every
 
     start = time.time()
 
     for it in range(n_iters):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=1, categories=model.categories)
+        batch_losses = []
+        batch_predictions = []
+        batch_accuracies = []
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
-            model, output, loss = train_sample(cat_tensor, line_tensor, model=model, lr=.005)
-            current_loss += loss
-
+            model, output_tensor, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=lr)
+            batch_predictions.append(model.category_from_output(output_tensor))
+            batch_accuracies.append(batch_predictions[-1] == cat)
+            batch_losses.append(loss)
             if it and not (it % print_every):
-                guess, guess_i = category_from_output(output, categories=model.categories)
+                guess, guess_i = model.predict_category_and_index(line)
                 correct = '✓' if guess == cat else '✗ (%s)' % cat
                 print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
+                mean_train_losses.append(np.mean(batch_losses))
+                mean_train_accuracies.append(np.mean(batch_accuracies))
+                mean_val_accuracies.append(np.mean([model.predict_category(text=s)==c for (s, c) in zip(df_val[text_col], df_val[target])]))
+                batch_losses = []
+                batch_predictions = []
+                batch_accuracies = []
 
-                all_losses.append(current_loss / plot_every)
-                current_loss = 0
 
     train_time = time_elapsed(start)
-    return dict(model=rnn, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=model.categories, char2i=model.char2i)
+    return dict(
+        model=model,
+        n_hidden=model.n_hidden,
+        train_losses=mean_train_losses,
+        train_accuracies=mean_train_accuracies,
+        validation_accuracies=mean_val_accuracies,
+        train_time=train_time,
+        categories=model.categories,
+        char2i=model.char2i
+        )
 
 
 def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
@@ -601,24 +643,21 @@ def plot_training_curve(losses):
 
 def save_results(**results):
     # load/save test for use on the huggingface spaces server
-    METANEW = copy.copy(results)
-    # METANEW = dict(
-    #     categories=CATEGORIES,
-    #     char2i=CHAR2I
-    # )
-    METANEW['model'] = results['model']
-    METANEW['losses'] = results['losses']
-    METANEW['train_time'] = results['train_time']
+    meta = copy.deepcopy(results)
+    meta['model'] = results['model']
+    meta['losses'] = results['losses']
+    meta['train_time'] = results['train_time']
 
-    METANEW['state_dict'] = results['model'].state_dict()
-    METANEW['min_loss'] = min(METANEW['losses'])
-    print(f"min_loss: {METANEW['min_loss']}")
+    meta['state_dict'] = results['model'].state_dict()
+    start_min = len(meta['losses']) // 4
+    meta['min_loss'] = min(meta['losses'][start_min:])
+    print(f"min_loss: {meta['min_loss']}")
     train_time_str = str(results['train_time']).replace(':', 'min_') + 'sec'
-    filename = str(MODEL_PATH) + f"-{METANEW['min_loss']:.3f}-{train_time_str}"
+    filename = str(MODEL_PATH) + f"-{meta['min_loss']:.3f}-{train_time_str}"
     filename = filename.replace('.', '_')
-    save_model(filename, **METANEW)
-    print(f'Model METANEW.keys(): {METANEW.keys()}')
-    print(f'Saving model state_dict and meta to {filename}.*')
+    save_model(filename, **meta)
+    print(f'Model meta.keys(): {meta.keys()}')
+    print(f'Saved model state_dict and meta to {filename}.*')
 
 
 if __name__ == '__main__':

@@ -60,7 +60,7 @@ generate-setup-file = true
 [tool.poetry.scripts]
 # https://python-poetry.org/docs/pyproject/#scripts
 # TODO: rename cnn-classify-text->cnn   and   main.py->cli.py
-"cnn" = "ch07.cnn.main"
+cnn = "nlpia2.ch07.cnn:main"
 
 [tool.poetry.dependencies]
 python = "^3.8.3,<3.10.0"
@@ -126,6 +126,7 @@ torch = "1.11.0"
 # torchvision = "0.12.0"
 tox = "^3.25.0"
 tqdm = "^4.60.0"
+unidecode = "^1.3.4"
 # transformers = "4.11.3"  # ">=4.18.0"
 # typer = "^0.4.1"
 wikipedia = "^1.4"

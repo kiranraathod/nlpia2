@@ -7,8 +7,11 @@ from urllib.request import urlretrieve, urljoin
 
 import pandas as pd
 
-from nlpia2.constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
-from nlpia2.constants import SRC_DATA_DIR
+from .constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
+from .constants import SRC_DATA_DIR
+from .constants import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
+from .constants import TLDS_POPULAR, tld_popular
+from .constants import TLDS, tld_iana
 
 # from qary.etl.netutils import DownloadProgressBar  # noqa
 
@@ -22,10 +25,10 @@ DATA_URL_PREFIX = f'https://gitlab.com/tangibleai/{PKG_NAME}/-/raw/main/' \
 DATA_URL_SUFFIX = '?inline=false'
 DATA_FILENAMES = [
     # 'secret_message_convolved_line_plot.csv',
-    'quotes.yml',
     'constants/nltk_stopwords_english.json',
     'constants/tlds-from-iana.csv',
     'constants/uri-schemes.xhtml.csv',
+    'quotes.yml',
 ]
 
 # download all this data too
@@ -117,50 +120,23 @@ def download_important_data(filenames=DATA_FILENAMES, force=False):
 # shutil.copytree(src=QARY_DATA_DIR, dst=conf.DATA_DIR, dirs_exist_ok=True)
 
 
-LOG_DIR = Path(DATA_DIR) / 'log'
-CONSTANTS_DIR = Path(DATA_DIR) / 'constants'
-HISTORY_PATH = Path(DATA_DIR) / 'history.yml'
-Path(LOG_DIR).mkdir(exist_ok=True)
-Path(CONSTANTS_DIR).mkdir(exist_ok=True)
 
-STOPWORDS = set(json.load((Path(DATA_DIR) / 'constants' / 'nltk_stopwords_english.json').open()))
-STOPWORDS_DICT = dict(zip(STOPWORDS, [1] * len(STOPWORDS)))
-QUESTIONWORDS = set('who what when were why which how'.split() + ['how come', 'why does', 'can i', 'can you', 'which way'])
-QUESTION_STOPWORDS = QUESTIONWORDS | STOPWORDS
 
 #####################################################################################
 # pugnlp.constants
 
-tld_iana = pd.read_csv(Path(DATA_DIR, 'constants', 'tlds-from-iana.csv'), encoding='utf8')
-tld_iana = dict(sorted(zip((tld.strip().lstrip('.') for tld in tld_iana.domain),
-                           [(sponsor.strip(), -1) for sponsor in tld_iana.sponsor]),
-                       key=lambda x: len(x[0]),
-                       reverse=True))
-# top 20 in Google searches per day
-# sorted by longest first so .com matches before .om (Oman)
-tld_popular = dict(sorted([
-    ('com', ('Commercial', 4860000000)),
-    ('org', ('Noncommercial', 1950000000)),
-    ('edu', ('US accredited postsecondary institutions', 1550000000)),
-    ('gov', ('United States Government', 1060000000)),
-    ('uk', ('United Kingdom', 473000000)),  # noqa
-    ('net', ('Network services', 206000000)),
-    ('ca', ('Canada', 165000000)),  # noqa
-    ('de', ('Germany', 145000000)),  # noqa
-    ('jp', ('Japan', 139000000)),  # noqa
-    ('fr', ('France', 96700000)),  # noqa
-    ('au', ('Australia', 91000000)),  # noqa
-    ('us', ('United States', 68300000)),  # noqa
-    ('ru', ('Russian Federation', 67900000)),  # noqa
-    ('ch', ('Switzerland', 62100000)),  # noqa
-    ('it', ('Italy', 55200000)),  # noqa
-    ('nl', ('Netherlands', 45700000)),  # noqa
-    ('se', ('Sweden', 39000000)),  # noqa
-    ('no', ('Norway', 32300000)),  # noqa
-    ('es', ('Spain', 31000000)),  # noqa
-    ('mil', ('US Military', 28400000)),
-    ], key=lambda x: len(x[0]), reverse=True))
+# tld_iana = pd.read_csv(Path(DATA_DIR, 'constants', 'tlds-from-iana.csv'), encoding='utf8')
+# tld_iana = dict(sorted(zip((tld.strip().lstrip('.') for tld in tld_iana.domain),
+#                            [(sponsor.strip(), -1) for sponsor in tld_iana.sponsor]),
+#                        key=lambda x: len(x[0]),
+#                        reverse=True))
 
-uri_schemes_iana = sorted(pd.read_csv(Path(DATA_DIR, 'constants', 'uri-schemes.xhtml.csv'),
-                                      index_col=0).index.values,
-                          key=lambda x: len(str(x)), reverse=True)
+
+# uri_schemes_iana = sorted(pd.read_csv(Path(DATA_DIR, 'constants', 'uri-schemes.xhtml.csv'),
+#                                       index_col=0).index.values,
+#                           key=lambda x: len(str(x)), reverse=True)
+
+
+def init(data_filenames=DATA_FILENAMES, force=False):
+
+    download_important_data(data_filenames=datafilenames, force=force)
