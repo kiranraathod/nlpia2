@@ -36,22 +36,20 @@ MODEL_PATH = Path(__file__).with_suffix('').name
 
 META = {
     'categories': [
-        "Arabic", "Irish", "Spanish", "French", "German", "English",
-        "Korean", "Vietnamese", "Scottish", "Japanese", "Polish",
-        "Greek", "Czech", "Italian", "Portuguese", "Russian", "Dutch", "Chinese",
-        "Indian", "Ethiopian", "Nigerian", "Nepalese",
-    ],
+        'Algerian', 'Arabic', 'Brazilian', 'Chilean', 'Chinese', 'Czech', 'Dutch', 'English', 'Ethiopian',
+        'Finnish', 'French', 'German', 'Greek', 'Honduran', 'Indian', 'Irish', 'Italian', 'Japanese', 'Korean',
+        'Malaysian', 'Mexican', 'Moroccan', 'Nepalese', 'Nicaraguan', 'Nigerian', 'Palestinian', 'Papua New Guinean',
+        'Peruvian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'South African', 'Spanish', 'Ukrainian',
+        'Venezuelan', 'Vietnamese'
+        ],
     'char2i': {
-        "g": 0, "J": 1, "j": 2, "l": 3, "X": 4, "e": 5, "L": 6, "H": 7, " ": 8,
-        "'": 9, "w": 10, "O": 11, "U": 12, "E": 13, "c": 14, "F": 15, "a": 16,
-        "Q": 17, "y": 18, "u": 19, "I": 20, "W": 21, ",": 22, "p": 23, "b": 24,
-        "z": 25, "G": 26, "T": 27, "t": 28, "q": 29, "S": 30, "m": 31, "d": 32,
-        "K": 33, "n": 34, "i": 35, "x": 36, "Y": 37, "M": 38, "R": 39, "r": 40,
-        "N": 41, "-": 42, "f": 43, "Z": 44, "s": 45, "D": 46, "P": 47, "o": 48,
-        ";": 49, "v": 50, "k": 51, "V": 52, "h": 53, "C": 54, "A": 55, ".": 56,
-        "B": 57
+        ' ': 0, "'": 1, ',': 2, '-': 3, '.': 4, ';': 5, 'A': 6, 'B': 7, 'C': 8, 'D': 9, 'E': 10,
+        'F': 11, 'G': 12, 'H': 13, 'I': 14, 'J': 15, 'K': 16, 'L': 17, 'M': 18, 'N': 19, 'O': 20, 'P': 21,
+        'Q': 22, 'R': 23, 'S': 24, 'T': 25, 'U': 26, 'V': 27, 'W': 28, 'X': 29, 'Y': 30, 'Z': 31, 'a': 32, 'b': 33,
+        'c': 34, 'd': 35, 'e': 36, 'f': 37, 'g': 38, 'h': 39, 'i': 40, 'j': 41, 'k': 42, 'l': 43, 'm': 44, 'n': 45,
+        'o': 46, 'p': 47, 'q': 48, 'r': 49, 's': 50, 't': 51, 'u': 52, 'v': 53, 'w': 54, 'x': 55, 'y': 56, 'z': 57
+        },
     }
-}
 META['n_hidden'] = 128
 META['n_categories'] = len(META['categories'])
 # save_model(MODEL_PATH, **META)
@@ -61,7 +59,7 @@ CHAR2I = META['char2i']
 
 
 class RNN(nn.Module):
-    def __init__(self, n_hidden=128, categories=None, char2i=None):
+    def __init__(self, n_hidden=128, categories=CATEGORIES, char2i=CHAR2I):
         super().__init__()
         self.categories = categories
         self.n_categories = len(self.categories)  # <1> n_categories = n_outputs (one-hot)
@@ -124,19 +122,22 @@ class RNN(nn.Module):
         return self.categories[pred_i], pred_i
 
     def load(self, filepath):
-        self.meta = load_model_meta(filepath=filepath)
+        filepath = Path(filepath)
+        with filepath.with_suffix('.meta.json').open('rt') as fin:
+            self.meta = json.load(fin)
         self.__init__(
             n_hidden=self.meta['n_hidden'],
             char2i=self.meta.get('char2i', None),
             categories=self.meta.get('categories', None))
-        self.load_state_dict(model.meta['state_dict'])
+        with filepath.with_suffix('.state_dict.pickle').open('rb') as fin:
+            state_dict = torch.load(fin)
+        self.load_state_dict(state_dict)
 
     def save(self, filepath):
         """ Save met to filepath.meta.json & state_dict to filepath.state_dict.pickle """
         filepath = Path(filepath)
         filedir = filepath.parent
         meta = dict(
-            model=self,
             filedir=str(filedir),
             state_dict_filename=filepath.with_suffix('.state_dict.pickle').name,
             meta_filename=filepath.with_suffix('.meta.json').name,
@@ -651,10 +652,13 @@ if __name__ == '__main__':
 
     results = dict(lr=lr, n_iters=n_iters)
     print(f"results: {results}")
-    results.update(train(model=model, df=df, n_iters=n_iters, lr=lr))
+    if n_iters and n_hidden and lr:
+        training_results = train(model=model, df=df, n_iters=n_iters, lr=lr)
+        results.update(training_results)
+        print(f"updated results: {results}")
 
-    # required for computing the filename
-    results['train_time'] = results.get('train_time', f'{np.random.randint(1000)}:np.random.randint(100)')
-    results['losses'] = results.get('losses', [99])
+        # required for computing the filename
+        results['train_time'] = results.get('train_time', f'{np.random.randint(1000)}:np.random.randint(100)')
+        results['losses'] = results.get('losses', [99])
 
-    save_results(**results)
+        save_results(**results)
