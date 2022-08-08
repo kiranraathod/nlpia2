@@ -16,6 +16,7 @@ import copy
 from pathlib import Path
 import time
 
+import json
 import numpy as np
 import torch
 import torch.nn as nn
@@ -123,8 +124,12 @@ class RNN(nn.Module):
         return self.categories[pred_i], pred_i
 
     def load(self, filepath):
-        meta = load_model_meta(filepath=filepath)
-        self.__init__(n_hidden=meta['n_hidden'], char2i=meta.get('char2i', None), categories=meta.get('categories', None))
+        self.meta = load_model_meta(filepath=filepath)
+        self.__init__(
+            n_hidden=self.meta['n_hidden'],
+            char2i=self.meta.get('char2i', None),
+            categories=self.meta.get('categories', None))
+        self.load_state_dict(model.meta['state_dict'])
 
     def save(self, filepath):
         """ Save met to filepath.meta.json & state_dict to filepath.state_dict.pickle """
@@ -132,15 +137,17 @@ class RNN(nn.Module):
         filedir = filepath.parent
         meta = dict(
             model=self,
+            filedir=str(filedir),
             state_dict_filename=filepath.with_suffix('.state_dict.pickle').name,
+            meta_filename=filepath.with_suffix('.meta.json').name,
             n_hidden=self.n_hidden,
             categories=self.categories,
             n_categories=self.n_categories,
             char2i=self.char2i,
             vocab_size=self.vocab_size)
-        state_dict = self.state_dict()
-        with filepath.with_suffix('.meta.json').open('wt') as fout:
+        with (filedir / meta['meta_filename']).open('wt') as fout:
             json.dump(meta, fout, indent=4)
+        state_dict = self.state_dict()
         with (filedir / meta['state_dict_filename']).open('wb') as fout:
             torch.save(state_dict, fout)
         return filepath
@@ -512,6 +519,7 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         train_losses=mean_train_losses,
         train_accuracies=mean_train_accuracies,
         validation_accuracies=mean_val_accuracies,
+        losses=[1.0-a for a in mean_val_accuracies],
         train_time=train_time,
         categories=model.categories,
         char2i=model.char2i,
@@ -582,7 +590,7 @@ def plot_training_curve(model, losses):
     print_predictions(model, text='Micali', n_predictions=3, categories=CATEGORIES)
 
 
-def save_results(**results):
+def save_results(filename=None, **results):
     # load/save test for use on the huggingface spaces server
     meta = copy.deepcopy(results)
     # meta['model'] = results['model']
@@ -590,12 +598,17 @@ def save_results(**results):
     # meta['train_time'] = results['train_time']
 
     meta['state_dict'] = results['model'].state_dict()
-    start_min = len(meta['losses']) // 4
-    meta['min_loss'] = min(meta['losses'][start_min:])
-    print(f"min_loss: {meta['min_loss']}")
-    train_time_str = str(results['train_time']).replace(':', 'min_') + 'sec'
-    filename = str(MODEL_PATH) + f"-{meta['min_loss']:.3f}-{train_time_str}"
-    filename = filename.replace('.', '_')
+    if filename is None:
+        if 'losses' not in meta:
+            meta['losses'] = [np.log(np.random.rand())]
+        if 'train_time' not in meta:
+            meta['train_time'] = '999:99'
+        start_min = len(meta['losses']) // 4
+        meta['min_loss'] = min(meta['losses'][start_min:])
+        print(f"min_loss: {meta['min_loss']}")
+        train_time_str = str(results['train_time']).replace(':', 'min_') + 'sec'
+        filename = str(MODEL_PATH) + f"-{meta['min_loss']:.3f}-{train_time_str}"
+        filename = filename.replace('.', '_')
     save_model(filename, **meta)
     print(f'Model meta.keys(): {meta.keys()}')
     print(f'Saved model state_dict and meta to {filename}.*')
@@ -639,4 +652,9 @@ if __name__ == '__main__':
     results = dict(lr=lr, n_iters=n_iters)
     print(f"results: {results}")
     results.update(train(model=model, df=df, n_iters=n_iters, lr=lr))
+
+    # required for computing the filename
+    results['train_time'] = results.get('train_time', f'{np.random.randint(1000)}:np.random.randint(100)')
+    results['losses'] = results.get('losses', [99])
+
     save_results(**results)
