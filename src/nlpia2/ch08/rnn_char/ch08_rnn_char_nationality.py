@@ -98,7 +98,6 @@ class RNN(nn.Module):
         return tensor
 
     def evaluate_tensor(self, text_tensor):
-        FIXME: this seems to be affecting convergence or something else about train_sample is unstable
         with torch.no_grad():
             hidden = torch.zeros(1, self.n_hidden)
             for i in range(text_tensor.shape[0]):
@@ -151,12 +150,6 @@ class RNN(nn.Module):
             f"RNN(\n    n_hidden={self.n_hidden},\n    n_categories={self.n_categories},\n"
             f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n    vocab_size={self.vocab_size},\n    char2i['A']={char2i['A']}\n)"
             )
-
-
-META["model"] = RNN(n_hidden=META['n_hidden'],
-                    char2i=META['char2i'],
-                    categories=META['categories']
-                    )
 
 
 
@@ -251,12 +244,6 @@ def encode_one_hot_seq(line, char2i=CHAR2I):
     return tensor
 
 
-# def category_from_output(output, categories=CATEGORIES):
-#     top_n, top_i = output.topk(1)
-#     category_i = top_i[0].item()
-#     return categories[category_i], category_i
-
-
 def sample_groupby(df, num_samples=1, groupby='nationality', char2i=CHAR2I, replace=True, shuffle=True):
     """ balanced sampling of all categories """
     if sample_groupby.groups is None:
@@ -270,7 +257,7 @@ def sample_groupby(df, num_samples=1, groupby='nationality', char2i=CHAR2I, repl
 sample_groupby.groups = None
 
 
-def random_example(groups, target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
+def random_example(groups, target='nationality', text_col='surname', categories=None, char2i=None):
     """ balanced sampling of all categories """
     # ANTIPATTERN
     # random_example.df = getattr(random_example, 'df', df)
@@ -286,7 +273,7 @@ def random_example(groups, target='nationality', text_col='surname', categories=
 
 def stratified_random_examples(
         groups, num_samples_per_group=1, replace=True, shuffle=True,
-        target='nationality', text_col='surname', categories=CATEGORIES, char2i=CHAR2I):
+        target='nationality', text_col='surname', categories=None, char2i=None):
     """ balanced sampling of all categories """
     df = groups.sample(num_samples_per_group, replace=replace)
     if shuffle:
@@ -352,7 +339,7 @@ def time_elapsed(t0):
     return f'{mins:02d}:{secs:02d}'
 
 
-def confusion_df(truth, pred, categories=CATEGORIES):
+def confusion_df(truth, pred, categories=None):
     """ Count mislabeled examples in entire dataset """
     pair_counts = Counter(zip(truth, pred))
     confusion = {c_tru: {c_pred: 0 for c_pred in categories} for c_tru in categories}
@@ -361,7 +348,7 @@ def confusion_df(truth, pred, categories=CATEGORIES):
     return pd.DataFrame(confusion)
 
 
-def predict_confusion(df, categories=CATEGORIES, target='nationality', text_col='surname'):
+def predict_confusion(df, categories=None, target='nationality', text_col='surname'):
     df_conf = confusion_df(
         truth=df[target],
         pred=df[text_col].apply(model.predict_category).values,
@@ -394,19 +381,19 @@ def topk_predictions(model, text, target_col='nationality', topk=3):
         # TODO: try this:
         for rank, (log_loss_tens, category_index) in enumerate(zip(topvalues[0], topindices[0])):
             predictions.append(
-                [rank, text, log_loss_tens.item(), categories[category_index]])
+                [rank, text, log_loss_tens.item(), model.categories[category_index]])
     return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target_col])
 
 
-def predict(model, text, char2i, categories):
+def predict(model, text):
     with torch.no_grad():
         output = model.evaluate_tensor(model.encode_one_hot_seq(text))
         topvalues, topindices = output.topk(1, 1, True)
         (log_loss_tens, category_index) = topindices[0]
-        return categories[category_index]
+        return model.categories[category_index]
 
 
-def predict_proba(model, text, char2i, categories):
+def predict_proba(model, text):
     with torch.no_grad():
         output = model.evaluate_tensor(model.encode_one_hot_seq(text))
         topvalues, topindices = output.topk(1, 1, True)
@@ -439,37 +426,6 @@ def print_dataset_samples(df, num_samples=3, replace=True, target='nationality')
 
 def load_name_counts(filepath=SRC_DATA_DIR / 'names' / 'name_counts.csv.gz'):
     return pd.read_csv(filepath)
-
-
-def train_batches(df=None, model=None, target='nationality', n_iters=5000, print_every=100, char2i=CHAR2I, categories=None):
-    df = load_name_counts() if df is None else df
-    categories = list(df['category'].unique())
-    model = RNN(n_hidden=128, char2i=char2i, categories=categories) if model is None else model
-    output_losses = []
-
-    start = time.time()
-
-    for it in tqdm(range(1, n_iters + 1)):
-        df_batch = sample_groupby(df, num_samples=1, groupby=target, replace=True, shuffle=True)
-        model, batch_output_losses = train_batch(df_batch, model=model, char2i=char2i, categories=categories, lr=.005)
-        output_losses += batch_output_losses
-
-        # Print iteration number, loss, name and guess
-        if not it % print_every:
-            predictions = [model.category_from_output(output) for output, loss in output_losses]
-            predictions = pd.DataFrame(
-                [list(row) for row in predictions],
-                columns='pred pred_i'.split())
-            df_batch['pred'] = predictions['pred']
-            df_batch['pred_i'] = predictions['pred_i']
-            print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)}')
-            print(df_batch)
-
-            output_losses.extend([list(x) for x in batch_output_losses])
-
-    train_time = time_elapsed(start)
-    return dict(model=model, n_hidden=model.n_hidden, losses=output_losses, train_time=train_time, categories=categories, char2i=char2i)
-
 
 def preprocess_surname_nationality_df(df, target_col='nationality', text_col='surname'):
     new_rows = []
@@ -505,36 +461,6 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
     return df
 
 
-def train_fast(df, model, n_iters=100000, print_every=10000, char2i=CHAR2I, target_col='nationality', categories=CATEGORIES):
-    df = df if df is not None else load_names_from_text()
-    df = df[df[target_col].isin(categories)].copy().reset_index()
-    groups = df.groupby(target_col)
-
-    current_loss = 0
-    all_losses = []
-
-    start = time.time()
-
-    num_samples_per_group = int(n_iters // len(categories)) + 1
-    print(f'num_samples_per_group: {num_samples_per_group}')
-    cats, lines, category_tensors, line_tensors = stratified_random_examples(
-        groups, num_samples_per_group=num_samples_per_group, categories=categories, replace=True)
-
-    for it, (cat, line, cat_tensor, line_tensor) in tqdm(enumerate(zip(cats, lines, category_tensors, line_tensors))):
-        model, output, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=.005)
-        current_loss += loss
-
-        if not (it + 1) % print_every:
-            guess, guess_i = model.category_from_output(output)
-            is_correct = '✓' if guess == cat else f'✗ \t (should be {cat.upper()})'
-            print(f'{it:06d} {it*100//n_iters}% {time_elapsed(start)} {loss:.4f} {line}: {guess} {is_correct}')
-
-            all_losses.append(current_loss / print_every)
-            current_loss = 0
-
-    train_time = time_elapsed(start)
-    return dict(model=model, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
-
 
 def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005):
     df = df if df is not None else load_names_from_text()
@@ -557,7 +483,8 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
     batch_predictions = []
     batch_accuracies = []
     for it in range(n_iters):
-        cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=1, categories=model.categories)
+        cats, lines, category_tensors, line_tensors = stratified_random_examples(
+            groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i)
 
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
             model, output_tensor, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=lr)
@@ -566,7 +493,8 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
             batch_accuracies.append(guess == cat)
             batch_losses.append(loss)
             if it and not (it % print_every):
-                correct = '✓' if batch_accuracies[-1] else f'✗ should be {cat} ({model.categories.index(cat)} = {cat_tensor[0].item()})'
+                print(f'    output_tensor: {output_tensor}\tmodel.category_from_output(output_tensor): {model.category_from_output(output_tensor)}')
+                correct = '✓' if batch_accuracies[-1] else f'✗ should be {cat} ({model.categories.index(cat)}={cat_tensor[0].item()})'
                 print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} ({guess_i}) {correct}')
         if it and not (it % print_every):
             mean_train_losses.append(np.mean(batch_losses))
