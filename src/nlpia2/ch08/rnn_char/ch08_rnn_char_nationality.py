@@ -98,6 +98,7 @@ class RNN(nn.Module):
         return tensor
 
     def evaluate_tensor(self, text_tensor):
+        # FIXME: this seems to be affecting convergence or something else about train_sample is unstable
         with torch.no_grad():
             hidden = torch.zeros(1, self.n_hidden)
             for i in range(text_tensor.shape[0]):
@@ -565,8 +566,6 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
             batch_accuracies.append(guess == cat)
             batch_losses.append(loss)
             if it and not (it % print_every):
-                print(cat_tensor)
-                print(cat_tensor[0])
                 correct = '✓' if batch_accuracies[-1] else f'✗ should be {cat} ({model.categories.index(cat)} = {cat_tensor[0].item()})'
                 print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} ({guess_i}) {correct}')
         if it and not (it % print_every):
