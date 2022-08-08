@@ -462,11 +462,10 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
 
 
 
-def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005):
+def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005, val_split=.05):
     df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
-    isvalidationset = np.random.rand(len(isdataset)) < .1  # 10% validation set
-
+    isvalidationset = np.random.rand(len(isdataset)) < val_split  # 10% validation set
     df_train = df[isdataset & ~isvalidationset].copy()
     df_val = df[isdataset & isvalidationset].copy()
     groups = df_train.groupby(target)
@@ -586,9 +585,9 @@ def plot_training_curve(model, losses):
 def save_results(**results):
     # load/save test for use on the huggingface spaces server
     meta = copy.deepcopy(results)
-    meta['model'] = results['model']
-    meta['losses'] = results['losses']
-    meta['train_time'] = results['train_time']
+    # meta['model'] = results['model']
+    # meta['losses'] = results['losses']
+    # meta['train_time'] = results['train_time']
 
     meta['state_dict'] = results['model'].state_dict()
     start_min = len(meta['losses']) // 4
