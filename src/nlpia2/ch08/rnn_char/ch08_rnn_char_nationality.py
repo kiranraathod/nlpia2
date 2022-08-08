@@ -489,7 +489,7 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
     batch_losses = []
     batch_predictions = []
     batch_accuracies = []
-    for it in range(n_iters):
+    for it in tqdm(range(n_iters)):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(
             groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i)
 
