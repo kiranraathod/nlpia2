@@ -98,9 +98,10 @@ class RNN(nn.Module):
         return tensor
 
     def evaluate_tensor(self, text_tensor):
-        hidden = torch.zeros(1, self.n_hidden)
-        for i in range(text_tensor.shape[0]):
-            output, hidden = self(text_tensor[i], hidden)
+        with torch.no_grad():
+            hidden = torch.zeros(1, self.n_hidden)
+            for i in range(text_tensor.shape[0]):
+                output, hidden = self(text_tensor[i], hidden)
         return output
 
     def category_from_output(self, output_tensor):
@@ -118,8 +119,8 @@ class RNN(nn.Module):
 
     def predict_category_and_index(self, text):
         tensor = self.encode_one_hot_seq(text)
-        pred_i = self.evaluate_tensor(tensor).topk(1)[1][0].item(),
-        return pred_i, self.categories[pred_i]
+        pred_i = self.evaluate_tensor(tensor).topk(1)[1][0].item()
+        return self.categories[pred_i], pred_i
 
     def load(self, filepath):
         meta = load_model_meta(filepath=filepath)
@@ -143,6 +144,12 @@ class RNN(nn.Module):
         with (filedir / meta['state_dict_filename']).open('wb') as fout:
             torch.save(state_dict, fout)
         return filepath
+
+    def __str__(self):
+        return (
+            f"RNN(\n    n_hidden={self.n_hidden},\n    n_categories={self.n_categories},\n"
+            f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n    vocab_size={self.vocab_size},\n    char2i['A']={char2i['A']}\n)"
+            )
 
 
 META["model"] = RNN(n_hidden=META['n_hidden'],
@@ -378,7 +385,7 @@ def plot_confusion(df_conf):
     plt.show()
 
 
-def topk_predictions(text, target_col_label='nationality', topk=3, model):
+def topk_predictions(model, text, target_col='nationality', topk=3):
     with torch.no_grad():
         output = model.evaluate_tensor(encode_one_hot_seq(text))
         topvalues, topindices = output.topk(topk, 1, True)
@@ -387,7 +394,7 @@ def topk_predictions(text, target_col_label='nationality', topk=3, model):
         for rank, (log_loss_tens, category_index) in enumerate(zip(topvalues[0], topindices[0])):
             predictions.append(
                 [rank, text, log_loss_tens.item(), categories[category_index]])
-    return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target_col_label])
+    return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target_col])
 
 
 def predict(model, text, char2i, categories):
@@ -406,8 +413,8 @@ def predict_proba(model, text, char2i, categories):
         return np.exp(log_loss_tens.item())
 
 
-def print_predictions(text, target_col_label='nationality', n_predictions=3, model):
-    preds_df = topk_predictions(text=text, target_col_label=target_col_label, topk=n_predictions, model=model)
+def print_predictions(model, text, target_col='nationality', n_predictions=3):
+    preds_df = topk_predictions(model=model, text=text, target_col=target_col, topk=n_predictions)
     if n_predictions > 1:
         print(preds_df)
     return preds_df
@@ -528,7 +535,7 @@ def train_fast(df, model, n_iters=100000, print_every=10000, char2i=CHAR2I, targ
     return dict(model=model, n_hidden=model.n_hidden, losses=all_losses, train_time=train_time, categories=categories, char2i=char2i)
 
 
-def train(model, df, n_iters=5000, print_every=100, target='nationality', text_col='surname', lr=.005):
+def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005):
     df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
     isvalidationset = np.random.rand(len(isdataset)) < .1  # 10% validation set
@@ -541,30 +548,35 @@ def train(model, df, n_iters=5000, print_every=100, target='nationality', text_c
     mean_train_accuracies = []
     mean_val_accuracies = []
 
-    plot_every = print_every
+    print_every = n_iters // 50 if print_every is None else print_every
 
     start = time.time()
 
+    batch_losses = []
+    batch_predictions = []
+    batch_accuracies = []
     for it in range(n_iters):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(groups, num_samples_per_group=1, categories=model.categories)
-        batch_losses = []
-        batch_predictions = []
-        batch_accuracies = []
+
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
             model, output_tensor, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=lr)
-            batch_predictions.append(model.category_from_output(output_tensor))
-            batch_accuracies.append(batch_predictions[-1] == cat)
+            guess, guess_i = model.predict_category_and_index(line)
+            batch_predictions.append(guess)
+            batch_accuracies.append(guess == cat)
             batch_losses.append(loss)
             if it and not (it % print_every):
-                guess, guess_i = model.predict_category_and_index(line)
-                correct = '✓' if guess == cat else '✗ (%s)' % cat
-                print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} {correct}')
-                mean_train_losses.append(np.mean(batch_losses))
-                mean_train_accuracies.append(np.mean(batch_accuracies))
-                mean_val_accuracies.append(np.mean([model.predict_category(text=s)==c for (s, c) in zip(df_val[text_col], df_val[target])]))
-                batch_losses = []
-                batch_predictions = []
-                batch_accuracies = []
+                print(cat_tensor)
+                print(cat_tensor[0])
+                correct = '✓' if batch_accuracies[-1] else f'✗ should be {cat} ({model.categories.index(cat)} = {cat_tensor[0].item()})'
+                print(f'{it:06d} {(it*100) // n_iters}% {time_elapsed(start)} {loss:.4f} {line} => {guess} ({guess_i}) {correct}')
+        if it and not (it % print_every):
+            mean_train_losses.append(np.mean(batch_losses))
+            mean_train_accuracies.append(np.mean(batch_accuracies))
+            mean_val_accuracies.append(np.mean([model.predict_category(text=s)==c for (s, c) in zip(df_val[text_col], df_val[target])]))
+            print(f"  mean_train_loss: {mean_train_losses[-1]}\n  mean_train_acc: {mean_train_accuracies[-1]}\n  mean_val_acc: {mean_val_accuracies[-1]}")
+            batch_losses = []
+            batch_predictions = []
+            batch_accuracies = []
 
 
     train_time = time_elapsed(start)
@@ -576,7 +588,10 @@ def train(model, df, n_iters=5000, print_every=100, target='nationality', text_c
         validation_accuracies=mean_val_accuracies,
         train_time=train_time,
         categories=model.categories,
-        char2i=model.char2i
+        char2i=model.char2i,
+        lr=lr,
+        n_iters=n_iters,
+        df_len=len(df),
         )
 
 
@@ -611,7 +626,7 @@ def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
     return df
 
 
-def plot_training_curve(losses):
+def plot_training_curve(model, losses):
     plt.figure()
     plt.plot(losses)
     plt.show(block=False)
@@ -620,25 +635,25 @@ def plot_training_curve(losses):
     print(f'CATEGORIES: {CATEGORIES}')
     print()
     print('Russia: https://en.wikipedia.org/wiki/Fyodor_Dostoevsky')
-    print_predictions(text='Fyodor', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Dostoevsky', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Fyodor', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Dostoevsky', n_predictions=3, categories=CATEGORIES)
     print()
     print('Nigeria: https://en.wikipedia.org/wiki/Sanmi_Koyejo # Oluwasanmi')
-    print_predictions(text='Oluwasanmi', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Sanmi', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Koyejo', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Oluwasanmi', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Sanmi', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Koyejo', n_predictions=3, categories=CATEGORIES)
     print()
     print('Japan: https://en.wikipedia.org/wiki/Satoshi_Nakamoto')
-    print_predictions(text='Satoshi', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Nakamoto', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Satoshi', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Nakamoto', n_predictions=3, categories=CATEGORIES)
     print()
     print('Etheopia: https://en.wikipedia.org/wiki/Rediet_Abebe')
-    print_predictions(text='Rediet', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Abebe', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Rediet', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Abebe', n_predictions=3, categories=CATEGORIES)
     print()
     print('Italy: https://en.wikipedia.org/wiki/Silvio_Micali')
-    print_predictions(text='Silvio', n_predictions=3, categories=CATEGORIES)
-    print_predictions(text='Micali', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Silvio', n_predictions=3, categories=CATEGORIES)
+    print_predictions(model, text='Micali', n_predictions=3, categories=CATEGORIES)
 
 
 def save_results(**results):
@@ -667,13 +682,14 @@ if __name__ == '__main__':
     url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}{suffix}"
     df = pd.read_csv(url)
     print(df)
-    ans = input("How many nationalities would you like to train on? [10]? ")
-    if not ans.strip():
-        n_categories = 10
-    else:
+
+    n_categories = 10
+    ans = input(f"How many nationalities would you like to train on? [{n_categories}]? ")
+    if ans.strip():
         n_categories = int(ans)
     categories = sorted(df['nationality'].unique())[:n_categories]
-    print(categories)
+    print(f"categories: {categories}")
+
     char2i = META['char2i']
     char2i = dict(zip(sorted(char2i), range(len(char2i))))
     n_hidden = 128
@@ -682,10 +698,19 @@ if __name__ == '__main__':
         categories=categories,
         n_hidden=128
     )
-    ans = input("How many samples would you like to train on? [10000]? ")
-    if not ans.strip():
-        n_iters = 10000
-    else:
+    print(f"model: {model}")
+
+    n_iters = 10000
+    ans = input(f"How many samples would you like to train on? [{n_iters}]? ")
+    if ans.strip():
         n_iters = int(ans)
-    results = train(df, model=model, n_iters=n_iters)
+
+    lr = .005
+    ans = input(f"What learning rate would you like to train with? [{lr}]? ")
+    if ans.strip():
+        lr = float(ans)
+
+    results = dict(lr=lr, n_iters=n_iters)
+    print(f"results: {results}")
+    results.update(train(model=model, df=df, n_iters=n_iters, lr=lr))
     save_results(**results)
