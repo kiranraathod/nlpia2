@@ -1,12 +1,13 @@
 # Scrape names for underrepresented countries
 
 A lot of cutting edge data science is happening in Nigeria, Etheopia and other underrepresented countries.
-The code here shows how to augment the PyTorch data with scraped names from `forebears.io`
+We've included a few names from our multilingual chatbots and some of our intern rosters in the US and Africa.
+The code here shows how to augment the PyTorch data with scraped names from `forebears.io`.
+The `char_rnn_from_scratch_refactored` module and script has been moved and renamed here: [src/nlpia2/ch08/rnn_char/ch08_rnn_char_nationality.py](https://gitlab.com/tangibleai/nlpia2/-/tree/main/src/nlpia2/ch08/rnn_char/ch08_rnn_char_nationality.py)
+
 
 ```python
 >>> %run char_rnn_from_scratch_refactored
->>> df = load_names_from_text(dedupe=True, categories=None)
->>> df = load_names_from_text(dedupe=True, categories=None).sample(10)
 >>> df = load_names_from_text(dedupe=True, categories=None)
 >>> len(df.sample(100))
 100
