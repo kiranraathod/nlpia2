@@ -1,3 +1,12 @@
+# Mob Programming
+
+August 9, 2022
+
+By printing out the activations and classifications for each character in and character-based RNN you can find several patterns that the character-based RNN is learning.
+This one appears to keep track of the length of the name and assumes all short names that start with a capital letter are Chinese.
+So there must be one or more of the 128 hidden activations that is keeping track of the position within the name.
+
+```python
 >>> %run ch08_rnn_char_nationality.py
 >>> model.predict('Nakamoto')
 >>> model.predict_category('Nakamoto')
@@ -486,3 +495,4 @@ tensor([[ 0.7650,  0.3478,  0.2797, -0.2389,  0.1785, -0.1259,  0.1729,  0.1893,
           0.0877, -0.4999,  0.4887, -0.0151,  0.2072, -0.3981, -0.0878, -0.3235]],
        grad_fn=<AddmmBackward0>)
 >>> hist -o -p -f ch08_mobprog_surname_nationality_visualization.md
+```
