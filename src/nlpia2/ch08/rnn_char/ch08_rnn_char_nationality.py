@@ -41,15 +41,15 @@ META = {
         'Malaysian', 'Mexican', 'Moroccan', 'Nepalese', 'Nicaraguan', 'Nigerian', 'Palestinian', 'Papua New Guinean',
         'Peruvian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'South African', 'Spanish', 'Ukrainian',
         'Venezuelan', 'Vietnamese'
-        ],
+    ],
     'char2i': {
         ' ': 0, "'": 1, ',': 2, '-': 3, '.': 4, ';': 5, 'A': 6, 'B': 7, 'C': 8, 'D': 9, 'E': 10,
         'F': 11, 'G': 12, 'H': 13, 'I': 14, 'J': 15, 'K': 16, 'L': 17, 'M': 18, 'N': 19, 'O': 20, 'P': 21,
         'Q': 22, 'R': 23, 'S': 24, 'T': 25, 'U': 26, 'V': 27, 'W': 28, 'X': 29, 'Y': 30, 'Z': 31, 'a': 32, 'b': 33,
         'c': 34, 'd': 35, 'e': 36, 'f': 37, 'g': 38, 'h': 39, 'i': 40, 'j': 41, 'k': 42, 'l': 43, 'm': 44, 'n': 45,
         'o': 46, 'p': 47, 'q': 48, 'r': 49, 's': 50, 't': 51, 'u': 52, 'v': 53, 'w': 54, 'x': 55, 'y': 56, 'z': 57
-        },
-    }
+    },
+}
 META['n_hidden'] = 128
 META['n_categories'] = len(META['categories'])
 # save_model(MODEL_PATH, **META)
@@ -70,7 +70,6 @@ class RNN(nn.Module):
         self.vocab_size = len(self.char2i)
 
         self.n_hidden = n_hidden
-
 
         self.i2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
         self.i2o = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
@@ -157,8 +156,7 @@ class RNN(nn.Module):
         return (
             f"RNN(\n    n_hidden={self.n_hidden},\n    n_categories={self.n_categories},\n"
             f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n    vocab_size={self.vocab_size},\n    char2i['A']={char2i['A']}\n)"
-            )
-
+        )
 
 
 asciify = Asciifier(include=ASCII_NAME_CHARS)
@@ -322,6 +320,22 @@ def train_sample(model, category_tensor, char_seq_tens,
 CRITERION = nn.NLLLoss()
 
 
+def visualize_outputs(model, text):
+    char_seq_tens = encode_one_hot_seq(text, char2i=model.char2i)
+    hidden = torch.zeros(1, model.n_hidden)
+    model.zero_grad()
+    outputs = []
+    hiddens = []
+    for i in range(char_seq_tens.size()[0]):
+        output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
+        outputs.append(output)
+        hiddens.append(hidden)
+    cats = []
+    for v in outputs:
+        cats.append(model.categories[np.exp(v.detach().numpy()).argmax()])
+    return cats
+
+
 def train_batch(df_batch, model, categories, target='nationality', text_col='surname', criterion=CRITERION, lr=.005, char2i=CHAR2I):
     """ train for one epoch(one batch of example tensors) """
     output_losses = []
@@ -435,6 +449,7 @@ def print_dataset_samples(df, num_samples=3, replace=True, target='nationality')
 def load_name_counts(filepath=SRC_DATA_DIR / 'names' / 'name_counts.csv.gz'):
     return pd.read_csv(filepath)
 
+
 def preprocess_surname_nationality_df(df, target_col='nationality', text_col='surname'):
     new_rows = []
     # Some Ukranian names have Russian alternatives e.g. surname='Markevych (Russian: Markevich)'
@@ -467,7 +482,6 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
         df = df.drop(ismulti, axis=0)
         df = pd.concat([df, new_rows])
     return df
-
 
 
 def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005, val_split=.05):
@@ -506,12 +520,12 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         if it and not (it % print_every):
             mean_train_losses.append(np.mean(batch_losses))
             mean_train_accuracies.append(np.mean(batch_accuracies))
-            mean_val_accuracies.append(np.mean([model.predict_category(text=s)==c for (s, c) in zip(df_val[text_col], df_val[target])]))
-            print(f"  mean_train_loss: {mean_train_losses[-1]}\n  mean_train_acc: {mean_train_accuracies[-1]}\n  mean_val_acc: {mean_val_accuracies[-1]}")
+            mean_val_accuracies.append(np.mean([model.predict_category(text=s) == c for (s, c) in zip(df_val[text_col], df_val[target])]))
+            print(
+                f"  mean_train_loss: {mean_train_losses[-1]}\n  mean_train_acc: {mean_train_accuracies[-1]}\n  mean_val_acc: {mean_val_accuracies[-1]}")
             batch_losses = []
             batch_predictions = []
             batch_accuracies = []
-
 
     train_time = time_elapsed(start)
     return dict(
@@ -520,14 +534,14 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         train_losses=mean_train_losses,
         train_accuracies=mean_train_accuracies,
         validation_accuracies=mean_val_accuracies,
-        losses=[1.0-a for a in mean_val_accuracies],
+        losses=[1.0 - a for a in mean_val_accuracies],
         train_time=train_time,
         categories=model.categories,
         char2i=model.char2i,
         lr=lr,
         n_iters=n_iters,
         df_len=len(df),
-        )
+    )
 
 
 def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
