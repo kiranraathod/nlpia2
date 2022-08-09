@@ -28,7 +28,7 @@ import pandas as pd
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 
-from persistence import save_model, load_model_meta
+from persistence import save_model
 
 MODEL_PATH = Path(__file__).with_suffix('').name
 
@@ -131,6 +131,7 @@ class RNN(nn.Module):
         with filepath.with_suffix('.state_dict.pickle').open('rb') as fin:
             state_dict = torch.load(fin)
         self.load_state_dict(state_dict)
+        return self
 
     def save(self, filepath):
         """ Save met to filepath.meta.json & state_dict to filepath.state_dict.pickle """
@@ -151,6 +152,21 @@ class RNN(nn.Module):
         with (filedir / meta['state_dict_filename']).open('wb') as fout:
             torch.save(state_dict, fout)
         return filepath
+
+    def unroll_activations(text):
+        char_seq_tens = encode_one_hot_seq(text, char2i=model.char2i)
+        hidden = torch.zeros(1, model.n_hidden)
+        model.zero_grad()
+        outputs = []
+        hiddens = []
+        for i in range(char_seq_tens.size()[0]):
+            output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
+            outputs.append(output)
+            hiddens.append(hidden)
+        cats = []
+        for v in outputs:
+            cats.append(model.categories[np.exp(v.detach().numpy()).argmax()])
+        return cats, outputs, hiddens
 
     def __str__(self):
         return (
