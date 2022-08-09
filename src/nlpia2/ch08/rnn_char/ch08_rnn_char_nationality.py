@@ -71,16 +71,25 @@ class RNN(nn.Module):
 
         self.n_hidden = n_hidden
 
-        self.i2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
-        self.i2o = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
+        self.W_c2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
+        self.W_c2y = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, char_tens, hidden):  # <2> x = input = char_tens
-        combined = torch.cat((char_tens, hidden), 1)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
-        output = self.softmax(output)
-        return output, hidden
+    # .Recurrence in PyTorch
+    # [source,python]
+    # ----
+    def forward(self, x, hidden):  # <1>
+        combined = torch.cat((x, hidden), 1)  # <2>
+        hidden = self.W_c2h(combined)  # <3>
+        y = self.W_c2y(combined)  # <4>
+        y = self.softmax(y)
+        return y, hidden    # <5>
+    # ----
+    # <1> token (character) one-hot vector
+    # <2> concatenate the `x` vector and the previous character's `hidden` tensor
+    # <3> `nn.Linear` dot product transforms `combined` vector into a `hidden` vector
+    # <4> dot product transforms `combined` vector into `y` (output vector of category likelihoods)
+    # <5> Both `output` and `hidden` tensors are needed to process the next token
 
     def encode_one_hot_vec(self, character):
         """ one - hot encode a single char """
@@ -313,24 +322,22 @@ def stratified_random_examples(
     return cats, names, cat_tensors, line_tensors
 
 
+# TODO: move this into a class called Pipeline or Trainer that inherits RNN or Model
 def train_sample(model, category_tensor, char_seq_tens,
                  criterion=nn.NLLLoss(), lr=.005):
-    """ train for one epoch(one batch of example tensors) """
+    """ Train for one epoch (one example name nationality tensor pair) """
     hidden = torch.zeros(1, model.n_hidden)
     model.zero_grad()
-    for i in range(char_seq_tens.size()[0]):
-        output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
-    # print(f"output: {output}")
-    # print(f"category_tensor: {category_tensor}")
-    loss = criterion(output, category_tensor)
-    # print(f"loss: {loss.item()}")
+    for char_onehot_vector in char_seq_tens:
+        category_predictions, hidden = model(
+            x=char_onehot_vector, hidden=hidden)
+    loss = criterion(category_predictions, category_tensor)
     loss.backward()
 
-    # Add parameters' gradients to their values, multiplied by learning rate
     for p in model.parameters():
         p.data.add_(p.grad.data, alpha=-lr)
 
-    return model, output, loss.item()
+    return model, category_predictions, loss.item()
 
 
 CRITERION = nn.NLLLoss()
@@ -538,7 +545,9 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
             mean_train_accuracies.append(np.mean(batch_accuracies))
             mean_val_accuracies.append(np.mean([model.predict_category(text=s) == c for (s, c) in zip(df_val[text_col], df_val[target])]))
             print(
-                f"  mean_train_loss: {mean_train_losses[-1]}\n  mean_train_acc: {mean_train_accuracies[-1]}\n  mean_val_acc: {mean_val_accuracies[-1]}")
+                f"  mean_train_loss: {mean_train_losses[-1]}\n"
+                f"  mean_train_acc: {mean_train_accuracies[-1]}\n"
+                f"  mean_val_acc: {mean_val_accuracies[-1]}")
             batch_losses = []
             batch_predictions = []
             batch_accuracies = []
