@@ -28,9 +28,15 @@ import pandas as pd
 from nlpia2.init import SRC_DATA_DIR, maybe_download
 from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 
-from persistence import save_model, load_model_meta
+from persistence import save_model
 
 MODEL_PATH = Path(__file__).with_suffix('').name
+PYTORCH_TUTORIAL_CATEGORIES = [
+    'Arabic', 'Chinese', 'Czech', 'Dutch', 'English', 'French', 'German', 'Greek', 'Irish', 'Italian', 'Japanese',
+    'Korean', 'Nigerian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'Spanish', 'Vietnamese'
+]
+MANUALLY_ADDED_CATEGORIES = ['Ethiopian', 'Indian', 'Nepalese']
+
 
 # META = load_model_meta(MODEL_PATH)
 
@@ -41,15 +47,15 @@ META = {
         'Malaysian', 'Mexican', 'Moroccan', 'Nepalese', 'Nicaraguan', 'Nigerian', 'Palestinian', 'Papua New Guinean',
         'Peruvian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'South African', 'Spanish', 'Ukrainian',
         'Venezuelan', 'Vietnamese'
-        ],
+    ],
     'char2i': {
         ' ': 0, "'": 1, ',': 2, '-': 3, '.': 4, ';': 5, 'A': 6, 'B': 7, 'C': 8, 'D': 9, 'E': 10,
         'F': 11, 'G': 12, 'H': 13, 'I': 14, 'J': 15, 'K': 16, 'L': 17, 'M': 18, 'N': 19, 'O': 20, 'P': 21,
         'Q': 22, 'R': 23, 'S': 24, 'T': 25, 'U': 26, 'V': 27, 'W': 28, 'X': 29, 'Y': 30, 'Z': 31, 'a': 32, 'b': 33,
         'c': 34, 'd': 35, 'e': 36, 'f': 37, 'g': 38, 'h': 39, 'i': 40, 'j': 41, 'k': 42, 'l': 43, 'm': 44, 'n': 45,
         'o': 46, 'p': 47, 'q': 48, 'r': 49, 's': 50, 't': 51, 'u': 52, 'v': 53, 'w': 54, 'x': 55, 'y': 56, 'z': 57
-        },
-    }
+    },
+}
 META['n_hidden'] = 128
 META['n_categories'] = len(META['categories'])
 # save_model(MODEL_PATH, **META)
@@ -59,6 +65,7 @@ CHAR2I = META['char2i']
 
 
 class RNN(nn.Module):
+
     def __init__(self, n_hidden=128, categories=CATEGORIES, char2i=CHAR2I):
         super().__init__()
         self.categories = categories
@@ -71,17 +78,25 @@ class RNN(nn.Module):
 
         self.n_hidden = n_hidden
 
-
-        self.i2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
-        self.i2o = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
+        self.W_c2h = nn.Linear(self.vocab_size + self.n_hidden, self.n_hidden)
+        self.W_c2y = nn.Linear(self.vocab_size + self.n_hidden, self.n_categories)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, char_tens, hidden):  # <2> x = input = char_tens
-        combined = torch.cat((char_tens, hidden), 1)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
-        output = self.softmax(output)
-        return output, hidden
+    # .Recurrence in PyTorch
+    # [source,python]
+    # ----
+    def forward(self, x, hidden):  # <1>
+        combined = torch.cat((x, hidden), 1)  # <2>
+        hidden = self.W_c2h(combined)  # <3>
+        y = self.W_c2y(combined)  # <4>
+        y = self.softmax(y)
+        return y, hidden    # <5>
+    # ----
+    # <1> token (character) one-hot vector
+    # <2> concatenate the `x` vector and the previous character's `hidden` tensor
+    # <3> `nn.Linear` dot product transforms `combined` vector into a `hidden` vector
+    # <4> dot product transforms `combined` vector into `y` (output vector of category likelihoods)
+    # <5> Both `output` and `hidden` tensors are needed to process the next token
 
     def encode_one_hot_vec(self, character):
         """ one - hot encode a single char """
@@ -132,6 +147,7 @@ class RNN(nn.Module):
         with filepath.with_suffix('.state_dict.pickle').open('rb') as fin:
             state_dict = torch.load(fin)
         self.load_state_dict(state_dict)
+        return self
 
     def save(self, filepath):
         """ Save met to filepath.meta.json & state_dict to filepath.state_dict.pickle """
@@ -153,12 +169,27 @@ class RNN(nn.Module):
             torch.save(state_dict, fout)
         return filepath
 
+    def unroll_activations(self, text):
+        char_seq_tens = encode_one_hot_seq(text, char2i=self.char2i)
+        hidden = torch.zeros(1, self.n_hidden)
+        self.zero_grad()
+        outputs = []
+        hiddens = []
+        for i in range(char_seq_tens.size()[0]):
+            output, hidden = self(char_tens=char_seq_tens[i], hidden=hidden)
+            outputs.append(output)
+            hiddens.append(hidden)
+        cats = []
+        for v in outputs:
+            cats.append(self.categories[np.exp(v.detach().numpy()).argmax()])
+        return cats, outputs, hiddens
+
     def __str__(self):
         return (
             f"RNN(\n    n_hidden={self.n_hidden},\n    n_categories={self.n_categories},\n"
-            f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n    vocab_size={self.vocab_size},\n    char2i['A']={char2i['A']}\n)"
-            )
-
+            f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n"
+            f"    vocab_size={self.vocab_size},\n    char2i['A']={self.char2i['A']}\n)"
+        )
 
 
 asciify = Asciifier(include=ASCII_NAME_CHARS)
@@ -171,7 +202,7 @@ def dedupe_mapping_df(df, key_column='surname', value_column='nationality'):
 
 
 def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=None, target='nationality', dedupe=False):
-    """ load names (lines of text) from text files if filename is among categories provided
+    """ Load names (lines of text) from text files if filename is among categories provided
 
     Inputs:
       categories (list of str): None will load all categories
@@ -221,7 +252,7 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=N
     return pd.DataFrame(name_label_counts, columns=columns)
 
 
-def dataset_confusion(df, normalize=True, fillna='0', text_col='surname', target='nationality'):
+def dataset_confusion(df, normalize=True, fillna=0, text_col='surname', target='nationality'):
     """ Given a df with columns name & category, assume "truth" is most popular category for a name """
     confusion = {c: Counter() for c in sorted(df[target].unique())}
     for i, g in df.groupby(text_col):
@@ -238,14 +269,14 @@ def dataset_confusion(df, normalize=True, fillna='0', text_col='surname', target
 
 
 def encode_one_hot_vec(letter, char2i=CHAR2I):
-    """ one - hot encode a single char """
+    """ one-hot encode a single character using the char2i mapping of chars to ints """
     tensor = torch.zeros(1, len(char2i))
     tensor[0][char2i[letter]] = 1
     return tensor
 
 
 def encode_one_hot_seq(line, char2i=CHAR2I):
-    """ one - hot encode each char in a str = > matrix of size(len(str), len(alphabet)) """
+    """ one-hot encode each char in a str => matrix of size(len(str), len(alphabet)) """
     tensor = torch.zeros(len(line), 1, len(ASCII_NAME_CHARS))
     for pos, letter in enumerate(line):
         tensor[pos][0][char2i[letter]] = 1
@@ -281,45 +312,80 @@ def random_example(groups, target='nationality', text_col='surname', categories=
 
 def stratified_random_examples(
         groups, num_samples_per_group=1, replace=True, shuffle=True,
-        target='nationality', text_col='surname', categories=None, char2i=None):
+        target='nationality', text_col='surname', categories=None, char2i=None,
+        multihot=False):
     """ balanced sampling of all categories """
-    df = groups.sample(num_samples_per_group, replace=replace)
+    # print(f'groups {groups}')
+    # print(f'df = groups.sample({num_samples_per_group}, replace={replace})')
+    # print(f'groups.sample(1): {groups.sample(1)}')
+
+    try:
+        df = groups.sample(num_samples_per_group, replace=replace)
+    except Exception as e:
+        print(e)
+        df = groups
     if shuffle:
         df = df.sample(len(df))
     names = df[text_col].values
     cats = df[target].values
     tqdm_fun = tqdm if len(cats) > 10000 else iter
-    cat_tensors = [
-        torch.tensor([categories.index(c)], dtype=torch.long) for c in
-        tqdm_fun(cats)
-    ]
+
+    # if the target variable (category) is a str then look it up in categories and create a one-hot vector
+    if isinstance(cats[0], str):
+        cat_tensors = [
+            torch.tensor([categories.index(c)], dtype=torch.long) for c in
+            tqdm_fun(cats)
+        ]
+    # if the target variable (category) is a vector/array then convert it to a multihot float tensor
+    else:
+        cat_tensors = [
+            torch.tensor(c, dtype=torch.float) for c in
+            tqdm_fun(cats)
+        ]
     line_tensors = [
         encode_one_hot_seq(n, char2i=char2i) for n in tqdm_fun(names)
     ]
     return cats, names, cat_tensors, line_tensors
 
 
+# TODO: move this into a class called Pipeline or Trainer that inherits RNN or Model
 def train_sample(model, category_tensor, char_seq_tens,
-                 criterion=nn.NLLLoss(), lr=.005):
-    """ train for one epoch(one batch of example tensors) """
+                 criterion=None, lr=.005):
+    """ Train for one epoch (one example name nationality tensor pair) """
     hidden = torch.zeros(1, model.n_hidden)
     model.zero_grad()
-    for i in range(char_seq_tens.size()[0]):
-        output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
-    # print(f"output: {output}")
-    # print(f"category_tensor: {category_tensor}")
-    loss = criterion(output, category_tensor)
-    # print(f"loss: {loss.item()}")
+    for char_onehot_vector in char_seq_tens:
+        category_predictions, hidden = model(
+            x=char_onehot_vector, hidden=hidden)
+#    log internal state to a global variable or file so that it can be visualized
+#    print(f"category_predictions: {category_predictions}")
+#    print(f"category_tensor: {category_tensor}")
+    loss = criterion(category_predictions, category_tensor)
     loss.backward()
 
-    # Add parameters' gradients to their values, multiplied by learning rate
     for p in model.parameters():
         p.data.add_(p.grad.data, alpha=-lr)
 
-    return model, output, loss.item()
+    return model, category_predictions, loss.item()
 
 
 CRITERION = nn.NLLLoss()
+
+
+def visualize_outputs(model, text):
+    char_seq_tens = encode_one_hot_seq(text, char2i=model.char2i)
+    hidden = torch.zeros(1, model.n_hidden)
+    model.zero_grad()
+    outputs = []
+    hiddens = []
+    for i in range(char_seq_tens.size()[0]):
+        output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
+        outputs.append(output)
+        hiddens.append(hidden)
+    cats = []
+    for v in outputs:
+        cats.append(model.categories[np.exp(v.detach().numpy()).argmax()])
+    return cats
 
 
 def train_batch(df_batch, model, categories, target='nationality', text_col='surname', criterion=CRITERION, lr=.005, char2i=CHAR2I):
@@ -435,6 +501,7 @@ def print_dataset_samples(df, num_samples=3, replace=True, target='nationality')
 def load_name_counts(filepath=SRC_DATA_DIR / 'names' / 'name_counts.csv.gz'):
     return pd.read_csv(filepath)
 
+
 def preprocess_surname_nationality_df(df, target_col='nationality', text_col='surname'):
     new_rows = []
     # Some Ukranian names have Russian alternatives e.g. surname='Markevych (Russian: Markevich)'
@@ -469,14 +536,23 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
     return df
 
 
-
-def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005, val_split=.05):
+def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname',
+          criterion=nn.NLLLoss(), lr=.005, val_split=.05, multihot=False):
     df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
     isvalidationset = np.random.rand(len(isdataset)) < val_split  # 10% validation set
     df_train = df[isdataset & ~isvalidationset].copy()
     df_val = df[isdataset & isvalidationset].copy()
+
+    if multihot or not isinstance(criterion, nn.NLLLoss):
+        multihot = True
+        # surprisingly you can groupby the onehot vectors
+        # (all the 679 different combinations of tags when there are 37 nationalities/categories)
+        # FYI 37*36 = 1332 > 679 < .1 * len(df) = .1 * 30923 = 3092.3
+        # as long as the vectors are tuples
+        df_train[target] = df_train[target].apply(tuple)
     groups = df_train.groupby(target)
+    # print(f'groups in train: {groups}')
 
     mean_train_losses = []
     mean_train_accuracies = []
@@ -489,12 +565,16 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
     batch_losses = []
     batch_predictions = []
     batch_accuracies = []
+
+    criterion = nn.NLLLoss() if criterion is None or not multihot else criterion
+
     for it in tqdm(range(n_iters)):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(
-            groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i)
+            groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i, multihot=multihot)
 
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
-            model, output_tensor, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=lr)
+            model, output_tensor, loss = train_sample(
+                model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, criterion=criterion, lr=lr)
             guess, guess_i = model.predict_category_and_index(line)
             batch_predictions.append(guess)
             batch_accuracies.append(guess == cat)
@@ -506,12 +586,14 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         if it and not (it % print_every):
             mean_train_losses.append(np.mean(batch_losses))
             mean_train_accuracies.append(np.mean(batch_accuracies))
-            mean_val_accuracies.append(np.mean([model.predict_category(text=s)==c for (s, c) in zip(df_val[text_col], df_val[target])]))
-            print(f"  mean_train_loss: {mean_train_losses[-1]}\n  mean_train_acc: {mean_train_accuracies[-1]}\n  mean_val_acc: {mean_val_accuracies[-1]}")
+            mean_val_accuracies.append(np.mean([model.predict_category(text=s) == c for (s, c) in zip(df_val[text_col], df_val[target])]))
+            print(
+                f"  mean_train_loss: {mean_train_losses[-1]}\n"
+                f"  mean_train_acc: {mean_train_accuracies[-1]}\n"
+                f"  mean_val_acc: {mean_val_accuracies[-1]}")
             batch_losses = []
             batch_predictions = []
             batch_accuracies = []
-
 
     train_time = time_elapsed(start)
     return dict(
@@ -520,14 +602,14 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         train_losses=mean_train_losses,
         train_accuracies=mean_train_accuracies,
         validation_accuracies=mean_val_accuracies,
-        losses=[1.0-a for a in mean_val_accuracies],
+        losses=[1.0 - a for a in mean_val_accuracies],
         train_time=train_time,
         categories=model.categories,
         char2i=model.char2i,
         lr=lr,
         n_iters=n_iters,
         df_len=len(df),
-        )
+    )
 
 
 def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
