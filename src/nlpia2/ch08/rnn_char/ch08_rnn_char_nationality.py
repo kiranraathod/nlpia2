@@ -312,18 +312,36 @@ def random_example(groups, target='nationality', text_col='surname', categories=
 
 def stratified_random_examples(
         groups, num_samples_per_group=1, replace=True, shuffle=True,
-        target='nationality', text_col='surname', categories=None, char2i=None):
+        target='nationality', text_col='surname', categories=None, char2i=None,
+        multihot=False):
     """ balanced sampling of all categories """
-    df = groups.sample(num_samples_per_group, replace=replace)
+    # print(f'groups {groups}')
+    # print(f'df = groups.sample({num_samples_per_group}, replace={replace})')
+    # print(f'groups.sample(1): {groups.sample(1)}')
+
+    try:
+        df = groups.sample(num_samples_per_group, replace=replace)
+    except Exception as e:
+        print(e)
+        df = groups
     if shuffle:
         df = df.sample(len(df))
     names = df[text_col].values
     cats = df[target].values
     tqdm_fun = tqdm if len(cats) > 10000 else iter
-    cat_tensors = [
-        torch.tensor([categories.index(c)], dtype=torch.long) for c in
-        tqdm_fun(cats)
-    ]
+
+    # if the target variable (category) is a str then look it up in categories and create a one-hot vector
+    if isinstance(cats[0], str):
+        cat_tensors = [
+            torch.tensor([categories.index(c)], dtype=torch.long) for c in
+            tqdm_fun(cats)
+        ]
+    # if the target variable (category) is a vector/array then convert it to a multihot float tensor
+    else:
+        cat_tensors = [
+            torch.tensor(c, dtype=torch.float) for c in
+            tqdm_fun(cats)
+        ]
     line_tensors = [
         encode_one_hot_seq(n, char2i=char2i) for n in tqdm_fun(names)
     ]
@@ -339,6 +357,9 @@ def train_sample(model, category_tensor, char_seq_tens,
     for char_onehot_vector in char_seq_tens:
         category_predictions, hidden = model(
             x=char_onehot_vector, hidden=hidden)
+#    log internal state to a global variable or file so that it can be visualized
+#    print(f"category_predictions: {category_predictions}")
+#    print(f"category_tensor: {category_tensor}")
     loss = criterion(category_predictions, category_tensor)
     loss.backward()
 
@@ -516,13 +537,22 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
 
 
 def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname',
-          critereon=nn.NLLLoss(), lr=.005, val_split=.05):
+          criterion=nn.NLLLoss(), lr=.005, val_split=.05, multihot=False):
     df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
     isvalidationset = np.random.rand(len(isdataset)) < val_split  # 10% validation set
     df_train = df[isdataset & ~isvalidationset].copy()
     df_val = df[isdataset & isvalidationset].copy()
+
+    if multihot or not isinstance(criterion, nn.NLLLoss):
+        multihot = True
+        # surprisingly you can groupby the onehot vectors
+        # (all the 679 different combinations of tags when there are 37 nationalities/categories)
+        # FYI 37*36 = 1332 > 679 < .1 * len(df) = .1 * 30923 = 3092.3
+        # as long as the vectors are tuples
+        df_train[target] = df_train[target].apply(tuple)
     groups = df_train.groupby(target)
+    # print(f'groups in train: {groups}')
 
     mean_train_losses = []
     mean_train_accuracies = []
@@ -536,15 +566,15 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
     batch_predictions = []
     batch_accuracies = []
 
-    critereon = nn.NLLLoss() if critereon is None else critereon
+    criterion = nn.NLLLoss() if criterion is None or not multihot else criterion
 
     for it in tqdm(range(n_iters)):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(
-            groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i)
+            groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i, multihot=multihot)
 
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
             model, output_tensor, loss = train_sample(
-                model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, critereon=critereon, lr=lr)
+                model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, criterion=criterion, lr=lr)
             guess, guess_i = model.predict_category_and_index(line)
             batch_predictions.append(guess)
             batch_accuracies.append(guess == cat)

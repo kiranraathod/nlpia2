@@ -1,46 +1,11 @@
 from collections import Counter
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 
-from ch08_rnn_char_nationality import RNN, train, save_results
-
-
-MODEL_PATH = Path(__file__).with_suffix('').name
-PYTORCH_TUTORIAL_CATEGORIES = [
-    'Arabic', 'Chinese', 'Czech', 'Dutch', 'English', 'French', 'German', 'Greek', 'Irish', 'Italian', 'Japanese',
-    'Korean', 'Nigerian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'Spanish', 'Vietnamese'
-]
-MANUALLY_ADDED_CATEGORIES = ['Ethiopian', 'Indian', 'Nepalese']
-
-
-# META = load_model_meta(MODEL_PATH)
-
-META = {
-    'categories': [
-        'Algerian', 'Arabic', 'Brazilian', 'Chilean', 'Chinese', 'Czech', 'Dutch', 'English', 'Ethiopian',
-        'Finnish', 'French', 'German', 'Greek', 'Honduran', 'Indian', 'Irish', 'Italian', 'Japanese', 'Korean',
-        'Malaysian', 'Mexican', 'Moroccan', 'Nepalese', 'Nicaraguan', 'Nigerian', 'Palestinian', 'Papua New Guinean',
-        'Peruvian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'South African', 'Spanish', 'Ukrainian',
-        'Venezuelan', 'Vietnamese'
-    ],
-    'char2i': {
-        ' ': 0, "'": 1, ',': 2, '-': 3, '.': 4, ';': 5, 'A': 6, 'B': 7, 'C': 8, 'D': 9, 'E': 10,
-        'F': 11, 'G': 12, 'H': 13, 'I': 14, 'J': 15, 'K': 16, 'L': 17, 'M': 18, 'N': 19, 'O': 20, 'P': 21,
-        'Q': 22, 'R': 23, 'S': 24, 'T': 25, 'U': 26, 'V': 27, 'W': 28, 'X': 29, 'Y': 30, 'Z': 31, 'a': 32, 'b': 33,
-        'c': 34, 'd': 35, 'e': 36, 'f': 37, 'g': 38, 'h': 39, 'i': 40, 'j': 41, 'k': 42, 'l': 43, 'm': 44, 'n': 45,
-        'o': 46, 'p': 47, 'q': 48, 'r': 49, 's': 50, 't': 51, 'u': 52, 'v': 53, 'w': 54, 'x': 55, 'y': 56, 'z': 57
-    },
-}
-META['n_hidden'] = 128
-META['n_categories'] = len(META['categories'])
-# save_model(MODEL_PATH, **META)
-
-CATEGORIES = META['categories']
-CHAR2I = META['char2i']
+from ch08_rnn_char_nationality import RNN, train, save_results, CATEGORIES, CHAR2I, META
 
 
 class RNNTagger(RNN):
@@ -130,13 +95,20 @@ if __name__ == '__main__':
     if ans.strip():
         lr = float(ans)
 
-    critereon = nn.BCELoss()
+    criterion = nn.BCELoss()
 
-    results = dict(lr=lr, n_iters=n_iters, critereon=critereon)
+    results = dict(lr=lr, n_iters=n_iters, criterion=criterion)
     print(f"hyperparams: {results}")
 
+    df_multihot = create_multihot_dataset(df)
+    categories = list(df_multihot.columns)
+    df_multihot['nationality'] = tuple(df_multihot.values)
+    df_multihot['surname'] = df_multihot.index.values
+    df_multihot = df_multihot['surname nationality'.split()].reset_index(drop=True)
+
+    # user can abort by setting any hyperparamter to 0 or False or None
     if n_iters and n_hidden and lr:
-        training_results = train(model=model, df=df, n_iters=n_iters, critereon=critereon, lr=lr)
+        training_results = train(model=model, df=df_multihot, n_iters=n_iters, criterion=criterion, lr=lr)
         results.update(training_results)
         print(f"updated results: {results}")
 
