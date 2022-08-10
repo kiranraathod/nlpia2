@@ -31,6 +31,12 @@ from nlpia2.string_normalizers import Asciifier, ASCII_NAME_CHARS
 from persistence import save_model
 
 MODEL_PATH = Path(__file__).with_suffix('').name
+PYTORCH_TUTORIAL_CATEGORIES = [
+    'Arabic', 'Chinese', 'Czech', 'Dutch', 'English', 'French', 'German', 'Greek', 'Irish', 'Italian', 'Japanese',
+    'Korean', 'Nigerian', 'Polish', 'Portuguese', 'Russian', 'Scottish', 'Spanish', 'Vietnamese'
+]
+MANUALLY_ADDED_CATEGORIES = ['Ethiopian', 'Indian', 'Nepalese']
+
 
 # META = load_model_meta(MODEL_PATH)
 
@@ -59,6 +65,7 @@ CHAR2I = META['char2i']
 
 
 class RNN(nn.Module):
+
     def __init__(self, n_hidden=128, categories=CATEGORIES, char2i=CHAR2I):
         super().__init__()
         self.categories = categories
@@ -162,25 +169,26 @@ class RNN(nn.Module):
             torch.save(state_dict, fout)
         return filepath
 
-    def unroll_activations(text):
-        char_seq_tens = encode_one_hot_seq(text, char2i=model.char2i)
-        hidden = torch.zeros(1, model.n_hidden)
-        model.zero_grad()
+    def unroll_activations(self, text):
+        char_seq_tens = encode_one_hot_seq(text, char2i=self.char2i)
+        hidden = torch.zeros(1, self.n_hidden)
+        self.zero_grad()
         outputs = []
         hiddens = []
         for i in range(char_seq_tens.size()[0]):
-            output, hidden = model(char_tens=char_seq_tens[i], hidden=hidden)
+            output, hidden = self(char_tens=char_seq_tens[i], hidden=hidden)
             outputs.append(output)
             hiddens.append(hidden)
         cats = []
         for v in outputs:
-            cats.append(model.categories[np.exp(v.detach().numpy()).argmax()])
+            cats.append(self.categories[np.exp(v.detach().numpy()).argmax()])
         return cats, outputs, hiddens
 
     def __str__(self):
         return (
             f"RNN(\n    n_hidden={self.n_hidden},\n    n_categories={self.n_categories},\n"
-            f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n    vocab_size={self.vocab_size},\n    char2i['A']={char2i['A']}\n)"
+            f"    categories=[{self.categories[0]}..{self.categories[-1]}],\n"
+            f"    vocab_size={self.vocab_size},\n    char2i['A']={self.char2i['A']}\n)"
         )
 
 
@@ -194,7 +202,7 @@ def dedupe_mapping_df(df, key_column='surname', value_column='nationality'):
 
 
 def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=None, target='nationality', dedupe=False):
-    """ load names (lines of text) from text files if filename is among categories provided
+    """ Load names (lines of text) from text files if filename is among categories provided
 
     Inputs:
       categories (list of str): None will load all categories
@@ -244,7 +252,7 @@ def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=N
     return pd.DataFrame(name_label_counts, columns=columns)
 
 
-def dataset_confusion(df, normalize=True, fillna='0', text_col='surname', target='nationality'):
+def dataset_confusion(df, normalize=True, fillna=0, text_col='surname', target='nationality'):
     """ Given a df with columns name & category, assume "truth" is most popular category for a name """
     confusion = {c: Counter() for c in sorted(df[target].unique())}
     for i, g in df.groupby(text_col):
@@ -261,14 +269,14 @@ def dataset_confusion(df, normalize=True, fillna='0', text_col='surname', target
 
 
 def encode_one_hot_vec(letter, char2i=CHAR2I):
-    """ one - hot encode a single char """
+    """ one-hot encode a single character using the char2i mapping of chars to ints """
     tensor = torch.zeros(1, len(char2i))
     tensor[0][char2i[letter]] = 1
     return tensor
 
 
 def encode_one_hot_seq(line, char2i=CHAR2I):
-    """ one - hot encode each char in a str = > matrix of size(len(str), len(alphabet)) """
+    """ one-hot encode each char in a str => matrix of size(len(str), len(alphabet)) """
     tensor = torch.zeros(len(line), 1, len(ASCII_NAME_CHARS))
     for pos, letter in enumerate(line):
         tensor[pos][0][char2i[letter]] = 1
@@ -324,7 +332,7 @@ def stratified_random_examples(
 
 # TODO: move this into a class called Pipeline or Trainer that inherits RNN or Model
 def train_sample(model, category_tensor, char_seq_tens,
-                 criterion=nn.NLLLoss(), lr=.005):
+                 criterion=None, lr=.005):
     """ Train for one epoch (one example name nationality tensor pair) """
     hidden = torch.zeros(1, model.n_hidden)
     model.zero_grad()
@@ -507,7 +515,8 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
     return df
 
 
-def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname', lr=.005, val_split=.05):
+def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname',
+          critereon=nn.NLLLoss(), lr=.005, val_split=.05):
     df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
     isvalidationset = np.random.rand(len(isdataset)) < val_split  # 10% validation set
@@ -526,12 +535,16 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
     batch_losses = []
     batch_predictions = []
     batch_accuracies = []
+
+    critereon = nn.NLLLoss() if critereon is None else critereon
+
     for it in tqdm(range(n_iters)):
         cats, lines, category_tensors, line_tensors = stratified_random_examples(
             groups, num_samples_per_group=1, categories=model.categories, char2i=model.char2i)
 
         for cat, line, cat_tensor, line_tensor in zip(cats, lines, category_tensors, line_tensors):
-            model, output_tensor, loss = train_sample(model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, lr=lr)
+            model, output_tensor, loss = train_sample(
+                model=model, category_tensor=cat_tensor, char_seq_tens=line_tensor, critereon=critereon, lr=lr)
             guess, guess_i = model.predict_category_and_index(line)
             batch_predictions.append(guess)
             batch_accuracies.append(guess == cat)
