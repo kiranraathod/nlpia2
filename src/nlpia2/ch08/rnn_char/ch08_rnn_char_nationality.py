@@ -201,57 +201,6 @@ def dedupe_mapping_df(df, key_column='surname', value_column='nationality'):
     return pd.DataFrame(key_value_counts, columns=[key_column, value_column, 'count'])
 
 
-def load_names_from_text(data_dir=SRC_DATA_DIR, text_col='surname', categories=None, target='nationality', dedupe=False):
-    """ Load names (lines of text) from text files if filename is among categories provided
-
-    Inputs:
-      categories (list of str): None will load all categories
-
-    Returns:
-      DataFrame with columns=['surname', 'nationality', 'count']
-
-    ```python
-    !curl - O https: // download.pytorch.org / tutorial / data.zip
-    !unzip data.zip
-    load_names_from_text(data_dir=Path.cwd())
-    ```
-
-    >>> df = load_names_from_text(dedupe=True, categories=None)
-    >>> df['category'].unique()
-    >>> len(df) > 10000
-    True
-    >>> df2 = load_names_from_text(dedupe=False, categories=None)
-    >>> len(df2) > len(df)
-    21516
-    >>> df['count'].sum() == len(df2)
-    True
-    >>> df.columns[:-1] == df2.columns
-    array([ True,  True])
-    """
-    name_label_counts = []
-    print(f"Looking for files for {len(categories or [])} categories: {categories}")
-    data_dir = Path(data_dir) / 'names'
-    if not data_dir.is_dir():
-        data_dir = data_dir.parent
-    for i, filepath in enumerate(data_dir.glob('*.txt')):
-        filepath = Path(filepath)
-        print(f"Loading file {i}: {filepath}.")
-        category = filepath.with_suffix('').name
-        if categories and category not in categories:
-            print(f"The path {filepath} looks like a new {category}.")
-            print(f"Add it to the {filepath.with_suffix('.meta.json')} and rerun.")
-            continue
-        filepath = maybe_download(filename=filepath)
-        with filepath.open() as fin:
-            lines = [asciify(line.rstrip()) for line in fin]
-            name_label_counts += list(zip(lines, [category] * len(lines)))
-    columns = [text_col, target]
-    if dedupe:
-        name_label_counts = [[k[0], k[1], v] for (k, v) in Counter(name_label_counts).items()]
-        columns += ['count']
-    return pd.DataFrame(name_label_counts, columns=columns)
-
-
 def dataset_confusion(df, normalize=True, fillna=0, text_col='surname', target='nationality'):
     """ Given a df with columns name & category, assume "truth" is most popular category for a name """
     confusion = {c: Counter() for c in sorted(df[target].unique())}
@@ -538,7 +487,6 @@ def preprocess_surname_nationality_df(df, target_col='nationality', text_col='su
 
 def train(model, df, n_iters=5000, print_every=None, target='nationality', text_col='surname',
           criterion=nn.NLLLoss(), lr=.005, val_split=.05, multihot=False):
-    df = df if df is not None else load_names_from_text()
     isdataset = df[target].isin(model.categories)
     isvalidationset = np.random.rand(len(isdataset)) < val_split  # 10% validation set
     df_train = df[isdataset & ~isvalidationset].copy()
@@ -610,37 +558,6 @@ def train(model, df, n_iters=5000, print_every=None, target='nationality', text_
         n_iters=n_iters,
         df_len=len(df),
     )
-
-
-def concatenate_surname_tables(html_dir=Path.home() / 'Downloads' / 'surnames',
-                               html_text_col='surname', textfile_text_col='surname', html_target='nationality', textfile_target='category'):
-    """ FIXME: use html_text_col='surname', textfile_text_col='name', html_target='nationality', textfile_target='category' """
-    html_dir = Path(html_dir)
-    filepaths = list(html_dir.glob('Most Common *.html'))
-    dfs = []
-    for fp in filepaths:
-        nationality = fp.with_suffix('').name.replace('Most Common', '').replace('Surnames & Meanings', '').strip()
-        fp = str(fp)
-        df1 = pd.read_html(str(fp))[-1]
-        df1.columns = 'rank surname count frequency'.split()
-        df1['frequency'] = df1['frequency'].str.replace(',', '')
-        df1['freq_numerator'] = df1['frequency'].str.split(':').apply(lambda x: float(x[0]))
-        df1['freq_denominator'] = df1['frequency'].str.split(':').apply(lambda x: float(x[1]))
-        df1['nationality'] = nationality
-        dfs.append(df1)
-    dftot = pd.concat(dfs)
-    dftot = preprocess_surname_nationality_df(dftot)
-    print(f"dftot.shape: {dftot.shape}")
-    df = load_names_from_text(dedupe=True, categories=None)
-    df = pd.concat([dftot, df])
-
-    if textfile_text_col != html_text_col:
-        df[html_text_col] = df[html_text_col].fillna(df[textfile_text_col][df[html_text_col].isna()]).values
-        df = df.drop(columns=[textfile_text_col])
-    if textfile_target != html_target:
-        df[html_target] = df[html_target].fillna(df[textfile_target][df[html_target].isna()]).values
-        df = df.drop(columns=[textfile_target])
-    return df
 
 
 def plot_training_curve(model, losses):

@@ -46,6 +46,28 @@ class RNNTagger(RNN):
         )
 
 
+def multihot_encoder(labels, dtype=torch.float32):
+    """ Convert an array of label lists into a 2-D multihot tensor (array of vectors)
+
+    label_lists = [['happy', 'kind'], ['sad', 'mean'], ['loud', 'happy'], ['quiet', 'kind']]
+    >>> multihot_encoder(label_lists, dtype=None)
+    """
+    label_set = set()
+    for label_list in labels:
+        label_set = label_set.union(set(label_list))
+    label_set = sorted(label_set)
+    multihot_vectors = []
+    # If you want to keep track of your labels and where they are in your vectors:
+    # label2id = {v: k for k, v in enumerate(label_set)}
+    for label_list in labels:
+        multihot_vectors.append([1 if x in label_list else 0 for x in label_set])
+    # # You probably want to keep track of which columns are which so you should store your data in a DataFrame/csv
+    # # before training a model on it
+    if dtype is None:
+        return pd.DataFrame(multihot_vectors, columns=label_set)
+    return torch.Tensor(multihot_vectors).to(dtype)
+
+
 def create_multihot_dataset(df, normalize=True, fillna=0, text_col='surname', target_col='nationality'):
     name_multihot_vecs = {}
     # FIXME: this dataset has already been deduplicated,
