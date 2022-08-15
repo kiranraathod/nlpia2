@@ -730,12 +730,39 @@ def save_results(filename=None, **results):
     print(f'Saved model state_dict and meta to {filename}.*')
 
 
+def gitlab_download_url(
+        account_name='tangibleai/nlpia2',
+        name='surname-nationality',
+        filepath=None,
+        suffix='?inline=false',
+        domain_name='gitlab.com',
+        protocol='https'):
+    if filepath is None:
+        filepath = f'src/nlpia2/data/{name}.csv'
+    return f'{protocol}://{domain_name}/{account_name}/-/raw/main/{filepath}{suffix}'
+
+
+def huggingface_download_url(
+        repo='tangibleai/nlpia2',
+        filepath=None,
+        suffix='?inline=false',
+        domain_name='huggingface.co',
+        account_name='Hobson',
+        hub='datasets',
+        name='surname-nationality',
+        protocol='https'):
+    if filepath is None:
+        filepath = f'{name}.csv.gz'
+    return f'{protocol}://{domain_name}/{hub}/{account_name}/{name}/resolve/main/{filepath}'
+
+
 if __name__ == '__main__':
-    repo = 'tangibleai/nlpia2'
-    filepath = 'src/nlpia2/data/surname_nationalities.csv'
-    suffix = '?inline=false'
-    url = f"https://gitlab.com/{repo}/-/raw/main/{filepath}{suffix}"
-    df = pd.read_csv(url)
+    try:
+        url = gitlab_download_url()
+        df = pd.read_csv(url, index_col=False)
+    except Exception:
+        url = gitlab_download_url()
+        df = pd.read_csv(url, index_col=False)
     print(df)
 
     n_categories = 10
