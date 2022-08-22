@@ -759,10 +759,10 @@ def huggingface_download_url(
 if __name__ == '__main__':
     try:
         url = gitlab_download_url()
-        df = pd.read_csv(url, index_col=False)
+        df = pd.read_csv(url)
     except Exception:
         url = gitlab_download_url()
-        df = pd.read_csv(url, index_col=False)
+        df = pd.read_csv(url)
     print(df)
 
     n_categories = 10
