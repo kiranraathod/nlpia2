@@ -130,6 +130,14 @@ class RNN(nn.Module):
         pred_i = self.predict_category_index(text)
         return self.categories[pred_i]
 
+    def prediction_history(self, text="Khalid"):
+        preds = []
+        for i in range(1, len(text) + 1):
+            substr = text[:i]
+            preds.append([substr, self.predict_category(substr)])
+            print(i, substr, preds[-1])
+        return preds
+
     def predict_category_index(self, text):
         tensor = self.encode_one_hot_seq(text)
         return self.evaluate_tensor(tensor).topk(1)[1][0].item()
