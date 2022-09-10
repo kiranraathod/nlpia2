@@ -114,7 +114,7 @@ class RNN(nn.Module):
             tensor[pos][0][self.char2i[letter]] = 1
         return tensor
 
-    def evaluate_tensor(self, text_tensor):
+    def predict_proba(self, text_tensor):
         with torch.no_grad():
             hidden = self.hidden_init
             for i in range(text_tensor.shape[0]):
@@ -127,8 +127,17 @@ class RNN(nn.Module):
         return self.categories[category_i], category_i
 
     def predict_category(self, text):
-        pred_i = self.predict_category_index(text)
+        tensor = self.encode_one_hot_seq(text)
+        pred_i = self.predict_proba(tensor).topk(1)[1][0].item()
         return self.categories[pred_i]
+
+    def predict_hidden(self, text="Khalid"):
+        text_tensor = self.encode_one_hot_seq(text)
+        with torch.no_grad():
+            hidden = self.hidden_init
+            for i in range(text_tensor.shape[0]):
+                output, hidden = self(text_tensor[i], hidden)
+        return hidden
 
     def prediction_history(self, text="Khalid"):
         preds = []
@@ -140,11 +149,11 @@ class RNN(nn.Module):
 
     def predict_category_index(self, text):
         tensor = self.encode_one_hot_seq(text)
-        return self.evaluate_tensor(tensor).topk(1)[1][0].item()
+        return self.predict_proba(tensor).topk(1)[1][0].item()
 
     def predict_category_and_index(self, text):
         tensor = self.encode_one_hot_seq(text)
-        pred_i = self.evaluate_tensor(tensor).topk(1)[1][0].item()
+        pred_i = self.predict_proba(tensor).topk(1)[1][0].item()
         return self.categories[pred_i], pred_i
 
     def load(self, filepath):
@@ -490,7 +499,7 @@ def plot_confusion(df_conf):
 
 def topk_predictions(model, text, target_col='nationality', topk=3):
     with torch.no_grad():
-        output = model.evaluate_tensor(encode_one_hot_seq(text))
+        output = model.predict_proba(encode_one_hot_seq(text))
         topvalues, topindices = output.topk(topk, 1, True)
         predictions = []
         # TODO: try this:
@@ -498,22 +507,6 @@ def topk_predictions(model, text, target_col='nationality', topk=3):
             predictions.append(
                 [rank, text, log_loss_tens.item(), model.categories[category_index]])
     return pd.DataFrame(predictions, columns='rank text log_loss'.split() + [target_col])
-
-
-def predict(model, text):
-    with torch.no_grad():
-        output = model.evaluate_tensor(model.encode_one_hot_seq(text))
-        topvalues, topindices = output.topk(1, 1, True)
-        (log_loss_tens, category_index) = topindices[0]
-        return model.categories[category_index]
-
-
-def predict_proba(model, text):
-    with torch.no_grad():
-        output = model.evaluate_tensor(model.encode_one_hot_seq(text))
-        topvalues, topindices = output.topk(1, 1, True)
-        (log_loss_tens, category_index) = topindices[0]
-        return np.exp(log_loss_tens.item())
 
 
 def print_predictions(model, text, target_col='nationality', n_predictions=3):
@@ -790,7 +783,7 @@ if __name__ == '__main__':
     )
     print(f"model: {model}")
 
-    n_iters = 10000
+    n_iters = 4000
     ans = input(f"How many samples would you like to train on? [{n_iters}]? ")
     if ans.strip():
         n_iters = int(ans)
