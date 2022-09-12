@@ -1,0 +1,2 @@
+torch
+pynvml==11.4.1
