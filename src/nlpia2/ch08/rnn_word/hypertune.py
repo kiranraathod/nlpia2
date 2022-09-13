@@ -1,5 +1,6 @@
 from itertools import product
 import pandas as pd
+import json
 
 from main import main, DEFAULT_HYPERPARAMS
 
@@ -31,7 +32,7 @@ def grid_search(
         #     ("python main.py {'--cuda' if cuda else ''} --epochs {epochs} --model_type {model_type}"
         #      " --nhid {nhid} --batch_size {batch_size} --bptt {bptt} --nlayers {nlayers} --save {filename}.pt").format(**kwargs)
         # )
-        print(kwargs)
+        print(json.dumps(kwargs, indent=4))
         results = main(**kwargs)
         experiments.append(results)
         with open('experiments.json', 'at') as fout:
@@ -41,6 +42,7 @@ def grid_search(
 
 if __name__ == '__main__':
     experiments = grid_search()
+    print(experiments)
     df_experiments = pd.DataFrame(experiments)
     print(df_experiments)
     df_experiments.to_csv('experiments.csv')

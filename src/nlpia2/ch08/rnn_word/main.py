@@ -10,6 +10,14 @@ import torch.onnx
 import data
 import model as rnn_models
 
+
+def try_exp(num):
+    try:
+        return math.exp(num)
+    except Exception:
+        return -1 * num
+
+
 DEFAULT_HYPERPARAMS = dict(
     annealing_loss_improvement_pct=1.0,
     batch_size=20,
@@ -234,10 +242,13 @@ def main(**kwargs):
             if batch and batch % kwargs['log_interval'] == 0:
                 cur_loss = total_loss / kwargs['log_interval']
                 elapsed = time.time() - start_time
+
                 print(('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
                        'loss {:5.2f} | ppl {:8.2f}').format(
                     epoch, batch, len(train_data) // kwargs['bptt'], lr,
-                    elapsed * 1000 / kwargs['log_interval'], cur_loss, math.exp(cur_loss)))
+                    elapsed * 1000 / kwargs['log_interval'],
+                    cur_loss,
+                    try_exp(cur_loss)))
                 total_loss = 0
                 start_time = time.time()
             if kwargs['dry_run']:
@@ -269,7 +280,7 @@ def main(**kwargs):
                 epoch_num=epoch_num,
                 epoch_time=epoch_time,
                 val_loss=val_loss,
-                val_perplexity=math.exp(val_loss)))
+                val_perplexity=try_exp(val_loss)))
             print('-' * 89)
             print(('| end of epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | val loss {val_loss:5.2f} | '
                    'valid ppl {val_perplexity:8.2f}').format(**results))
@@ -298,7 +309,7 @@ def main(**kwargs):
 
     # Run on test data.
     results['test_loss'] = evaluate(test_data)
-    results['test_perplexity'] = math.exp(results['test_loss'])
+    results['test_perplexity'] = try_exp(results['test_loss'])
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
         **results))
