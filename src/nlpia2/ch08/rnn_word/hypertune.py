@@ -11,27 +11,23 @@ def grid_search(
         dropouts=(0, .2, .5),
         rnn_types=tuple('RNN_TANH RNN_RELU GRU LSTM'.split()),
         lrs=(.5, 2),
-        nlayers_options=(1, 2, 3, 5),
+        num_layers_options=(1, 2, 3, 5),
 ):
     experiments = []
-    for hidden_size, rnn_type, epochs, dropout, lr, nlayers in product(
-            hidden_sizes, rnn_types, epoch_nums, dropouts, lrs, nlayers_options):
+    for hidden_size, rnn_type, epochs, dropout, lr, num_layers in product(
+            hidden_sizes, rnn_types, epoch_nums, dropouts, lrs, num_layers_options):
         kwargs = DEFAULT_HYPERPARAMS.copy()
         kwargs.update(dict(
-            nhid=hidden_size,
+            hidden_size=hidden_size,
             rnn_type=rnn_type,
             dropout=dropout,
             epochs=epochs,
-            nlayers=nlayers_options,
+            num_layers=num_layers,
             lr=lr))
 
         kwargs['filename'] = (
-            'model_epochs_{epochs}_rnn_type_{rnn_type}_nhid_{nhid}_batch_size_{batch_size}'
-            '_bptt_{bptt}_nlayers_{nlayers}').format(**kwargs)
-        # print(
-        #     ("python main.py {'--cuda' if cuda else ''} --epochs {epochs} --model_type {model_type}"
-        #      " --nhid {nhid} --batch_size {batch_size} --bptt {bptt} --nlayers {nlayers} --save {filename}.pt").format(**kwargs)
-        # )
+            'model_epochs_{epochs}_rnn_type_{rnn_type}_hidden_size_{hidden_size}_batch_size_{batch_size}'
+            '_bptt_{bptt}_num_layers_{num_layers}').format(**kwargs)
         print(json.dumps(kwargs, indent=4))
         results = main(**kwargs)
         experiments.append(results)

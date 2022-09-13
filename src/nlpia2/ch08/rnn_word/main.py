@@ -34,8 +34,8 @@ DEFAULT_HYPERPARAMS = dict(
     lr=3,
     rnn_type='RNN_TANH',
     nhead=2,
-    nhid=200,
-    nlayers=2,
+    hidden_size=200,
+    num_layers=2,
     onnx_export='',
     save='model.pt',
     filename='model.py',
@@ -71,9 +71,9 @@ def parse_args():
                         help='type of network (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
     parser.add_argument('--emsize', type=int, default=DEFAULT_HYPERPARAMS['emsize'],
                         help='size of word embeddings')
-    parser.add_argument('--nhid', type=int, default=DEFAULT_HYPERPARAMS['nhid'],
+    parser.add_argument('--hidden_size', type=int, default=DEFAULT_HYPERPARAMS['hidden_size'],
                         help='number of hidden units per layer')
-    parser.add_argument('--nlayers', type=int, default=DEFAULT_HYPERPARAMS['nlayers'],
+    parser.add_argument('--num_layers', type=int, default=DEFAULT_HYPERPARAMS['num_layers'],
                         help='number of layers')
     parser.add_argument('--lr', type=float, default=DEFAULT_HYPERPARAMS['lr'],
                         help='initial learning rate')
