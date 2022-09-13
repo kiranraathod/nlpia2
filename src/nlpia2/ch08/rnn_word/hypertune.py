@@ -6,11 +6,20 @@ from main import main, DEFAULT_HYPERPARAMS
 
 def grid_search(
         hidden_sizes=(200,),
-        rnn_types=tuple('GRU RNN_TANH RNN_RELU LSTM'.split())):
+        rnn_types=tuple('GRU RNN_TANH RNN_RELU LSTM'.split()),
+        epoch_nums=(1, 12),
+        dropouts=(0, .3),
+        lrs=(3, .9, 20)
+):
     experiments = []
-    for hidden_size, rnn_type in product(hidden_sizes, rnn_types):
+    for hidden_size, rnn_type, epochs, dropout, lr in product(hidden_sizes, rnn_types, epoch_nums, dropouts, lrs):
         kwargs = DEFAULT_HYPERPARAMS.copy()
-        kwargs.update(dict(nhid=hidden_size, rnn_type=rnn_type))
+        kwargs.update(dict(
+            nhid=hidden_size,
+            rnn_type=rnn_type,
+            dropout=dropout,
+            epochs=epochs,
+            lr=lr))
 
         kwargs['filename'] = (
             'model_epochs_{epochs}_rnn_type_{rnn_type}_nhid_{nhid}_batch_size_{batch_size}'
