@@ -14,7 +14,7 @@ def grid_search(
         nlayers_options=(1, 2, 3, 5),
 ):
     experiments = []
-    for hidden_size, rnn_type, epochs, dropout, lr in product(
+    for hidden_size, rnn_type, epochs, dropout, lr, nlayers in product(
             hidden_sizes, rnn_types, epoch_nums, dropouts, lrs, nlayers_options):
         kwargs = DEFAULT_HYPERPARAMS.copy()
         kwargs.update(dict(
