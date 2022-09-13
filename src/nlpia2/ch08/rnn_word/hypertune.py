@@ -6,10 +6,13 @@ from main import main, DEFAULT_HYPERPARAMS
 
 def grid_search(
         hidden_sizes=(200,),
-        rnn_types=tuple('GRU RNN_TANH RNN_RELU LSTM'.split()),
-        epoch_nums=(1, 12),
-        dropouts=(0, .3),
-        lrs=(3, .9, 20)
+        # rnn_types=tuple('RNN_TANH RNN_RELU GRU LSTM'.split()),
+        rnn_types=tuple('RNN_TANH RNN_RELU'.split()),
+        # epoch_nums=(1, 12),
+        # dropouts=(0, .3),
+        epoch_nums=(1,),
+        dropouts=(0,),
+        lrs=(3, .9, 20),
 ):
     experiments = []
     for hidden_size, rnn_type, epochs, dropout, lr in product(hidden_sizes, rnn_types, epoch_nums, dropouts, lrs):
