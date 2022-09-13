@@ -1,4 +1,5 @@
 from itertools import product
+import pandas as pd
 
 from main import main, DEFAULT_HYPERPARAMS
 
@@ -6,6 +7,7 @@ from main import main, DEFAULT_HYPERPARAMS
 def grid_search(
         hidden_sizes=(200,),
         rnn_types=tuple('GRU RNN_TANH RNN_RELU LSTM'.split())):
+    experiments = []
     for hidden_size, rnn_type in product(hidden_sizes, rnn_types):
         kwargs = DEFAULT_HYPERPARAMS.copy()
         kwargs.update(dict(NHID=hidden_size, MODEL=rnn_type))
@@ -16,8 +18,10 @@ def grid_search(
              " --nhid {nhid} --batch_size {batch_size} --bptt {bptt} --nlayers {nlayers} --save {filename}.pt").format(**kwargs)
         )
         print(kwargs)
-        main(**kwargs)
+        results = main(**kwargs)
+        experiments.append(results)
 
 
 if __name__ == '__main__':
-    grid_search()
+    experiments = grid_search()
+    df_experiments = pd.DataFrame(experiments)
