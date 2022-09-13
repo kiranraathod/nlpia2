@@ -10,7 +10,7 @@ def grid_search(
     experiments = []
     for hidden_size, rnn_type in product(hidden_sizes, rnn_types):
         kwargs = DEFAULT_HYPERPARAMS.copy()
-        kwargs.update(dict(NHID=hidden_size, MODEL=rnn_type))
+        kwargs.update(dict(nhid=hidden_size, rnn_type=rnn_type))
 
         kwargs['filename'] = (
             'model_epochs_{epochs}_rnn_type_{rnn_type}_nhid_{nhid}_batch_size_{batch_size}'
