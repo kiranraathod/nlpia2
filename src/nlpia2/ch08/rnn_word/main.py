@@ -10,36 +10,55 @@ import torch.onnx
 import data
 import model as rnn_models
 
+DEFAULT_HYPERPARAMS = dict(
+    datapath='./data/wikitext-2',
+    cuda=True,
+    epochs=1,
+    rnn_type='RNN_TANH',
+    nhid=200,
+    emsize=200,
+    batch_size=20,
+    lr=20,
+    bptt=35,
+    nlayers=1,
+    clip=0.25,
+    seed=1111,
+    device='',
+    dropout=.2,
+    onnx_export='',
+    nhead=2,
+)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 RNN/LSTM/GRU/Transformer Language Model')
-    parser.add_argument('--datapath', type=str, default='./data/wikitext-2',
+    parser.add_argument('--datapath', type=str, default=DEFAULT_HYPERPARAMS['datapath'],
                         help='location of the data corpus')
-    parser.add_argument('--rnn_type', type=str, default='LSTM',
+    parser.add_argument('--rnn_type', type=str, default=DEFAULT_HYPERPARAMS['rnn_type'],
                         help='type of network (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
-    parser.add_argument('--emsize', type=int, default=200,
+    parser.add_argument('--emsize', type=int, default=DEFAULT_HYPERPARAMS['emsize'],
                         help='size of word embeddings')
-    parser.add_argument('--nhid', type=int, default=200,
+    parser.add_argument('--nhid', type=int, default=DEFAULT_HYPERPARAMS['nhid'],
                         help='number of hidden units per layer')
-    parser.add_argument('--nlayers', type=int, default=2,
+    parser.add_argument('--nlayers', type=int, default=DEFAULT_HYPERPARAMS['nlayers'],
                         help='number of layers')
-    parser.add_argument('--lr', type=float, default=20,
+    parser.add_argument('--lr', type=float, default=DEFAULT_HYPERPARAMS['lr'],
                         help='initial learning rate')
-    parser.add_argument('--clip', type=float, default=0.25,
+    parser.add_argument('--clip', type=float, default=DEFAULT_HYPERPARAMS['clip'],
                         help='gradient clipping')
-    parser.add_argument('--epochs', type=int, default=40,
+    parser.add_argument('--epochs', type=int, default=DEFAULT_HYPERPARAMS['epochs'],
                         help='upper epoch limit')
-    parser.add_argument('--batch_size', type=int, default=20, metavar='N',
+    parser.add_argument('--batch_size', type=int, default=DEFAULT_HYPERPARAMS['batch_size'], metavar='N',
                         help='split each document into this number of independently trained batches (columns)')
-    parser.add_argument('--bptt', type=int, default=35,
+    parser.add_argument('--bptt', type=int, default=DEFAULT_HYPERPARAMS['bptt'],
                         help='sequence length')
-    parser.add_argument('--dropout', type=float, default=0.2,
+    parser.add_argument('--dropout', type=float, default=DEFAULT_HYPERPARAMS['dropout'],
                         help='dropout applied to layers (0 = no dropout)')
     parser.add_argument('--tied', action='store_true',
                         help='tie the word embedding and softmax weights')
-    parser.add_argument('--seed', type=int, default=1111,
+    parser.add_argument('--seed', type=int, default=DEFAULT_HYPERPARAMS['seed'],
                         help='random seed')
-    parser.add_argument('--device', type=str, default='',
+    parser.add_argument('--device', type=str, default=DEFAULT_HYPERPARAMS['device'],
                         help='device string to use in torch.device() call')
     parser.add_argument('--cuda', action='store_true',
                         help='use CUDA')
@@ -47,9 +66,9 @@ def parse_args():
                         help='report interval')
     parser.add_argument('--save', type=str, default='model.pt',
                         help='path to save the final model')
-    parser.add_argument('--onnx-export', type=str, default='',
+    parser.add_argument('--onnx_export', type=str, default=DEFAULT_HYPERPARAMS['onnx_export'],
                         help='path to export the final model in onnx format')
-    parser.add_argument('--nhead', type=int, default=2,
+    parser.add_argument('--nhead', type=int, default=DEFAULT_HYPERPARAMS['nhead'],
                         help='the number of heads in the encoder/decoder of the transformer model')
     parser.add_argument('--dry-run', action='store_true',
                         help='verify the code and the model')
@@ -123,7 +142,7 @@ def main(**kwargs):
         else:
             return tuple(repackage_hidden(v) for v in h)
 
-    # get_batch subdivides the source data into chunks of length args.bptt.
+    # get_batch subdivides the source data into chunks of length kwargs['bptt'].
     # If source is equal to the example output of the batchify function, with
     # a bptt-limit of 2, we'd get the following two Variables for i = 0:
     # ┌ a g m s ┐ ┌ b h n t ┐
@@ -134,7 +153,7 @@ def main(**kwargs):
     # to the seq_len dimension in the LSTM.
 
     def get_batch(source, i):
-        seq_len = min(args.bptt, len(source) - 1 - i)
+        seq_len = min(kwargs['bptt'], len(source) - 1 - i)
         data = source[i:i + seq_len]
         target = source[i + 1:i + 1 + seq_len].view(-1)
         return data, target
@@ -147,7 +166,7 @@ def main(**kwargs):
         if kwargs['rnn_type'] != 'Transformer':
             hidden = model.init_hidden(eval_batch_size)
         with torch.no_grad():
-            for i in range(0, data_source.size(0) - 1, args.bptt):
+            for i in range(0, data_source.size(0) - 1, kwargs['bptt']):
                 data, targets = get_batch(data_source, i)
                 if kwargs['rnn_type'] == 'Transformer':
                     output = model(data)
@@ -166,7 +185,7 @@ def main(**kwargs):
         ntokens = len(corpus.dictionary)
         if kwargs['rnn_type'] != 'Transformer':
             hidden = model.init_hidden(kwargs['batch_size'])
-        for batch, i in enumerate(range(0, train_data.size(0) - 1, args.bptt)):
+        for batch, i in enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])):
             data, targets = get_batch(train_data, i)
             # Starting each batch, we detach the hidden state from how it was previously produced.
             # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -192,7 +211,7 @@ def main(**kwargs):
                 elapsed = time.time() - start_time
                 print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
                       'loss {:5.2f} | ppl {:8.2f}'.format(
-                          epoch, batch, len(train_data) // args.bptt, lr,
+                          epoch, batch, len(train_data) // kwargs['bptt'], lr,
                           elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
                 total_loss = 0
                 start_time = time.time()
@@ -200,7 +219,7 @@ def main(**kwargs):
                 break
 
     def export_onnx(path, batch_size, seq_len):
-        print('The model is also exported in ONNX format at {}.'.format(os.path.realpath(args.onnx_export)))
+        print('The model is also exported in ONNX format at {}.'.format(os.path.realpath(kwargs['onnx_export'])))
         model.eval()
         dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
         hidden = model.init_hidden(batch_size)
@@ -260,9 +279,9 @@ def main(**kwargs):
         **results))
     print('=' * 89)
 
-    if len(args.onnx_export) > 0:
+    if len(kwargs['onnx_export']) > 0:
         # Export the model in ONNX format.
-        export_onnx(args.onnx_export, batch_size=1, seq_len=args.bptt)
+        export_onnx(kwargs['onnx_export'], batch_size=1, seq_len=kwargs['bptt'])
 
     return results
 
