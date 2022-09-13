@@ -45,4 +45,4 @@ class Corpus(object):
                 idss.append(torch.tensor(ids).type(torch.int64))
             ids = torch.cat(idss)
 
-        return ids
+        return ids  # id_sequences (1-D tensors of id numbers)

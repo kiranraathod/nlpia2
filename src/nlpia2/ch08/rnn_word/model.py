@@ -30,9 +30,12 @@ class RNNBaseModel(nn.Module):
     """
 
     def __init__(self,
+                 rnn_type='LSTM',
                  input_size=200, hidden_size=200, num_layers=2, dropout=0.2,
-                 ntoken=DEFAULT_VOCAB_SIZE, tie_weights=False):
+                 ntoken=DEFAULT_VOCAB_SIZE, tie_weights=False, **kwargs):
         super().__init__()
+        self.rnn_type = rnn_type
+        self.activation_type = rnn_type.split('_')[-1] if '_' in rnn_type else None
         self.ntoken = ntoken
         self.drop = nn.Dropout(dropout)
         self.encoder = nn.Embedding(ntoken, input_size)
@@ -78,7 +81,7 @@ class RNNBaseModel(nn.Module):
 class LSTMModel(RNNBaseModel):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, rnn_type, input_size=200, hidden_size=200, num_layers=2, dropout=0.2, ntoken=DEFAULT_VOCAB_SIZE, tie_weights=False):
+    def __init__(self, rnn_type='LSTM', input_size=200, hidden_size=200, num_layers=2, dropout=0.2, ntoken=DEFAULT_VOCAB_SIZE, tie_weights=False):
         super().__init__()
         self.rnn = nn.LSTM(input_size, hidden_size, num_layers, dropout=dropout)
 
@@ -108,8 +111,11 @@ class LSTMModel(RNNBaseModel):
 class RNNModel(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, rnn_type, ntoken, input_size, hidden_size, num_layers, dropout=0.5, tie_weights=False):
+    def __init__(self, rnn_type='RNN_TANH', ntoken=DEFAULT_VOCAB_SIZE, input_size=200,
+                 hidden_size=200, num_layers=2, dropout=0.5,
+                 tie_weights=False, **kwargs):
         super(RNNModel, self).__init__()
+        self.rnn_type = rnn_type
         self.ntoken = ntoken
         self.drop = nn.Dropout(dropout)
         self.encoder = nn.Embedding(ntoken, input_size)
@@ -212,13 +218,13 @@ class PositionalEncoding(nn.Module):
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ntoken, input_size, nhead, hidden_size, num_layers, dropout=0.5):
+    def __init__(self, ntoken, input_size, nhead, hidden_size, num_layers, dropout=0.5, **kwargs):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
         except:
             raise ImportError('TransformerEncoder module does not exist in PyTorch 1.1 or lower.')
-        self.model_type = 'Transformer'
+        self.rnn_type = 'Transformer'
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(input_size, dropout)
         encoder_layers = TransformerEncoderLayer(input_size, nhead, hidden_size, dropout)
