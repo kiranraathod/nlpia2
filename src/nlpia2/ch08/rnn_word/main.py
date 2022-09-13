@@ -20,7 +20,7 @@ DEFAULT_HYPERPARAMS = dict(
     dropout=0.2,
     dry_run=False,
     emsize=200,
-    epochs=40,
+    epochs=1,
     log_interval=200,
     lr=20,
     rnn_type='LSTM',
@@ -232,10 +232,10 @@ def main(**kwargs):
             if batch and batch % args.log_interval == 0:
                 cur_loss = total_loss / args.log_interval
                 elapsed = time.time() - start_time
-                print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
-                      'loss {:5.2f} | ppl {:8.2f}'.format(
-                          epoch, batch, len(train_data) // kwargs['bptt'], lr,
-                          elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
+                print(('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
+                       'loss {:5.2f} | ppl {:8.2f}').format(
+                    epoch, batch, len(train_data) // kwargs['bptt'], lr,
+                    elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
                 total_loss = 0
                 start_time = time.time()
             if args.dry_run:
@@ -267,10 +267,10 @@ def main(**kwargs):
                 epoch_num=epoch_num,
                 epoch_time=epoch_time,
                 val_loss=val_loss,
-                val_perplexith=math.exp(val_loss)))
+                val_perplexity=math.exp(val_loss)))
             print('-' * 89)
-            print(f'| end of epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | val loss {val_loss:5.2f} | '
-                  'valid ppl {math.exp(val_loss):8.2f}'.format(**results))
+            print(('| end of epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | val loss {val_loss:5.2f} | '
+                   'valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < args.annealing_loss_improvement_pct * best_val_loss:
