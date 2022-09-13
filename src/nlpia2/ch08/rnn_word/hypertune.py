@@ -20,8 +20,13 @@ def grid_search(
         print(kwargs)
         results = main(**kwargs)
         experiments.append(results)
+        with open('experiments.json', 'at') as fout:
+            print(str(results))
+            fout.write(str(results) + '\n')
 
 
 if __name__ == '__main__':
     experiments = grid_search()
     df_experiments = pd.DataFrame(experiments)
+    print(df_experiments)
+    df_experiments.to_csv('experiments.csv')
