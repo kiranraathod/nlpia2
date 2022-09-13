@@ -296,7 +296,7 @@ def main(**kwargs):
 
     # Run on test data.
     results['test_loss'] = evaluate(test_data)
-    results['test_perplexity'] = evaluate(test_data)
+    results['test_perplexity'] = math.exp(results['test_loss'])
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
         **results))

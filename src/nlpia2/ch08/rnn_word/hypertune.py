@@ -5,7 +5,7 @@ from main import main, DEFAULT_HYPERPARAMS
 
 def grid_search(
         hidden_sizes=(200,),
-        rnn_types=tuple('GRU LSTM RNN_TANH RNN_RELU'.split())):
+        rnn_types=tuple('GRU RNN_TANH RNN_RELU LSTM'.split())):
     for hidden_size, rnn_type in product(hidden_sizes, rnn_types):
         kwargs = DEFAULT_HYPERPARAMS.copy()
         kwargs.update(dict(NHID=hidden_size, MODEL=rnn_type))
