@@ -29,6 +29,7 @@ DEFAULT_HYPERPARAMS = dict(
     nlayers=2,
     onnx_export='',
     save='model.pt',
+    filename='model.py',
     seed=1111,
     tied=False)
 """
@@ -223,22 +224,22 @@ def main(**kwargs):
             loss.backward()
 
             # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), kwargs['clip'])
             for p in model.parameters():
                 p.data.add_(p.grad, alpha=-lr)
 
             total_loss += loss.item()
 
-            if batch and batch % args.log_interval == 0:
-                cur_loss = total_loss / args.log_interval
+            if batch and batch % kwargs['log_interval'] == 0:
+                cur_loss = total_loss / kwargs['log_interval']
                 elapsed = time.time() - start_time
                 print(('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
                        'loss {:5.2f} | ppl {:8.2f}').format(
                     epoch, batch, len(train_data) // kwargs['bptt'], lr,
-                    elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
+                    elapsed * 1000 / kwargs['log_interval'], cur_loss, math.exp(cur_loss)))
                 total_loss = 0
                 start_time = time.time()
-            if args.dry_run:
+            if kwargs['dry_run']:
                 break
 
     def export_onnx(path, batch_size, seq_len):
@@ -249,7 +250,7 @@ def main(**kwargs):
         torch.onnx.export(model, (dummy_input, hidden), path)
 
     # Loop over epochs.
-    lr = args.lr
+    lr = kwargs['lr']
     best_val_loss = None
     results = kwargs.copy()
 
@@ -257,7 +258,7 @@ def main(**kwargs):
     try:
         epoch = 0
         epoch_time = 0
-        for epoch_num in range(1, args.epochs + 1):
+        for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
             train_epoch(model=model, train_data=train_data)
             val_loss = evaluate(val_data)
@@ -273,8 +274,8 @@ def main(**kwargs):
                    'valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
             # Save the model if the validation loss is the best we've seen so far.
-            if not best_val_loss or val_loss < args.annealing_loss_improvement_pct * best_val_loss:
-                with open(args.save, 'wb') as f:
+            if not best_val_loss or val_loss < kwargs['annealing_loss_improvement_pct'] * best_val_loss:
+                with open(kwargs['filename'], 'wb') as f:
                     torch.save(model, f)
                 best_val_loss = val_loss
             else:
@@ -286,7 +287,7 @@ def main(**kwargs):
         print('Exiting from training early')
 
     # Load the best saved model.
-    with open(args.save, 'rb') as f:
+    with open(kwargs['filename'], 'rb') as f:
         model = torch.load(f)
         # after load the rnn params are not a continuous chunk of memory
         # this makes them a continuous chunk, and will speed up forward pass
