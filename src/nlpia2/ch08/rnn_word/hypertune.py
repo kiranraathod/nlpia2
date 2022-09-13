@@ -12,7 +12,9 @@ def grid_search(
         kwargs = DEFAULT_HYPERPARAMS.copy()
         kwargs.update(dict(NHID=hidden_size, MODEL=rnn_type))
 
-        kwargs['filename'] = 'model_epochs_{epochs}_model_{model}_nhid_{nhid}_batch_size_{batch_size}_bptt_{bptt}_nlayers_{nlayers}'.format(**kwargs)
+        kwargs['filename'] = (
+            'model_epochs_{epochs}_rnn_type_{rnn_type}_nhid_{nhid}_batch_size_{batch_size}'
+            '_bptt_{bptt}_nlayers_{nlayers}').format(**kwargs)
         print(
             ("python main.py {'--cuda' if cuda else ''} --epochs {epochs} --model_type {model_type}"
              " --nhid {nhid} --batch_size {batch_size} --bptt {bptt} --nlayers {nlayers} --save {filename}.pt").format(**kwargs)
