@@ -15,7 +15,7 @@ DEFAULT_HYPERPARAMS = dict(
     batch_size=20, bptt=35,
     clip=0.25,
     cuda=True,
-    data='./data/wikitext-2',
+    datapath='./data/wikitext-2',
     device='',
     dropout=0.2,
     dry_run=False,
