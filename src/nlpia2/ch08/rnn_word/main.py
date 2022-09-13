@@ -11,6 +11,28 @@ import data
 import model as rnn_models
 
 DEFAULT_HYPERPARAMS = dict(
+    annealing_loss_improvement_pct=1.0,
+    batch_size=20, bptt=35,
+    clip=0.25,
+    cuda=True,
+    data='./data/wikitext-2',
+    device='',
+    dropout=0.2,
+    dry_run=False,
+    emsize=200,
+    epochs=40,
+    log_interval=200,
+    lr=20,
+    model='LSTM',
+    nhead=2,
+    nhid=200,
+    nlayers=2,
+    onnx_export='',
+    save='model.pt',
+    seed=1111,
+    tied=False)
+"""
+DEFAULT_HYPERPARAMS = dict(
     datapath='./data/wikitext-2',
     cuda=True,
     epochs=1,
@@ -24,10 +46,11 @@ DEFAULT_HYPERPARAMS = dict(
     clip=0.25,
     seed=1111,
     device='',
-    dropout=.2,
+    dropout=0.2,
     onnx_export='',
     nhead=2,
 )
+"""
 
 
 def parse_args():
