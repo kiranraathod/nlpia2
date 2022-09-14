@@ -31,11 +31,11 @@ def grid_search(
         print(json.dumps(kwargs, indent=4))
         results = main(**kwargs)
         experiments.append(results)
-        with open('experiments.txt', 'at') as fout:
+        with open('experiments.ljson', 'at') as fout:
             print(json.dumps(results, indent=4))
             fout.write(json.dumps(results) + '\n')
     with open('experiments.json', 'at') as fout:
-        json.dump(fout, experiments)
+        json.dump(experiments, fout)
 
 
 if __name__ == '__main__':
