@@ -301,7 +301,7 @@ def main(**kwargs):
     print(' {learned_parameters:6d} learned params for {rnn_type}'.format(results))
     print('=' * 89)
 
-    if len(kwargs['onnx_export']) > 0:
+    if kwargs['onnx_export']:
         # Export the model in ONNX format.
         export_onnx(kwargs['onnx_export'], batch_size=1, seq_len=kwargs['bptt'])
 
