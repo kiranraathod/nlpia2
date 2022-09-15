@@ -6,6 +6,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.onnx
+from nlpia2.torch_utils import count_parameters
 
 import data
 import model as rnn_models
@@ -40,27 +41,8 @@ DEFAULT_HYPERPARAMS = dict(
     save='model.pt',
     filename='model.py',
     seed=1111,
-    tied=False)
-"""
-DEFAULT_HYPERPARAMS = dict(
-    datapath='./data/wikitext-2',
-    cuda=True,
-    epochs=1,
-    rnn_type='RNN_TANH',
-    nhid=200,
-    emsize=200,
-    batch_size=20,
-    lr=20,
-    bptt=35,
-    nlayers=1,
-    clip=0.25,
-    seed=1111,
-    device='',
-    dropout=0.2,
-    onnx_export='',
-    nhead=2,
+    tied=False,
 )
-"""
 
 
 def parse_args():
@@ -113,29 +95,32 @@ def parse_args():
 
 
 def main(**kwargs):
+    default_kwargs = DEFAULT_HYPERPARAMS.copy()
+    default_kwargs.update(vars(parse_args()))
+    default_kwargs.update(kwargs)
+    kwargs = default_kwargs
     corpus = data.Corpus(kwargs['datapath'])
 
-    if not len(kwargs):
-        kwargs = vars(parse_args())
-
     def batchify(dataset, batch_size=kwargs['batch_size']):
-        # Starting from sequential data, batchify arranges the dataset into columns.
-        # For instance, with the alphabet as the sequence and batch size 4, we'd get
-        # ┌ a g m s ┐
-        # │ b h n t │
-        # │ c i o u │
-        # │ d j p v │
-        # │ e k q w │
-        # └ f l r x ┘.
-        # shape = (seq_len, batch_size)
-        #
-        # These columns are treated as independent by the model, which means that the
-        # dependence of e. g. 'g' on 'f' can not be learned, but allows more efficient
-        # batch processing.
+        """
+        Starting from sequential data, batchify arranges the dataset into columns.
+        For instance, with the alphabet as the sequence and batch size 4, we'd get
+        ┌ a g m s ┐
+        │ b h n t │
+        │ c i o u │
+        │ d j p v │
+        │ e k q w │
+        └ f l r x ┘.
+        shape = (seq_len, batch_size)
 
-        # Work out how cleanly dataset divides into batch_size (bsz) parts.
+        These columns are treated as independent by the model, which means that the
+        dependence of e. g. 'g' on 'f' can not be learned, but allows more efficient
+        batch processing.
+        """
+
+        # Even number of segments or batches of text
         num_segments = dataset.size(0) // batch_size
-        # Trim off any extra elements that wouldn't cleanly fit (remainders).
+        # Trim off any extra text that wouldn't cleanly fit in a batch
         dataset = dataset.narrow(0, 0, num_segments * batch_size)
         # Evenly divide the data across the bsz batches.
         dataset = dataset.view(batch_size, -1).t().contiguous()
@@ -243,9 +228,9 @@ def main(**kwargs):
                 cur_loss = total_loss / kwargs['log_interval']
                 elapsed = time.time() - start_time
 
-                print(('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
+                print((' | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
                        'loss {:5.2f} | ppl {:8.2f}').format(
-                    epoch, batch, len(train_data) // kwargs['bptt'], lr,
+                    batch, len(train_data) // kwargs['bptt'], lr,
                     elapsed * 1000 / kwargs['log_interval'],
                     cur_loss,
                     try_exp(cur_loss)))
@@ -268,7 +253,6 @@ def main(**kwargs):
 
     # [ctrl]-C to break out of training early and retain the latest best checkpoint (model.pt)
     try:
-        epoch = 0
         epoch_time = 0
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
@@ -313,6 +297,8 @@ def main(**kwargs):
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
         **results))
+    results['learned_parameters'] = count_parameters(model)
+    print(' {learned_parameters:6d} learned params for {rnn_type}'.format(results))
     print('=' * 89)
 
     if len(kwargs['onnx_export']) > 0:
