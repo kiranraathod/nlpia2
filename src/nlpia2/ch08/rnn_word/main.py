@@ -250,23 +250,26 @@ def main(**kwargs):
     lr = kwargs['lr']
     best_val_loss = None
     results = kwargs.copy()
+    total_time = 0
+    epoch_time = 0
 
     # [ctrl]-C to break out of training early and retain the latest best checkpoint (model.pt)
     try:
-        epoch_time = 0
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
             train_epoch(model=model, train_data=train_data)
             val_loss = evaluate(val_data)
             epoch_time = time.time() - epoch_start_time
+            total_time += epoch_time
             results.update(dict(
                 best_val_loss=best_val_loss,
                 epoch_num=epoch_num,
                 epoch_time=epoch_time,
+                total_time=total_time,
                 val_loss=val_loss,
                 val_perplexity=try_exp(val_loss)))
             print('-' * 89)
-            print(('| end of epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | val loss {val_loss:5.2f} | '
+            print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s} | val loss {val_loss:5.2f} | '
                    'valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
             # Save the model if the validation loss is the best we've seen so far.
