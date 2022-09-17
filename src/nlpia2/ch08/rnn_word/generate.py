@@ -33,11 +33,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def generate_word_hidden(model, vocab, input_word, hidden_tens=None, temperature=1, device=DEVICE):
+def generate_word_hidden(model, input_word, vocab=None, hidden_tens=None, temperature=1, device=DEVICE):
     if hidden_tens is None:
         hidden_tens = model.init_hidden()
+    if vocab is None:
+        vocab = model.vocab
+
     input_tens = torch.LongTensor(
-        [[corpus.dictionary.word2idx[input_word]]]).to(device)
+        [[vocab.word2idx[input_word]]]).to(device)
     output_tens, hidden_tens = model(input_tens, hidden_tens)
     word_weights = output_tens.squeeze().div(temperature).exp().cpu()
     word_idx = torch.multinomial(word_weights, 1)[0]
@@ -80,11 +83,10 @@ def generate_text(model, vocab, prompt, seed=1111, eos_words='<eos>', skip_words
     return ' '.join([w for w in words if not skip_words or w not in skip_words])
 
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
     corpus = data.Corpus(args.data)
 
-    token_id = corpus.dictionary(args.prompt) if args.prompt else torch.randint
     # Set the random seed manually for reproducibility.
     torch.manual_seed(args.seed)
 
@@ -120,3 +122,40 @@ if __name__ == '__main__':
 
                 if i % args.log_interval == 0:
                     print('| Generated {}/{} words'.format(i, args.words))
+
+
+if __name__ == '__main__':
+    from model import *
+    corpus = data.Corpus('data/wikitext-2')
+    model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+    checkpoint = 'models/model_epochs_12_rnn_type_GRU_hidden_size_200_batch_size_20_bptt_35_num_layers_1'
+    checkpoint = torch.load(open(checkpoint, 'rb'), map_location='cpu')
+    model.load_state_dict(checkpoint.state_dict())
+# FIXME:
+# File ~/code/tangibleai/nlpia2/src/nlpia2/ch08/rnn_word/generate.py:64, in generate_words(model, vocab, prompt, eos_words, skip_words, max_words, temperature, seed)
+#      62 output_words = []
+#      63 max_words = 1024
+# ---> 64 hidden_tens = model.init_hidden()
+#      66 for word in prompt_words:
+#      67     unused_prediction, hidden_tens = generate_word_hidden(
+#      68         model=model, vocab=vocab, input_word=word, hidden_tens=hidden_tens)
+
+# File ~/code/tangibleai/nlpia2/src/nlpia2/ch08/rnn_word/model.py:190, in RNNModel.init_hidden(self, batch_size)
+#     182     return (
+#     183         weight.new_zeros(
+#     184             self.num_layers, self.batch_size, self.hidden_size),
+#     185         weight.new_zeros(
+#     186             self.num_layers, self.batch_size, self.hidden_size)
+#     187     )
+#     188 else:
+#     189     return weight.new_zeros(
+# --> 190         self.num_layers, self.batch_size, self.hidden_size)
+
+# File ~/code/tangibleai/nlpia2/venv/lib/python3.9/site-packages/torch/nn/modules/module.py:1207, in Module.__getattr__(self, name)
+#    1205     if name in modules:
+#    1206         return modules[name]
+# -> 1207 raise AttributeError("'{}' object has no attribute '{}'".format(
+#    1208     type(self).__name__, name))
+
+# AttributeError: 'RNNModel' object has no attribute 'batch_size'
+#     generate_words(model, vocab=corpus.dictionary, prompt='He')

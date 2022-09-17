@@ -23,9 +23,10 @@ DEVICE = torch.device('cpu')
 #             as `(batch, seq, feature)` instead of `(seq, batch, feature)`.
 #             Note that this does not apply to hidden or cell states. See the
 #             Inputs/Outputs sections below for details.  Default: ``False``
-#         dropout: If non-zero, introduces a `Dropout` layer on the outputs of each
+#         embedding_dropout: If non-zero, introduces a `Dropout` layer on the outputs of the Embedding layer,
+#         rnn_dropout: If non-zero, introduces a `Dropout` layer on the outputs of each
 #             RNN layer except the last layer, with dropout probability equal to
-#             :attr:`dropout`. Default: 0
+#             :attr:`dropout`. Default: 0.2
 #     bidirectional: If ``True``, becomes a bidirectional RNN. Default: ``False``
 #     """
 
@@ -115,31 +116,33 @@ class RNNModel(nn.Module):
     """
 
     def __init__(self, rnn_type, vocab, nonlinearity='RELU', input_size=200,
-                 hidden_size=200, batch_size=20, num_layers=2, dropout=0.5,
-                 embedding_dropout=0.0,
+                 hidden_size=200, batch_size=20, num_layers=2,
+                 embedding_dropout=0, rnn_dropout=0.2,
                  bidirectional=False,
                  tie_weights=False, **kwargs):
-        super(RNNModel, self).__init__()
+        super().__init__()
         self.rnn_type = rnn_type.split('_')[0].upper()
-        self.ntoken = len(vocab.idx2word)
+        self.vocab = vocab
+        self.nonlinearity = nonlinearity or rnn_type.split('_')[-1].lower()
+        self.input_size = input_size
         self.embedding_dropout = nn.Dropout(embedding_dropout)
-        self.encoder = nn.Embedding(self.ntoken, input_size)
+        self.rnn_dropout = rnn_dropout
+        self.encoder = nn.Embedding(len(self.vocab), self.input_size)
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = bidirectional
         self.batch_size = batch_size
-        self.nonlinearity = nonlinearity or rnn_type.split('_')[-1].lower()
 
         rnn_kwargs = dict(
             input_size=self.input_size,
             hidden_size=self.hidden_size,
             num_layers=self.num_layers,
-            dropout=self.dropout,
+            dropout=self.rnn_dropout,
         )
         if self.rnn_type == 'RNN':
             rnn_kwargs['nonlinearity'] = self.nonlinearity or 'relu'
         self.rnn = getattr(nn, rnn_type)(**rnn_kwargs)
-        self.decoder = nn.Linear(hidden_size, self.ntoken)
+        self.decoder = nn.Linear(hidden_size, len(self.vocab))
 
         # Optionally tie weights as in:
         # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)
