@@ -6,6 +6,8 @@ import torch
 
 import data
 
+DEVICE = torch.device('cpu')
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Language Model Generator')
@@ -29,6 +31,53 @@ def parse_args():
     parser.add_argument('--prompt', type=str, default='',
                         help='Prompt token to seed text generation. Tokens must be separated by spaces. Default = randomly selected.')
     return parser.parse_args()
+
+
+def generate_word_hidden(model, vocab, input_word, hidden_tens=None, temperature=1, device=DEVICE):
+    if hidden_tens is None:
+        hidden_tens = model.init_hidden()
+    input_tens = torch.LongTensor(
+        [[corpus.dictionary.word2idx[input_word]]]).to(device)
+    output_tens, hidden_tens = model(input_tens, hidden_tens)
+    word_weights = output_tens.squeeze().div(temperature).exp().cpu()
+    word_idx = torch.multinomial(word_weights, 1)[0]
+    # if word_idx == IDX_UNK:
+    #     continue
+    input_tens.fill_(word_idx)
+    return corpus.dictionary.idx2word[word_idx], hidden_tens
+
+
+def generate_words(
+        model, vocab, prompt,
+        eos_words='<eos>', skip_words='<unk>', max_words=1024,
+        temperature=1, seed=None):
+    # IDX_UNK = dictionary.word2idx['<unk>']
+
+    prompt_words = prompt
+    if isinstance(prompt_words, str):
+        prompt_words = prompt_words.split()
+    output_words = []
+    max_words = 1024
+    hidden_tens = model.init_hidden()
+
+    for word in prompt_words:
+        unused_prediction, hidden_tens = generate_word_hidden(
+            model=model, vocab=vocab, input_word=word, hidden_tens=hidden_tens)
+    while word and word not in eos_words and len(output_words) < max_words:
+        word, hidden_tens = generate_word_hidden(
+            model=model, vocab=vocab,
+            input_word=word, hidden_tens=hidden_tens,
+            temperature=temperature)
+        if not skip_words or word not in skip_words:
+            output_words.append(word)
+    return output_words
+
+
+def generate_text(model, vocab, prompt, seed=1111, eos_words='<eos>', skip_words='<unk>', max_words=1024):
+    words = generate_words(
+        model=model, vocab=vocab, prompt=prompt,
+        seed=seed, eos_word=eos_words, max_words=max_words)
+    return ' '.join([w for w in words if not skip_words or w not in skip_words])
 
 
 if __name__ == '__main__':
