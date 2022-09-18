@@ -9,18 +9,23 @@ import torch
 import torch.nn as nn
 import torch.onnx
 
-__file__ = inspect.getfile(inspect.currentframe())
-print(__file__)
-NLPIA2_PACKAGE_PATH = Path(__file__).resolve().absolute().parent.parent.parent
-print(NLPIA2_PACKAGE_PATH)
-sys.path.append(NLPIA2_PACKAGE_PATH)
-print(sys.path)
-
-
-from nlpia2 import torch_utils
-
 import data
 import model as rnn_models
+
+try:
+    from nlpia2 import torch_utils
+except ImportError:
+    __file__ = inspect.getfile(inspect.currentframe())
+    # NLPIA2_PATH = os.path.dirname(os.path.abspath(__file__))
+    # NLPIA2_PATH = os.path.dirname(os.path.dirname(os.path.dirname(NLPIA2_PATH)))
+    # sys.path.append(NLPIA2_PATH)
+    # print(f'WARNING: Added {NLPIA2_PATH} to PYTHONPATH')
+
+    NLPIA2_PACKAGE_PATH = str(Path(__file__).absolute().parent.parent.parent.parent)
+    print(f'WARNING: Added {NLPIA2_PACKAGE_PATH} to PYTHONPATH')
+    sys.path.append(NLPIA2_PACKAGE_PATH)
+
+    from nlpia2 import torch_utils
 
 
 def try_exp(num):
