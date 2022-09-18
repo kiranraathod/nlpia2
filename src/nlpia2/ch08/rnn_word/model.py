@@ -122,7 +122,7 @@ class RNNModel(nn.Module):
                  tie_weights=False, **kwargs):
         super().__init__()
         self.rnn_type = rnn_type.split('_')[0].upper()
-        self.nonlinearity = nonlinearity or rnn_type.split('_')[-1].lower()
+        self.nonlinearity = str.lower(nonlinearity or rnn_type.split('_')[-1])
         self.vocab = vocab
         self.input_size = input_size
         self.embedding_dropout = nn.Dropout(embedding_dropout)
