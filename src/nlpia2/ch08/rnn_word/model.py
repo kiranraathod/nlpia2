@@ -171,7 +171,7 @@ class RNNModel(nn.Module):
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)
         decoded = self.decoder(output)
-        decoded = decoded.view(-1, self.ntoken)
+        decoded = decoded.view(-1, len(self.vocab))
         return F.log_softmax(decoded, dim=1), hidden
 
     def init_hidden(self, batch_size=None):
