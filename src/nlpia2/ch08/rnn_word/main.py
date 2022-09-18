@@ -37,7 +37,8 @@ def try_exp(num):
 
 
 DEFAULT_HYPERPARAMS = dict(
-    annealing_loss_improvement_pct=1.0,
+    stop_improvement_fraction=0.001,
+    no_improvement_count_max=3,
     batch_size=20,
     bptt=35,
     clip=0.25,
@@ -106,6 +107,15 @@ def parse_args():
                         help='verify the code and the model')
     parser.add_argument('--annealing_loss_improvement_pct', type=float, default=1.0,
                         help='For each epoch, if the loss is not smaller than this fraction of the previous best loss, the learning rate is reduced (default = 1.0).')
+    parser.add_argument('--stop_improvement_fraction', type=float,
+                        default=DEFAULT_HYPERPARAMS['stop_improvement_fraction'],
+                        help='If the loss does not improve by this amount for no_improvement_count_max then stop training.',
+                        )
+
+    parser.add_argument('--no_improvement_count_max=3', type=float,
+                        default=DEFAULT_HYPERPARAMS['no_improvement_count_max'],
+                        help='If the loss does not improve by stop_improvement_fraction amount for this number of epochs then stop training.',
+                        )
     args = parser.parse_args()
 
     return args
