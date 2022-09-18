@@ -56,7 +56,7 @@ DEFAULT_HYPERPARAMS = dict(
     num_layers=2,
     onnx_export='',
     save='model.pt',
-    filename='model.py',
+    filename='model.pt',
     seed=1111,
     tied=False,
 )
