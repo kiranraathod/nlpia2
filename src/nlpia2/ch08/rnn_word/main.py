@@ -323,7 +323,7 @@ def main(
                 lr /= 4
                 print(f'TRAINING no improvement count: {no_improvement_count}, new lr: {lr:7.3f}')
 
-            if no_improvement_count > no_improvement_count_max:
+            if no_improvement_count >= no_improvement_count_max:
                 print(f'Stopping training early at best_loss: {best_loss:7.4f}.')
                 break
 
