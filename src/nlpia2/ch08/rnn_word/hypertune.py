@@ -57,11 +57,11 @@ def grid_search(
             print(f'HYPERPARAM improvement ({improvement:10.3f}) is < {stop_improvement_fraction:7.3f} * {best_loss:7.3f}...')
             print(f'HYPERPARAM no improvement count: {no_improvement_count}')
         elif improvement > 0:
-            best_loss = results[loss_name]
             no_improvement_count = 0
+            best_loss = results[loss_name]
             print(f'HYPERPARAM new best_loss: {best_loss:7.3f} is {improvement * 100. / best_loss:7.3f}% improvement')
 
-        if no_improvement_count > no_improvement_count_max:
+        if no_improvement_count >= no_improvement_count_max:
             print(f'HYPERPARAM Stopping tuning at best_loss: {best_loss:7.4f}.')
             break
 
