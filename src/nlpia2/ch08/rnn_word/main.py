@@ -283,9 +283,9 @@ def main(**kwargs):
                 epoch_time=epoch_time,
                 total_time=total_time,
                 val_loss=val_loss,
-                val_perplexity=try_exp(val_loss)))
+                val_perplexity=(val_loss)))
             print('-' * 89)
-            print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s} | val loss {val_loss:5.2f} | '
+            print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s | val loss {val_loss:5.2f} | '
                    'valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
             # Save the model if the validation loss is the best we've seen so far.
