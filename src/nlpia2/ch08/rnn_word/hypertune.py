@@ -1,5 +1,6 @@
 from itertools import product
 import pandas as pd
+from pathlib import Path
 import json
 import jsonlines
 
@@ -62,13 +63,14 @@ def grid_search(
     return experiments
 
 
-def show_best_experiments(topk=10):
-    with jsonlines.open('experiments.jsonl') as fin:
+def show_best_experiments(jsonl_path='experiments.jsonl', topk=10):
+    jsonl_path = Path(jsonl_path)
+    with jsonlines.open(jsonl_path) as fin:
         lines = list(fin)
     df = pd.DataFrame(lines)
-    df.to_csv('experiments.csv')
-    cols = 'rnn_type epochs lr num_layers dropout epoch_time val_loss test_loss'.split()
-    print(df[cols].round(2).sort_values('test_loss').head(topk))
+    df.to_csv(jsonl_path.with_suffix('.csv'))
+    cols = 'id rnn_type epochs lr num_layers dropout epoch_time val_loss test_loss'.split()
+    print(df[[c for c in cols if c in df.columns]].round(2).sort_values('test_loss').head(topk))
     return df
 
 
