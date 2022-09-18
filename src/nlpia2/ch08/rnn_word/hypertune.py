@@ -9,7 +9,7 @@ from main import main, DEFAULT_HYPERPARAMS
 
 def grid_search(
         loss_name='test_loss',
-        stop_improvement_fraction=0.00001,
+        stop_improvement_fraction=0.001,
         no_improvement_count_max=5,
 
         hidden_size=(200,),
@@ -57,7 +57,7 @@ def grid_search(
         elif improvement > 0:
             best_loss = results[loss_name]
             no_improvement_count = 0
-            print(f'NEW best_loss: {best_loss} is {improvement * 100. / best_loss}% improvement')
+            print(f'NEW best_loss: {best_loss:6.3f} is {improvement * 100. / best_loss:6.3f}% improvement')
 
         if no_improvement_count > no_improvement_count_max:
             print(f'Stopping hyperparameter tuning at best_loss: {best_loss}.')

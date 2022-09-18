@@ -294,7 +294,8 @@ def main(
                 val_perplexity=(val_loss)))
             print('-' * 89)
             print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s'
-                   '| val loss {val_loss:5.2f} | valid ppl {val_perplexity:8.2f}').format(**results))
+                   '| val loss {val_loss:5.2f}').format(**results))
+            #       ' | valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
 
             improvement = best_loss - val_loss
