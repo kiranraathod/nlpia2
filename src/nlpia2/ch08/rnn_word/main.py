@@ -1,4 +1,6 @@
-# coding: utf-8
+from pathlib import Path
+import inspect
+import sys
 import argparse
 import time
 import math
@@ -6,7 +8,16 @@ import os
 import torch
 import torch.nn as nn
 import torch.onnx
-from nlpia2.torch_utils import count_parameters
+
+__file__ = inspect.getfile(inspect.currentframe())
+print(__file__)
+NLPIA2_PACKAGE_PATH = Path(__file__).resolve().absolute().parent.parent.parent
+print(NLPIA2_PACKAGE_PATH)
+sys.path.append(NLPIA2_PACKAGE_PATH)
+print(sys.path)
+
+
+from nlpia2 import torch_utils
 
 import data
 import model as rnn_models
@@ -300,7 +311,7 @@ def main(**kwargs):
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
         **results))
-    results['learned_parameters'] = count_parameters(model)
+    results['learned_parameters'] = torch_utils.count_parameters(model)
     print(' {learned_parameters:6d} learned params for {rnn_type}'.format(results))
     print('=' * 89)
 
