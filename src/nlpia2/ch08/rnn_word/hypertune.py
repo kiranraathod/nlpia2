@@ -19,18 +19,23 @@ def grid_search(
     hypernames += list(kwargs.keys())
     hyperparam_ranges = dict(list(zip(hypernames, hypervalues)))
     hyperparameter_grid = list(product(*list(hyperparam_ranges.values())))
-    json.dump(hyperparameter_grid, open(f'experiment_grid_{len(hyperparameter_grid)}', 'w'))
-    json.dump(hyperparam_ranges, open(f'experiment_plan_{len(hyperparam_ranges)}', 'w'))
-
+    json.dump(hyperparameter_grid, open(f'experiment_grid_{len(hyperparameter_grid)}.json', 'w'), indent=4)
+    json.dump(hyperparam_ranges, open(f'experiment_plan_{len(hyperparam_ranges)}.json', 'w'), indent=4)
+    df = pd.DataFrame(hyperparameter_grid, columns=list(hyperparam_ranges.keys()))
+    df = df.sample(len(df))  # shuffle row order while retaining original index
+    df.to_csv('experiment_grid.csv')
     print(f'Running {len(hyperparameter_grid)} experiments...')
     experiments = []
-    for i, hyperparam_values in enumerate(hyperparameter_grid):
-        hyperparams = dict(zip(hypernames, hyperparam_values))
+    best_loss = 1e6
+    loss_name = 'test_loss'
+    no_improvement_count = 0
+    stop_improvement_fraction = 0.00001
+    no_improvement_count_max = 5
+    for idx, hyperparams in df.iterrows():
         train_kwargs = DEFAULT_HYPERPARAMS.copy()
-        train_kwargs.update(hyperparams)
-        train_kwargs['filename'] = (
-            'model_epochs_{epochs}_rnn_type_{rnn_type}_hidden_size_{hidden_size}_batch_size_{batch_size}'
-            '_bptt_{bptt}_num_layers_{num_layers}').format(**train_kwargs)
+        train_kwargs['id'] = idx
+        train_kwargs.update(hyperparams.to_dict())
+        train_kwargs['filename'] = f'model_{idx:03d}.pt'
         print(json.dumps(train_kwargs, indent=4))
 
         results = main(**train_kwargs)
@@ -39,6 +44,19 @@ def grid_search(
         with open('experiments.jsonl', 'at') as fout:
             print(json.dumps(results, indent=4))
             fout.write(json.dumps(results) + '\n')
+
+        improvement = best_loss - results[loss_name]
+        if improvement > 0:
+            best_loss = results[loss_name]
+            no_improvement_count = 0
+            print(f'NEW best_loss: {best_loss} is {improvement * 100. / best_loss}% improvement')
+        if improvement / best_loss > stop_improvement_fraction:
+            no_improvement_count += 1
+            print(f'no improvement count: {no_improvement_count}')
+        if no_improvement_count > no_improvement_count_max:
+            print(f'Stopping hyperparameter tuning at best_loss: {best_loss}.')
+            break
+
     with open('experiments.json', 'at') as fout:
         json.dump(experiments, fout)
     return experiments
