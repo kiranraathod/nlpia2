@@ -9,8 +9,6 @@ import torch
 import torch.nn as nn
 import torch.onnx
 
-import data
-import model as rnn_models
 
 try:
     from nlpia2 import torch_utils
@@ -26,6 +24,9 @@ except ImportError:
     sys.path.append(NLPIA2_PACKAGE_PATH)
 
     from nlpia2 import torch_utils
+
+import data
+import model as rnn_models
 
 
 def try_exp(num):
