@@ -111,7 +111,10 @@ def parse_args():
     return args
 
 
-def main(**kwargs):
+def main(
+        stop_improvement_fraction=0.00001,
+        no_improvement_count_max=5,
+        **kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
     default_kwargs.update(kwargs)
@@ -265,38 +268,53 @@ def main(**kwargs):
 
     # Loop over epochs.
     lr = kwargs['lr']
-    best_val_loss = None
+
     results = kwargs.copy()
     total_time = 0
     epoch_time = 0
+
+    best_loss = 1e6
+    no_improvement_count = 0
 
     # [ctrl]-C to break out of training early and retain the latest best checkpoint (model.pt)
     try:
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
+
             train_epoch(model=model, train_data=train_data)
             val_loss = evaluate(val_data)
             epoch_time = time.time() - epoch_start_time
             total_time += epoch_time
             results.update(dict(
-                best_val_loss=best_val_loss,
+                best_loss=best_loss,
                 epoch_num=epoch_num,
                 epoch_time=epoch_time,
                 total_time=total_time,
                 val_loss=val_loss,
                 val_perplexity=(val_loss)))
             print('-' * 89)
-            print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s | val loss {val_loss:5.2f} | '
-                   'valid ppl {val_perplexity:8.2f}').format(**results))
+            print(('| epoch {epoch_num:3d} | time: {epoch_time:5.2f}s | total: {total_time:6.2f}s'
+                   '| val loss {val_loss:5.2f} | valid ppl {val_perplexity:8.2f}').format(**results))
             print('-' * 89)
+
+            improvement = best_loss - val_loss
+
             # Save the model if the validation loss is the best we've seen so far.
-            if not best_val_loss or val_loss < kwargs['annealing_loss_improvement_pct'] * best_val_loss:
+            if improvement > 0:
                 with open(kwargs['filename'], 'wb') as f:
                     torch.save(model, f)
-                best_val_loss = val_loss
-            else:
+                best_loss = val_loss
+                no_improvement_count = 0
+                print(f'TRAINING best_loss: {best_loss} is {improvement * 100. / best_loss}% improvement')
+            if improvement < stop_improvement_fraction * best_loss:
+                no_improvement_count += 1
                 # Reduce the learning rate if no improvement has been seen in the validation dataset.
                 lr /= 4
+                print(f'TRAINING no improvement count: {no_improvement_count}, new lr: {lr}')
+
+            if no_improvement_count > no_improvement_count_max:
+                print(f'Stopping training early at best_loss: {best_loss}.')
+                break
 
     except KeyboardInterrupt:
         print('-' * 89)

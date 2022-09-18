@@ -8,6 +8,10 @@ from main import main, DEFAULT_HYPERPARAMS
 
 
 def grid_search(
+        loss_name='test_loss',
+        stop_improvement_fraction=0.00001,
+        no_improvement_count_max=5,
+
         hidden_size=(200,),
         epochs=(1, 12, 32),
         dropout=(0, .2, .5),
@@ -25,13 +29,13 @@ def grid_search(
     df = pd.DataFrame(hyperparameter_grid, columns=list(hyperparam_ranges.keys()))
     df = df.sample(len(df))  # shuffle row order while retaining original index
     df.to_csv('experiment_grid.csv')
+
+    best_loss = 1e6
+    no_improvement_count = 0
+
     print(f'Running {len(hyperparameter_grid)} experiments...')
     experiments = []
-    best_loss = 1e6
-    loss_name = 'test_loss'
-    no_improvement_count = 0
-    stop_improvement_fraction = 0.00001
-    no_improvement_count_max = 5
+
     for idx, hyperparams in df.iterrows():
         train_kwargs = DEFAULT_HYPERPARAMS.copy()
         train_kwargs['id'] = idx
@@ -47,13 +51,14 @@ def grid_search(
             fout.write(json.dumps(results) + '\n')
 
         improvement = best_loss - results[loss_name]
-        if improvement > 0:
+        if improvement < stop_improvement_fraction * best_loss:
+            no_improvement_count += 1
+            print(f'no improvement count: {no_improvement_count}')
+        elif improvement > 0:
             best_loss = results[loss_name]
             no_improvement_count = 0
             print(f'NEW best_loss: {best_loss} is {improvement * 100. / best_loss}% improvement')
-        if improvement / best_loss > stop_improvement_fraction:
-            no_improvement_count += 1
-            print(f'no improvement count: {no_improvement_count}')
+
         if no_improvement_count > no_improvement_count_max:
             print(f'Stopping hyperparameter tuning at best_loss: {best_loss}.')
             break
