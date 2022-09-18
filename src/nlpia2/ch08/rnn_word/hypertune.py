@@ -40,7 +40,7 @@ def grid_search(
         train_kwargs = DEFAULT_HYPERPARAMS.copy()
         train_kwargs['id'] = idx
         train_kwargs.update(hyperparams.to_dict())
-        train_kwargs['filename'] = f'model_{idx:03d}.pt'
+        train_kwargs['filename'] = f'model_{idx:04d}.pt'
         print(json.dumps(train_kwargs, indent=4))
 
         results = main(**train_kwargs)
@@ -57,10 +57,10 @@ def grid_search(
         elif improvement > 0:
             best_loss = results[loss_name]
             no_improvement_count = 0
-            print(f'NEW best_loss: {best_loss:6.3f} is {improvement * 100. / best_loss:6.3f}% improvement')
+            print(f'NEW best_loss: {best_loss:7.3f} is {improvement * 100. / best_loss:7.3f}% improvement')
 
         if no_improvement_count > no_improvement_count_max:
-            print(f'Stopping hyperparameter tuning at best_loss: {best_loss}.')
+            print(f'Stopping hyperparameter tuning at best_loss: {best_loss:7.4f}.')
             break
 
     with open('experiments.json', 'at') as fout:

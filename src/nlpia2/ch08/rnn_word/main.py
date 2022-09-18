@@ -306,15 +306,15 @@ def main(
                     torch.save(model, f)
                 best_loss = val_loss
                 no_improvement_count = 0
-                print(f'TRAINING best_loss: {best_loss} is {improvement * 100. / best_loss}% improvement')
+                print(f'TRAINING best_loss: {best_loss:7.3f} is {improvement * 100. / best_loss:7.3f}% improvement')
             if improvement < stop_improvement_fraction * best_loss:
                 no_improvement_count += 1
                 # Reduce the learning rate if no improvement has been seen in the validation dataset.
                 lr /= 4
-                print(f'TRAINING no improvement count: {no_improvement_count}, new lr: {lr}')
+                print(f'TRAINING no improvement count: {no_improvement_count}, new lr: {lr:7.3f}')
 
             if no_improvement_count > no_improvement_count_max:
-                print(f'Stopping training early at best_loss: {best_loss}.')
+                print(f'Stopping training early at best_loss: {best_loss:7.4f}.')
                 break
 
     except KeyboardInterrupt:
