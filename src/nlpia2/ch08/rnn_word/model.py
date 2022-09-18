@@ -126,7 +126,7 @@ class RNNModel(nn.Module):
         self.vocab = vocab
         self.input_size = input_size
         self.embedding_dropout = nn.Dropout(embedding_dropout)
-        self.rnn_dropout = rnn_dropout
+        self.rnn_dropout = embedding_dropout
         self.encoder = nn.Embedding(len(self.vocab), self.input_size)
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -169,7 +169,7 @@ class RNNModel(nn.Module):
         emb = self.encoder(input)
         emb = self.embedding_dropout(emb)
         output, hidden = self.rnn(emb, hidden)
-        output = self.drop(output)
+        # output = self.drop(output)
         decoded = self.decoder(output)
         decoded = decoded.view(-1, self.ntoken)
         return F.log_softmax(decoded, dim=1), hidden
