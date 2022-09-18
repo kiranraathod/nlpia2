@@ -317,6 +317,7 @@ def main(**kwargs):
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
         **results))
     results['learned_parameters'] = torch_utils.count_parameters(model)
+    print(results)
     print(' {learned_parameters:6d} learned params for {rnn_type}'.format(results))
     print('=' * 89)
 
