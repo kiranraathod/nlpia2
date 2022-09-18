@@ -18,11 +18,13 @@ def grid_search(
     hypervalues += list(kwargs.values())
     hypernames += list(kwargs.keys())
     hyperdict = dict(list(zip(hypernames, hypervalues)))
-    hyperparameters_to_try = list(product(*list(hyperdict.values())))
+    hyperparameter_grid = list(product(*list(hyperdict.values())))
+    json.dump(hyperparameter_grid, open(f'experiment_grid_{len(hyperparameter_grid)}', 'w'))
+    json.dump(hyperdict, open(f'experiment_plan_{len(hyperdict)}', 'w'))
 
-    print(f'Running {len(hyperparameters_to_try)} experiments...')
+    print(f'Running {len(hyperparameter_grid)} experiments...')
     experiments = []
-    for i, hyperparams in enumerate(hyperparameters_to_try):
+    for i, hyperparams in enumerate(hyperparameter_grid):
         hyperparams = dict(zip(hypernames, hyperparams))
         train_kwargs = DEFAULT_HYPERPARAMS.copy()
         train_kwargs.update(hyperdict)
