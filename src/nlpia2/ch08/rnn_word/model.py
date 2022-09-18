@@ -122,8 +122,8 @@ class RNNModel(nn.Module):
                  tie_weights=False, **kwargs):
         super().__init__()
         self.rnn_type = rnn_type.split('_')[0].upper()
-        self.vocab = vocab
         self.nonlinearity = nonlinearity or rnn_type.split('_')[-1].lower()
+        self.vocab = vocab
         self.input_size = input_size
         self.embedding_dropout = nn.Dropout(embedding_dropout)
         self.rnn_dropout = rnn_dropout
@@ -141,7 +141,7 @@ class RNNModel(nn.Module):
         )
         if self.rnn_type == 'RNN':
             rnn_kwargs['nonlinearity'] = self.nonlinearity or 'relu'
-        self.rnn = getattr(nn, rnn_type)(**rnn_kwargs)
+        self.rnn = getattr(nn, self.rnn_type)(**rnn_kwargs)
         self.decoder = nn.Linear(hidden_size, len(self.vocab))
 
         # Optionally tie weights as in:
