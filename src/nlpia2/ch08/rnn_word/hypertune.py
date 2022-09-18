@@ -17,17 +17,17 @@ def grid_search(
     hypervalues = [hidden_size, epochs, rnn_type, dropout, lr, num_layers]
     hypervalues += list(kwargs.values())
     hypernames += list(kwargs.keys())
-    hyperdict = dict(list(zip(hypernames, hypervalues)))
-    hyperparameter_grid = list(product(*list(hyperdict.values())))
+    hyperparam_ranges = dict(list(zip(hypernames, hypervalues)))
+    hyperparameter_grid = list(product(*list(hyperparam_ranges.values())))
     json.dump(hyperparameter_grid, open(f'experiment_grid_{len(hyperparameter_grid)}', 'w'))
-    json.dump(hyperdict, open(f'experiment_plan_{len(hyperdict)}', 'w'))
+    json.dump(hyperparam_ranges, open(f'experiment_plan_{len(hyperparam_ranges)}', 'w'))
 
     print(f'Running {len(hyperparameter_grid)} experiments...')
     experiments = []
-    for i, hyperparams in enumerate(hyperparameter_grid):
-        hyperparams = dict(zip(hypernames, hyperparams))
+    for i, hyperparam_values in enumerate(hyperparameter_grid):
+        hyperparams = dict(zip(hypernames, hyperparam_values))
         train_kwargs = DEFAULT_HYPERPARAMS.copy()
-        train_kwargs.update(hyperdict)
+        train_kwargs.update(hyperparams)
         train_kwargs['filename'] = (
             'model_epochs_{epochs}_rnn_type_{rnn_type}_hidden_size_{hidden_size}_batch_size_{batch_size}'
             '_bptt_{bptt}_num_layers_{num_layers}').format(**train_kwargs)
