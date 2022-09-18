@@ -161,7 +161,7 @@ def main(**kwargs):
         model = rnn_models.TransformerModel(
             ntokens=len(corpus.dictionary), **kwargs).to(device)
     else:
-        model = rnn_models.RNNModel(**kwargs).to(device)
+        model = rnn_models.RNNModel(vocab=corpus.dictionary, **kwargs).to(device)
 
     criterion = nn.NLLLoss()
 
