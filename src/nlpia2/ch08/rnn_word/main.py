@@ -14,11 +14,6 @@ try:
     from nlpia2 import torch_utils
 except ImportError:
     __file__ = inspect.getfile(inspect.currentframe())
-    # NLPIA2_PATH = os.path.dirname(os.path.abspath(__file__))
-    # NLPIA2_PATH = os.path.dirname(os.path.dirname(os.path.dirname(NLPIA2_PATH)))
-    # sys.path.append(NLPIA2_PATH)
-    # print(f'WARNING: Added {NLPIA2_PATH} to PYTHONPATH')
-
     NLPIA2_PACKAGE_PATH = str(Path(__file__).absolute().parent.parent.parent.parent)
     print(f'WARNING: Added {NLPIA2_PACKAGE_PATH} to PYTHONPATH')
     sys.path.append(NLPIA2_PACKAGE_PATH)
@@ -37,8 +32,8 @@ def try_exp(num):
 
 
 DEFAULT_HYPERPARAMS = dict(
-    stop_improvement_fraction=0.001,
-    no_improvement_count_max=3,
+    early_stop_fract=0.001,
+    early_stop_count=2,
     batch_size=20,
     bptt=35,
     clip=0.25,
@@ -107,12 +102,12 @@ def parse_args():
                         help='verify the code and the model')
     parser.add_argument('--annealing_loss_improvement_pct', type=float, default=1.0,
                         help='For each epoch, if the loss is not smaller than this fraction of the previous best loss, the learning rate is reduced (default = 1.0).')
-    parser.add_argument('--stop_improvement_fraction', type=float,
-                        default=DEFAULT_HYPERPARAMS['stop_improvement_fraction'],
+    parser.add_argument('--early_stop_fract', type=float,
+                        default=DEFAULT_HYPERPARAMS['early_stop_fract'],
                         help='If the loss does not improve by this amount for no_improvement_count_max then stop training.',
                         )
 
-    parser.add_argument('--no_improvement_count_max=3', type=float,
+    parser.add_argument('--early_stop_count', type=float,
                         default=DEFAULT_HYPERPARAMS['no_improvement_count_max'],
                         help='If the loss does not improve by stop_improvement_fraction amount for this number of epochs then stop training.',
                         )

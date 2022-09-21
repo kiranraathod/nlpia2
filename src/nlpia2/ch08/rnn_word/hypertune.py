@@ -3,21 +3,59 @@ import pandas as pd
 from pathlib import Path
 import json
 import jsonlines
+import argparse
 
 from main import main, DEFAULT_HYPERPARAMS
 
+DEFAULT_TUNING_PARAMS = dict(
+    method='random',  # random
+    tune_stop_fract=0.001,
+    tune_stop_count=10,
+    loss_name='test_loss',
+)
 
-def grid_search(
+DEFAULT_HYPERPARAM_RANGES = dict(
+    early_stop_fract=(0.001,),
+    early_stop_count=(2,),
+    hidden_size=(200,),
+    epochs=(32,),
+    dropout=(0., .2, .35, .5),
+    rnn_type=tuple('RNN_TANH RNN_RELU GRU LSTM'.split()),
+    lr=(2.,),
+    num_layers=(1, 2, 3, 4, 5)
+)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Optimize hyperparameters by attempting to run main.main(**hyperparams) with a variety of hyperparams')
+    parser.add_argument('--method', type=str, default=DEFAULT_TUNING_PARAMS['method'],
+                        help='Hyperparameter search algorithm: "grid" or "random".')
+    parser.add_argument('--tune_stop_count', type=int, default=DEFAULT_TUNING_PARAMS['tune_stop_count'],
+                        help='Stop tuning if improvement (reduction) in the loss (relative to best_loss) for this many attempts.')
+    parser.add_argument('--tune_stop_fract', type=float, default=DEFAULT_HYPERPARAMS['tune_stop_fract'],
+                        help='Stop tuning if improvement (reduction) in the loss (relative to best_loss) is less than this fraction of the best_loss for tune_stop_count attempts.')
+
+    args = parser.parse_args()
+    return args
+
+
+def hyperparameter_search(
+        # hyperparameter tuning parameters
+        method='random',  # random
+        tune_stop_fract=0.001,
+        tune_stop_count=10,
         loss_name='test_loss',
-        stop_improvement_fraction=0.001,
-        no_improvement_count_max=5,
-
+        # hyperparameter ranges:
+        train_stop_fract=(0.001,),
+        train_stop_count=(2,),
         hidden_size=(200,),
-        epochs=(1, 12, 32),
-        dropout=(0, .2, .5),
+        epochs=(32,),
+        dropout=(0., .2, .35, .5),
         rnn_type=tuple('RNN_TANH RNN_RELU GRU LSTM'.split()),
-        lr=(.5, 2),
-        num_layers=(1, 2, 3, 4, 5), **kwargs):
+        lr=(2.,),
+        num_layers=(1, 2, 3, 4, 5),
+        **kwargs):
     hypernames = 'hidden_size epochs rnn_type dropout lr num_layers'.split()
     hypervalues = [hidden_size, epochs, rnn_type, dropout, lr, num_layers]
     hypervalues += list(kwargs.values())
@@ -52,16 +90,16 @@ def grid_search(
 
         improvement = best_loss - results[loss_name]
 
-        if improvement < stop_improvement_fraction * best_loss:
+        if improvement < tune_stop_fract * best_loss:
             no_improvement_count += 1
-            print(f'HYPERPARAM improvement ({improvement:10.3f}) is < {stop_improvement_fraction:7.3f} * {best_loss:7.3f}...')
+            print(f'HYPERPARAM improvement ({improvement:10.3f}) is < {tune_stop_fract:7.3f} * {best_loss:7.3f}...')
             print(f'HYPERPARAM no improvement count: {no_improvement_count}')
-        elif improvement > 0:
+        else:
             no_improvement_count = 0
             best_loss = results[loss_name]
             print(f'HYPERPARAM new best_loss: {best_loss:7.3f} is {improvement * 100. / best_loss:7.3f}% improvement')
 
-        if no_improvement_count >= no_improvement_count_max:
+        if no_improvement_count >= tune_stop_count:
             print(f'HYPERPARAM Stopping tuning at best_loss: {best_loss:7.4f}.')
             break
 
@@ -82,7 +120,12 @@ def show_best_experiments(jsonl_path='experiments.jsonl', topk=10):
 
 
 if __name__ == '__main__':
-    experiments = grid_search()
+    args = parse_args()
+    experiments = hyperparameter_search(
+        method=args.method,  # random
+        tune_stop_fract=args.tune_stop_fract,
+        tune_stop_count=args.tune_stop_count,
+        loss_name=args.loss_name,)
     print(experiments)
     df = pd.DataFrame(experiments)
     print(df)
