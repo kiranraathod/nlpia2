@@ -1,6 +1,7 @@
 """
 Generate text starting with word sampled from Wikitext-2 vocabulary (33278 words)
 """
+from pathlib import Path
 import argparse
 import torch
 
@@ -51,14 +52,24 @@ def generate_word_hidden(model, input_word, vocab=None, hidden_tens=None, temper
 
 
 def generate_words(
-        model, vocab, prompt,
+        model, prompt,
+        vocab=None,
         eos_words='<eos>', skip_words='<unk>', max_words=1024,
         temperature=1, seed=None):
     # IDX_UNK = dictionary.word2idx['<unk>']
+    if isinstance(model, (str, Path)):
+        with open(model, 'rb') as fin:
+            model = torch.load(fin, map_location=device)
+            model.eval()  # switch model into evaluation mode instead of training mode
 
+    if vocab is None:
+        vocab = model.vocab
     prompt_words = prompt
     if isinstance(prompt_words, str):
-        prompt_words = prompt_words.split()
+        if ' ' in prompt_words:
+            prompt_words = prompt_words.split()
+        else:
+            prompt_words = [prompt_words]
     output_words = []
     max_words = 1024
     hidden_tens = model.init_hidden()
@@ -94,7 +105,7 @@ def main():
 
     with open(args.checkpoint, 'rb') as f:
         model = torch.load(f, map_location=device)
-    model.eval()
+    model.eval()  # switch model into evaluation mode instead of training mode
 
     is_transformer_model = getattr(model, 'model_type') == 'Transformer'
     if not is_transformer_model:
