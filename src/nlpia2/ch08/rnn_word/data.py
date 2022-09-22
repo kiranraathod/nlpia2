@@ -1,6 +1,8 @@
-import os
-from io import open
+from pathlib import Path
 import torch
+
+EOS_TOKEN = '<eos>'
+
 
 class Dictionary(object):
     def __init__(self):
@@ -18,26 +20,37 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path):
-        self.dictionary = Dictionary()
-        self.train = self.tokenize(os.path.join(path, 'train.txt'))
-        self.valid = self.tokenize(os.path.join(path, 'valid.txt'))
-        self.test = self.tokenize(os.path.join(path, 'test.txt'))
+    def __init__(self, datadir):
+        datadir = Path(datadir)
+        if not datadir.is_dir():
+            datadir = Path(__file__).parent / datadir
 
-    def tokenize(self, path):
-        """Tokenizes a text file."""
-        assert os.path.exists(path)
-        # Add words to the dictionary
-        with open(path, 'r', encoding="utf8") as f:
+        self.dictionary = Dictionary()
+
+        # avoid OOV complication by including all tokens in dictionary
+        for split in 'train valid test'.split():
+            filepath = datadir / f'{split}.txt'
+            self.vocab_from_file(filepath)
+            setattr(self, split, self.tokens2ids(filepath))
+
+    def vocab_from_file(self, filepath):
+        filepath = Path(filepath)
+        with filepath.with_suffix('.txt').open() as f:
             for line in f:
-                words = line.split() + ['<eos>']
+                if not line.strip():
+                    continue
+                words = line.split() + [EOS_TOKEN]
                 for word in words:
                     self.dictionary.add_word(word)
+        return self.dictionary
 
-        # Tokenize file content
-        with open(path, 'r', encoding="utf8") as f:
+    def tokens2ids(self, filepath):
+        filepath = Path(filepath)
+        assert filepath.is_file()
+
+        with filepath.open() as fin:
             idss = []
-            for line in f:
+            for line in fin:
                 words = line.split() + ['<eos>']
                 ids = []
                 for word in words:
