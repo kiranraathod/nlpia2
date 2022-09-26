@@ -8,7 +8,9 @@ import os
 import torch
 import torch.nn as nn
 import torch.onnx
+from tqdm import tqdm
 
+DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
 
 try:
     from nlpia2 import torch_utils
@@ -34,6 +36,7 @@ def try_exp(num):
 DEFAULT_HYPERPARAMS = dict(
     early_stop_fract=0.001,
     early_stop_count=2,
+    no_improvement_count_max=1,
     batch_size=20,
     bptt=35,
     clip=0.25,
@@ -116,40 +119,76 @@ def parse_args():
     return args
 
 
+def batchify(dataset, batch_size=20, device=DEVICE):
+    """
+    Starting from sequential data, batchify arranges the dataset into columns.
+    For instance, with the alphabet as the sequence and batch size 4, we'd get
+    ┌ a g m s ┐
+    │ b h n t │
+    │ c i o u │
+    │ d j p v │
+    │ e k q w │
+    └ f l r x ┘.
+    shape = (seq_len, batch_size)
+
+    These columns are treated as independent by the model, which means that the
+    dependence of e. g. 'g' on 'f' can not be learned, but allows more efficient
+    batch processing.
+    """
+
+    # Even number of segments or batches of text
+    num_segments = dataset.size(0) // batch_size
+    # Trim off any extra text that wouldn't cleanly fit in a batch
+    dataset = dataset.narrow(0, 0, num_segments * batch_size)
+    # Evenly divide the data across the bsz batches.
+    dataset = dataset.view(batch_size, -1).t().contiguous()
+    return dataset.to(device)
+
+
+def repackage_hidden(h):
+    """Wraps hidden states in new Tensors, to detach them from their history."""
+
+    if isinstance(h, torch.Tensor):
+        return h.detach()
+    else:
+        return tuple(repackage_hidden(v) for v in h)
+
+
+def get_batch(source, i):
+    seq_len = min(kwargs['bptt'], len(source) - 1 - i)
+    data = source[i:i + seq_len]
+    target = source[i + 1:i + 1 + seq_len].view(-1)
+    return data, target
+
+
+def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=None):
+    # Turn on evaluation mode which disables dropout.
+    model.eval()
+    total_loss = 0.
+    if kwargs['rnn_type'] != 'Transformer':
+        hidden = model.init_hidden(eval_batch_size)
+    with torch.no_grad():
+        for i in range(0, data_source.size(0) - 1, kwargs['bptt']):
+            data, targets = get_batch(data_source, i)
+            if kwargs['rnn_type'] == 'Transformer':
+                output = model(data)
+                output = output.view(-1, ntokens)
+            else:
+                output, hidden = model(data, hidden)
+                hidden = repackage_hidden(hidden)
+            total_loss += len(data) * criterion(output, targets).item()
+    return total_loss / (len(data_source) - 1)
+
+
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
-        **kwargs):
+        **model_kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
-    default_kwargs.update(kwargs)
-    kwargs = default_kwargs
+    default_kwargs.update(model_kwargs)
+    model_kwargs = default_kwargs
     corpus = data.Corpus(kwargs['datapath'])
-
-    def batchify(dataset, batch_size=kwargs['batch_size']):
-        """
-        Starting from sequential data, batchify arranges the dataset into columns.
-        For instance, with the alphabet as the sequence and batch size 4, we'd get
-        ┌ a g m s ┐
-        │ b h n t │
-        │ c i o u │
-        │ d j p v │
-        │ e k q w │
-        └ f l r x ┘.
-        shape = (seq_len, batch_size)
-
-        These columns are treated as independent by the model, which means that the
-        dependence of e. g. 'g' on 'f' can not be learned, but allows more efficient
-        batch processing.
-        """
-
-        # Even number of segments or batches of text
-        num_segments = dataset.size(0) // batch_size
-        # Trim off any extra text that wouldn't cleanly fit in a batch
-        dataset = dataset.narrow(0, 0, num_segments * batch_size)
-        # Evenly divide the data across the bsz batches.
-        dataset = dataset.view(batch_size, -1).t().contiguous()
-        return dataset.to(device)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(kwargs['seed'])
@@ -165,25 +204,10 @@ def main(
     val_data = batchify(dataset=corpus.valid, batch_size=eval_batch_size)
     test_data = batchify(dataset=corpus.test, batch_size=eval_batch_size)
 
-    # model = rnn_models.RNNModel('RNN_TANH')
-    if kwargs['rnn_type'] == 'Transformer':
-        model = rnn_models.TransformerModel(
-            ntokens=len(corpus.dictionary), **kwargs).to(device)
-    else:
-        model = rnn_models.RNNModel(vocab=corpus.dictionary, **kwargs).to(device)
-
-    criterion = nn.NLLLoss()
+    model = rnn_models.RNNModel(vocab=corpus.dictionary, **kwargs).to(device)
 
     ###############################################################################
     # Training
-
-    def repackage_hidden(h):
-        """Wraps hidden states in new Tensors, to detach them from their history."""
-
-        if isinstance(h, torch.Tensor):
-            return h.detach()
-        else:
-            return tuple(repackage_hidden(v) for v in h)
 
     # get_batch subdivides the source data into chunks of length kwargs['bptt'].
     # If source is equal to the example output of the batchify function, with
@@ -195,40 +219,16 @@ def main(
     # by the batchify function. The chunks are along dimension 0, corresponding
     # to the seq_len dimension in the LSTM.
 
-    def get_batch(source, i):
-        seq_len = min(kwargs['bptt'], len(source) - 1 - i)
-        data = source[i:i + seq_len]
-        target = source[i + 1:i + 1 + seq_len].view(-1)
-        return data, target
-
-    def evaluate(data_source):
-        # Turn on evaluation mode which disables dropout.
-        model.eval()
-        total_loss = 0.
-        ntokens = len(corpus.dictionary)
-        if kwargs['rnn_type'] != 'Transformer':
-            hidden = model.init_hidden(eval_batch_size)
-        with torch.no_grad():
-            for i in range(0, data_source.size(0) - 1, kwargs['bptt']):
-                data, targets = get_batch(data_source, i)
-                if kwargs['rnn_type'] == 'Transformer':
-                    output = model(data)
-                    output = output.view(-1, ntokens)
-                else:
-                    output, hidden = model(data, hidden)
-                    hidden = repackage_hidden(hidden)
-                total_loss += len(data) * criterion(output, targets).item()
-        return total_loss / (len(data_source) - 1)
-
-    def train_epoch(model, train_data):
+    def train_epoch(model, criterion=nn.NLLLoss(), ntokens=len(corpus.dictionary.idx2word),
+                    data_source=train_data):
         # Training mode enables dropout layers
         model.train()
         total_loss = 0.
         start_time = time.time()
-        ntokens = len(corpus.dictionary)
+
         if kwargs['rnn_type'] != 'Transformer':
             hidden = model.init_hidden(kwargs['batch_size'])
-        for batch, i in enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])):
+        for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])), total=train_data.size(0)):
             data, targets = get_batch(train_data, i)
             # Starting each batch, we detach the hidden state from how it was previously produced.
             # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -287,7 +287,8 @@ def main(
             epoch_start_time = time.time()
 
             train_epoch(model=model, train_data=train_data)
-            val_loss = evaluate(val_data)
+            val_loss = evaluate(
+                model=model, ntokens=len(corpus.dictionary.idx2word), data_source=val_data)
             epoch_time = time.time() - epoch_start_time
             total_time += epoch_time
             results.update(dict(

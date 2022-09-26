@@ -72,7 +72,7 @@ def generate_words(
             prompt_words = [prompt_words]
     output_words = []
     max_words = 1024
-    hidden_tens = model.init_hidden()
+    hidden_tens = model.init_hidden(batch_size=1)
 
     for word in prompt_words:
         unused_prediction, hidden_tens = generate_word_hidden(
@@ -90,7 +90,7 @@ def generate_words(
 def generate_text(model, vocab, prompt, seed=1111, eos_words='<eos>', skip_words='<unk>', max_words=1024):
     words = generate_words(
         model=model, vocab=vocab, prompt=prompt,
-        seed=seed, eos_word=eos_words, max_words=max_words)
+        seed=seed, eos_words=eos_words, max_words=max_words)
     return ' '.join([w for w in words if not skip_words or w not in skip_words])
 
 
@@ -110,22 +110,22 @@ def main():
     is_transformer_model = getattr(model, 'model_type') == 'Transformer'
     if not is_transformer_model:
         hidden = model.init_hidden(1)
-    input = torch.randint(len(corpus.dictionary), (1, 1), dtype=torch.long).to(device)
+    inpt = torch.randint(len(corpus.dictionary), (1, 1), dtype=torch.long).to(device)
 
     with open(args.outf, 'w') as outf:
         with torch.no_grad():  # don't compute or remember gradients
             for i in range(args.words):
                 if is_transformer_model:
-                    output = model(input, False)
+                    output = model(inpt, False)
                     word_weights = output[-1].squeeze().div(args.temperature).exp().cpu()
                     word_idx = torch.multinomial(word_weights, 1)[0]
                     word_tensor = torch.Tensor([[word_idx]]).long().to(device)
-                    input = torch.cat([input, word_tensor], 0)
+                    inpt = torch.cat([inpt, word_tensor], 0)
                 else:
-                    output, hidden = model(input, hidden)
+                    output, hidden = model(inpt, hidden)
                     word_weights = output.squeeze().div(args.temperature).exp().cpu()
                     word_idx = torch.multinomial(word_weights, 1)[0]
-                    input.fill_(word_idx)
+                    inpt.fill_(word_idx)
 
                 word = corpus.dictionary.idx2word[word_idx]
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     from model import *
     corpus = data.Corpus('data/wikitext-2')
     model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
-    checkpoint = 'models/model_epochs_12_rnn_type_GRU_hidden_size_200_batch_size_20_bptt_35_num_layers_1'
+    checkpoint = 'checkpoints/model_epochs_12_rnn_type_GRU_hidden_size_200_batch_size_20_bptt_35_num_layers_1.pt'
     checkpoint = torch.load(open(checkpoint, 'rb'), map_location='cpu')
     model.load_state_dict(checkpoint.state_dict())
 # FIXME:
