@@ -48,7 +48,7 @@ def generate_word_hidden(model, input_word, vocab=None, hidden_tens=None, temper
     # if word_idx == IDX_UNK:
     #     continue
     input_tens.fill_(word_idx)
-    return corpus.dictionary.idx2word[word_idx], hidden_tens
+    return vocab.idx2word[word_idx], hidden_tens
 
 
 def generate_words(

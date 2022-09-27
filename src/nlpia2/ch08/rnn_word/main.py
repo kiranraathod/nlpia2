@@ -180,6 +180,51 @@ def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=N
     return total_loss / (len(data_source) - 1)
 
 
+def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
+    # Training mode enables dropout layers
+    model.train()
+    total_loss = 0.
+    start_time = time.time()
+
+    if kwargs['rnn_type'] != 'Transformer':
+        hidden = model.init_hidden(kwargs['batch_size'])
+    for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])), total=train_data.size(0)):
+        data, targets = get_batch(train_data, i)
+        # Starting each batch, we detach the hidden state from how it was previously produced.
+        # If we didn't, the model would try backpropagating all the way to start of the dataset.
+        model.zero_grad()
+        if kwargs['rnn_type'] == 'Transformer':
+            output = model(data)
+            output = output.view(-1, ntokens)
+        else:
+            hidden = repackage_hidden(hidden)
+            output, hidden = model(data, hidden)
+        loss = criterion(output, targets)
+        loss.backward()
+
+        # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
+        torch.nn.utils.clip_grad_norm_(model.parameters(), kwargs['clip'])
+        for p in model.parameters():
+            p.data.add_(p.grad, alpha=-lr)
+
+        total_loss += loss.item()
+
+        if batch and batch % kwargs['log_interval'] == 0:
+            cur_loss = total_loss / kwargs['log_interval']
+            elapsed = time.time() - start_time
+
+            print((' | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
+                   'loss {:5.2f} | ppl {:8.2f}').format(
+                batch, len(train_data) // kwargs['bptt'], lr,
+                elapsed * 1000 / kwargs['log_interval'],
+                cur_loss,
+                try_exp(cur_loss)))
+            total_loss = 0
+            start_time = time.time()
+        if kwargs['dry_run']:
+            break
+
+
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
@@ -219,51 +264,6 @@ def main(
     # by the batchify function. The chunks are along dimension 0, corresponding
     # to the seq_len dimension in the LSTM.
 
-    def train_epoch(model, criterion=nn.NLLLoss(), ntokens=len(corpus.dictionary.idx2word),
-                    data_source=train_data):
-        # Training mode enables dropout layers
-        model.train()
-        total_loss = 0.
-        start_time = time.time()
-
-        if kwargs['rnn_type'] != 'Transformer':
-            hidden = model.init_hidden(kwargs['batch_size'])
-        for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])), total=train_data.size(0)):
-            data, targets = get_batch(train_data, i)
-            # Starting each batch, we detach the hidden state from how it was previously produced.
-            # If we didn't, the model would try backpropagating all the way to start of the dataset.
-            model.zero_grad()
-            if kwargs['rnn_type'] == 'Transformer':
-                output = model(data)
-                output = output.view(-1, ntokens)
-            else:
-                hidden = repackage_hidden(hidden)
-                output, hidden = model(data, hidden)
-            loss = criterion(output, targets)
-            loss.backward()
-
-            # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-            torch.nn.utils.clip_grad_norm_(model.parameters(), kwargs['clip'])
-            for p in model.parameters():
-                p.data.add_(p.grad, alpha=-lr)
-
-            total_loss += loss.item()
-
-            if batch and batch % kwargs['log_interval'] == 0:
-                cur_loss = total_loss / kwargs['log_interval']
-                elapsed = time.time() - start_time
-
-                print((' | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
-                       'loss {:5.2f} | ppl {:8.2f}').format(
-                    batch, len(train_data) // kwargs['bptt'], lr,
-                    elapsed * 1000 / kwargs['log_interval'],
-                    cur_loss,
-                    try_exp(cur_loss)))
-                total_loss = 0
-                start_time = time.time()
-            if kwargs['dry_run']:
-                break
-
     def export_onnx(path, batch_size, seq_len):
         print('The model is also exported in ONNX format at {}.'.format(os.path.realpath(kwargs['onnx_export'])))
         model.eval()
@@ -286,7 +286,7 @@ def main(
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
 
-            train_epoch(model=model, train_data=train_data)
+            train_epoch(model=model, criterion=nn.NLLLoss(), ntokens=len(corpus.dictionary.idx2word), train_data=train_data)
             val_loss = evaluate(
                 model=model, ntokens=len(corpus.dictionary.idx2word), data_source=val_data)
             epoch_time = time.time() - epoch_start_time
