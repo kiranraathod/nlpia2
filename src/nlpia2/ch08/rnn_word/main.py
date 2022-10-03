@@ -38,7 +38,7 @@ DEFAULT_HYPERPARAMS = dict(
     early_stop_count=2,
     no_improvement_count_max=1,
     batch_size=20,
-    bptt=35,
+    seqlen=35,
     clip=0.25,
     cuda=True,
     datapath='./data/wikitext-2',
@@ -81,8 +81,8 @@ def parse_args():
                         help='upper epoch limit')
     parser.add_argument('--batch_size', type=int, default=DEFAULT_HYPERPARAMS['batch_size'], metavar='N',
                         help='split each document into this number of independently trained batches (columns)')
-    parser.add_argument('--bptt', type=int, default=DEFAULT_HYPERPARAMS['bptt'],
-                        help='sequence length')
+    parser.add_argument('--seqlen', type=int, default=DEFAULT_HYPERPARAMS['seqlen'],
+                        help='Number of tokens in an individual document (phrase, sentence, paragraph)')
     parser.add_argument('--dropout', type=float, default=DEFAULT_HYPERPARAMS['dropout'],
                         help='dropout applied to layers (0 = no dropout)')
     parser.add_argument('--tied', action='store_true',
@@ -103,13 +103,13 @@ def parse_args():
                         help='the number of heads in the encoder/decoder of the transformer model')
     parser.add_argument('--dry-run', action='store_true',
                         help='verify the code and the model')
+
     parser.add_argument('--annealing_loss_improvement_pct', type=float, default=1.0,
                         help='For each epoch, if the loss is not smaller than this fraction of the previous best loss, the learning rate is reduced (default = 1.0).')
     parser.add_argument('--early_stop_fract', type=float,
                         default=DEFAULT_HYPERPARAMS['early_stop_fract'],
                         help='If the loss does not improve by this amount for no_improvement_count_max then stop training.',
                         )
-
     parser.add_argument('--early_stop_count', type=float,
                         default=DEFAULT_HYPERPARAMS['no_improvement_count_max'],
                         help='If the loss does not improve by stop_improvement_fraction amount for this number of epochs then stop training.',
@@ -117,32 +117,6 @@ def parse_args():
     args = parser.parse_args()
 
     return args
-
-
-def batchify(dataset, batch_size=20, device=DEVICE):
-    """
-    Starting from sequential data, batchify arranges the dataset into columns.
-    For instance, with the alphabet as the sequence and batch size 4, we'd get
-    ┌ a g m s ┐
-    │ b h n t │
-    │ c i o u │
-    │ d j p v │
-    │ e k q w │
-    └ f l r x ┘.
-    shape = (seq_len, batch_size)
-
-    These columns are treated as independent by the model, which means that the
-    dependence of e. g. 'g' on 'f' can not be learned, but allows more efficient
-    batch processing.
-    """
-
-    # Even number of segments or batches of text
-    num_segments = dataset.size(0) // batch_size
-    # Trim off any extra text that wouldn't cleanly fit in a batch
-    dataset = dataset.narrow(0, 0, num_segments * batch_size)
-    # Evenly divide the data across the bsz batches.
-    dataset = dataset.view(batch_size, -1).t().contiguous()
-    return dataset.to(device)
 
 
 def repackage_hidden(h):
@@ -155,7 +129,7 @@ def repackage_hidden(h):
 
 
 def get_batch(source, i):
-    seq_len = min(kwargs['bptt'], len(source) - 1 - i)
+    seq_len = min(kwargs['seqlen'], len(source) - 1 - i)
     data = source[i:i + seq_len]
     target = source[i + 1:i + 1 + seq_len].view(-1)
     return data, target
@@ -168,7 +142,7 @@ def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=N
     if kwargs['rnn_type'] != 'Transformer':
         hidden = model.init_hidden(eval_batch_size)
     with torch.no_grad():
-        for i in range(0, data_source.size(0) - 1, kwargs['bptt']):
+        for i in range(0, data_source.size(0) - 1, kwargs['seqlen']):
             data, targets = get_batch(data_source, i)
             if kwargs['rnn_type'] == 'Transformer':
                 output = model(data)
@@ -188,7 +162,7 @@ def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
 
     if kwargs['rnn_type'] != 'Transformer':
         hidden = model.init_hidden(kwargs['batch_size'])
-    for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['bptt'])), total=train_data.size(0)):
+    for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['seqlen'])), total=train_data.size(0)):
         data, targets = get_batch(train_data, i)
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -215,7 +189,7 @@ def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
 
             print((' | {:5d}/{:5d} batches | lr {:02.4f} | ms/batch {:5.2f} | '
                    'loss {:5.2f} | ppl {:8.2f}').format(
-                batch, len(train_data) // kwargs['bptt'], lr,
+                batch, len(train_data) // kwargs['seqlen'], lr,
                 elapsed * 1000 / kwargs['log_interval'],
                 cur_loss,
                 try_exp(cur_loss)))
@@ -225,15 +199,24 @@ def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
             break
 
 
+def export_onnx(model, path, batch_size, seq_len):
+    print('The model is also exported in ONNX format at {}.'.format(os.path.realpath(kwargs['onnx_export'])))
+    model.eval()
+    dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
+    hidden = model.init_hidden(batch_size)
+    torch.onnx.export(model, (dummy_input, hidden), path)
+
+
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
+        max_corpus_size=10000,
         **model_kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
     default_kwargs.update(model_kwargs)
     model_kwargs = default_kwargs
-    corpus = data.Corpus(kwargs['datapath'])
+    corpus = data.Corpus(kwargs['datapath'], max_size=max_corpus_size)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(kwargs['seed'])
@@ -244,32 +227,25 @@ def main(
     device = kwargs['device'] or ("cuda" if kwargs['cuda'] else "cpu")
     device = torch.device(device)
 
-    eval_batch_size = kwargs['batch_size']  # 10
-    train_data = batchify(dataset=corpus.train, batch_size=kwargs['batch_size'])
-    val_data = batchify(dataset=corpus.valid, batch_size=eval_batch_size)
-    test_data = batchify(dataset=corpus.test, batch_size=eval_batch_size)
-
     model = rnn_models.RNNModel(vocab=corpus.dictionary, **kwargs).to(device)
 
     ###############################################################################
     # Training
 
-    # get_batch subdivides the source data into chunks of length kwargs['bptt'].
+    batch_size = kwargs['batch_size']  # 10
+    train_data = batchify(dataset=corpus.train, batch_size=batch_size)
+    val_data = batchify(dataset=corpus.valid, batch_size=batch_size)
+    test_data = batchify(dataset=corpus.test, batch_size=batch_size)
+
+    # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
     # If source is equal to the example output of the batchify function, with
-    # a bptt-limit of 2, we'd get the following two Variables for i = 0:
+    # a seqlen-limit of 2, we'd get the following two Variables for i = 0:
     # ┌ a g m s ┐ ┌ b h n t ┐
     # └ b h n t ┘ └ c i o u ┘
     # Note that despite the name of the function, the subdivison of data is not
     # done along the batch dimension (i.e. dimension 1), since that was handled
     # by the batchify function. The chunks are along dimension 0, corresponding
     # to the seq_len dimension in the LSTM.
-
-    def export_onnx(path, batch_size, seq_len):
-        print('The model is also exported in ONNX format at {}.'.format(os.path.realpath(kwargs['onnx_export'])))
-        model.eval()
-        dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-        hidden = model.init_hidden(batch_size)
-        torch.onnx.export(model, (dummy_input, hidden), path)
 
     # Loop over epochs.
     lr = kwargs['lr']
@@ -286,7 +262,12 @@ def main(
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
 
-            train_epoch(model=model, criterion=nn.NLLLoss(), ntokens=len(corpus.dictionary.idx2word), train_data=train_data)
+            print(train_data.size())
+            train_epoch(
+                model=model,
+                criterion=nn.NLLLoss(),
+                ntokens=len(corpus.dictionary.idx2word),
+                train_data=train_data)
             val_loss = evaluate(
                 model=model, ntokens=len(corpus.dictionary.idx2word), data_source=val_data)
             epoch_time = time.time() - epoch_start_time
@@ -347,13 +328,19 @@ def main(
     print('=' * 89)
 
     if kwargs['onnx_export']:
+        onnx_batch_size = 1
         # Export the model in ONNX format.
-        export_onnx(kwargs['onnx_export'], batch_size=1, seq_len=kwargs['bptt'])
+        export_onnx(
+            model,
+            kwargs['onnx_export'],
+            batch_size=onnx_batch_size,
+            seq_len=kwargs['seqlen']
+        )
 
-    return results
+    return dict(model=model, results=results)
 
 
 if __name__ == '__main__':
     args = parse_args()
     kwargs = vars(args)
-    results = main(**kwargs)
+    trained_model, results = main(**kwargs).values()
