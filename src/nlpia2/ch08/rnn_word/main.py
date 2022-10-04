@@ -22,7 +22,7 @@ except ImportError:
 
     from nlpia2 import torch_utils
 
-import data
+from preprocessing import Corpus, batchify
 import model as rnn_models
 
 
@@ -216,7 +216,7 @@ def main(
     default_kwargs.update(vars(parse_args()))
     default_kwargs.update(model_kwargs)
     model_kwargs = default_kwargs
-    corpus = data.Corpus(kwargs['datapath'], max_size=max_corpus_size)
+    corpus = Corpus(kwargs['datapath'], max_size=max_corpus_size)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(kwargs['seed'])
@@ -227,7 +227,7 @@ def main(
     device = kwargs['device'] or ("cuda" if kwargs['cuda'] else "cpu")
     device = torch.device(device)
 
-    model = rnn_models.RNNModel(vocab=corpus.dictionary, **kwargs).to(device)
+    model = rnn_models.RNNModel(vocab=corpus.vocab, **kwargs).to(device)
 
     ###############################################################################
     # Training
@@ -266,10 +266,10 @@ def main(
             train_epoch(
                 model=model,
                 criterion=nn.NLLLoss(),
-                ntokens=len(corpus.dictionary.idx2word),
+                ntokens=len(corpus.vocab.idx2word),
                 train_data=train_data)
             val_loss = evaluate(
-                model=model, ntokens=len(corpus.dictionary.idx2word), data_source=val_data)
+                model=model, ntokens=len(corpus.vocab.idx2word), data_source=val_data)
             epoch_time = time.time() - epoch_start_time
             total_time += epoch_time
             results.update(dict(

@@ -5,7 +5,8 @@ from pathlib import Path
 import argparse
 import torch
 
-import data
+from preprocessing import Corpus
+from model import RNNModel
 
 DEVICE = torch.device('cpu')
 
@@ -55,7 +56,8 @@ def generate_words(
         model, prompt,
         vocab=None,
         eos_words='<eos>', skip_words='<unk>', max_words=1024,
-        temperature=1, seed=None):
+        temperature=1, seed=None,
+        device=DEVICE):
     # IDX_UNK = dictionary.word2idx['<unk>']
     if isinstance(model, (str, Path)):
         with open(model, 'rb') as fin:
@@ -96,7 +98,7 @@ def generate_text(model, vocab, prompt, seed=1111, eos_words='<eos>', skip_words
 
 def main():
     args = parse_args()
-    corpus = data.Corpus(args.data)
+    corpus = Corpus(args.data)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(args.seed)
@@ -110,7 +112,7 @@ def main():
     is_transformer_model = getattr(model, 'model_type') == 'Transformer'
     if not is_transformer_model:
         hidden = model.init_hidden(1)
-    inpt = torch.randint(len(corpus.dictionary), (1, 1), dtype=torch.long).to(device)
+    inpt = torch.randint(len(corpus.vocab), (1, 1), dtype=torch.long).to(device)
 
     with open(args.outf, 'w') as outf:
         with torch.no_grad():  # don't compute or remember gradients
@@ -127,7 +129,7 @@ def main():
                     word_idx = torch.multinomial(word_weights, 1)[0]
                     inpt.fill_(word_idx)
 
-                word = corpus.dictionary.idx2word[word_idx]
+                word = corpus.vocab.idx2word[word_idx]
 
                 outf.write(word + ('\n' if i % 20 == 19 else ' '))
 
@@ -136,9 +138,8 @@ def main():
 
 
 if __name__ == '__main__':
-    from model import *
-    corpus = data.Corpus('data/wikitext-2')
-    model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+    corpus = Corpus('data/wikitext-2')
+    model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
     checkpoint = 'checkpoints/model_epochs_12_rnn_type_GRU_hidden_size_200_batch_size_20_bptt_35_num_layers_1.pt'
     checkpoint = torch.load(open(checkpoint, 'rb'), map_location='cpu')
     model.load_state_dict(checkpoint.state_dict())
@@ -169,4 +170,4 @@ if __name__ == '__main__':
 #    1208     type(self).__name__, name))
 
 # AttributeError: 'RNNModel' object has no attribute 'batch_size'
-#     generate_words(model, vocab=corpus.dictionary, prompt='He')
+#     generate_words(model, vocab=corpus.vocab, prompt='He')

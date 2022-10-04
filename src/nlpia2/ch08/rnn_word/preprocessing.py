@@ -1,8 +1,17 @@
 from pathlib import Path
 import torch
+import gzip
 
 EOS_TOKEN = '<eos>'
 DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
+
+
+def smartopen(filepath):
+    """ Open file in 'rb' mode (binary stream) gzipped, ascii, or unicode text files. """
+    stream = Path(filepath).open('rb')
+    if stream.name.lower().endswith('.gz'):
+        return gzip.open(stream)
+    return stream
 
 
 class Vocabulary:
@@ -22,12 +31,12 @@ class Vocabulary:
         return self.word2idx[word]
 
     def add_vocab_from_file(self, filepath):
-        filepath = Path(filepath)
-        with filepath.with_suffix('.txt').open() as f:
+        with smartopen(filepath) as f:
             for line in f:
+                # skip blank lines
                 if not line.strip():
                     continue
-                words = self.tokenize(line) + [self.eos_tok]
+                words = self.tokenize(line.decode()) + [self.eos_tok]
                 for word in words:
                     self.add_word(word)
 
@@ -36,21 +45,22 @@ class Vocabulary:
 
 
 class Corpus(object):
-    def __init__(self, datadir, corpus_size=10000):
+    def __init__(self, datadir, corpus_size=10000, raw=False):
         datadir = Path(datadir)
         if not datadir.is_dir():
             datadir = Path(__file__).parent / datadir
 
-        self.dictionary = Vocabulary()
-        self.dictionary.add_vocab_from_file(datadir / 'train.txt')
+        self.vocab = Vocabulary()
+        self.vocab.add_vocab_from_file(datadir / 'train.txt')
 
-        # avoid OOV complication by including train+test+validation tokens in dictionary
-        self.dictionary.add_vocab_from_file(datadir / 'test.txt')
-        self.dictionary.add_vocab_from_file(datadir / 'valid.txt')
+        # avoid OOV complication by including train+test+validation tokens in vocab
+        self.vocab.add_vocab_from_file(datadir / 'test.txt')
+        self.vocab.add_vocab_from_file(datadir / 'valid.txt')
 
         # use the vocab to convert texts into sequences of token IDs
-        self.test = self.tokens2ids(datadir / 'test.txt')
-        self.valid = self.tokens2ids(datadir / 'valid.txt')
+        self.train = self.tokens2ids(datadir / 'train.txt')
+        # self.test = self.tokens2ids(datadir / 'test.txt')
+        # self.valid = self.tokens2ids(datadir / 'valid.txt')
 
     def tokens2ids(self, filepath):
         filepath = Path(filepath)
@@ -62,7 +72,7 @@ class Corpus(object):
                 words = line.split() + ['<eos>']
                 ids = []
                 for word in words:
-                    ids.append(self.dictionary.word2idx[word])
+                    ids.append(self.vocab.word2idx[word])
                 idss.append(torch.tensor(ids).type(torch.int64))
             ids = torch.cat(idss)
 

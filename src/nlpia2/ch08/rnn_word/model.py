@@ -125,7 +125,7 @@ class RNNModel(nn.Module):
         self.nonlinearity = str.lower(nonlinearity or rnn_type.split('_')[-1])
         self.vocab = vocab
         self.input_size = input_size
-        self.embedding_dropout = nn.Dropout(embedding_dropout)
+        self.embedding_dropout = nn.Dropout(embedding_dropout, name='embedding_dropout')
         self.rnn_dropout = embedding_dropout
         self.encoder = nn.Embedding(len(self.vocab), self.input_size)
         self.hidden_size = hidden_size

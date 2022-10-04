@@ -11,17 +11,17 @@ cd ~/code/team/exercises/
 who
 generate_words(model=model, vocab=vocab, prompt='He')
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 # ' '.join(generate_words(model=model, vocab=vocab, prompt='The', temperature=1))
 generate_words(model=model, vocab=vocab, prompt='He')
@@ -281,8 +281,8 @@ batches = batchify1(corpus.train, num_batches=1000, batch_size=10)
 batches.size()
 train_epoch
 train_epoch?
-train_epoch(model, batches, ntokens=len(corpus.dictionary.idx2word))
+train_epoch(model, batches, ntokens=len(corpus.vocab.idx2word))
 batches = batchify1(corpus.train, num_batches=1000, batch_size=20)
-train_epoch(model, batches, ntokens=len(corpus.dictionary.idx2word))
+train_epoch(model, batches, ntokens=len(corpus.vocab.idx2word))
 hist -o -p -f hist/ch08_batchify_rnn_input.hist.md
 hist -f hist/ch08_batchify_rnn_input.hist.py

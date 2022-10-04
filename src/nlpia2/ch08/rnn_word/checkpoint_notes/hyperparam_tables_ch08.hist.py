@@ -2,109 +2,109 @@ from generate import generate_words
 from model import RNNModel
 
 corpus = data.Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='He'))
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
-model.load_state_dict(state_dict)
-' '.join(generate_words(model=model, vocab=vocab, prompt='He'))
-import torch
-from data import Corpus
-from generate import generate_words
-from model import RNNModel
-
-corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
-with open('model.pt', 'rb') as f:
-    model = torch.load(f, map_location='cpu')
-state_dict = model.state_dict()
-
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='He'))
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
+model.load_state_dict(state_dict)
+' '.join(generate_words(model=model, vocab=vocab, prompt='He'))
+import torch
+from preprocessing import Corpus
+from generate import generate_words
+from model import RNNModel
+
+corpus = Corpus('data/wikitext-2')
+vocab = corpus.vocab
+with open('model.pt', 'rb') as f:
+    model = torch.load(f, map_location='cpu')
+state_dict = model.state_dict()
+
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='The'))
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='The', temperature=.1))
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='The', temperature=.2))
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='The', temperature=.5))
 import torch
-from data import Corpus
+from preprocessing import Corpus
 from generate import generate_words
 from model import RNNModel
 
 corpus = Corpus('data/wikitext-2')
-vocab = corpus.dictionary
+vocab = corpus.vocab
 with open('model.pt', 'rb') as f:
     model = torch.load(f, map_location='cpu')
 state_dict = model.state_dict()
 
-model = RNNModel('GRU', vocab=corpus.dictionary, num_layers=1)
+model = RNNModel('GRU', vocab=corpus.vocab, num_layers=1)
 model.load_state_dict(state_dict)
 ' '.join(generate_words(model=model, vocab=vocab, prompt='The', temperature=1))
 more data/wikitext-2/train.txt
