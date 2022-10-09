@@ -42,27 +42,23 @@ def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-hyperp = dict(
-    use_glove=True,
-    expand_glove_vocab=False,  # None
-    seq_len=32,
-    vocab_size=2000,
-    embedding_size=64,
-    # out_channels=50,
+hyperparams_old = dict(
+    expand_glove_vocab=False,
+    seq_len=35,
+    vocab_size=3000,
+    embedding_size=50,
     num_stopwords=0,
-    kernel_lengths=[2, 3, 4, 5],
-    strides=[2, 2, 2, 2],
-    batch_size=12,
-    learning_rate=0.001,
-    # TODO:
-    # lots of dropout can cause the training accuracy to be worse than the test acc
-    # low dropout can cause the model to overfit, so dropout should be incrementally increased
-    dropout=.2,
-    num_epochs=12,
+    kernel_lengths=[2],
+    strides=[1],
+    batch_size=10,
+    learning_rate=0.01,
+    num_epochs=10,
 )
 
 # experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
-hyperp_best = {
+hyperparams = {
+    "expand_glove_vocab": False,
+    "num_epochs": 10,
     "seq_len": 32,
     "usecols": ["text", "target"],
     "tokenizer": "tokenize_re",
@@ -87,33 +83,14 @@ hyperp_best = {
     "re_sub": "[^A-Za-z0-9.?!]+",
     "vocab_size": 2000,
     "embedding_size": 64,
-    "learning_curve": [],
+    #    "learning_curve": [],
     "loss": 0.11444409191608429,
     "train_accuracy": 0.8727193110494819,
     "test_accuracy": 0.7900262467191601,
 }
 
-# best hyper for .79 accuracy
-# expand_glove_vocab                                                 None
-# seq_len                                                              32
-# vocab_size                                                         2000
-# embedding_size                                                       64
-# num_stopwords                                                         0
-# kernel_lengths                                             [2, 3, 4, 5]
-# strides                                                    [2, 2, 2, 2]
-# batch_size                                                           12
-# learning_rate                                                    0.0010
-# num_epochs                                                          NaN
-# y_train                                                            None
-# y_test                                                             None
-# learning_curve                [.64 .71 .74 .77 .78 .78 .78 .78 .78 .79]
-# loss                                                             0.1144
-# train_accuracy                                                   0.8727
-# test_accuracy                                                    0.7900
-# filename                                                          24363
 
-
-def pad(sequence, seq_len, pad_value=0):
+def pad(sequence, pad_value=0, seq_len=hyperparams['seq_len']):
     log.debug(f'BEFORE PADDING: {sequence}')
     padded = list(sequence)[:seq_len]
     padded = padded + [pad_value] * (seq_len - len(padded))
@@ -122,40 +99,27 @@ def pad(sequence, seq_len, pad_value=0):
 
 
 def load_dataset(
-    use_glove=True,
-    expand_glove_vocab=bool(hyperp['expand_glove_vocab']),
-    seq_len=int(hyperp['seq_len']),
-    vocab_size=int(hyperp['vocab_size']),
-    embedding_size=int(hyperp['embedding_size']),
-    num_stopwords=int(hyperp['num_stopwords']),
+    expand_glove_vocab=hyperparams['expand_glove_vocab'],
+    seq_len=hyperparams['seq_len'],
+    vocab_size=hyperparams['vocab_size'],
+    embedding_size=hyperparams['embedding_size'],
+    num_stopwords=hyperparams['num_stopwords'],
     **kwargs,
 ):
     """ load and preprocess csv file: return [(token id sequences, label)...]
 
-    1. load the CSV
-    2. optionally fold the character case with lower()
-    3. optionally remove punctuation characters (non-alpha chars)
-    4. tokenize with regex or spacy (configurable)
-    5. optionally remove stopwords (most frequent words)
-    6. optionally remove infrequent words
-    7. compute a reverse index (token->id)
-    8. transform token sequences to `int` id sequences
-    9. pad token id sequences so they are all the same length
-    10. split your texts into training and test (validation) sets
-
-    To be fully rigorous with your pipeline hygene you need to do train_test_split before
-    tokenization and token filtering/folding, because this creates your vocabulary.
-    And you don't want to let your model "cheat" by seeing the words in your test set that
-    are not in your training set.
-    So step 10 should be between step 1 and 2 and most of the other steps can be skipped for the test set.
-
-    1, 10
-    Then on trainset: 2, 3, 4, 5, 6, 7, 8, 9
-    Then on testset: 2, 3, 4
-    Then on the testset remove all words not in the vocab from the trainset
-    Skip 8 on the testset because that's the vocab from trainset
-    Just 9 (pad) is needed to complete your testset preprocessing.
+    1. Simplified: load the CSV
+    2. Configurable: case folding
+    3. Configurable: remove non-letters (nonalpha):
+    4. Configurable: tokenize with regex or spacy
+    5. Configurable: remove stopwords (frequent words)
+    6. Configurable: filter infrequent words
+    7. Simplified: compute reverse index
+    8. Simplified: transform token sequences to integer id sequences
+    9. Simplified: pad token id sequences
+    10. Simplified: train_test_split
     """
+
     import re
     from nessvec.files import load_vecs_df
     HOME_DATA_DIR = Path.home() / '.nlpia2-data'
@@ -171,49 +135,36 @@ def load_dataset(
     if PAD_TOK not in vocab:
         vocab = [PAD_TOK] + list(vocab)
 
-    # FIXME: Compare with and without glove by shuffling or not shuffling the index
-    # Will also confirm that the word vocab and index are correct
-    if use_glove:
-        glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
-        num_glove_vecs, embed_dims = glove.shape
-        new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
-        glove = pd.concat([new_embeddings, glove])
-        print(f'glove.shape {glove.shape}')
-        print(glove)
+    glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
+    num_glove_vecs, embed_dims = glove.shape
+    new_embeddings = pd.DataFrame([pd.Series([0] * embed_dims, name=PAD_TOK)])
+    glove = pd.concat([new_embeddings, glove])
+    print(f'glove.shape {glove.shape}')
+    print(glove)
 
-        # <3> If your vocab of popular words contains words that glove does not
-        #     you can expand your vocabulary by creating random vectors for each of these words
-        # Because these words are really common in your domain (dataset) they are probably
-        #     important for you language model to understand.
-        if expand_glove_vocab:
-            nonglove_words = [tok for tok in vocab if tok not in glove.index]   # <3>
-            vocab.extend(nonglove_words)
-            embed = []
-            # create the new vocabulary (TODO: should be simple concat(df[nonglove_vocab], df[vocab]))
-            for tok in vocab:                                              # <4>
-                if tok in glove.index:
-                    embed.append(glove.loc[tok])
-                else:
-                    embed.append(.1 * np.random.randn(embed_dims) - .05)
-                    # embed.append(np.zeros(embed_dims))
-            vocab = vocab[:vocab_size]
-            embed = embed[:vocab_size]
-        else:
-            vocab = [tok for tok in vocab if tok in glove.index]
-            print(f'len(vocab) {len(vocab)}')
-            embed = glove.loc[vocab].values
-        embed = pd.DataFrame(embed, index=vocab)
-        print(f'df_glove before tensor: {embed}')
-        print(f'glove.shape {glove.shape}')
-        print(f'embed.shape {embed.shape} (after filtering')
-        embed = torch.tensor(embed.values, dtype=torch.float32)
-        print(f'embed.size() {embed.size()}')
-        print(f'embed.size(): {embed.size()}')
-        print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
-        retval['embed'] = embed
+    expand_glove_vocab = False
+    if expand_glove_vocab:
+        new_vocab = [tok for tok in vocab if tok not in new_embeddings.index]   # <3>
+        vocab.extend(new_vocab)
+        embed = []
+        for tok in vocab:                                              # <4>
+            if tok in glove.index:
+                embed.append(glove.loc[tok])
+            else:
+                embed.append(np.zeros(embed_dims))
     else:
-        retval['embed'] = torch.Tensor(np.random.randn(*(vocab_size, embedding_size)))
-    assert 'embed' in retval, f'retval not in {retval.keys()}'
+        vocab = [tok for tok in vocab if tok in glove.index]
+        print(f'len(vocab) {len(vocab)}')
+        embed = glove.loc[vocab].values
+    embed = np.array(embed)
+    print(f'glove.shape {glove.shape}')
+    print(f'embed.shape {embed.shape}')
+    embed = torch.Tensor(np.array(embed))
+    print(f'embed.size() {embed.size()}')
+
+    print(df)
+    print(f'embed.size(): {embed.size()}')
+    print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
 
     # <1> tokenizing, case folding, and occurrence counting
     # <2> ignore the 3 most frequent tokens ("t", "co", "http")
@@ -225,23 +176,24 @@ def load_dataset(
     tok2id = dict(zip(vocab, range(len(vocab))))
 
     # 8. Simplified: transform token sequences to integer id sequences
-    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df['text']]
+    id_sequences = [[i for i in map(tok2id.get, seq) if i is not None] for seq in df.text]
 
     # 9. Simplified: pad token id sequences
     padded_sequences = []
     for seq in id_sequences:
-        padded_sequences.append(pad(seq, seq_len=seq_len, pad_value=vocab.index(PAD_TOK)))
+        padded_sequences.append(pad(seq, seq_len=35, pad_value=vocab.index(PAD_TOK)))
     padded_sequences = torch.IntTensor(padded_sequences)
 
     # 10. Configurable sampling for testset (test_size samples)
-    retval.update(dict(zip(
+    retval = dict(zip(
         'x_train x_test y_train y_test'.split(),
         train_test_split(
             padded_sequences,
             list(df['target']),
-            test_size=.1))))
+            test_size=.1)))
     retval['vocab'] = vocab
     retval['tok2id'] = tok2id
+    retval['embed'] = embed
     return retval
 
 
@@ -294,12 +246,9 @@ class Pipeline:
         self.x_test = dataset['x_test']
         self.y_test = dataset['y_test']
         self.model = CNNTextClassifier(
-            embeddings=dataset['embed'],
-            out_channels=None,
-            seq_len=hyperp['seq_len'],
-            kernel_lengths=hyperp['kernel_lengths'],
-            strides=hyperp['strides'],
-        )
+            seq_len=self.seq_len,
+            kernel_lengths=self.kernel_lengths,
+            embeddings=tuple(dataset['embed'].size()))
 
     def train(self, X=None, y=None):
 
@@ -317,11 +266,8 @@ class Pipeline:
             predictions = []
             for x_batch, y_batch in self.loader_train:
                 y_batch = y_batch.type(torch.FloatTensor)
-                # print(f'y_batch: {y_batch}')
                 y_pred = self.model(x_batch)
-                # print(f'y_pred: {y_pred}')
                 loss = F.binary_cross_entropy(y_pred, y_batch)
-                # print(f'loss: {loss}')
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -393,7 +339,7 @@ def parse_argv(sys_argv=sys.argv):
     argv = list(reversed(sys_argv[1:]))
 
     pipeline_args = []
-    pipe_kwargs = {}  # dict(tokenizer='tokenize_re')
+    pipeline_kwargs = {}  # dict(tokenizer='tokenize_re')
     while len(argv):
         a = argv.pop()
         if a.startswith('--'):
@@ -403,18 +349,11 @@ def parse_argv(sys_argv=sys.argv):
             else:
                 k = a.lstrip('-')
                 v = argv.pop()
-            pipe_kwargs[k] = v
+            pipeline_kwargs[k] = v
         else:
             pipeline_args.append(a)
-    for k in pipe_kwargs:
-        pipe_kwargs[k] = type(hyperp[k])(pipe_kwargs[k])
-    # hyperp['use_glove'] = bool(int(hyperp['use_glove'])),
-    # hyperp['expand_glove_vocab'] = bool(int(hyperp['expand_glove_vocab'])),
-    # hyperp['seq_len'] = int(hyperp['seq_len']),
-    # hyperp['vocab_size'] = int(hyperp['vocab_size']),
-    # hyperp['embedding_size'] = int(hyperp['embedding_size']),
-    # hyperp['num_stopwords'] = int(hyperp['num_stopwords'])
-    return pipeline_args, pipe_kwargs
+
+    return pipeline_args, pipeline_kwargs
 
 
 def main():
@@ -424,16 +363,15 @@ def main():
         log.error(f'main.py does not accept positional args: {cli_args}')
     log.warning(f'kwargs: {cli_kwargs}')
 
-    hyperp.update(cli_kwargs)
-    pipeline = Pipeline(
-        **hyperp)
+    hyperparams.update(cli_kwargs)
+    pipeline = Pipeline(**hyperparams)
 
     pipeline = pipeline.train()
     hyperparms = json.loads(pipeline.dump())
 
     # predictions = pipeline.predict()
 
-    return dict(pipeline=pipeline, hyperp=hyperparms)
+    return dict(pipeline=pipeline, hyperparams=hyperparms)
 
 
 if __name__ == '__main__':
@@ -444,16 +382,16 @@ if __name__ == '__main__':
         log.error(f'main.py does not accept positional args: {cli_args}')
     log.warning(f'kwargs: {cli_kwargs}')
 
-    hyperp.update(cli_kwargs)
-    pipeline = Pipeline(**hyperp)
+    hyperparams.update(cli_kwargs)
+    pipeline = Pipeline(**hyperparams)
 
     pipeline = pipeline.train()
     hyperparms = json.loads(pipeline.dump())
 
     # predictions = pipeline.predict()
 
-    results = dict(pipeline=pipeline, hyperp=hyperparms)
+    results = dict(pipeline=pipeline, hyperparams=hyperparms)
     print("=" * 100)
     print("=========== HYPERPARMS =============")
-    print(results['hyperp'].keys())
+    print(results['hyperparams'].keys())
     print("=" * 100)
