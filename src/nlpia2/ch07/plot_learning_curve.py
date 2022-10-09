@@ -9,7 +9,7 @@ pd.options.display.float_format = '{: 5.4f}'.format
 
 
 def get_sorted_experiments(
-        datadir='hyperparam-tuning',
+        datadir='experiments',
         important_hyperparams=None):
     important_hyperparams = important_hyperparams or str.split(
         'split_random_state torch_random_state filename case_sensitive num_stopwords'
@@ -36,9 +36,6 @@ def get_sorted_experiments(
         test_cols = [s for s in df.columns if 'test' in s.lower() or 'val' in s.lower()]
         df = df.sort_values([s for s in test_cols if 'acc' in s.lower() or 'loss' in s.lower()][-1])
     return df
-
-
-
 
 
 def get_sorted_experiments_from_log(datadir=(Path.home() / '.nlpia2-data' / 'log')):

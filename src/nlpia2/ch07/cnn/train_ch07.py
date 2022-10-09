@@ -44,22 +44,73 @@ def tokenize_re(doc):
 
 hyperp = dict(
     use_glove=True,
-    expand_glove_vocab=True,
-    seq_len=40,
+    expand_glove_vocab=False,  # None
+    seq_len=32,
     vocab_size=2000,
-    embedding_size=50,
-    out_channels=50,
+    embedding_size=64,
+    # out_channels=50,
     num_stopwords=0,
-    kernel_lengths=[1, 2, 3, 4, 5, 6],
-    strides=[1, 1, 1, 1, 1, 1],
-    batch_size=24,
-    learning_rate=0.002,
+    kernel_lengths=[2, 3, 4, 5],
+    strides=[2, 2, 2, 2],
+    batch_size=12,
+    learning_rate=0.001,
     # TODO:
     # lots of dropout can cause the training accuracy to be worse than the test acc
     # low dropout can cause the model to overfit, so dropout should be incrementally increased
-    dropout=0,
-    num_epochs=400,
+    dropout=.2,
+    num_epochs=12,
 )
+
+# experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
+hyperp_best = {
+    "seq_len": 32,
+    "usecols": ["text", "target"],
+    "tokenizer": "tokenize_re",
+    "embeddings": [2000, 64],
+    "kernel_lengths": [2, 3, 4, 5],
+    "strides": [2, 2, 2, 2],
+    "conv_output_size": 32,
+    "in_channels": 32,
+    "planes": 1,
+    "out_channels": 32,
+    "groups": 1,
+    "epochs": 10,
+    "batch_size": 12,
+    "learning_rate": 0.001,
+    "test_size": 0.1,
+    "dropout_portion": 0.2,
+    "num_stopwords": 0,
+    "case_sensitive": True,
+    "split_random_state": 1460940,
+    "numpy_random_state": 433,
+    "torch_random_state": 433994,
+    "re_sub": "[^A-Za-z0-9.?!]+",
+    "vocab_size": 2000,
+    "embedding_size": 64,
+    "learning_curve": [],
+    "loss": 0.11444409191608429,
+    "train_accuracy": 0.8727193110494819,
+    "test_accuracy": 0.7900262467191601,
+}
+
+# best hyper for .79 accuracy
+# expand_glove_vocab                                                 None
+# seq_len                                                              32
+# vocab_size                                                         2000
+# embedding_size                                                       64
+# num_stopwords                                                         0
+# kernel_lengths                                             [2, 3, 4, 5]
+# strides                                                    [2, 2, 2, 2]
+# batch_size                                                           12
+# learning_rate                                                    0.0010
+# num_epochs                                                          NaN
+# y_train                                                            None
+# y_test                                                             None
+# learning_curve                [.64 .71 .74 .77 .78 .78 .78 .78 .78 .79]
+# loss                                                             0.1144
+# train_accuracy                                                   0.8727
+# test_accuracy                                                    0.7900
+# filename                                                          24363
 
 
 def pad(sequence, seq_len, pad_value=0):
@@ -143,7 +194,7 @@ def load_dataset(
                 if tok in glove.index:
                     embed.append(glove.loc[tok])
                 else:
-                    embed.append(.1 * np.random.randn(embed_dims))
+                    embed.append(.1 * np.random.randn(embed_dims) - .05)
                     # embed.append(np.zeros(embed_dims))
             vocab = vocab[:vocab_size]
             embed = embed[:vocab_size]
@@ -161,7 +212,7 @@ def load_dataset(
         print(f'pd.Series(vocab):\n{pd.Series(vocab)}')
         retval['embed'] = embed
     else:
-        retval['embed'] = torch.random.randn((vocab_size, embedding_size))
+        retval['embed'] = torch.Tensor(np.random.randn(*(vocab_size, embedding_size)))
     assert 'embed' in retval, f'retval not in {retval.keys()}'
 
     # <1> tokenizing, case folding, and occurrence counting
