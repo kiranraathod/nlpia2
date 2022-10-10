@@ -14,7 +14,6 @@ from itertools import chain
 import logging
 from pathlib import Path
 import re
-import sys
 
 import numpy as np
 import pandas as pd
@@ -406,7 +405,6 @@ class Pipeline(Parameters):
             X_batches = list(zip(*self.loader_test))[0]
             y_batches = list(zip(*self.loader_test))[1]
 
-
         print(f'len(X_batches): {len(X_batches)}')
         print(f'len(X_batches[0]): {len(X_batches[0])}')
         print(f'len(X_batches[1]): {len(X_batches[1])}')
@@ -414,10 +412,10 @@ class Pipeline(Parameters):
         print(f'X_batches[1].size(): {X_batches[1].size()}')
         print(f'X_batches[0][0]: {str(X_batches[0][0])[:80]}...')
         print(f'X_batches[0][1]: {str(X_batches[0][1])[:80]}...')
-        print('self.indexes_to_texts(X_batches[0][0])')
-        print(self.indexes_to_texts(X_batches[0][0]))
-        print('self.indexes_to_texts(X_batches[0][1])')
-        print(self.indexes_to_texts(X_batches[0][1]))
+        # print('self.indexes_to_texts(X_batches[0][0])')
+        # print(self.indexes_to_texts(X_batches[0][0]))
+        # print('self.indexes_to_texts(X_batches[0][1])')
+        # print(self.indexes_to_texts(X_batches[0][1]))
 
         y_batches = list(zip(*self.loader_test))[1]
 
