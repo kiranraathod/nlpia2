@@ -191,9 +191,9 @@ class CNNTextClassifier(nn.Module):
     def forward(self, x):
         """ Input is sequence of ints (token indices). Output is a single binary class label """
         # x = torch.tensor(x)
-        # print(x.size())  # torch.Size([12, 32])  # batch_size=12, in_channels=32
+        # print(x.size())  # torch.Size([12, 32])  # batch_size=12, seq_len=32
         X = self.embedding(x)
-        # print(X.size())  # torch.Size([12, 32, 64]) # batch_size=12, in_channels=32, embedding_size=64
+        # print(X.size())  # torch.Size([12, 32, 64]) # batch_size=12, seq_len=32, embedding_size=64
         conv_outputs = []
         for (conv, pool) in zip(self.convolvers, self.poolers):
             z = conv(X)

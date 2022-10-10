@@ -44,7 +44,6 @@ log.setLevel(level=logging.INFO)
 # experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
 HYPERP = {
     "expand_glove_vocab": False,
-    "num_epochs": 10,
     "seq_len": 32,
     "usecols": ["text", "target"],
     "tokenizer": "tokenize_re",
