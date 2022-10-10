@@ -58,7 +58,7 @@ def calc_output_seq_len(in_seq_len, kernel_lengths, strides, dilation=1):
 ##########################################################################
 
 
-class CNNTextClassifier(nn.ModuleList):
+class CNNTextClassifier(nn.Module):
 
     def __init__(self,
                  random_state=None,
@@ -76,6 +76,8 @@ class CNNTextClassifier(nn.ModuleList):
                  strides=None,
                  embeddings=(2000, 64),
                  test_size=.1,
+                 batch_size=12,
+                 # conv_output_size=32,
                  **kwargs):
         """ Conv1D layers concatenated into a single 1D vector
 
@@ -83,8 +85,8 @@ class CNNTextClassifier(nn.ModuleList):
         """
         super().__init__()
         if len(kwargs):
-            log.warning(f"Did not process all kwargs: {kwargs}")
-
+            log.warning(f"!!!DID NOT PROCESS ALL KWARGS!!!: {list(kwargs.keys())}")
+            #  ['filepath', 'usecols', 'tokenizer', 'conv_output_size', 'planes', 'epochs', 'batch_size', 'learning_rate', 'num_stopwords', 'case_sensitive', 'split_random_state', 're_sub', 'vocab_size', 'embedding_size', '_Parameters__names', 'tokenizer_fun', 'vocab', 'tok2id', 'x_train', 'y_train', 'x_test', 'y_test']
         self.first_time = True
         self.random_state = random_state
         if self.random_state is not None:
@@ -188,8 +190,10 @@ class CNNTextClassifier(nn.ModuleList):
 
     def forward(self, x):
         """ Input is sequence of ints (token indices). Output is a single binary class label """
-
+        # x = torch.tensor(x)
+        # print(x.size())  # torch.Size([12, 32])  # batch_size=12, in_channels=32
         X = self.embedding(x)
+        # print(X.size())  # torch.Size([12, 32, 64]) # batch_size=12, in_channels=32, embedding_size=64
         conv_outputs = []
         for (conv, pool) in zip(self.convolvers, self.poolers):
             z = conv(X)

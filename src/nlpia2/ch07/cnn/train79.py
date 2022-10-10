@@ -6,6 +6,7 @@ Epoch: 1, loss: 0.71129, Train accuracy: 0.56970, Test accuracy: 0.64698
 ...
 Epoch: 10, loss: 0.38202, Train accuracy: 0.80324, Test accuracy: 0.75984
 """
+import argparse
 import time
 from collections import Counter
 import json
@@ -13,7 +14,6 @@ from itertools import chain
 import logging
 from pathlib import Path
 import re
-import sys
 
 import numpy as np
 import pandas as pd
@@ -25,6 +25,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
+import utils
 from model79 import CNNTextClassifier
 from nlpia2.language_model import nlp
 import joblib
@@ -39,6 +40,41 @@ logging.basicConfig(level=logging.INFO)
 log.setLevel(level=logging.INFO)
 
 
+# experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
+HYPERP = {
+    "expand_glove_vocab": False,
+    "num_epochs": 10,
+    "seq_len": 32,
+    "usecols": ["text", "target"],
+    "tokenizer": "tokenize_re",
+    "embeddings": [2000, 64],
+    "kernel_lengths": [2, 3, 4, 5],
+    "strides": [2, 2, 2, 2],
+    "conv_output_size": 32,
+    "in_channels": 32,
+    "planes": 1,
+    "out_channels": 32,
+    "groups": 1,
+    "epochs": 10,
+    "batch_size": 12,
+    "learning_rate": 0.001,
+    "test_size": 0.1,
+    "dropout_portion": 0.2,
+    "num_stopwords": 0,
+    "case_sensitive": True,
+    "split_random_state": 1460940,
+    "numpy_random_state": 433,
+    "torch_random_state": 433994,
+    "re_sub": "[^A-Za-z0-9.?!]+",
+    "vocab_size": 2000,
+    "embedding_size": 64,
+    #    "learning_curve": [],
+    "loss": 0.11444409191608429,
+    "train_accuracy": 0.8727193110494819,
+    "test_accuracy": 0.7900262467191601,
+}
+
+
 def tokenize_spacy(doc):
     return [tok.text for tok in nlp(doc) if tok.text.strip()]
 
@@ -47,9 +83,21 @@ def tokenize_re(doc):
     return [tok for tok in re.findall(r'\w+', doc)]
 
 
-class Parameters:
+def parse_args():
+    parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 RNN/LSTM/GRU/Transformer Language Model')
+    parser.add_argument('--vocab_size', type=int, default=HYPERP['vocab_size'],
+                        help='number of most frequent words to included in vocabulary')
+    parser.add_argument('--epochs', type=int, default=HYPERP['epochs'],
+                        help='type of network (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
+    args = parser.parse_args()
 
-    def __init__(self):
+    return args
+
+
+class Parameters(dict):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.seq_len: int = 32
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
@@ -93,12 +141,33 @@ class Parameters:
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
 
+        self.__names = 'filepath usecols tokenizer embeddings kernel_lengths'.split()
+        self.__names += 'strides conv_output_size in_channels planes out_channels'.split()
+        self.__names += 'groups epochs batch_size learning_rate test_size dropout_portion num_stopwords'.split()
+        self.__names += 'case_sensitive split_random_state numpy_random_state torch_random_state'.split()
+
     def to_dict(self):
-        names = 'filepath usecols tokenizer embeddings kernel_lengths'.split()
-        names += 'strides conv_output_size in_channels planes out_channels'.split()
-        names += 'groups epochs batch_size learning_rate test_size dropout_portion num_stopwords'.split()
-        names += 'case_sensitive split_random_state numpy_random_state torch_random_state'.split()
-        return {k: getattr(self, k) for k in names}
+        for k in self.__names:
+            self[k] = getattr(self, k)
+        return self
+
+    def parse_args(self):
+        d = self.to_dict()
+        self.__parser = argparse.ArgumentParser(description='PyTorch CNN disaster tweet natural language text classifier.')
+        # self.__parser.add_argument('--vocab_size', type=int, default=['vocab_size'],
+        #                     help='number of most frequent words to included in vocabulary')
+        # self.__parser.add_argument('--epochs', type=int, default=HYPERP['epochs'],
+        #                     help='type of network (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
+        for name, value in d.items():
+            typ = type(value)
+            self.__parser.add_argument(f'--{name}', type=typ, default=value,
+                                       help=f'{name}: {typ} (default = {value})')
+
+        self.args = self.__parser.parse_args()
+        for k in d:
+            print(k, getattr(self, k))
+
+        return self
 
 
 HYPERPARAMS = Parameters()
@@ -264,6 +333,7 @@ class Pipeline(Parameters):
         self.vocab = dataset['vocab']
         self.tokenizer_fun = dataset['tokenizer_fun']
         self.tok2id = dataset['tok2id']
+        self.id2tok = self.vocab
         self.embedding_size = dataset['embedding_size']
         self.num_stopwords = dataset['num_stopwords']
         self.test_size = dataset['test_size']
@@ -308,30 +378,67 @@ class Pipeline(Parameters):
                 "Epoch: %d, loss: %.5f, Train accuracy: %.5f, Test accuracy: %.5f"
                 % (epoch + 1, self.loss, self.train_accuracy, self.test_accuracy)
             )
+        print([s for s in dir(self) if 'tok' in s.lower()])
+        print([s for s in dir(self) if 'voc' in s.lower()])
         return self
+
+    def indexes_to_texts(self, indexes):
+        try:
+            indexes = np.array(indexes)
+        except:
+            indexes = indexes.numpy()
+        while len(indexes.shape) > 2:
+            indexes = indexes[0]
+        texts = []
+        for row in indexes:
+            texts.append(' '.join([self.id2tok[i] for i in row]))
+        return texts
 
     def predict(self, X=None):
 
         self.model.eval()  # evaluation mode
         predictions = []
 
-        if X is not None:
-            X_batches = zip([X], [[None] * len(X)])
+        if X is None:
+            X_batches = list(zip(*self.loader_test))
         else:
-            X_batches = list(zip(*self.loader_test))[0]
-            y_batches = list(zip(*self.loader_test))[1]
+            X_batches = X
+
+        print(f'len(X_batches): {len(X_batches)}')
+        print(f'len(X_batches[0]): {len(X_batches[0])}')
+        print(f'len(X_batches[1]): {len(X_batches[1])}')
+        print(f'X_batches[0][0].size(): {X_batches[0][0].size()}')
+        print(f'X_batches[0][1].size(): {X_batches[0][1].size()}')
+        print(f'X_batches[0][0]: {str(X_batches[0][0])[:80]}...')
+        print(f'X_batches[0][1]: {str(X_batches[0][1])[:80]}...')
+        print('self.indexes_to_texts(X_batches[0][0])')
+        print(self.indexes_to_texts(X_batches[0][0]))
+        print('self.indexes_to_texts(X_batches[0][1])')
+        print(self.indexes_to_texts(X_batches[0][1]))
+
+        y_batches = list(zip(*self.loader_test))[1]
+
+        X_batch = X_batches[0]
+        if isinstance(X_batch, list):
+            X_batches = torch.tensor(X_batches)
         with torch.no_grad():
-            for x_batch, y_batch in zip(X_batches, y_batches):
-                y_pred = self.model(x_batch).detach().numpy()
+            for x_batch in X_batches:
+                y_pred = self.model(x_batch)
+                print(y_pred)
+                y_pred = y_pred.detach()
+                print(y_pred)
+                y_pred = y_pred.numpy()
                 predictions += list(y_pred)
+                break
         return predictions
 
     def predict_text(self, X):
         if isinstance(X, str):
             X = [X]
-        tokens = [self.tokenizer_fun(s) for s in X]
-        X = [[i for i in map(self.tok2id.get, tokens) if i is not None]]
-        # X = torch.Tensor(X).to_device(device)
+        X_tokenized = [self.tokenizer_fun(s) for s in X]
+        X = [[i for i in map(self.tok2id.get, toks) if i is not None] for toks in X_tokenized]
+        X = torch.tensor(X)  # .to_device(self.device)
+        print(X)
         return self.predict(X)
 
     def score(self, X, y):
@@ -367,33 +474,11 @@ class Pipeline(Parameters):
         return json.dumps(hashable_dict, indent=indent)
 
 
-def parse_argv(sys_argv=sys.argv):
-    argv = list(reversed(sys_argv[1:]))
-
-    pipeline_args = []
-    pipeline_kwargs = {}  # dict(tokenizer='tokenize_re')
-    while len(argv):
-        a = argv.pop()
-        if a.startswith('--'):
-            if '=' in a:
-                k, v = a.split('=')
-                k = k.lstrip('-')
-            else:
-                k = a.lstrip('-')
-                v = argv.pop()
-            pipeline_kwargs[k] = v
-        else:
-            pipeline_args.append(a)
-
-    return pipeline_args, pipeline_kwargs
-
-
 def main():
 
-    pipeline_args, pipeline_kwargs = parse_argv(sys.argv)
+    # pipeline_kwargs = dict(HYPERPARAMS.parse_args())
+    pipeline_args, pipeline_kwargs = utils.parse_argv()
 
-    if len(pipeline_args):
-        log.error(f'main.py does not accept positional args: {pipeline_args}')
     log.warning(f'kwargs: {pipeline_kwargs}')
 
     pipeline = Pipeline(**pipeline_kwargs)
@@ -420,6 +505,8 @@ if __name__ == '__main__':
         --numpy_random_state=433 \
         --torch_random_state=433994 \
         --split_random_state=1460940
+
+    WARNING: exact same ac curacies achieved with different embedding size and in_channels
 
 
     Conv1d(kwargs={'in_channels': 32, 'out_channels': 32, 'kernel_size': 2, 'stride': 2, 'groups': 1})
@@ -494,7 +581,20 @@ if __name__ == '__main__':
     print("=========== HYPERPARMS =============")
     print(results['hyperparams'].keys())
     print("=" * 100)
-    with open('train79.results.joblib', 'wb') as f:
-        joblib.dump(results, f)
-    with open('train79.pipeline.joblib', 'wb') as f:
-        joblib.dump(results['pipeline'], f)
+    EXPDIR = Path('experiments')
+    EXPDIR.mkdir(exist_ok=True)
+    try:
+        with (EXPDIR / 'train79.hyperparams.json').open('wt') as f:
+            json.dump(results['hyperparams'], f)
+    except Exception:
+        print('Failed to save hyperparams.json')
+    try:
+        with (EXPDIR / 'train79.results.joblib').open('wb') as f:
+            joblib.dump(results, f)
+    except Exception:
+        print('Failed to save results.joblib')
+    try:
+        with (EXPDIR / 'train79.pipeline.joblib').open('wb') as f:
+            joblib.dump(results['pipeline'], f)
+    except Exception:
+        print('Failed to save pipeline.joblib')
