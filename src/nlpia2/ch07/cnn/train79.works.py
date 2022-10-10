@@ -405,22 +405,6 @@ class Pipeline(Parameters):
         else:
             X_batches = list(zip(*self.loader_test))[0]
             y_batches = list(zip(*self.loader_test))[1]
-
-
-        print(f'len(X_batches): {len(X_batches)}')
-        print(f'len(X_batches[0]): {len(X_batches[0])}')
-        print(f'len(X_batches[1]): {len(X_batches[1])}')
-        print(f'X_batches[0].size(): {X_batches[0].size()}')
-        print(f'X_batches[1].size(): {X_batches[1].size()}')
-        print(f'X_batches[0][0]: {str(X_batches[0][0])[:80]}...')
-        print(f'X_batches[0][1]: {str(X_batches[0][1])[:80]}...')
-        print('self.indexes_to_texts(X_batches[0][0])')
-        print(self.indexes_to_texts(X_batches[0][0]))
-        print('self.indexes_to_texts(X_batches[0][1])')
-        print(self.indexes_to_texts(X_batches[0][1]))
-
-        y_batches = list(zip(*self.loader_test))[1]
-
         with torch.no_grad():
             for x_batch, y_batch in zip(X_batches, y_batches):
                 y_pred = self.model(x_batch).detach().numpy()
