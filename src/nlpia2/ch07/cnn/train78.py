@@ -27,7 +27,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 import utils
-from model79 import CNNTextClassifier
+from model78 import CNNTextClassifier
 from nlpia2.language_model import nlp
 import joblib
 
@@ -105,7 +105,6 @@ class Parameters(dict):
         self.in_channels: int = 32
         self.seq_len = self.in_channels
         self.conv_output_size: int = 32
-
 
         self.planes: int = 1  # not sure if the is correct terminology
         self.out_channels: int = self.planes * self.in_channels
