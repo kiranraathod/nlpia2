@@ -466,15 +466,7 @@ class Pipeline(Parameters):
         return json.dumps(hashable_dict, indent=indent)
 
 
-def main():
-
-    # pipeline_kwargs = dict(HYPERPARAMS.parse_args())
-    pipeline_args, pipeline_kwargs = utils.parse_argv(sys.argv)
-
-    if len(pipeline_args):
-        log.error(f'main.py does not accept positional args: {pipeline_args}')
-    log.warning(f'kwargs: {pipeline_kwargs}')
-
+def main(**pipeline_kwargs):
     pipeline = Pipeline(**pipeline_kwargs)
 
     pipeline = pipeline.train()
@@ -570,7 +562,14 @@ if __name__ == '__main__':
     Epoch: 19, loss: 0.15811, Train accuracy: 0.93913, Test accuracy: 0.75066
     Epoch: 20, loss: 0.05061, Train accuracy: 0.93665, Test accuracy: 0.76115
     """
-    results = main()
+    # pipeline_kwargs = dict(HYPERPARAMS.parse_args())
+    pipeline_args, pipeline_kwargs = utils.parse_argv(sys.argv)
+
+    if len(pipeline_args):
+        log.error(f'main.py does not accept positional args: {pipeline_args}')
+    log.warning(f'kwargs: {pipeline_kwargs}')
+
+    results = main(**pipeline_kwargs)
     print("=" * 100)
     print("=========== HYPERPARMS =============")
     print(results['hyperparams'].keys())
