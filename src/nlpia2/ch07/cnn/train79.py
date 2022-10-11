@@ -27,7 +27,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 import utils
-from model79 import CNNTextClassifier
+from model78 import CNNTextClassifier
 from nlpia2.language_model import nlp
 import joblib
 
@@ -41,38 +41,41 @@ logging.basicConfig(level=logging.INFO)
 log.setLevel(level=logging.INFO)
 
 
-# experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
-HYPERP = {
-    "expand_glove_vocab": False,
-    "epochs": 10,
-    "seq_len": 32,
-    "usecols": ["text", "target"],
-    "tokenizer": "tokenize_re",
-    "embeddings": [2000, 64],
-    "kernel_lengths": [2, 3, 4, 5],
-    "strides": [2, 2, 2, 2],
-    "conv_output_size": 32,
-    "in_channels": 32,
-    "planes": 1,
-    "out_channels": 32,
-    "groups": 1,
-    "batch_size": 12,
-    "learning_rate": 0.001,
-    "test_size": 0.1,
-    "dropout_portion": 0.2,
-    "num_stopwords": 0,
-    "case_sensitive": True,
-    "split_random_state": 1460940,
-    "numpy_random_state": 433,
-    "torch_random_state": 433994,
-    "re_sub": "[^A-Za-z0-9.?!]+",
-    "vocab_size": 2000,
-    "embedding_size": 64,
-    #    "learning_curve": [],
-    "loss": 0.11444409191608429,
-    "train_accuracy": 0.8727193110494819,
-    "test_accuracy": 0.7900262467191601,
-}
+# # experiments/disaster_tweets_cnn_pipeline_24363.json  # May 29 16:12
+# HYPERPARAMS_BEST = {
+#     "expand_glove_vocab": False,
+#     "epochs": 10,
+#     "usecols": ["text", "target"],
+#     "tokenizer": "tokenize_re",
+#     "embeddings": [2000, 64],
+#     "kernel_lengths": [2, 3, 4, 5],
+#     "strides": [2, 2, 2, 2],
+#     "conv_output_size": 32,
+#     "in_channels": 32,
+#     "planes": 1,
+#     "out_channels": 32,
+#     "groups": 1,
+#     "batch_size": 12,
+#     "learning_rate": 0.001,
+#     "test_size": 0.1,
+#     "dropout_portion": 0.2,
+#     "num_stopwords": 0,
+#     "case_sensitive": True,
+#     "split_random_state": 1460940,
+#     "numpy_random_state": 433,
+#     "torch_random_state": 433994,
+#     "re_sub": "[^A-Za-z0-9.?!]+",
+#     "vocab_size": 2000,
+#     "embedding_size": 64,
+#     #    "learning_curve": [],
+#     "loss": 0.11444409191608429,
+#     "train_accuracy": 0.8727193110494819,
+#     "test_accuracy": 0.7900262467191601,
+# }
+# # lopez example transposes the sequence of embeddings
+# #   so that CNN channels for lopez are the tokens
+# #   and time and CNN time/sequence/tokens are the embedding dimensions
+# HYPERPARAMS_BEST["seq_len"] = HYPERPARAMS_BEST["in_channels"]
 
 
 def tokenize_spacy(doc):
@@ -87,7 +90,6 @@ class Parameters(dict):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.seq_len: int = 32
         self.filepath: Path = Path('disaster-tweets.csv')
         self.usecols: tuple = ('text', 'target')
         self.tokenizer: str = 'tokenize_re'
@@ -97,9 +99,13 @@ class Parameters(dict):
         self.embeddings: tuple = (2000, 64)
         self.kernel_lengths: list = [2, 3, 4, 5]
         self.strides: list = [2, 2, 2, 2]
+
+        # lopez transposes the last 2 CNN tensor dimensions (time, in_channels).T => (in_channels, time)
+        # lopez only works if in_channels and out_channels are 32 (equal)
+        self.in_channels: int = 32
+        self.seq_len = self.in_channels
         self.conv_output_size: int = 32
 
-        self.in_channels: int = 32
         self.planes: int = 1  # not sure if the is correct terminology
         self.out_channels: int = self.planes * self.in_channels
         self.groups: int = 1  # self.in_channels  # depth-first conv if groups == in_chan == out_channels / planes
@@ -143,35 +149,20 @@ class Parameters(dict):
 
     def parse_args(self):
         d = self.to_dict()
-        self.__parser = argparse.ArgumentParser(description='PyTorch CNN disaster tweet natural language text classifier.')
-        # self.__parser.add_argument('--vocab_size', type=int, default=['vocab_size'],
-        #                     help='number of most frequent words to included in vocabulary')
-        # self.__parser.add_argument('--epochs', type=int, default=HYPERP['epochs'],
-        #                     help='type of network (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
+        self._parser = argparse.ArgumentParser(description='PyTorch CNN disaster tweet natural language text classifier.')
         for name, value in d.items():
             typ = type(value)
-            self.__parser.add_argument(f'--{name}', type=typ, default=value,
-                                       help=f'{name}: {typ} (default = {value})')
+            self._parser.add_argument(f'--{name}', type=typ, default=value,
+                                      help=f'{name}: {typ} (default = {value})')
 
-        self.args = self.__parser.parse_args()
+        self.args = self._parser.parse_args()
         for k in d:
             print(k, getattr(self, k))
 
         return self
 
 
-HYPERPARAMS = Parameters()
-
-
-def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
-    log.debug(f'BEFORE PADDING: {sequence}')
-    padded = list(sequence)[:seq_len]
-    padded = padded + [pad_value] * (seq_len - len(padded))
-    log.debug(f'AFTER PADDING: {sequence}')
-    return padded
-
-
-def update_params(params=HYPERPARAMS, **kwargs):
+def update_params(params, **kwargs):
     # use "winning" train-test split to repro best results in NLPiA 2nd Ed
     if kwargs.pop('win', False):
         kwargs['split_random_state'] = 1460940  # seems to create easier testset
@@ -195,9 +186,22 @@ def update_params(params=HYPERPARAMS, **kwargs):
     return params
 
 
+HYPERPARAMS = Parameters()
+pipeline_args, pipeline_kwargs = utils.parse_argv(sys.argv)
+HYPERPARAMS = update_params(params=HYPERPARAMS, **pipeline_kwargs)
+
+
+def pad(sequence, pad_value=0, seq_len=HYPERPARAMS.seq_len):
+    log.debug(f'BEFORE PADDING: {sequence}')
+    padded = list(sequence)[:seq_len]
+    padded = padded + [pad_value] * (seq_len - len(padded))
+    log.debug(f'AFTER PADDING: {sequence}')
+    return padded
+
+
 def load_dataset(
         params,
-        seq_len=32,
+        # seq_len=HYPERARAMS['seq_len'],
         vocab_size=2000,
         embedding_size=64,
         num_stopwords=0,
