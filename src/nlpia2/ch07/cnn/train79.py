@@ -321,21 +321,21 @@ class Pipeline(Parameters):
         log.info(kwargs)
         params = update_params(params=self)
         # self.__dict__.update(params.__dict__)
-        self.verbose = kwargs.pop('verbose', 0)
+        self.verbose = int(float(kwargs.pop('verbose', 0) or 0))
 
         self.print(vars(self))
 
         dataset = load_dataset(params, **kwargs)
 
-        self.epochs = dataset['epochs']
+        self.epochs = int(float(dataset['epochs']))
         self.vocab = dataset['vocab']
         self.tokenizer_fun = dataset['tokenizer_fun']
         self.tok2id = dataset['tok2id']
         self.id2tok = self.vocab
         self.embedding_size = dataset['embedding_size']
-        self.num_stopwords = dataset['num_stopwords']
+        self.num_stopwords = int(float(dataset['num_stopwords']))
         self.test_size = dataset['test_size']
-        self.split_random_state = dataset['split_random_state']
+        self.split_random_state = int(float(dataset['split_random_state']))
         self.x_train = dataset['x_train']
         self.y_train = dataset['y_train']
         self.x_test = dataset['x_test']
