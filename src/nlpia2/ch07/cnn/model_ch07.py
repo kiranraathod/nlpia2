@@ -84,7 +84,7 @@ class CNNTextClassifier(nn.Module):
         super().__init__()
 
         self.seq_len = 35                          # <1>
-        self.vocab_size = 3000                     # <2>
+        self.vocab_size3000                        # <2>
         self.embedding_size = 50                   # <3>
         self.kernel_lengths = [2]                  # <4>
         self.stride = 1                            # <5>
@@ -105,7 +105,10 @@ class CNNTextClassifier(nn.Module):
                 nn.MaxPool1d(kernel_size, self.stride))  # <7>
 
         # self.conv_output_size = lopez_cnn_output_size()  # <8>
-        self.conv_output_size = compute_output_seq_len()  # <8>
+        self.conv_output_size = compute_output_seq_len(
+            embedding_size=self.embedding_size,
+            kernel_lengths=self.kernel_lengths,
+            stride=1)  # <8>
         self.linear_layer = nn.Linear(self.conv_output_size, 1)
 # ----
 # <1> `N_`: assume a maximum text length of 35 tokens
