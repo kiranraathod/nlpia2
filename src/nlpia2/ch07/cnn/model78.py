@@ -64,8 +64,6 @@ class CNNTextClassifier(nn.Module):
                  random_state=None,
                  torch_random_state=None,
                  numpy_random_state=None,
-
-                 win=False,
                  seq_len=32,
                  in_channels=50,
                  out_channels=50,
@@ -78,6 +76,10 @@ class CNNTextClassifier(nn.Module):
                  test_size=.1,
                  batch_size=12,
                  # conv_output_size=32,
+
+                 verbose=1,
+                 win=False,
+
                  **kwargs):
         """ Conv1D layers concatenated into a single 1D vector
 
@@ -87,6 +89,7 @@ class CNNTextClassifier(nn.Module):
         if len(kwargs):
             log.warning(f"!!!DID NOT PROCESS ALL KWARGS!!!: {list(kwargs.keys())}")
             #  ['filepath', 'usecols', 'tokenizer', 'conv_output_size', 'planes', 'epochs', 'batch_size', 'learning_rate', 'num_stopwords', 'case_sensitive', 'split_random_state', 're_sub', 'vocab_size', 'embedding_size', '_Parameters__names', 'tokenizer_fun', 'vocab', 'tok2id', 'x_train', 'y_train', 'x_test', 'y_test']
+        self.verbose = int(float(verbose or 0))
         self.first_time = True
         self.random_state = random_state
         if self.random_state is not None:
@@ -101,7 +104,8 @@ class CNNTextClassifier(nn.Module):
         else:
             self.numpy_random_state = numpy_random_state
 
-        print(f"embeddings={embeddings}")
+        if self.verbose:
+            print(f"embeddings={embeddings}")
         try:
             shape = embeddings.shape
         except AttributeError:
@@ -109,7 +113,8 @@ class CNNTextClassifier(nn.Module):
                 shape = embeddings.size()
             except AttributeError:
                 shape = embeddings
-        print(f'shape: {shape}')
+        if self.verbose:
+            print(f'model.embeddings.size(): {shape}')
         self.vocab_size = shape[0]
         self.embedding_size = shape[1]
 
@@ -117,7 +122,7 @@ class CNNTextClassifier(nn.Module):
         self.in_channels = in_channels             # <1> seq_len
         self.out_channels = self.in_channels
         self.groups = groups
-        self.kernel_lengths = [2]  # kernel_lengths         # <2>
+        self.kernel_lengths = kernel_lengths  # kernel_lengths         # <2>
         self.stride = 2
         self.strides = strides
         if self.strides is None or not len(self.strides) == len(self.kernel_lengths):
@@ -137,14 +142,17 @@ class CNNTextClassifier(nn.Module):
         self.convolvers = []
         self.poolers = []
 
-        print(f"self.embedding_size: {self.embedding_size}")
+        if self.verbose:
+            print(f"self.embedding_size: {self.embedding_size}")
         self.kernel_lengths = list(kernel_lengths)
 
         if isinstance(embeddings, torch.Tensor):
-            print(f'Loading embeddings: {embeddings.size()}')
+            if self.verbose:
+                print(f'Loading embeddings: {embeddings.size()}')
             self.embedding = nn.Embedding.from_pretrained(embeddings, freeze=False)
         else:
-            print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
+            if self.verbose:
+                print(f'Creating empty embeddings: {self.vocab_size, self.embedding_size}')
             self.embedding = nn.Embedding(self.vocab_size, self.embedding_size, padding_idx=0)
 
         self.strides = strides
@@ -167,21 +175,26 @@ class CNNTextClassifier(nn.Module):
                 stride=stride,
                 groups=self.groups,
             )
-            print(f"Conv1d(kwargs={convkwargs})")
+            if self.verbose:
+                print(f"Conv1d(kwargs={convkwargs})")
             self.convolvers.append(nn.Conv1d(
                 **convkwargs))
-            print(self.convolvers[-1])
+            if self.verbose:
+                print(self.convolvers[-1])
             self.poolers.append(nn.MaxPool1d(kernel_size, stride))
-            print(f"self.poolers[-1]: {self.poolers[-1]}")
+            if self.verbose:
+                print(f"self.poolers[-1]: {self.poolers[-1]}")
 
         calcoutkwargs = dict(in_seq_len=self.in_channels * 2,  # seq_len
                              kernel_lengths=self.kernel_lengths,
                              strides=self.strides)
-        print(calcoutkwargs)
+        if self.verbose:
+            print(calcoutkwargs)
         self.encoding_size = calc_output_seq_len(
             **calcoutkwargs,
         )
-        print(f"self.encoding_size = {self.encoding_size}")
+        if self.verbose:
+            print(f"self.encoding_size = {self.encoding_size}")
 
         self.linear_layer = nn.Linear(self.encoding_size, 1)
 # <1> assume a maximum text length of 32 tokens
@@ -204,10 +217,10 @@ class CNNTextClassifier(nn.Module):
         if self.first_time:
             print(f"conv_outputs: {[co.size() for co in conv_outputs]}")
         encoding = torch.cat(conv_outputs, 2)
-        if self.first_time:
+        if self.verbose > 1 or self.first_time:
             print(f"encoding.size(): {encoding.size()}")
         encoding = encoding.reshape(encoding.size(0), -1)
-        if self.first_time:
+        if self.verbose > 1 or self.first_time:
             print(f"reshaped encoding.size(): {encoding.size()}")
 
         encoding = self.dropout(encoding)
