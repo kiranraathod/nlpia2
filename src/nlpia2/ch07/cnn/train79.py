@@ -27,7 +27,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 import utils
-from model78 import CNNTextClassifier
+from model79 import CNNTextClassifier
 from nlpia2.language_model import nlp
 import joblib
 
