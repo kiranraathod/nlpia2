@@ -236,7 +236,7 @@ def main(
 
     batch_size = kwargs['batch_size']  # 10
     train_data = batchify(dataset=corpus.train, batch_size=batch_size, device=device)
-    # val_data = batchify(dataset=corpus.valid, batch_size=batch_size, device=device)
+    val_data = batchify(dataset=corpus.valid, batch_size=batch_size, device=device)
     test_data = batchify(dataset=corpus.test, batch_size=batch_size, device=device)
 
     # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
