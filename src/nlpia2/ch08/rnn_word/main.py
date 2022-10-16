@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.onnx
 from tqdm import tqdm
 
-DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
+# DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
 
 try:
     from nlpia2 import torch_utils
@@ -42,7 +42,7 @@ DEFAULT_HYPERPARAMS = dict(
     clip=0.25,
     cuda=True,
     datapath='./data/wikitext-2',
-    device='',
+    device='cuda',
     dropout=0.0,
     dry_run=False,
     emsize=200,
@@ -156,6 +156,7 @@ def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=N
 
 def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
     # Training mode enables dropout layers
+    print(train_data.device)
     model.train()
     total_loss = 0.
     start_time = time.time()
@@ -224,7 +225,9 @@ def main(
             print("WARNING: You have a CUDA device, so you should probably run with --cuda.")
 
     device = kwargs['device'] or ("cuda" if kwargs['cuda'] else "cpu")
+    print(device)
     device = torch.device(device)
+    print(device)
 
     model = rnn_models.RNNModel(vocab=corpus.vocab, **kwargs).to(device)
 
@@ -232,9 +235,9 @@ def main(
     # Training
 
     batch_size = kwargs['batch_size']  # 10
-    train_data = batchify(dataset=corpus.train, batch_size=batch_size)
-    val_data = batchify(dataset=corpus.valid, batch_size=batch_size)
-    test_data = batchify(dataset=corpus.test, batch_size=batch_size)
+    train_data = batchify(dataset=corpus.train, batch_size=batch_size, device=device)
+    # val_data = batchify(dataset=corpus.valid, batch_size=batch_size, device=device)
+    test_data = batchify(dataset=corpus.test, batch_size=batch_size, device=device)
 
     # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
     # If source is equal to the example output of the batchify function, with
@@ -262,6 +265,7 @@ def main(
             epoch_start_time = time.time()
 
             print(train_data.size())
+            print(train_data.device)
             train_epoch(
                 model=model,
                 criterion=nn.NLLLoss(),

@@ -59,8 +59,8 @@ class Corpus(object):
 
         # use the vocab to convert texts into sequences of token IDs
         self.train = self.tokens2ids(datadir / 'train.txt')
-        # self.test = self.tokens2ids(datadir / 'test.txt')
-        # self.valid = self.tokens2ids(datadir / 'valid.txt')
+        self.test = self.tokens2ids(datadir / 'test.txt')
+        self.valid = self.tokens2ids(datadir / 'valid.txt')
 
     def tokens2ids(self, filepath):
         filepath = Path(filepath)
