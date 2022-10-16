@@ -91,17 +91,17 @@ def parse_args():
                         help='random seed')
     parser.add_argument('--device', type=str, default=DEFAULT_HYPERPARAMS['device'],
                         help='device string to use in torch.device() call')
-    parser.add_argument('--cuda', action='store_true',
+    parser.add_argument('--cuda', action='store_true', default=DEFAULT_HYPERPARAMS['cuda'],
                         help='use CUDA')
-    parser.add_argument('--log-interval', type=int, default=200, metavar='N',
+    parser.add_argument('--log_interval', type=int, default=DEFAULT_HYPERPARAMS['log_interval'], metavar='N',
                         help='report interval')
-    parser.add_argument('--save', type=str, default='model.pt',
+    parser.add_argument('--save', type=str, default=DEFAULT_HYPERPARAMS['filename'],
                         help='path to save the final model')
     parser.add_argument('--onnx_export', type=str, default=DEFAULT_HYPERPARAMS['onnx_export'],
                         help='path to export the final model in onnx format')
     parser.add_argument('--nhead', type=int, default=DEFAULT_HYPERPARAMS['nhead'],
                         help='the number of heads in the encoder/decoder of the transformer model')
-    parser.add_argument('--dry-run', action='store_true',
+    parser.add_argument('--dry_run', action='store_true', default=DEFAULT_HYPERPARAMS['dry_run'],
                         help='verify the code and the model')
 
     parser.add_argument('--annealing_loss_improvement_pct', type=float, default=1.0,
@@ -154,12 +154,12 @@ def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=N
     return total_loss / (len(data_source) - 1)
 
 
-def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
+def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0, **kwargs):
     # Training mode enables dropout layers
-    print(train_data.device)
     model.train()
     total_loss = 0.
     start_time = time.time()
+    log_interval = kwargs.get('log_interval', 500)
 
     if kwargs['rnn_type'] != 'Transformer':
         hidden = model.init_hidden(kwargs['batch_size'])
@@ -243,6 +243,7 @@ def main(
     print(f'batchify(corpus.test, batch_size={batch_size}).size(): {test_data.size()}')
     checkpoint_filename = kwargs['filename']
     print(f'checkpoint_filename: {checkpoint_filename}')
+    print(f'log_interval: {kwargs["log_interval"]}')
 
     # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
     # If source is equal to the example output of the batchify function, with
@@ -273,7 +274,8 @@ def main(
                 model=model,
                 criterion=nn.NLLLoss(),
                 ntokens=len(corpus.vocab.idx2word),
-                train_data=train_data)
+                train_data=train_data,
+                **kwargs)
             val_loss = evaluate(
                 model=model,
                 criterion=nn.NLLLoss(),
