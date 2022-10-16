@@ -211,11 +211,11 @@ def export_onnx(model, path, batch_size, seq_len):
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
-        **model_kwargs):
+        **kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
-    default_kwargs.update(model_kwargs)
-    model_kwargs = default_kwargs
+    default_kwargs.update(kwargs)
+    kwargs = default_kwargs
     corpus = Corpus(kwargs['datapath'])
 
     # Set the random seed manually for reproducibility.
@@ -225,9 +225,7 @@ def main(
             print("WARNING: You have a CUDA device, so you should probably run with --cuda.")
 
     device = kwargs['device'] or ("cuda" if kwargs['cuda'] else "cpu")
-    print(device)
     device = torch.device(device)
-    print(device)
 
     model = rnn_models.RNNModel(vocab=corpus.vocab, **kwargs).to(device)
 
@@ -236,8 +234,13 @@ def main(
 
     batch_size = kwargs['batch_size']  # 10
     train_data = batchify(dataset=corpus.train, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.train, batch_size={batch_size}).size(): {train_data.size()}')
     val_data = batchify(dataset=corpus.valid, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.valid, batch_size={batch_size}).size(): {val_data.size()}')
     test_data = batchify(dataset=corpus.test, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.test, batch_size={batch_size}).size(): {test_data.size()}')
+    checkpoint_filename = kwargs['filename']
+    print(f'checkpoint_filename: {checkpoint_filename}')
 
     # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
     # If source is equal to the example output of the batchify function, with
@@ -264,15 +267,16 @@ def main(
         for epoch_num in range(1, kwargs['epochs'] + 1):
             epoch_start_time = time.time()
 
-            print(train_data.size())
-            print(train_data.device)
             train_epoch(
                 model=model,
                 criterion=nn.NLLLoss(),
                 ntokens=len(corpus.vocab.idx2word),
                 train_data=train_data)
             val_loss = evaluate(
-                model=model, ntokens=len(corpus.vocab.idx2word), data_source=val_data)
+                model=model,
+                criterion=nn.NLLLoss(),
+                ntokens=len(corpus.vocab.idx2word),
+                data_source=val_data)
             epoch_time = time.time() - epoch_start_time
             total_time += epoch_time
             results.update(dict(
@@ -292,7 +296,7 @@ def main(
 
             # Save the model if the validation loss is the best we've seen so far.
             if improvement > 0:
-                with open(kwargs['filename'], 'wb') as f:
+                with open(checkpoint_filename, 'wb') as f:
                     torch.save(model, f)
                 best_loss = val_loss
                 no_improvement_count = 0
@@ -312,7 +316,7 @@ def main(
         print('Exiting from training early')
 
     # Load the best saved model.
-    with open(kwargs['filename'], 'rb') as f:
+    with open(checkpoint_filename, 'rb') as f:
         model = torch.load(f)
         # after load the rnn params are not a continuous chunk of memory
         # this makes them a continuous chunk, and will speed up forward pass
@@ -321,7 +325,11 @@ def main(
             model.rnn.flatten_parameters()
 
     # Run on test data.
-    results['test_loss'] = evaluate(test_data)
+    results['test_loss'] = evaluate(
+        model=model,
+        criterion=nn.NLLLoss(),
+        ntokens=len(corpus.vocab.idx2word),
+        data_source=test_data)
     results['test_perplexity'] = try_exp(results['test_loss'])
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(
