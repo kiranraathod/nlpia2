@@ -47,7 +47,7 @@ DEFAULT_HYPERPARAMS = dict(
     dry_run=False,
     emsize=200,
     epochs=1,
-    log_interval=200,
+    log_interval=500,
     lr=3,
     rnn_type='RNN_TANH',
     nhead=2,
@@ -163,7 +163,9 @@ def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
 
     if kwargs['rnn_type'] != 'Transformer':
         hidden = model.init_hidden(kwargs['batch_size'])
-    for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['seqlen'])), total=train_data.size(0)):
+    for batch, i in tqdm(
+            enumerate(range(0, train_data.size(0) - 1, kwargs['seqlen'])),
+            total=len(train_data) // kwargs['seqlen']):
         data, targets = get_batch(train_data, i)
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -264,7 +266,7 @@ def main(
 
     # [ctrl]-C to break out of training early and retain the latest best checkpoint (model.pt)
     try:
-        for epoch_num in range(1, kwargs['epochs'] + 1):
+        for epoch_num in tqdm(range(1, kwargs['epochs'] + 1)):
             epoch_start_time = time.time()
 
             train_epoch(
