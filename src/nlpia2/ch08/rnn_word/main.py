@@ -210,13 +210,12 @@ def export_onnx(model, path, batch_size, seq_len):
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
-        max_corpus_size=10000,
         **model_kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
     default_kwargs.update(model_kwargs)
     model_kwargs = default_kwargs
-    corpus = Corpus(kwargs['datapath'], max_size=max_corpus_size)
+    corpus = Corpus(kwargs['datapath'])
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(kwargs['seed'])
