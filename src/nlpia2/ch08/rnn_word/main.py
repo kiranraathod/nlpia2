@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.onnx
 from tqdm import tqdm
 
-DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
+# DEVICE = device = torch.device('cpu')  # 'cuda', 'cuda:0', 'cuda:1'
 
 try:
     from nlpia2 import torch_utils
@@ -42,12 +42,12 @@ DEFAULT_HYPERPARAMS = dict(
     clip=0.25,
     cuda=True,
     datapath='./data/wikitext-2',
-    device='',
+    device='cuda',
     dropout=0.0,
     dry_run=False,
     emsize=200,
     epochs=1,
-    log_interval=200,
+    log_interval=500,
     lr=3,
     rnn_type='RNN_TANH',
     nhead=2,
@@ -91,17 +91,17 @@ def parse_args():
                         help='random seed')
     parser.add_argument('--device', type=str, default=DEFAULT_HYPERPARAMS['device'],
                         help='device string to use in torch.device() call')
-    parser.add_argument('--cuda', action='store_true',
+    parser.add_argument('--cuda', action='store_true', default=DEFAULT_HYPERPARAMS['cuda'],
                         help='use CUDA')
-    parser.add_argument('--log-interval', type=int, default=200, metavar='N',
+    parser.add_argument('--log_interval', type=int, default=DEFAULT_HYPERPARAMS['log_interval'], metavar='N',
                         help='report interval')
-    parser.add_argument('--save', type=str, default='model.pt',
+    parser.add_argument('--save', type=str, default=DEFAULT_HYPERPARAMS['filename'],
                         help='path to save the final model')
     parser.add_argument('--onnx_export', type=str, default=DEFAULT_HYPERPARAMS['onnx_export'],
                         help='path to export the final model in onnx format')
     parser.add_argument('--nhead', type=int, default=DEFAULT_HYPERPARAMS['nhead'],
                         help='the number of heads in the encoder/decoder of the transformer model')
-    parser.add_argument('--dry-run', action='store_true',
+    parser.add_argument('--dry_run', action='store_true', default=DEFAULT_HYPERPARAMS['dry_run'],
                         help='verify the code and the model')
 
     parser.add_argument('--annealing_loss_improvement_pct', type=float, default=1.0,
@@ -154,15 +154,18 @@ def evaluate(model, criterion, ntokens=None, eval_batch_size=None, data_source=N
     return total_loss / (len(data_source) - 1)
 
 
-def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0):
+def train_epoch(model, train_data, ntokens, criterion=nn.NLLLoss(), lr=2.0, **kwargs):
     # Training mode enables dropout layers
     model.train()
     total_loss = 0.
     start_time = time.time()
+    log_interval = kwargs.get('log_interval', 500)
 
     if kwargs['rnn_type'] != 'Transformer':
         hidden = model.init_hidden(kwargs['batch_size'])
-    for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, kwargs['seqlen'])), total=train_data.size(0)):
+    for batch, i in tqdm(
+            enumerate(range(0, train_data.size(0) - 1, kwargs['seqlen'])),
+            total=len(train_data) // kwargs['seqlen']):
         data, targets = get_batch(train_data, i)
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -210,13 +213,12 @@ def export_onnx(model, path, batch_size, seq_len):
 def main(
         stop_improvement_fraction=0.00001,
         no_improvement_count_max=5,
-        max_corpus_size=10000,
-        **model_kwargs):
+        **kwargs):
     default_kwargs = DEFAULT_HYPERPARAMS.copy()
     default_kwargs.update(vars(parse_args()))
-    default_kwargs.update(model_kwargs)
-    model_kwargs = default_kwargs
-    corpus = Corpus(kwargs['datapath'], max_size=max_corpus_size)
+    default_kwargs.update(kwargs)
+    kwargs = default_kwargs
+    corpus = Corpus(kwargs['datapath'])
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(kwargs['seed'])
@@ -233,9 +235,15 @@ def main(
     # Training
 
     batch_size = kwargs['batch_size']  # 10
-    train_data = batchify(dataset=corpus.train, batch_size=batch_size)
-    val_data = batchify(dataset=corpus.valid, batch_size=batch_size)
-    test_data = batchify(dataset=corpus.test, batch_size=batch_size)
+    train_data = batchify(dataset=corpus.train, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.train, batch_size={batch_size}).size(): {train_data.size()}')
+    val_data = batchify(dataset=corpus.valid, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.valid, batch_size={batch_size}).size(): {val_data.size()}')
+    test_data = batchify(dataset=corpus.test, batch_size=batch_size, device=device)
+    print(f'batchify(corpus.test, batch_size={batch_size}).size(): {test_data.size()}')
+    checkpoint_filename = kwargs['filename']
+    print(f'checkpoint_filename: {checkpoint_filename}')
+    print(f'log_interval: {kwargs["log_interval"]}')
 
     # get_batch subdivides the source data into chunks of length kwargs['seqlen'].
     # If source is equal to the example output of the batchify function, with
@@ -259,17 +267,20 @@ def main(
 
     # [ctrl]-C to break out of training early and retain the latest best checkpoint (model.pt)
     try:
-        for epoch_num in range(1, kwargs['epochs'] + 1):
+        for epoch_num in tqdm(range(1, kwargs['epochs'] + 1)):
             epoch_start_time = time.time()
 
-            print(train_data.size())
             train_epoch(
                 model=model,
                 criterion=nn.NLLLoss(),
                 ntokens=len(corpus.vocab.idx2word),
-                train_data=train_data)
+                train_data=train_data,
+                **kwargs)
             val_loss = evaluate(
-                model=model, ntokens=len(corpus.vocab.idx2word), data_source=val_data)
+                model=model,
+                criterion=nn.NLLLoss(),
+                ntokens=len(corpus.vocab.idx2word),
+                data_source=val_data)
             epoch_time = time.time() - epoch_start_time
             total_time += epoch_time
             results.update(dict(
@@ -289,7 +300,7 @@ def main(
 
             # Save the model if the validation loss is the best we've seen so far.
             if improvement > 0:
-                with open(kwargs['filename'], 'wb') as f:
+                with open(checkpoint_filename, 'wb') as f:
                     torch.save(model, f)
                 best_loss = val_loss
                 no_improvement_count = 0
@@ -309,7 +320,7 @@ def main(
         print('Exiting from training early')
 
     # Load the best saved model.
-    with open(kwargs['filename'], 'rb') as f:
+    with open(checkpoint_filename, 'rb') as f:
         model = torch.load(f)
         # after load the rnn params are not a continuous chunk of memory
         # this makes them a continuous chunk, and will speed up forward pass
@@ -318,7 +329,11 @@ def main(
             model.rnn.flatten_parameters()
 
     # Run on test data.
-    results['test_loss'] = evaluate(test_data)
+    results['test_loss'] = evaluate(
+        model=model,
+        criterion=nn.NLLLoss(),
+        ntokens=len(corpus.vocab.idx2word),
+        data_source=test_data)
     results['test_perplexity'] = try_exp(results['test_loss'])
     print('=' * 89)
     print('| End of training | test loss {test_loss:5.2f} | test ppl {test_perplexity:8.2f}'.format(

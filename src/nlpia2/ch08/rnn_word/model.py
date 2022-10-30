@@ -125,7 +125,7 @@ class RNNModel(nn.Module):
         self.nonlinearity = str.lower(nonlinearity or rnn_type.split('_')[-1])
         self.vocab = vocab
         self.input_size = input_size
-        self.embedding_dropout = nn.Dropout(embedding_dropout, name='embedding_dropout')
+        self.embedding_dropout = nn.Dropout(embedding_dropout)
         self.rnn_dropout = embedding_dropout
         self.encoder = nn.Embedding(len(self.vocab), self.input_size)
         self.hidden_size = hidden_size
@@ -189,9 +189,10 @@ class RNNModel(nn.Module):
             return weight.new_zeros(
                 self.num_layers, self.batch_size, self.hidden_size)
 
-    def predict_word_hidden(self, input_word, hidden_tens=None, temperature=1, device=DEVICE):
+    def predict_word_hidden(self, input_word, hidden_tens=None, temperature=1, device=None):
         if hidden_tens is None:
             hidden_tens = self.init_hidden()
+        device = device or hidden_tens.device
         input_tens = torch.LongTensor(
             [[self.vocab.word2idx[input_word]]]).to(device)
         output_tens, hidden_tens = self(input_tens, hidden_tens)
