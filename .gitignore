@@ -120,3 +120,4 @@ src/nlpia2/data/meuller/*.pdf
 
 # other git repos
 src/nlpia2/ch08/nlpia-rnn/
+src/nlpia2/ch08/huggingface-spaces-nlpia-rnn/
