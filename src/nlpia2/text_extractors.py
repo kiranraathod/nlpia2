@@ -1,7 +1,8 @@
-import re
+import argparse
 import doctest
-from pathlib import Path
 from doctest import DocTestParser
+from pathlib import Path
+import re
 import tempfile
 
 try:
@@ -65,12 +66,12 @@ def expressions_to_doctests(expressions, prompt='>>> ', ellipsis='... ', comment
             blocks.append('')
 
 
-def extract_code_file(filename=DEFAULT_FILENAME, basedir=DEFAULT_DIR, destfile=None):
-    filename = Path(DEFAULT_FILENAME)
-    basedir = Path(DEFAULT_DIR)
-    filepath = basedir / filename
-    destfile = destfile or filepath.with_suffix('.adoc.py')
-    lines = extract_code_lines(filepath=filepath)
+def extract_code_file(filepath=DEFAULT_DIR / DEFAULT_FILENAME, destfile=None):
+    filepath = Path(filepath)
+    destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
+    if destfile.is_dir():
+        destfile = destfile / filepath.with_suffix('.adoc.py').name
+    lines = extract_code_lines(filepath=filepath, with_metadata=False)
     if destfile:
         with Path(destfile).open('wt') as fout:
             fout.writelines(lines)
@@ -133,7 +134,36 @@ def extract_code_files(glob='*.adoc', adocdir=DEFAULT_DIR, destdir=None):
     return destpaths
 
 
+def parse_args(
+        description='Transcoder for doctest-formatted code blocks in asciidoc/txt files to py, or ipynb code blocks',
+        input_help='Path to asciidoc or text file containing doctest-format code blocks',
+        output_help='Path to new py file created from code blocks in INPUT',
+        format_help='Output file format or type (md, py, ipynb, python, or notebook)'):
+
+    parser = argparse.ArgumentParser(description=description)
+
+    parser.add_argument(
+        '--input', type=Path, default=Path(DEFAULT_DIR / DEFAULT_FILENAME),
+        help=input_help
+    )
+    parser.add_argument(
+        '--output', type=Path, default=Path(DEFAULT_DIR / DEFAULT_FILENAME),
+        help=output_help,
+    )
+    parser.add_argument(
+        '--format', type=str, default='py', help=format_help
+    )
+    return vars(parser.parse_args())
+
+
 if __name__ == '__main__':
-    if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
-        filepaths = extract_code_files()
-        print(filepaths)
+    args = parse_args()
+    if args['input']:
+        if Path(args['input']).is_dir():
+            results = extract_code_files(adocdir=args['input'])
+        else:
+            results = extract_code_file(filepath=args['input'])
+    else:
+        if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
+            results = extract_code_files()
+    print(results)

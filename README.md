@@ -8,9 +8,7 @@
 [![codecov](https://codecov.io/gl/tangibleai/nlpia2/branch/master/graph/badge.svg)](https://codecov.io/gl/tangibleai/nlpia2)
 [![GitLab CI](https://gitlab.com/tangibleai/nlpia2/badges/master/pipeline.svg)](https://gitlab.com/tangibleai/nlpia2/badges/master/pipeline.svg)
 
-
-
-Official code repository for the book [_Natural Language Processing in Action, 2nd Edition_](https://proai.org/nlpia2e) by Maria Dyshel and Hobson Lane at [Tangible AI](https://tangibleai.com). It would not have happened without the generous work of [contributing authors](AUTHORS.md) and prosocial AI developers.
+Official [code repository](https://gitlab.com/tangibleai/nlpia2/) for the book [_Natural Language Processing in Action, 2nd Edition_](https://proai.org/nlpia2e) by Maria Dyshel and Hobson Lane at [Tangible AI](https://tangibleai.com) for [Manning Publications](https://manning.com). It would not have happened without the generous work of [contributing authors](AUTHORS.md).
 
 To get the most of this repository, you need to do two things.
 
