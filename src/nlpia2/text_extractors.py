@@ -1,6 +1,7 @@
 import argparse
 import doctest
 from doctest import DocTestParser
+from parsimonious import Grammar
 from pathlib import Path
 import re
 import tempfile
@@ -12,19 +13,27 @@ except NameError:
 
 assert DATA_DIR.is_dir()
 
-DEFAULT_DIR = Path('/home/hobs/code/tangibleai/nlpia-manuscript/manuscript/adoc')
+MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
+DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
-def extract_code_lines(filepath=DEFAULT_DIR / DEFAULT_FILENAME, with_metadata=True):
+def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data/grammars/adoc.ppeg')):
+    filepath, grammarpath = Path(filepath), Path(grammarpath)
+    g = Grammar(grammarpath.open().read())
+    ast = g.parse(filepath.open().read())
+    return ast
+
+
+def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
     expressions = extract_expressions(filepath=filepath)
     if with_metadata:
         return [vars(ex) for ex in expressions]
     return [ex.source for ex in expressions]
 
 
-def extract_expressions(filepath=DEFAULT_DIR / DEFAULT_FILENAME):
+def extract_expressions(filepath=DEFAULT_FILEPATH):
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     return dtparser.get_examples(text)
@@ -66,7 +75,7 @@ def expressions_to_doctests(expressions, prompt='>>> ', ellipsis='... ', comment
             blocks.append('')
 
 
-def extract_code_file(filepath=DEFAULT_DIR / DEFAULT_FILENAME, destfile=None):
+def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     filepath = Path(filepath)
     destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
     if destfile.is_dir():
@@ -78,20 +87,18 @@ def extract_code_file(filepath=DEFAULT_DIR / DEFAULT_FILENAME, destfile=None):
     return ''.join(lines)
 
 
-def test_file(filename=DEFAULT_FILENAME, basedir=DEFAULT_DIR, adoc=True,
+def test_file(filepath=DEFAULT_FILEPATH, adoc=True,
               optionflags=DEFAULT_OPTIONFLAGS,
               name=None,
               verbose=False,
               package=None, module_relative=False,
               **kwargs):
-    filename = Path(filename)
     if name is None:
-        name = filename.name
+        name = filepath.name
     if package:
         module_relative = True
         basedir = '.'
     basedir = Path(basedir)
-    filepath = basedir / filename
     if not module_relative:
         assert filepath.is_file()
     if adoc:
@@ -117,7 +124,7 @@ def test_file(filename=DEFAULT_FILENAME, basedir=DEFAULT_DIR, adoc=True,
     return results
 
 
-def extract_code_files(glob='*.adoc', adocdir=DEFAULT_DIR, destdir=None):
+def extract_code_files(glob='*.adoc', adocdir=MANUSCRIPT_DIR, destdir=None):
     adocdir = Path(adocdir)
     if destdir is None:
         destdir = adocdir.parent / 'py'
@@ -143,11 +150,11 @@ def parse_args(
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        '--input', type=Path, default=Path(DEFAULT_DIR / DEFAULT_FILENAME),
+        '--input', type=Path, default=None,
         help=input_help
     )
     parser.add_argument(
-        '--output', type=Path, default=Path(DEFAULT_DIR / DEFAULT_FILENAME),
+        '--output', type=Path, default=None,
         help=output_help,
     )
     parser.add_argument(
@@ -166,4 +173,3 @@ if __name__ == '__main__':
     else:
         if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_code_files()
-    print(results)
