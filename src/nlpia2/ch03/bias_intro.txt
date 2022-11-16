@@ -2,7 +2,8 @@ Algorithmic bias describes systematic and repeatable errors in a computer system
 Bias can emerge due to many factors, including but not limited to the design of the algorithm or the unintended or unanticipated use or decisions relating to the way data is coded, collected, selected or used to train the algorithm.
 Algorithmic bias is found across platforms, including but not limited to search engine results and social media platforms, and can have impacts ranging from inadvertent privacy violations to reinforcing social biases of race, gender, sexuality, and ethnicity.
 The study of algorithmic bias is most concerned with algorithms that reflect "systematic and unfair" discrimination.
-This bias has only recently been addressed in legal frameworks, such as the 2018 European Union's General Data Protection Regulation. More comprehensive regulation is needed as emerging technologies become increasingly advanced and opaque.
+This bias has only recently been addressed in legal frameworks, such as the 2018 European Union's General Data Protection Regulation.
+More comprehensive regulation is needed as emerging technologies become increasingly advanced and opaque.
 
 As algorithms expand their ability to organize society, politics, institutions, and behavior, sociologists have become concerned with the ways in which unanticipated output and manipulation of data can impact the physical world.
 Because algorithms are often considered to be neutral and unbiased, they can inaccurately project greater authority than human expertise, and in some cases, reliance on algorithms can displace human responsibility for their outcomes.
