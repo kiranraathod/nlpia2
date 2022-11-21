@@ -124,7 +124,7 @@ def test_file(filepath=DEFAULT_FILEPATH, adoc=True,
     return results
 
 
-def extract_code_files(glob='*.adoc', adocdir=MANUSCRIPT_DIR, destdir=None):
+def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc'):
     adocdir = Path(adocdir)
     if destdir is None:
         destdir = adocdir.parent / 'py'
@@ -134,7 +134,7 @@ def extract_code_files(glob='*.adoc', adocdir=MANUSCRIPT_DIR, destdir=None):
     for p in adocdir.glob(glob):
         destfile = (destdir / p.name).with_suffix('.adoc.py')
         print(f"{p} => {destfile}")
-        code = extract_code_file(filename=p.name, basedir=p.parent)
+        code = extract_code_file(filepath=p)
         with destfile.open('wt') as fout:
             fout.write(code)
         destpaths.append(destfile)
