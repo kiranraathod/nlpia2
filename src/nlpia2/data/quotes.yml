@@ -13,6 +13,386 @@
 # TODO:
 # - Edelman:
 #    _Neural Darwinism_: (ch1 and philosophy, wisdom, prosocial)
+
+-
+  text: "The universe is a dark forest. Every civilization is an armed hunter stalking through the trees like a ghost, gently pushing aside branches that block the path and trying to tread without sound. Even breathing is done with care. The hunter has to be careful, because everywhere in the forest are stealthy hunters like him. If he finds other life--another hunter, an angel or a demon, a delicate infant or a tottering old man, a fairy or a demigod--there's only one thing he can do: open fire and eliminate them. In this forest, hell is other people. An eternal threat that any life that exposes its own existence will be swiftly wiped out. This is the picture of cosmic civilization. It's the explanation for the Fermi Paradox."
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "No, emptiness is not nothingness. Emptiness is a type of existence. You must use this existential emptiness to fill yourself."
+  likes: 200
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Weakness and ignorance are not barriers to survival, but arrogance is."
+  likes: 169
+  author: Liu Cixin  
+  source: Good Reads
+  book:  Death's End
+-
+  text: "If I destroy you, what business is it of yours?"
+  likes: 167
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "It was impossible to expect a moral awakening from humankind itself, just like it was impossible to expect humans to lift off the earth by pulling up on their own hair. To achieve moral awakening required a force outside the human race."
+  likes: 113
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "To effectively contain a civilization's development and disarm it across such a long span of time, there is only one way: kill its science."
+  likes: 106
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Is it possible that the relationship between humanity and evil is similar to the relationship between the ocean and an iceberg floating on its surface? Both the ocean and the iceberg are made of the same material. That the iceberg seems separate is only because it is in a different form. In reality, it is but a part of the vast ocean.…"
+  likes: 103
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "In the shooter hypothesis, a good marksman shoots at a target, creating a hole every ten centimeters. Now suppose the surface of the target is inhabited by intelligent, two-dimensional creatures. Their scientists, after observing the universe, discover a great law: "There exists a hole in the universe every ten centimeters." They have mistaken the result of the marksman's momentary whim for an unalterable law of the universe. The farmer hypothesis, on the other hand, has the flavor of a horror story: Every morning on a turkey farm, the farmer comes to feed the turkeys. A scientist turkey, having observed this pattern to hold without change for almost a year, makes the following discovery: "Every morning at eleven, food arrives." On the morning of Thanksgiving, the scientist announces this law to the other turkeys. But that morning at eleven, food doesn't arrive; instead, the farmer comes and kills the entire flock."
+  likes: 93
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Your lack of fear is based on your ignorance."
+  likes: 84
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [fear, ignorance]
+-
+  text: "For the majority of people, what they love exists only in the imagination. The object of their love is not the man or woman of reality, but what he or she is like in their imagination. The person in reality is just a template used for the creation of this dream lover. Eventually, they find out the differences between their dream lover and the template. If they can get used to those differences, then they can be together. If not, they split up. It's as simple as that. You differ from the majority in one respect: You didn't need a template."
+  likes: 84
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "Every era puts invisible shackles on those who have lived through it, and I can only dance in my chains."
+  likes: 69
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "I'm a simple man without a lot of complicated twists and turns. Look down my throat and you can see out my ass."
+  likes: 67
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [simple, simple-life, simple-man, simple-minds]
+-
+  text: "And now we know that this is the journey that must be made by every civilization: awakening inside a cramped cradle, toddling out of it, taking flight, flying faster and farther, and, finally, merging with the fate of the universe as one. The ultimate fate of all intelligent beings has always been to become as grand as their thoughts."
+  likes: 63
+  author: Liu Cixin  
+  source: Good Reads
+  book:  Death's End
+-
+  text: "If we lose our human nature, we lose much, but if we lose our bestial nature, we lose everything."
+  likes: 61
+  author: Liu Cixin  
+  source: Good Reads
+  book:  Death's End
+-
+  text: "In the face of madness, rationality was powerless."
+  likes: 53
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Time is the cruelest force of all."
+  likes: 53
+  author: Cixin Liu  
+  source: Good Reads
+  book:  Death's End
+  tags: [cruel, eternity, force, time]
+-
+  text: "It's a wonder to be alive. If you don't understand that, how can you search for anything deeper?"
+  likes: 48
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "In China, any idea that dared to take flight would only crash back to the ground. The gravity of reality is too strong."
+  likes: 48
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Make time for civilization, for civilization won't make time."
+  likes: 46
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "By the time you're my age, you'll realize that everything you once thought mattered so much turns out to mean very little."
+  likes: 45
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Sometimes I thought life was precious, and everything was so important; but other times I thought humans were insignificant, and nothing was worthwhile. Anyway, my life passed day after day accompanied by this strange feeling, and before I knew it, I was old.…"
+  likes: 44
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Even if God were here, it wouldn't do any good. The entire human race has reached the point where no one is listening to their prayers."
+  likes: 34
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Mere existence is already the result of incredible luck. Such was the case on Earth in the past, and such has always been the case in this cruel universe. But at some point, humanity began to develop the illusion that they're entitled to life, that life can be taken for granted."
+  likes: 33
+  author: Liu Cixin  
+  source: Good Reads
+  book:  Death's End
+  tags: [don-t-panic]
+-
+  text: "Staying alive is not enough to guarantee survival. Development is the best way to ensure survival."
+  likes: 32
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "Take those frauds who practice pseudoscience - do you know who they're most afraid of?"
+  likes: 31
+
+"Scientists, of course."
+
+"No. Many of the best scientists can be fooled by pseudoscience and sometimes devote their lives to it. But pseudoscience is afraid of one particular type of people who are very hard to fool: stage magicians. In fact, many pseudoscience hoaxes were exposed by stage magicians."
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [magicians, pseudoscience, stage-magic, street-magic]
+-
+  text: "A woman should be like water, able to flow over and around anything."
+  likes: 31
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [gender-roles, impossible-expectations, impossible-standards, life, standards, stereotypes, woman, women]
+-
+  text: "Time is the one thing that can't be stopped. Like a sharp blade, it silently cuts through hard and soft, constantly advancing. Nothing is capable of jolting it even the slightest bit, but it changes everything."
+  likes: 30
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest
+-
+  text: "I need a dual-vector foil for cleansing."
+  likes: 30
+  author: Liu Cixin  
+  source: Good Reads
+  book:  Death's End
+-
+  text: "You must know that a person's ability to discern the truth is directly proportional to his knowledge."
+  likes: 29
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Ten thousand times the web could be destroyed, and ten thousand times the spider would rebuild it. There was neither annoyance nor despair, nor any delight, just as it had been for a billion years."
+  likes: 28
+  author: Liu Cixin  
+  source: Good Reads
+  book:  The Dark Forest 
+-
+  text: "No, emptiness is not nothingness. Emptiness is a type of existence. You must use this existential emptiness to fill yourself."
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "It was impossible to expect a moral awakening from humankind itself, just like it was impossible to expect humans to lift off the earth by pulling up on their own hair. To achieve moral awakening required a force outside the human race."
+  likes: 169
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "To effectively contain a civilization's development and disarm it across such a long span of time, there is only one way: kill its science."
+  likes: 106
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Is it possible that the relationship between humanity and evil is similar to the relationship between the ocean and an iceberg floating on its surface? Both the ocean and the iceberg are made of the same material. That the iceberg seems separate is only because it is in a different form. In reality, it is but a part of the vast ocean.…"
+  likes: 103
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: |+
+    In the shooter hypothesis, a good marksman shoots at a target, creating a hole every ten centimeters. Now suppose the surface of the target is inhabited by intelligent, two-dimensional creatures. Their scientists, after observing the universe, discover a great law: "There exists a hole in the universe every ten centimeters." They have mistaken the result of the marksman's momentary whim for an unalterable law of the universe. The farmer hypothesis, on the other hand, has the flavor of a horror story: Every morning on a turkey farm, the farmer comes to feed the turkeys. A scientist turkey, having observed this pattern to hold without change for almost a year, makes the following discovery: "Every morning at eleven, food arrives." On the morning of Thanksgiving, the scientist announces this law to the other turkeys. But that morning at eleven, food doesn't arrive; instead, the farmer comes and kills the entire flock.
+  likes: 93
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Your lack of fear is based on your ignorance."
+  likes: 84
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [fear, ignorance]
+-
+  text: "Every era puts invisible shackles on those who have lived through it, and I can only dance in my chains."
+  likes: 84
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "I'm a simple man without a lot of complicated twists and turns. Look down my throat and you can see out my ass."
+  likes: 67
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [simple, simple-life, simple-man, simple-minds]
+-
+  text: "In the face of madness, rationality was powerless."
+  likes: 63
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "In China, any idea that dared to take flight would only crash back to the ground. The gravity of reality is too strong."
+  likes: 53
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "By the time you're my age, you'll realize that everything you once thought mattered so much turns out to mean very little."
+  likes: 46
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Sometimes I thought life was precious, and everything was so important; but other times I thought humans were insignificant, and nothing was worthwhile. Anyway, my life passed day after day accompanied by this strange feeling, and before I knew it, I was old.…"
+  likes: 44
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Even if God were here, it wouldn't do any good. The entire human race has reached the point where no one is listening to their prayers."
+  likes: 34
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: |+
+    "Take those frauds who practice pseudoscience - do you know who they're most afraid of?"
+    "Scientists, of course."
+    "No. Many of the best scientists can be fooled by pseudoscience and sometimes devote their lives to it. But pseudoscience is afraid of one particular type of people who are very hard to fool: stage magicians. In fact, many pseudoscience hoaxes were exposed by stage magicians."
+  likes: 33
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [magicians, pseudoscience, stage-magic, street-magic]
+-
+  text: "A woman should be like water, able to flow over and around anything."
+  likes: 31
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [gender-roles, impossible-expectations, impossible-standards, life, standards, stereotypes, woman, women]
+-
+  text: "You must know that a person's ability to discern the truth is directly proportional to his knowledge."
+  likes: 30
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Should philosophy guide experiments, or should experiments guide philosophy?"
+  likes: 28
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [philosophy, scientific-experiments, scientific-method]
+-
+  text: "Overly literal translations, far from being faithful, actually distort meaning by obscuring sense."
+  likes: 23
+  author: Ken Liu (Cixin Liu's translator) 
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [bilingualism, language-barrier, translated, translating, translation, translations, translator]
+-
+  text: "From time to time, I would gaze up at the stars after a night shift and think that they looked like a glowing desert, and I myself was a poor child abandoned in the desert... I thought that life was truly an accident among accidents in the universe. The universe was an empty palace, and humankind the only ant in the entire palace. This kind of thinking infused the second half of my life with a conflicted mentality: Sometimes I thought life was precious, and everything was so important; but other times I thought humans were insignificant, and nothing was worthwhile. Anyway, my life passed day after day accompanied by this strange feeling, and before I knew it, I was old..."
+  likes: 22
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  tags: [meaning, nihilism, time]
+-
+  text: "The creation myths of the various peoples and religions of the world pale when compared to the glory of the big bang."
+  likes: 19
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: |+
+    "Why are you all like this?" Evans suddenly became furious. "Why does one have to save people to be considered a hero? Why is saving other species considered insignificant? Who gave humans such high honors? No, humans do not need saving. They're already living much better than they deserve."
+  likes: 19
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+  text: "She was like a star, always so distant. Even the light she shone on me was always cold."
+  likes: 18
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "My father then said, 'Mike, I've told you how dinosaurs went extinct. An asteroid crashed into the Earth. The world first became a sea of fire, and then sank into a prolonged period of darkness and coldness.… One night, you woke from a nightmare, saying that you had dreamt that you were back in that terrifying age. Let me tell you now what I wanted to tell you that night: If you really lived during the Cretaceous Period, you'd be fortunate. The period we live in now is far more frightening. Right now, species on Earth are going extinct far faster than during the late Cretaceous. Now is truly the age of mass extinctions! So, my child, what you're seeing is nothing. This is only an insignificant episode in a much vaster process. We can have no sea birds, but we can't be without oil. Can you imagine life without oil? Your last birthday, I gave you that lovely Ferrari and promised you that you could drive it after you turned fifteen. But without oil, it would be a pile of junk metal and you'd never drive it. Right now, if you want to visit your grandfather, you can get there on my personal jet and cross the ocean in a dozen hours or so. But without oil, you'd have to tumble in a sailboat for more than a month.… These are the rules of the game of civilization: The first priority is to guarantee the existence of the human race and their comfortable life. Everything else is secondary."
+  likes: 17
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Is it possible that the relationship between humanity and evil is similar to the relationship between the ocean and an iceberg floating on its surface? Both the ocean and the iceberg are made of the same material. That the iceberg seems separate is only because it is in a different form. In reality, it is but a part of the vast ocean.… It was impossible to expect a moral awakening from humankind itself, just like it was impossible to expect humans to lift off the earth by pulling up on their own hair. To achieve moral awakening required a force outside the human race."
+  likes: 16
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "At the end, an adult and a child stand in front of the grave of a Red Guard who had died during the faction civil wars. The child asks the adult, 'Are they heroes?' The adult says no. The child asks, 'Are they enemies?' The adult again says no. The child asks, 'Then who are they?' The adult says, 'History."
+  likes: 15
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "On Earth, humankind can step onto another continent, and without a thought, destroy the kindred civilizations found there through warfare and disease. But when they gaze up at the stars, they turn sentimental and believe that if extraterrestrial intelligences exist, they must be civilizations bound by universal, noble, moral constraints, as if cherishing and loving different forms of life are parts of a self-evident universal code of conduct. I think it should be precisely the opposite: Let's turn the kindness we show toward the stars to members of the human race on Earth"
+  likes: 12
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Evans: We don't know what extraterrestrial civilization is like, but we know humanity."
+  likes: 12
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "The creation myths of the various peoples and religions of the world pale when compared to the glory of the big bang. The three-billion-year history of life's evolution from self-reproducing molecules to civilization contains twists and romances that cannot be matched by any myth or epic. There is also the poetic vision of space and time in relativity, the weird subatomic world of quantum mechanics … these wondrous stories of science all possess an irresistible attraction. Through the medium of science fiction, I seek only to create my own worlds using the power of imagination, and to make known the poetry of Nature in those worlds, to tell the romantic legends that have unfolded between Man and Universe."
+  likes: 11
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Can the fundamental nature of matter really be lawlessness? Can the stability and order of the world be but a temporary dynamic equilibrium achieved in a corner of the universe, a short-lived eddy in a chaotic current?"
+  likes: 11
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem
+-
+  text: "Anything sufficiently weird must be fishy."
+  likes: 11
+  author: Cixin Liu  
+  source: Good Reads
+  book:  The Three-Body Problem 
 -
     text: |+
       So from that spring whence comfort seemed to come
@@ -50,7 +430,7 @@
   date: 1992
   author: Luhmann
 -
-  text: "It's no use, Mr. James—it's turtles all the way down."
+  text: "It's no use, Mr. James--it's turtles all the way down."
   author: J. R. Ross
   source: _Constraints on Variables in Syntax_, 1967
   tags: [recursion, rnn, philosophy, debate, logic, argument, ch8]
@@ -74,7 +454,7 @@
   tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
   source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
 -
-  text: "The man who can hold forth on every matter under debate in two contradictory ways of pleading, or can argue for and against every proposition that can be laid down—such a man is the true, the complete, and the only orator."
+  text: "The man who can hold forth on every matter under debate in two contradictory ways of pleading, or can argue for and against every proposition that can be laid down--such a man is the true, the complete, and the only orator."
   author: Roman Orator Cicero (see this article)
   tags: [debate, Rapoport, Rapoport's Rules, Impossible Conversations, communication, influence, persuasion, arguing, disagreement, criticism]
   source: https://www.rightattitudes.com/2017/06/16/rapoport-rules-criticism
@@ -369,7 +749,7 @@
   tags: [stoicism, inspiration, stoic, philosophy, life]
   author: Epictetus
 -
-  text: "Choose not to be harmed — and you won't feel harmed. Don't feel harmed — and you haven't been."
+  text: "Choose not to be harmed -- and you won't feel harmed. Don't feel harmed -- and you haven't been."
   author: Marcus Aurelius"
   tags: [stoicism, inspiration, stoic, philosophy, life, mindfulness]
 -
@@ -656,7 +1036,7 @@
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
   tags: [intuition pumps, argument, debate, toxic comments, social media, discipline, philosophy, nlp, nlpia, save the world, collective consciousness]
-- text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it's far easier to be wrong than right).
+- text: Beliefs matter because people act upon their beliefs--whether those beliefs are true or not (and it's far easier to be wrong than right).
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
   tags: [beliefs, post-truth, misinformation, intuition pumps, argument, debate, toxic comments, misinformation, social media, discipline, philosophy, nlp, nlpia, save the world, collective consciousness]
@@ -711,7 +1091,7 @@
   author: Socrates
   tags: [knoweldge, truth]
 -
-  text: "I set to do you—each one of you, individually and in private—what I hold to be the greatest possible service. I tried to persuade each one of you to concern himself less with what he has than with what he is, so as to render himself as excellent and rational as possible."
+  text: "I set to do you--each one of you, individually and in private--what I hold to be the greatest possible service. I tried to persuade each one of you to concern himself less with what he has than with what he is, so as to render himself as excellent and rational as possible."
   author: Socrates
   tags: [meaning of life, consumerism, capitalism, philosophy, values, objective function, life]
 -
@@ -729,7 +1109,7 @@
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
 -
-  text: Beliefs matter because people act upon their beliefs—whether those beliefs are true or not (and it's far easier to be wrong than right).
+  text: Beliefs matter because people act upon their beliefs--whether those beliefs are true or not (and it's far easier to be wrong than right).
   author: Peter Boghossian
   title: "How to Have Impossible Conversations: A Very Practical Guide"
 -
@@ -819,7 +1199,7 @@
 -
   text: "[The term prosocial] was created by social scientists as an antonym for antisocial."
   author: C. Daniel Batson
-  tags: prosocial AI, prosocial, cooperation, altruism, society
+  tags: [prosocial AI, prosocial, cooperation, altruism, society]
 -
   text: "If we fail to provide boys with pro-social models of the transition to adulthood, they may construct their own. In some cases, gang initiation rituals, street racing, and random violence may be the result."
   author: Leonard Sax
@@ -890,9 +1270,9 @@
   text: "Economics is the mother tongue of public policy,"
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
-  tags: economics, public policy
+  tags: [economics, public policy]
 -
-  text: "global greenhouse gas emissions is highly skewed: the top 10 percent of emitters—think of them as the global carbonistas living on every continent—generate around 45 percent of global emissions, while the bottom 50 percent of people contribute only 13 percent."
+  text: "global greenhouse gas emissions is highly skewed: the top 10 percent of emitters--think of them as the global carbonistas living on every continent--generate around 45 percent of global emissions, while the bottom 50 percent of people contribute only 13 percent."
   author: Kate Raworth
   title: "Doughnut Economics: Seven Ways to Think like a 21st-Century Economist"
   tags: [economics, global warming, inequality, environmental impact]

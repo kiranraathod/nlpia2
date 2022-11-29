@@ -2,7 +2,7 @@
 # https://python-poetry.org/docs/pyproject/
 # https://github.com/python-poetry/poetry/blob/master/pyproject.toml
 name = "nlpia2"
-version = "0.0.20"
+version = "0.0.21"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "MIT"
 readme = "README.md"
@@ -164,3 +164,10 @@ include_trailing_comma = true
 line_length = 80
 indent = 4
 use_parentheses = true
+
+# [tool.pytest.ini_options]
+# minversion = "6.0"
+# # addopts = "-ra -q"
+# testpaths = [
+#     "tests",
+# ]

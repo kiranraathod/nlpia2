@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import tempfile
 
+
 try:
     DATA_DIR = Path(__file__).parent / 'data'
 except NameError:
@@ -87,32 +88,114 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     return ''.join(lines)
 
 
+def extract_goodreads_quotes(text):
+    """ Regexes used in Sublime to turn goodreads copypasta text into yaml entries in quotes.yml
+
+    Example output:
+      https://gitlab.com/tangibleai/nlpia2/-/tree/main/src/nlpia2/data/quotes.yml
+    Example input (copy text in browser):
+      https://www.goodreads.com/author/quotes/5780686.Liu_Cixin
+    Crawler can start with search for author/keyword quotes:
+      https://www.goodreads.com/quotes/search?q=Chiang
+    """
+    resub_pairs = dict(
+        unicode_quotes=[r'[“”]', r'"'],
+        unicode_appostrophes=[r'[‘’]', r"'"],
+        quote_text=[r'― ([^,]+),([-!?\w\d ]+)',
+                    r'''
+  author: \1
+  source: Good Reads
+  book: \2
+'''],
+        likes=[
+            r'''
+
+(\d*) likes
+Like
+(".*)
+''',
+            r'''
+
+-
+  text: \2
+  likes: \1
+'''],
+
+    )
+    for name, (pattern, replacement) in resub_pairs.items():
+        text = re.sub(pattern, replacement, text)
+    return text
+
+
+re_codeblock_source = r'[ ]*\[[ ]*source\s*,[ ]*python[ ]*\][ ]*'
+re_ipython_shabang = r'([>]{2,3}|[.]{2,3})?[ ]*[!].*'
+re_codeblock_horizontal_line = r'[ ]*[-]{2,80}[ ]*'
+
+
 def test_file(filepath=DEFAULT_FILEPATH, adoc=True,
               optionflags=DEFAULT_OPTIONFLAGS,
               name=None,
               verbose=False,
-              package=None, module_relative=False,
+              package=None,
+              module_relative=False,
               **kwargs):
     if name is None:
         name = filepath.name
     if package:
         module_relative = True
-        basedir = '.'
-    basedir = Path(basedir)
     if not module_relative:
         assert filepath.is_file()
     if adoc:
+        # Insert blank line before '----' at end of adoc code block for doctests
         with filepath.open() as fin:
             lines = fin.readlines()
             newlines = []
-            for pair in zip(lines[:-1], lines[1:]):
-                newlines.append(pair[0])
-                if not re.match(r'\s*\[\s*source\s*,\s*python\s*\]\s*', pair[0]):
-                    if re.match(r'\s*[-]{4,80}\s*', pair[1]):
+            # blocks the command line and the running of doctests
+            ignore_line_prefixes = [
+                '>>> !firefox',
+                '>>> displacy.serve(',
+                '>>> spacy.cli.download(',
+            ]
+            ignore_linepair_prefixes = [
+                '>>> %timeit',
+            ]
+            ignore_nextline = False
+            for line, nextline in zip(lines[:-1], lines[1:]):
+                # skip ignore_prefixes lines:
+                if any((line.lower().lstrip().startswith(p) for p in ignore_line_prefixes)):
+                    line = '\n'
+
+                if ignore_nextline:
+                    line = '\n'
+                    ignore_nextline = False
+                if any((line.lower().lstrip().startswith(p) for p in ignore_linepair_prefixes)):
+                    line = '\n'
+                    ignore_nextline = True
+                # remove nonpython shell commands (shabangs) !
+                # line = re.match(r'(>[2,3]|[.]{3})?\s*!.*', '', line)
+
+                # remove comment hash at begging of return value (e.g. '# 42')
+                # line = re.sub(r'^#\s+', '', line)
+
+                # rstrip EOL footnotes/comments (e.g. '  # <1>')
+                line = re.sub(r'[ ]+#[ ]+<\d+>[ ]*', '', line)
+
+                newlines.append(line)
+
+                # insert newline before '----' at end of code block
+                if nextline.startswith('----'):
+                    # print(f'line: {len(newlines)}')
+                    # print(repr(line))
+                    # print(f'nextline: {len(newlines)+1}')
+                    # print(repr(nextline))
+                    if not re.match(re_codeblock_source, line):
                         newlines.append('\n')
+                    # check for inline adoc code block comments (callout bubbles)
+            # for loop finishes one early, so append the last line of text
             newlines.append(lines[-1])
         fp, filepath = tempfile.mkstemp(text=True)
         filepath = Path(filepath)
+        print(filepath)
         with filepath.open('wt') as fout:
             fout.writelines(newlines)
     results = doctest.testfile(str(filepath),
