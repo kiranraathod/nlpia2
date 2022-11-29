@@ -19,6 +19,7 @@ db.sqlite3
 *.pkl
 **/simple-transformers
 **/albert-large-*
+/char_rnn_from_scratch_refactored.meta.json
 
 # submodules
 src/wikipedia
@@ -44,6 +45,7 @@ __pycache__/*
 */.ipynb_checkpoints/*
 .coverage*
 cache_dir/
+pyproject.toml.bak
 
 # repo2docker
 .ipython
@@ -121,3 +123,4 @@ src/nlpia2/data/meuller/*.pdf
 # other git repos
 src/nlpia2/ch08/nlpia-rnn/
 src/nlpia2/ch08/huggingface-spaces-nlpia-rnn/
+
