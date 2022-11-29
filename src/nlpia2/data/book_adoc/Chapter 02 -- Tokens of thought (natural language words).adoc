@@ -448,32 +448,38 @@ What about speed?
 
 === Tokenizer race
 
-SpaCy can parse the AsciiDoc text for a chapter in this book in about 5 seconds:
+SpaCy can parse the AsciiDoc text for a chapter in this book in about 5 seconds.
+First download the AsciiDoc text file for this chapter:
 
 [source,python]
 ----
->>> import spacy
->>> f = 'Chapter 02 -- Tokens of thought (natural language words).adoc'
->>> nlp = spacy.load('en_core_web_sm')
->>> %timeit nlp(text)  # <1>
-4.67 s ± 45.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+>>> import requests
+>>> text = requests.get('https://proai.org/nlpia2-ch2.adoc').text
+>>> f'{round(len(text) / 10_000)}0k'
+'150k'
 ----
-<1> `%timeit` is a magic function within `jupyter notebook` or `jupyter console` or `ipython`
+<1> I divided by 10,000 and rounded it, so that Doctests would continue to pass as I revise this text.
 
+There were about 150 thousand ASCII characters in this AsciiDoc file where I wrote this sentence that you are reading right now.
 What does that mean in terms of words-per-second, the standard benchmark for tokenizer speed?
 
 [source,python]
 ----
->>> text = open(f).read()
->>> f'(round(len(text) / 10_000)}0k'
+>>> import spacy
+>>> nlp = spacy.load('en_core_web_sm')
+>>> %timeit nlp(text)  # <1>
+4.67 s ± 45.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+>>> f'{round(len(text) / 10_000)}0k'
 '150k'
->>> doc = nlp(doc)
->>> f'(round(len(list(doc)) / 1_000)}k'
+>>> doc = nlp(text)
+>>> f'{round(len(list(doc)) / 1_000)}k'
 '34k'
->>> f'(round(len(list(doc)) / 1_000 / 4.67)}ktps'  # <1> 
-'7k'
+>>> f'{round(len(doc) / 1_000 / 4.67)}kWPS'  # <2> 
+'7kWPS'
 ----
-<1> ktps is for thousands of tokens per second
+<1> `%timeit` is a magic function within `jupyter notebook`, `jupyter console` or `ipython`
+<2> kWPS is for thousands of words (tokens) per second
 
 That's nearly 5 seconds for about 150,000 characters or 34,000 words of English and Python text or about 7000 words per second.
 
@@ -507,27 +513,31 @@ NLTK's `word_tokenize` method is often used as the pace setter in tokenizer benc
 
 [source,python]
 ----
+>>> import nltk
+>>> nltk.download('punkt')
+True
 >>> from nltk.tokenize import word_tokenize
 >>> %timeit word_tokenize(text)
 156 ms ± 1.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
->>> len(word_tokenize(text))
-31385
+>>> tokens = word_tokenize(text)
+>>> f'{round(len(tokens) / 1_000)}k'
+'31k'
 ----
 
 Could it be that you found a winner for the tokenizer race?
 Not so fast.
-Your regular expression tokenizer has some pretty simple rules, so it should run pretty fast:
+Your regular expression tokenizer has some pretty simple rules, so it should run pretty fast as well:
 
 [source,python]
 ----
 >>> pattern = r'\w+(?:\'\w+)?|[^\w\s]'
 >>> tokens = re.findall(pattern, text)  # <1>
->>> len(tokens)
-34534
+>>> f'{round(len(tokens) / 1_000)}k'
+'34k'
 >>> %timeit re.findall(pattern, text)
 8.77 ms ± 29.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 ----
-<1> Each time you use a regular expression a compiled and optimized version of it is cached in RAM. So you can `precompile` a regex just by using it once early in your pipeline.
+<1> Try precompiling with `re.compile` to learn something about how smart the core Python developers are
 
 Now that's not surprising.
 Regular expressions can be compiled and run very efficiently within low level C routines in Python.
@@ -535,6 +545,8 @@ Regular expressions can be compiled and run very efficiently within low level C 
 [TIP]
 ================
 Use a regular expression tokenizer when speed is more import than linguistic accuracy and you do not need the additional tags that spaCy and other pipelines provide.footnote:[Andrew Long, "Benchmarking Python NLP Tokenizers", (https://towardsdatascience.com/benchmarking-python-nlp-tokenizers-3ac4735100c5)]
+And each time you use a regular expression in the `re` or `regex` packages, a compiled and optimized version of it is cached in RAM.
+So there's usually no need to _precompile_ (using `re.compile()`) your regexes.
 ================
 
 == Wordpiece tokenizers
@@ -638,8 +650,10 @@ Let's see how it works on our text corpus:
 >>> from sklearn.feature_extraction.text import CountVectorizer
 >>> vectorizer = CountVectorizer(ngram_range=(1, 2), analyzer='char')
 >>> vectorizer.fit(texts)
->>> vocab = vectorizer.get_feature_names()
->>> vocab[:7]
+CountVectorizer(analyzer='char', ngram_range=(1, 2))
+
+>>> bpevocab = vectorizer.get_feature_names()
+>>> bpevocab[:7]
 [' ', ' a', ' c', ' f', ' h', ' i', ' l']
 ----
 
@@ -650,7 +664,7 @@ Once the vectorizer knows what tokens it needs to be able to count, it can trans
 [source,python]
 ----
 >>> vectors = vectorizer.transform(texts)
->>> df = pd.DataFrame(vectors.todense(), columns=vocab)
+>>> df = pd.DataFrame(vectors.todense(), columns=bpevocab)
 >>> df.index = [t[:8] + '...' for t in texts]
 >>> df = df.T
 >>> df['total'] = df.T.sum()
@@ -667,13 +681,32 @@ y             2            1      3
 y             1            0      1
 y,            1            0      1
 yb            0            1      1
+<BLANKLINE>
+[148 rows x 3 columns]
+----
+
+The DataFrame contains a column for each sentence and a row for each character 2-gram.
+Check out the top four rows where the byte pair (character 2-gram) of " a" is seen to occur five times in these two sentences.
+So even spaces count as "characters" when you're building a BPE tokenizer.
+This is one of the advantages of BPE, it will figure out what your token delimiters are, so it will work even in languages where there is no whitespace between words.
+And BPE will work on substitution cypher text like ROT13, a toy cypher that rotates the alphabet 13 characters forward.
+
+[source,python]
+----
 >>> df.sort_values('total').tail()
+        Trust me...  There's ...  total
+    he           10            3     13
+    h            14            5     19
+    t            11            9     20
+    e            18            8     26
+                 31           14     45
 ----
 
-A BPE encoder would then find the most frequent 2-grams and add them to the permanent vocabulary, deleting the less frequent pairs.
+A BPE tokenizer then finds the most frequent 2-grams and adds them to the permanent vocabulary.
+Over time it deletes the less frequent character pairs as it gets less and less likely that they won't come up a lot more later in your text.
 
 ----
->>> df['n'] = [len(tok) for tok in vocab]
+>>> df['n'] = [len(tok) for tok in bpevocab]
 >>> df[df['n'] > 1].sort_values('total').tail()
     Trust me...  There's ...  total  n
 ,             6            1      7  2
@@ -683,7 +716,7 @@ th            8            4     12  2
 he           10            3     13  2
 ----
 
-So the next round of preprocessing would retain the character 2-grams "he" and "th" and even " t" and "e ".
+So the next round of preprocessing in the BPE tokenizer would retain the character 2-grams "he" and "th" and even " t" and "e ".
 Then the BPE algorithm would make another pass through the text with this smaller character bigram vocabulary.
 It would look for frequent pairings of these character bigrams with each other and individual characters.
 This process would continue until the maximum number of tokens is reached and the longest possible character sequences have been incorporated into the vocabulary.
@@ -696,6 +729,15 @@ It eliminates the characters from its vocabulary that hurt the accuracy of this 
 The math is subtly different and it produces subtly different token vocabularies, but you don't need to select this tokenizer intentionally.
 The models that use it will come with it built into their pipelines.
 ====
+
+One big challenge of BPE-based tokenizers is that they must be trained on your individual corpus.
+So BPE tokenizers are usually only used for Transformers and Large Language Models (LLMs) which you will learn about in chapter 9.
+
+Another challenge of BPE tokenizers is all the book keeping you need to do to keep track of which trained tokenizer goes with each of your trained models.
+This was one of the big innovations of Huggingface.
+They made it easy to store and share all the preprocessing data, such as the tokenizer vocabulary, along side the language model.
+This makes it easier to reuse and share BPE tokenizers. 
+If you want to become an NLP expert, you may want to imitate what they've done at HuggingFace with your own NLP preprocessing pipelines.footnote:[Huggingface documentation on tokenizers (https://huggingface.co/docs/transformers/tokenizer_summary)]
 
 == Vectors of tokens
 
@@ -726,7 +768,7 @@ False
 
 So tokenization can help you reduce the number of false positives in your simple intent recognition pipeline that looks for the presence of greeting words.
 This is often called keyword detection, because your vocabulary of words is limited to a set of words you think are important.
-However, it's quite cumbersome to have to think of all the words that might appear in a greeting in order to recognize them all, including slang and mispellings.
+However, it's quite cumbersome to have to think of all the words that might appear in a greeting in order to recognize them all, including slang, misspellngs and typoos.
 And creating a for loop to iterate through them all would be inefficient.
 We can use the math of linear algebra and the vectorized operations of `numpy` to speed this process up.
 
@@ -743,19 +785,17 @@ You'll first learn the most basic, direct, raw and lossless way to represent wor
 Now that you've successfully split your document into the kinds of words you want, you're ready to create vectors out of them.
 Vectors of numbers are what we need to do the math or processing of NL*P* on natural language text.
 
-// TODO: consider not sorting the vocab so the top rows of the one_hot table are populated
-
 [source,python]
 ----
 >>> import pandas as pd
 >>> onehot_vectors = np.zeros(
-...     (len(tokens), vocab_size), int)  # <1>
+...     (len(tokens), vocab_size), int)  # <2>
 >>> for i, word in enumerate(tokens):
-...     onehot_vectors[i, vocab.index(word)] = 1  # <2>
+...     onehot_vectors[i, vocab.index(word)] = 1  # <3>
 >>> df_onehot = pd.DataFrame(onehot_vectors, columns=vocab)
 >>> df_onehot.shape
 (18, 15)
->>> df_onehot.iloc[:,:8].replace(0, '')  # <3>
+>>> df_onehot.iloc[:,:8].replace(0, '')  # <4>
     ,  .  Survival  There's  adequate  as  fittest  maybe
 0                       1
 1
@@ -776,9 +816,9 @@ Vectors of numbers are what we need to do the math or processing of NL*P* on nat
 16                                                1
 17     1
 ----
-<1> The table is as wide as your count of unique vocabulary terms and as tall as the length of your document: 18 rows, 15 columns
-<2> For each token in the sentence, mark the column for it with a `1`.
-<3> For brevity we're only showing the first 8 columns of the DataFrame and replaced 0's with ''.
+<2> The table is as wide as your count of unique vocabulary terms and as tall as the length of your document: 18 rows, 15 columns
+<3> For each token in the sentence, mark the column for it with a `1`.
+<4> For brevity we're only showing the first 8 columns of the DataFrame and replaced 0's with ''.
 
 In this representation of this two-sentence quote, each row is a vector representation of a single word from the text.
 The table has the 15 columns because this is the number of unique words in your vocabulary.

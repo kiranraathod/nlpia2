@@ -12,9 +12,10 @@ __copyright__ = "Hobson Lane"
 __license__ = "mit"
 
 
-def test_manuscript_ch2(ch=2):
+def test_manuscript_ch2(ch=2, skip=0):
     filepath = list(ADOC_DIR.glob(f'Chapter {ch:02d} -- *'))[0]
     results = test_file(filepath,
+                        skip=skip,
                         verbose=True,
                         optionflags=(
                             doctest.ELLIPSIS |

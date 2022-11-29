@@ -132,7 +132,7 @@ re_ipython_shabang = r'([>]{2,3}|[.]{2,3})?[ ]*[!].*'
 re_codeblock_horizontal_line = r'[ ]*[-]{2,80}[ ]*'
 
 
-def test_file(filepath=DEFAULT_FILEPATH, adoc=True,
+def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
               optionflags=DEFAULT_OPTIONFLAGS,
               name=None,
               verbose=False,
@@ -160,7 +160,9 @@ def test_file(filepath=DEFAULT_FILEPATH, adoc=True,
                 '>>> %timeit',
             ]
             ignore_nextline = False
-            for line, nextline in zip(lines[:-1], lines[1:]):
+            for i, (line, nextline) in enumerate(zip(lines[:-1], lines[1:])):
+                if i < skip:
+                    continue
                 # skip ignore_prefixes lines:
                 if any((line.lower().lstrip().startswith(p) for p in ignore_line_prefixes)):
                     line = '\n'
