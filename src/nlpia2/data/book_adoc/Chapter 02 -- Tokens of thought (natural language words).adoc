@@ -465,14 +465,15 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 [source,python]
 ----
 >>> text = open(f).read()
->>> len(text)
-152232
+>>> f'(round(len(text) / 10_000)}0k'
+'150k'
 >>> doc = nlp(doc)
->>> len(list(doc))
-33714
->>> len(doc) / 4.67
-7219.271948608137
+>>> f'(round(len(list(doc)) / 1_000)}k'
+'34k'
+>>> f'(round(len(list(doc)) / 1_000 / 4.67)}ktps'  # <1> 
+'7k'
 ----
+<1> ktps is for thousands of tokens per second
 
 That's nearly 5 seconds for about 150,000 characters or 34,000 words of English and Python text or about 7000 words per second.
 
