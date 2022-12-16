@@ -76,18 +76,6 @@ def expressions_to_doctests(expressions, prompt='>>> ', ellipsis='... ', comment
             blocks.append('')
 
 
-def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
-    filepath = Path(filepath)
-    destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
-    if destfile.is_dir():
-        destfile = destfile / filepath.with_suffix('.adoc.py').name
-    lines = extract_code_lines(filepath=filepath, with_metadata=False)
-    if destfile:
-        with Path(destfile).open('wt') as fout:
-            fout.writelines(lines)
-    return ''.join(lines)
-
-
 def extract_goodreads_quotes(text):
     """ Regexes used in Sublime to turn goodreads copypasta text into yaml entries in quotes.yml
 
@@ -133,6 +121,7 @@ re_codeblock_horizontal_line = r'[ ]*[-]{2,80}[ ]*'
 
 
 def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
+              cleanup=True,  # whether to remove the temporary adoc file containing preprocessed code blocks
               optionflags=DEFAULT_OPTIONFLAGS,
               name=None,
               verbose=False,
@@ -195,7 +184,7 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
                     # check for inline adoc code block comments (callout bubbles)
             # for loop finishes one early, so append the last line of text
             newlines.append(lines[-1])
-        fp, filepath = tempfile.mkstemp(text=True)
+        fp, filepath = tempfile.mkstemp(text=True, suffix='.adoc')
         filepath = Path(filepath)
         print(filepath)
         with filepath.open('wt') as fout:
@@ -205,8 +194,27 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
                                module_relative=module_relative, package=package,
                                optionflags=optionflags, verbose=verbose,
                                **kwargs)
-    filepath.unlink()
+    if results.failed > 0:
+        fp, pyfilepath = tempfile.mkstemp(text=True, suffix='.py')
+        extract_code_file(filepath=filepath, destfile=pyfilepath)
+        print(f"You can find the doctests in {pyfilepath}")
+    if cleanup:
+        filepath.unlink()
+    else:
+        print(f"You can find the preprocessed adoc text in {filepath}")
     return results
+
+
+def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
+    filepath = Path(filepath)
+    destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
+    if destfile.is_dir():
+        destfile = destfile / filepath.with_suffix('.adoc.py').name
+    lines = extract_code_lines(filepath=filepath, with_metadata=False)
+    if destfile:
+        with Path(destfile).open('wt') as fout:
+            fout.writelines(lines)
+    return ''.join(lines)
 
 
 def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc'):

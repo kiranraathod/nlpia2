@@ -22,3 +22,7 @@ def test_manuscript_ch2(ch=2, skip=0):
                             doctest.NORMALIZE_WHITESPACE |
                             doctest.FAIL_FAST))
     assert results.failed == 0
+
+
+if __name__ == '__main__':
+    test_manuscript_ch2()

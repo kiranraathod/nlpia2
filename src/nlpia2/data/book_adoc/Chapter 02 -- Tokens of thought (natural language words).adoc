@@ -15,6 +15,7 @@ This chapter covers
 * Consolidating your vocabulary with stemming, lemmatization, and case folding
 * Building a structured numerical representation of natural language text
 * Scoring text for sentiment and prosocial intent
+* Using character frequency analysis to optimize your token vocabulary
 * Dealing with variable length sequences of words and tokens
 
 
@@ -26,56 +27,87 @@ For many NLP applications, you only need to convert your text to a sequence of w
 You will now learn how to split a document, any string, into discrete tokens of meaning.
 You will be able to parse text documents as small as a single word and as large as an entire Encyclopedia.
 And they will all produce a consistent representation that you can use to compare them.
-For this chapter your tokens will be words, punctuation marks, and numbers.
-Later you will see that you can use these same techniques to find packets of meaning in any discrete sequence.
+For this chapter your tokens will be words, punctuation marks, and even pictograms such as Chinese characters, emojis and emoticons.
+
+Later in the book you will see that you can use these same techniques to find packets of meaning in any discrete sequence.
 For example, your tokens could be the ASCII characters represented by a sequence of bytes, perhaps with ASCII emoticons.
 Or they could be Unicode emojis, mathematical symbols, Egyption, hieroglyphics, pictographs from languages like Kanji  and Cantonese.
 You could even define the tokens for DNA and RNA sequences with letters for each of the five base nucleotides: adenine (A), guanine (G), cytosine \(C), thymine (T), and uracil (U).
 Natural language sequences of tokens are all around you ... and even inside you.
 
-.Emoticons vs emojis
-[NOTE]
-=========================
-_Emoticons_ were invented in the 1970's but were first typed into an ASCII text message in 1972 when Carnegie Mellon researchers mistakenly understood a text message about a mercury spill to be a joke. So the professor, Dr. Scott E. Fahlman, suggested that `:-)`should be appended to messages that were jokes, and  `:-(` emoticons should be used for serious warning messages.
+Is there something you can do with tokens that doesn't require a lot of complicated deep learning?
+If you have a good tokenizer you can use it to identify statistics about the occurrence of tokens in a set of documents, such as your blog posts or a business website.
+Then you can build a search engine in pure Python with just a dictionary to represent to record links to the set of documents where those words occur.
+That Python dictionary that maps words to document links or pages is called a reverse index.
+It's just like the index at the back of this book.
+This is called _information retrieval_ -- a really powerful tool in your NLP toolbox.
 
-_Emoticons_ are a textual, usually ASCII punctuation character, portrayals of a writer's mood or facial expression, such as the _smiley_ emoticon: `:-)`.
-_Emoji_ are the graphical representation of these characters, such as a yellow icon (small graphical drawing) of a smiling face that is associated with the `:-)`
-
-The plural of "emoji" is either "emoji" (like the plural of sushi) or "emojis" (like Tsunami-Tsunamis), however the the Atlantic and NY Times style editors prefer "emojis" to avoid ambiguity.
-
-image::../images/ch02/wikipedia-smiley-icon.svg[alt="Smiley icon from wikipedia article en.wikipedia.org/wiki/Smiley",align="center",width=100%,link="../images/ch02/wikipedia-smiley-icon.svg"]
-=========================
-
-
-For example, you can build a search engine by using your list of tokens to see which documents contain those words or tokens your user is looking for.
-This is often all you need for keyword detection, full text search applications and information retrieval.
+Statistics about tokens are often all you need for keyword detection, full text search, and information retrieval.
 You can even build customer support chatbots using text search to find answers to customers' questions in your documentation or FAQ (frequently asked question) lists.
 A chatbot can't answer your questions until it knows where to look for the answer.
 Search is the foundation of many state of the art applications such as conversational AI and open domain question answering.
 A tokenizer forms the foundation for almost all NLP pipelines.
 
+=== Tokens of emotion
+
+Another practical use for your tokenizer is called _sentiment analysis_, or analysis of text to estimate emotion.
+You'll see an example of a sentiment analysis pipeline later in this chapter.
+For now you just need to know how to build a tokenizer.
+And your tokenizer will almost certainly need to handle the tokens of emotion called _emoticons_ and _emojis_.
+
+_Emoticons_ are a textual representations of a writer's mood or facial expression, such as the _smiley_ emoticon: `:-)`.
+They are kind-of like a modern hieroglyph or picture-word for computer users that only have access to an ASCII terminal for communication.
+_Emojis_ are the graphical representation of these characters.
+For example, the smilie emoji has a small yellow circle with two black dots for eyes and a U shaped curve for a mouth.
+The smiley emoji is a graphical representation of the `:-)` smiley emoticon.
+
+Both emojis and emoticons have evolved into their own language.
+There are hundreds of popular emojis.
+People have created emojis for everything from company logos to memes and innuendo.
+Noncommercial social media networks such Mastodon even allow you to create your own custom emojis.footnote:[Mastodon servers you can join (https://proai.org/mastoserv)] footnote:[Mastodon custom emoji documentation (https://docs.joinmastodon.org/methods/custom_emojis/)] 
+
+.Emojis and Emoticons
+[NOTE]
+====
+_Emoticons_ were first typed into an ASCII text message in 1972 when Carnegie Mellon researchers mistakenly understood a text message about a mercury spill to be a joke.
+The professor, Dr. Scott E. Fahlman, suggested that `:-)` should be appended to messages that were jokes, and  `:-(` emoticons should be used for serious warning messages. 
+Gosh, how far we've come.
+====
+
+The plural of "emoji" is either "emoji" (like "sushi") or "emojis" (like "Tsunamis"), however the the Atlantic and NY Times style editors prefer "emojis" to avoid ambiguity.
+Your NLP pipeline will learn what you mean no matter how you type it.
+
+image::../images/ch02/wikipedia-smiley-icon.svg[alt="Smiley icon from wikipedia article en.wikipedia.org/wiki/Smiley",align="center",width=100%,link="../images/ch02/wikipedia-smiley-icon.svg"]
+
 == What is a token?
 
-So you need to break your text into tokens of thought or meaning.
-You will spend a lot of time working with the most meaningful and understandable tokens, _words_.
-You'll also include punctuation marks, numbers, and other word-like things in your vocabulary.
+A token can be almost any chunk of text that you want to treat as a packet of thought and emotion.
+So you need to break your text into chunks that capture individual thoughts.
+You may be thinking that _words_ are the obvious choice for tokens.
+So that's what you will start with here.
+You'll also learn how to include punctuation marks, emojis, numbers, and other word-like things in your vocabulary of words.
 Later you'll see that you can use these same techniques to find packets of meaning in any discrete sequence.
-Your tokenizers will be able to analyze and structure any text document or string, from a single word, to a sentence, to an entire book.
+And later you will learn some even more powerful ways to split discrete sequences into meaningful packets.
+Your tokenizers will be soon able to analyze and structure any text document or string, from a single word, to a sentence, to an entire book.
 
-And each collection of documents, called a corpus, will suggest to you a different vocabulary -- the set of tokens you decide to keep track of.
+Think about a collection of documents, called a _corpus_, that you want to process with NLP.
+Think about the _vocabulary_ that would be important to your NLP algorithm -- the set of tokens you will need to keep track of.
 For example your tokens could be the characters for ASCII emoticons, if this is what is important in your NLP pipeline for a particular corpus.
-Or your tokens could be Unicode emojis, mathematical symbols, hieroglyphics, pictographs like Kanji and Cantonese.
+Or your tokens could be Unicode emojis, mathematical symbols, hieroglyphics, even pictographs like Kanji and Cantonese characters.
 Your tokenizer and your NLP pipeline would even be useful for the nucleotide sequences of DNA and RNA where your tokens might be A, C, T, G, U, and so on.
-Natural language sequences of tokens are inside you and all around you.
-And as you read this text, the tokens in this sentence exist briefly, as a web of neurons sparking in your brain.
+And neuroscientists sometimes create sequences of discrete symbols to represent neurons firing in your brain when you read text like this sentence.
+Natural language sequences of tokens are inside you, all around you, and flowing through you.
+Soon you'll be flowing streams of tokens through your machine learning NLP pipeline.
 
 Retrieving tokens from a document will require some string manipulation beyond just the `str.split()` method employed in chapter 1.
-You'll likely want to separate punctuation from words, like quotes at the beginning and end of a statement.
-And you'll probably want to split contractions like "you'll" into the words that were combined to form them, perhaps "you" and "'ll", or perhaps "you" and "will."
+You'll probably want to split contractions like "you'll" into the words that were combined to form them, perhaps "you" and "'ll", or perhaps "you" and "will."
+You'll want to separate punctuation from words, like quotes at the beginning and end of quoted statements or words, such as those in the previous sentence.
+And you need to treat some punctuation such as dashes ("-") as part of singly-hyphenated compound words such as "singly-hyphenated."
 
-Once you have identified the tokens in a document that you would like to include in your vocabulary, you will return to the regular expression toolbox to combine words with similar spelling in a process called _stemming_.
+Once you have identified the tokens in a document that you would like to include in your vocabulary, you will return to the regular expression toolbox to build a tokenizer.
+And you can use regular expressions combine different forms of a word into a single token in your vocabulary -- a process called _stemming_.
 Then you will assemble a vector representation of your documents called a _bag of words_.
-You will try to use this bag of words vector to see if it can help you improve upon the basic greeting recognizer at the end of chapter 1.
+Finally, you will try to use this bag of words vector to see if it can help you improve upon the basic greeting recognizer at the end of chapter 1.
 
 === Alternative tokens
 
@@ -123,18 +155,32 @@ But don't worry about invisible words for now.
 All you need for this chapter is a tokenizer that can recognize words that are spelled out.
 You will worry about implied words and connotation and even meaning itself in chapter 4 and beyond.footnote:[If you want to learn more about exactly what a "word" really is, check out the introduction to _The Morphology of Chinese_ by Jerome Packard where he discusses the concept of a "word" in detail. The concept of a "word" did not exist at all in the Chinese language until the 20th century when it was translated from English grammar into Chinese.]
 
-Here are five general options for your tokens:
+Your NLP pipeline can start with one of these five options as your tokens:
 
-. Bytes
-. Characters
-. Subwords (Word pieces)
-. Words
-. Sentence pieces
+1. **Bytes** - ASCII characters
+2. **Characters** - multi-byte Unicode characters
+3. **Subwords** (Word pieces) - syllables and common character clusters
+4. **Words** - dictionary words or their roots (stems, lemmas)
+5. **Sentence pieces** - short, common word and multi-word pieces
 
-Character-based NLP pipelines are often used in translation problems or NLG tasks that need to generalize from few examples.
+As you work your way down this list your vocabulary size increases and your NLP pipeline will need more and more data to train.
+Character-based NLP pipelines are often used in translation problems or NLG tasks that need to generalize from a modest number of examples.
+The number of possible words that your pipeline can deal with is called its _vocabulary_.
+A character-based NLP pipeline typically needs fewer than 200 possible tokens to process many Latin-based languages.
+That small vocabulary ensures that byte- and character-based NLP pipelines can handle new unseen test examples without too many meaningless OOV (out of vocabulary) tokens.
+
+For word-based NLP pipelines your pipeline will need to start paying attention to how often tokens are used before deciding whether to "count it."
+You don't want you pipeline to do anything meaningful with junk words such `asdf` - the 
+But even if you make sure your pipeline on pays attention to words that occur a lot, you could end up with a vocabulary that's as large as a typical dictionary - 20 to 50 thousand words.
+
 Subwords are the optimal token to use for most Deep Learning NLP pipelines.
 Subword (Word piece) tokenizers are built into many state of the art transformer pipelines.
 Words are the token of choice for any linguistics project or academic research where your results need to be interpretable and explainable.
+
+Sentence pieces take the subword algorithm to the extreme.
+The sentence piece tokenizer allows your algorithm to combine multiple word pieces together into a single token that can sometimes span multiple words.
+The only hard limit on sentence pieces is that they do not extend past the end of a sentence.
+This ensures that the meaning of a token is associated with only a single coherent thought and is useful on single sentences as well as longer documents.W
 
 ==== _N_-grams
 
@@ -259,14 +305,15 @@ image::../images/ch02/book-thief-split.png[alt="Trust|me,|though,|the|words|were
 
 As you can see, this built-in Python method does an OK job of tokenizing this sentence.
 Its only "mistake" is to include commas within the tokens.
-This would prevent your keyword detector from detecting quite a few tokens: `['me', 'though', 'way', 'arrived', 'clouds', 'out', "rain"]`.
-And those words "clouds" and "rain" are pretty important to the meaning of this text.
+This would prevent your keyword detector from detecting quite a few important tokens: `['me', 'though', 'way', 'arrived', 'clouds', 'out', "rain"]`.
+Those words "clouds" and "rain" are pretty important to the meaning of this text.
+So you'll need to do a bit better with your tokenizer to ensure you can catch all the important words and "hold" them like Liesel.
 
 === Rule-based tokenization
 
 It turns out there is a simple fix to the challenge of splitting punctuation from words.
 You can use a regular expression tokenizer to create rules to deal with common punctuation patterns.
-Here's just one particular regular expression you use to deal with punctuation "hanger-ons."
+Here's just one particular regular expression you could use to deal with punctuation "hanger-ons."
 And while we're at it, this regular expression will be smart about words that have internal punctuation, such as possessive words and contractions that contain apostrophes.
 
 You'll use a regular expression to tokenize some text from the book _Blindsight_ by Peter Watts.
@@ -295,16 +342,16 @@ The example here should help you start to develop your intuition about applicati
 <1> The _look-ahead_ pattern `(?:\'\w+)?` detects whether or not the word contains a single apostrophe followed by 1 or more letters.footnote:[Thank you Wiktor Stribiżew (https://stackoverflow.com/a/43094210/623735).]
 
 Much better.
-Now the tokenizer separates punctuation from the end of a word, but doesn't break up words that contain internal punctuation.
+Now the tokenizer separates punctuation from the end of a word, but doesn't break up words that contain internal punctuation such as the apostrophe within the token "There's."
 So all of these words were tokenized the way we wanted: "There's", "fittest", "maybe".
 And this regular expression tokenizer will work fine on contractions even if they have more than one letter after the apostrophe such as "can't", "she'll", "what've".
-It will work even for typos such as 'can"t' and "she,ll", "what`ve".
+It will work even typos such as 'can"t' and "she,ll", and "what`ve".
 But this liberal matching of internal punctuation probably isn't what you want if your text contains rare double contractions such as "couldn't've", "ya'll'll", and "y'ain't"
 
 [TIP]
-================
+=====
 Pro tip: You can accommodate double-contractions with the regular expression `r'\w+(?:\'\w+){0,2}|[^\w\s]'`
-================
+=====
 
 This is the main idea to keep in mind.
 No matter how carefully you craft your tokenizer, it will likely destroy some amount of information in your raw text.
@@ -370,9 +417,10 @@ And you may want to have a synonym substitution algorithm to replace "There's" w
 However, this would only work if your tokenizer kept contraction and possessive apostrophes attached to their parent token.
 
 [TIP]
-================
-If you ever find some words going missing from your vocabulary in downstream portions of your pipeline, makes sure you check your tokenizer.
-================
+=====
+Make sure you take a look at your vocabulary whenever it seems your pipeline isn't working well for a particular text.
+You may need to revise your tokenizer to make sure it can "see" all the tokens it needs to do well for your NLP task.
+=====
 
 
 === SpaCy
@@ -456,11 +504,11 @@ First download the AsciiDoc text file for this chapter:
 >>> import requests
 >>> text = requests.get('https://proai.org/nlpia2-ch2.adoc').text
 >>> f'{round(len(text) / 10_000)}0k'
-'150k'
+'160k'
 ----
 <1> I divided by 10,000 and rounded it, so that Doctests would continue to pass as I revise this text.
 
-There were about 150 thousand ASCII characters in this AsciiDoc file where I wrote this sentence that you are reading right now.
+There were about 160 thousand ASCII characters in this AsciiDoc file where I wrote this sentence that you are reading right now.
 What does that mean in terms of words-per-second, the standard benchmark for tokenizer speed?
 
 [source,python]
@@ -471,10 +519,10 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 4.67 s ± 45.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
 >>> f'{round(len(text) / 10_000)}0k'
-'150k'
+'160k'
 >>> doc = nlp(text)
->>> f'{round(len(list(doc)) / 1_000)}k'
-'34k'
+>>> f'{round(len(list(doc)) / 10_000)}0k'
+'30k'
 >>> f'{round(len(doc) / 1_000 / 4.67)}kWPS'  # <2> 
 '7kWPS'
 ----
@@ -520,8 +568,8 @@ True
 >>> %timeit word_tokenize(text)
 156 ms ± 1.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 >>> tokens = word_tokenize(text)
->>> f'{round(len(tokens) / 1_000)}k'
-'31k'
+>>> f'{round(len(tokens) / 10_000)}0k'
+'30k'
 ----
 
 Could it be that you found a winner for the tokenizer race?
@@ -532,8 +580,8 @@ Your regular expression tokenizer has some pretty simple rules, so it should run
 ----
 >>> pattern = r'\w+(?:\'\w+)?|[^\w\s]'
 >>> tokens = re.findall(pattern, text)  # <1>
->>> f'{round(len(tokens) / 1_000)}k'
-'34k'
+>>> f'{round(len(tokens) / 10_000)}0k'
+'30k'
 >>> %timeit re.findall(pattern, text)
 8.77 ms ± 29.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 ----
@@ -544,7 +592,8 @@ Regular expressions can be compiled and run very efficiently within low level C 
 
 [TIP]
 ================
-Use a regular expression tokenizer when speed is more import than linguistic accuracy and you do not need the additional tags that spaCy and other pipelines provide.footnote:[Andrew Long, "Benchmarking Python NLP Tokenizers", (https://towardsdatascience.com/benchmarking-python-nlp-tokenizers-3ac4735100c5)]
+Use a regular expression tokenizer when speed is more import than accuracy.
+If you do not need the additional linguistic tags that spaCy and other pipelines provide your tokenizer doesn't need to waste time trying to figure out those tags.footnote:[Andrew Long, "Benchmarking Python NLP Tokenizers" (https://towardsdatascience.com/benchmarking-python-nlp-tokenizers-3ac4735100c5)]
 And each time you use a regular expression in the `re` or `regex` packages, a compiled and optimized version of it is cached in RAM.
 So there's usually no need to _precompile_ (using `re.compile()`) your regexes.
 ================
@@ -557,7 +606,7 @@ And many compound words or named entities that you'd like to keep together have 
 So it can help to dig a little deeper and think about the statistics of what makes a word.
 Think about how we can build up words from neighboring characters instead of cleaving text at separators such as spaces and punctuation.
 
-=== Clumping characters
+=== Clumping characters into sentence pieces
 
 Instead of thinking about breaking strings up into tokens, your tokenizer can look for characters that are used a lot right next to each other, such as "i" before "e".
 You can pair up characters and sequences of characters that belong together.footnote:[In many applications the term "_n_-gram" refers to character _n_-grams rather than word n-grams. For example the leading relational database PostgreSQL has a Trigram index which tokenizes your text into character 3-grams not word 3-grams. In this book, we use "_n_-gram" to refer to sequences of word grams and "character _n_-grams" when talking about sequences of characters.]
@@ -753,13 +802,13 @@ With your new tokenizer in place, your NLP pipeline wouldn't misinterpret the wo
 
 [source,python]
 ----
->>> text = 'Hiking home now'
->>> text.startswith('Hi')
+>>> hi_text = 'Hiking home now'
+>>> hi_text.startswith('Hi')
 True
 >>> pattern = r'\w+(?:\'\w+)?|[^\w\s]'  # <1>
->>> 'Hi' in re.findall(pattern, text)  # <2>
+>>> 'Hi' in re.findall(pattern, hi_text)  # <2>
 False
->>> 'Hi' == re.findall(pattern, text)[0]  # <3>
+>>> 'Hi' == re.findall(pattern, hi_text)[0]  # <3>
 False
 ----
 <1> You can reuse the regular expression pattern from earlier to create a one-line tokenizer
@@ -1068,10 +1117,10 @@ The most common tokenizer used in academia is the PennTreebank tokenizer:
 [source,python]
 ----
 >>> from nltk.tokenize import TreebankWordTokenizer
->>> texts.append("""
-...   If conscience and empathy were impediments to the advancement of
-...   self-interest, then we would have evolved to be amoral sociopaths.
-...   """  # <1>
+>>> texts.append(
+...   "If conscience and empathy were impediments to the advancement of "
+...   "self-interest, then we would have evolved to be amoral sociopaths."
+...   )  # <1>
 >>> tokenizer = TreebankWordTokenizer()
 >>> tokens = tokenizer.tokenize(texts[-1])[:6]
 >>> tokens[:8]

@@ -1,6 +1,7 @@
 # string_normalizers.py
 import string
 import unicodedata
+import re
 from unidecode import unidecode
 
 
@@ -23,11 +24,6 @@ CURLY_DOUBLE_QUOTES = '“”'
 STRAIGHT_DOUBLE_QUOTES = '"' * len(CURLY_DOUBLE_QUOTES)
 
 from nlpia2.string_encoding import ENCODINGS  # noqa
-
-
-def normalize_newlines(s):
-    s = s.replace(ASCII_VERTICAL_TAB, '\n')
-    s = s.replace(ASCII_PAGE_BREAK, '\n\n')
 
 
 class Asciifier:
@@ -115,6 +111,36 @@ class TaggedStr(str):
 
 
 asciify = Asciifier()
+
+
+def normalize_newlines(s):
+    s = s.replace(ASCII_VERTICAL_TAB, '\n')
+    s = s.replace(ASCII_PAGE_BREAK, '\n\n')
+
+
+fold_newlines = normalize_newlines
+
+
+def normalize_varname(s):
+    """ Create a valid ASCII variable name from str s 
+
+    >>> normalize_varname("\tGreat Journalism!\n--Maria (Ressa)  ")
+    'great_journalism_maria_ressa'
+    """
+    s = asciify(s).strip().lower()
+    return re.subn(r'[^\w]+', ' ', s)[0].strip().replace(' ', '_')
+
+
+fold_varname = normalize_varname
+
+
+def normalize_df_colnames(df):
+    """ Return the DataFrame with asciified, lowered, striped column names """
+    df.columns = [normalize_varname(c) for c in df.columns]
+    return df
+
+
+fold_colnames = normalize_df_colnames  # noqa
 
 
 class Decoder:
