@@ -3,8 +3,11 @@ import doctest
 from doctest import DocTestParser
 from parsimonious import Grammar
 from pathlib import Path
+import pandas as pd
 import re
 import tempfile
+
+from qary.text_processing.re_patterns import RE_URL_WITH_SCHEME
 
 
 try:
@@ -28,6 +31,7 @@ def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data
 
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+    """ Extract lines of Python using DocTestParser, return list of strs """
     expressions = extract_expressions(filepath=filepath)
     if with_metadata:
         return [vars(ex) for ex in expressions]
@@ -35,9 +39,75 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
 
 
 def extract_expressions(filepath=DEFAULT_FILEPATH):
+    """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     return dtparser.get_examples(text)
+
+
+def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
+    """ Find all URLs in the file at filepath, return a list of dicts with urls """
+    if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
+        text = Path(text).open('rt').read()
+    urls = []
+    for i, line in enumerate(text.splitlines()):
+        for k, groups in enumerate(re.findall(RE_URL_WITH_SCHEME, line)):
+            url, scheme = groups[0], groups[1]
+            urls.append(dict(
+                scheme=scheme,
+                url=url,
+                line_number=i,
+                url_number=k,
+                line_text=line,
+            ))
+    return urls
+
+
+def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+                             extractor=extract_urls_from_text, with_meta=True):
+    """ Find all URLs in files at input_dir, return a list of dicts with urls """
+    outputs = []
+    for p in input_dir.glob(glob):
+        df = extractor(filepath=p, with_meta=with_meta)
+        outputs.append(df)
+    return outputs
+
+
+extract_lists = extract_lists_from_files
+
+
+def extract_url_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+                                 extractor=extract_urls_from_text, with_meta=True):
+    """ Find all URLs in files at input_dir, return a list of dicts with urls """
+    outputs = []
+    for p in input_dir.glob(glob):
+        df = extractor(p, with_meta=with_meta)
+        outputs.append(df)
+    return outputs
+
+
+extact_url_lists = extract_url_lists_from_files
+
+
+def extract_urls(texts=MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+    if (isinstance(texts, Path) or len(texts) < 1024):
+        if Path(texts).is_file():
+            return extract_urls_from_text(text=texts, with_meta=with_meta)
+        elif Path(texts).is_dir():
+            glob = glob or '*'
+            return extract_url_lists_from_files(
+                input_dir=texts, glob='*.adoc', with_meta=with_meta)
+    return extract_urls_from_text(text=texts, with_meta=with_meta)
+
+
+def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+    """ Use regex to extract URLs from text file, return DataFrame with url column """
+    urls = extract_urls_from_text(filepath=filepath, with_meta=with_meta)
+    df = pd.DataFrame(urls, index=[
+        f"{u['line_number']}-{u['url_number']}" for u in urls])
+    df['filename'] = filepath.name
+    df['filepath'] = str(filepath)
+    return df
 
 
 def expressions_to_doctests(expressions, prompt='>>> ', ellipsis='... ', comment=''):
@@ -217,20 +287,59 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     return ''.join(lines)
 
 
-def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc'):
+def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+                             extractor=extract_urls_from_text, with_meta=True):
+    outputs = []
+    for p in input_dir.glob(glob):
+        df = extractor(filepath=p, with_meta=with_meta)
+        outputs.append(df)
+    return outputs
+
+
+def extract_files(
+        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        extractor=extract_code_file, suffix='.adoc.py'):
+    output_paths = []
+    for p in input_dir.glob(glob):
+        destfile = (output_dir / p.name).with_suffix(suffix)
+        print(f"{p} => {destfile}")
+        code = extractor(filepath=p)
+        with destfile.open('wt') as fout:
+            fout.write(code)
+        output_paths.append(destfile)
+    return output_paths
+
+
+def extract_url_dfs_from_files(
+        adocdir=MANUSCRIPT_DIR, destdir=None,
+        glob='*.adoc', suffix='.adoc.py'):
+    adocdir = Path(adocdir)
+    dfs = extract_dfs_from_files(
+        extractor=extract_urls_df,
+        adocdir=adocdir, destdir=destdir, glob=glob,
+        suffix=suffix)
+    return dfs
+
+
+def extract_dfs_from_files(
+        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        extractor=extract_urls_df, suffix='.adoc.py'):
+    outputs = []
+    for p in input_dir.glob(glob):
+        df = extractor(filepath=p)
+        outputs.append(df)
+    return outputs
+
+
+def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suffix='.adoc.py'):
     adocdir = Path(adocdir)
     if destdir is None:
         destdir = adocdir.parent / 'py'
     destdir = Path(destdir)
     destdir.mkdir(exist_ok=True)
-    destpaths = []
-    for p in adocdir.glob(glob):
-        destfile = (destdir / p.name).with_suffix('.adoc.py')
-        print(f"{p} => {destfile}")
-        code = extract_code_file(filepath=p)
-        with destfile.open('wt') as fout:
-            fout.write(code)
-        destpaths.append(destfile)
+    destpaths = extract_files(extractor=extract_code_file,
+                              adocdir=adocdir, destdir=destdir,
+                              glob=glob, suffix=suffix)
     return destpaths
 
 
@@ -266,3 +375,5 @@ if __name__ == '__main__':
     else:
         if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_code_files()
+        if input('Extract urls from all manuscript/adoc files? ').lower()[0] == 'y':
+            results = extract_urls()

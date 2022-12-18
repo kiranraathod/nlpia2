@@ -933,7 +933,7 @@ Nobel Laureate Paul Krugman, speaking about economic models and Zipf's Law, put 
 
 _The usual complaint about economic theory is that our models are oversimplified -- that they offer excessively neat views of complex, messy reality. [With Zipf's law] the reverse is true: You have complex, messy models, yet reality is startlingly neat and simple._
 
-Here is an updated version of Krugman's city population plot:footnote:[Population data downloaded from Wikipedia using Pandas. See the ``nlpia.book.examples` code on GitHub (https://gitlab.com/tangibleai/nlpia2/blob/master/src/nlpia/book/examples/ch03_zipf.py)]
+Here is an updated version of Krugman's city population plot:footnote:[Population data downloaded from Wikipedia using Pandas. See the ``nlpia.book.examples` code on GitHub (https://gitlab.com/tangibleai/nlpia2/blob/main/src/nlpia2/ch03/ch03_zipf.py)]
 
 .City population distribution
 image::../images/ch03/log_pop_from_wikipedia.png[City Population Distributions, width=80%, link="../images/ch03/log_pop_from_wikipedia.png"]
