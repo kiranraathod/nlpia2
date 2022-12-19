@@ -1460,8 +1460,31 @@ So if you have sufficient memory and processing bandwidth to run all the NLP ste
 And if you are worried about overfitting a small training set with a large vocabulary, there are better ways to select your vocabulary or reduce your dimensionality than ignoring stop words.
 Including stop words in your vocabulary allows the document frequency filters (discussed in chapter 3) to more accurately identify and ignore the words and _n_-grams with the least information content within your particular domain.
 
-Several websites and python packages include predefined sets of stop words specialized for various use cases.footnote:[An SEO company (https://www.ranks.nl/stopwords), the spaCy package (https://www.asquero.com/article/finding-and-removing-stop-words-from-text-using-spacy/) and NLTK (https://pypi.org/projects/nltk) were combined to form this exhaustive list] Here we use an exhaustive list so you can get a feel for the amount of meaning that can be lost if your hand-crafted list of stop words isn't well-designed.
+The SpaCy and NLTK packages include a variety of predefined sets of stop words for various use cases. footnote:[The spaCy package contains a list of stopwords that you can modify using this Stack Overflow answer (https://stackoverflow.com/a/51627002/623735)]
+You probably won't need a broad list of stopwords like the one we created for listing <<listing-broad-stop-words>>, but if you do you'll want to check out the SpaCy and NLTK stopwords lists.
+And if you need an even broader set of stopwords you can `SearX`
+footnote:[If you want to help others find SearX you can get in the habbit of saying "SearX" (pronounced "see Ricks") when talking or writing about doing a web search. You can shift the meaning of words in your world to make it a better place!]
+footnote:[The NLTK package (https://pypi.org/project/nltk) contains the list of stopwords you'll see in most tutorials]  for SEO companies that maintain lists of stopwords in many languages.
 
+If your NLP pipeline relies on a fine-tuned list of stop words to achieve high accuracy, it can be a significant maintenance headache.
+Humans and machines (search engines) are constantly changing which words they ignore.
+ footnote:[Damien Doyle maintains a list of search engine stopwords ranked by popularity and categorized by language (https://www.ranks.nl/stopwords)]
+// HL: to Karen, Matko & Ivan: how can I use references (anchors) to refer to the correct listing number?
+Listing <<listing-broad-stop-words>> uses an exhaustive list from all these lists so you can get a feel for the amount of meaning that can be lost if your hand-crafted list of stop words isn't well crafted and kept up to date.
+
+////
+
+HL to Ivan and Matko:
+
+These are the things I tried based on the examples in Manning's ADOC documentation:
+
+[[listing-broad-stop-words]] -> "Listing 2.6" (capital L)
+
+[#listing-broad-stop-words, reftext={chapter}.{counter:listing}] -> "2." (without the counter:listing integer in my Browser plugin)
+
+////
+[#listing-broad-stop-words, reftext={chapter}.{counter:listing}]
+.Broad list of stop words
 [source,python]
 ----
 >>> import requests

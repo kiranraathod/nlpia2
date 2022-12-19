@@ -11,28 +11,41 @@ from xml.parsers.expat import ExpatError
 
 log = logging.getLogger(__name__)
 
-CODE_DIR = Path(__file__).resolve().absolute()
-for i in range(4):
-    if CODE_DIR.name in ['code', 'nlpia2']:
-        break
-    # print(f"NOT code dir: {CODE_DIR}")
-    CODE_DIR = CODE_DIR.parent
 
-REPO_DIR = CODE_DIR.parent
-for i in range(4):
-    if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
-        break
-    # print(f"not repo dir: {REPO_DIR}")
-    REPO_DIR = REPO_DIR.parent
+def find_data_dirs(
+        PACKAGE_NAMES=('code', 'nlpia2'),
+        REPO_NAMES=('nlpia-manuscript', 'nlpia2')):
 
-HOME_CODE_DIR = REPO_DIR.parent.parent
-print(HOME_CODE_DIR)
-assert HOME_CODE_DIR.name == 'code'
-MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
-assert MANUSCRIPT_DIR.is_dir()
-IMAGE_DIR = MANUSCRIPT_DIR / 'images'
-assert IMAGE_DIR.is_dir()
-SCRIPT_WORKING_DIR = os.getcwd()
+    CODE_DIR = Path(__file__).resolve().absolute()
+    for i in range(4):
+        if CODE_DIR.name in PACKAGE_NAMES:
+            break
+        CODE_DIR = CODE_DIR.parent
+    print(f'CODE_DIR: {CODE_DIR}')
+
+    REPO_DIR = CODE_DIR.parent
+    for i in range(4):
+        if REPO_DIR.name in REPO_NAMES:
+            break
+        REPO_DIR = REPO_DIR.parent
+    print(f'REPO_DIR: {REPO_DIR}')
+
+    HOME_CODE_DIR = REPO_DIR.parent.parent
+    print(f'HOME_CODE_DIR: {HOME_CODE_DIR}')
+    assert HOME_CODE_DIR.name in PACKAGE_NAMES
+    MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
+    assert MANUSCRIPT_DIR.is_dir()
+    IMAGE_DIR = MANUSCRIPT_DIR / 'images'
+    assert IMAGE_DIR.is_dir()
+
+    # SCRIPT_WORKING_DIR = os.getcwd()
+    # print(f"SCRIPT_CWD: {SCRIPT_WORKING_DIR}")
+
+    print(f"IMAGE_DIR: {IMAGE_DIR}")
+    return MANUSCRIPT_DIR, IMAGE_DIR
+
+
+MANUSCRIPT_DIR, IMAGE_DIR = find_data_dirs()
 
 
 def render_adoc(doctype='book', backend='html5', destination_dir='html', embedded=False, adoc_path='adoc/*.adoc'):
@@ -67,10 +80,10 @@ def html2xml(destination_dir=None, html_path=None):
 
     command_messages = []
     for p in htmlpaths:
-        # pandoc -t xml -o ../xml/"$p".xml 
+        # pandoc -t xml -o ../xml/"$p".xml
         command = f'pandoc -t xml -o {str(destination_dir)} {p}'.split()
         output = run(command=command)
-        messages.append(' '.join(command), output)
+        command_messages.append(' '.join(command), output)
     return command_messages
 
 
@@ -117,12 +130,12 @@ def pprint_output(output, command=None):
 
 
 if __name__ == '__main__':
-    
+
     # svgfilepaths = list(IMAGE_DIR.glob('**/*.svg'))
     svgfilepaths = [
         IMAGE_DIR / 'ch02' / 'survival-of-adequate-sentence-diagram.svg',
-        ]
-    svgfilepaths = [str(p) for p in svgfilepaths]    
+    ]
+    svgfilepaths = [str(p) for p in svgfilepaths]
     if len(sys.argv) >= 2:
         svgfilepaths = sys.argv[1:]
 
@@ -148,11 +161,11 @@ if __name__ == '__main__':
     if flags['x'] or flags['j']:
         print('render_html(backend=docbook) STDOUT:')
         output = render_adoc(
-            doctype='book', 
-            backend='docbook', 
-            destination_dir='xml', 
+            doctype='book',
+            backend='docbook',
+            destination_dir='xml',
             embedded=False
-            )
+        )
         pprint_output(output)
 
     if flags['j']:
