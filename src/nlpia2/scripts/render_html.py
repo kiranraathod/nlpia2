@@ -183,7 +183,11 @@ if __name__ == '__main__':
             basename = filepath.with_suffix('').name
             bookdict[basename] = d
             filepath = MANUSCRIPT_DIR / 'json' / (basename + '.json')
-            fout = open(filepath, 'wt')
+            if not filepath.parent.is_dir():
+                filepath.parent.mkdir()
+            fout = filepath.open('w')
             json.dump(d, fout, indent=4)
         filepath = MANUSCRIPT_DIR / 'json' / 'book.json'
+        if not filepath.parent.is_dir():
+            filepath.parent.mkdir()
         json.dump(d, fout, indent=4)
