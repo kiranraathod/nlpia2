@@ -89,7 +89,7 @@ huggingface-hub = "^0.11.0"
 jupyter-console = ">=6.4.4"
 lxml = "^4.9.1"
 m2r = "^0.3"  # [required by Sphinx & m2r](https://github.com/CrossNox/m2r2/issues/40)
-mastodon_py = {name="mastodon", version="*"}
+mastodonplus_py = "*"
 matplotlib = "^3.6"
 matplotlib-inline = "^0.1"
 meilisearch = "^0.22.2"
