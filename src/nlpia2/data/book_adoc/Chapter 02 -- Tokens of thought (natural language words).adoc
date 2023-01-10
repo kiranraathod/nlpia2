@@ -1461,23 +1461,26 @@ And if you are worried about overfitting a small training set with a large vocab
 Including stop words in your vocabulary allows the document frequency filters (discussed in chapter 3) to more accurately identify and ignore the words and _n_-grams with the least information content within your particular domain.
 
 The SpaCy and NLTK packages include a variety of predefined sets of stop words for various use cases. footnote:[The spaCy package contains a list of stopwords that you can modify using this Stack Overflow answer (https://stackoverflow.com/a/51627002/623735)]
-You probably won't need a broad list of stopwords like the one we created for listing <<listing-broad-stop-words>>, but if you do you'll want to check out the SpaCy and NLTK stopwords lists.
+You probably won't need a broad list of stopwords like the one we created for listing 2.6, but if you do you'll want to check out the SpaCy and NLTK stopwords lists.
 And if you need an even broader set of stopwords you can `SearX`
 footnote:[If you want to help others find SearX you can get in the habbit of saying "SearX" (pronounced "see Ricks") when talking or writing about doing a web search. You can shift the meaning of words in your world to make it a better place!]
-footnote:[The NLTK package (https://pypi.org/project/nltk) contains the list of stopwords you'll see in most tutorials]  for SEO companies that maintain lists of stopwords in many languages.
+footnote:[The NLTK package (https://pypi.org/project/nltk) contains the list of stopwords you'll see in most tutorials]
+for SEO companies that maintain lists of stopwords in many languages.
 
 If your NLP pipeline relies on a fine-tuned list of stop words to achieve high accuracy, it can be a significant maintenance headache.
 Humans and machines (search engines) are constantly changing which words they ignore.
- footnote:[Damien Doyle maintains a list of search engine stopwords ranked by popularity and categorized by language (https://www.ranks.nl/stopwords)]
-// HL: to Karen, Matko & Ivan: how can I use references (anchors) to refer to the correct listing number?
-Listing <<listing-broad-stop-words>> uses an exhaustive list from all these lists so you can get a feel for the amount of meaning that can be lost if your hand-crafted list of stop words isn't well crafted and kept up to date.
+footnote:[Damien Doyle maintains a list of search engine stopwords ranked by popularity and categorized by language (https://www.ranks.nl/stopwords)]
+Listing 2.6 uses an exhaustive list from all these lists so you can get a feel for the amount of meaning that can be lost if your hand-crafted list of stop words isn't well crafted and kept up to date.
 
 ////
 
 HL to Ivan and Matko:
 
-These are the things I tried based on the examples in Manning's ADOC documentation:
+I want to be able to refer to figures like this: "See listing <<listing-broad-stop-words>>." 
+But that doesn't render the correct number with the Manning template.adoc.
 
+These are the two ways I tried to "anchor" or label the listtings, based on the examples in Manning's ADOC documentation:
+ 
 [[listing-broad-stop-words]] -> "Listing 2.6" (capital L)
 
 [#listing-broad-stop-words, reftext={chapter}.{counter:listing}] -> "2." (without the counter:listing integer in my Browser plugin)
@@ -1491,21 +1494,25 @@ These are the things I tried based on the examples in Manning's ADOC documentati
 >>> url = ("https://gitlab.com/tangibleai/nlpia/-/raw/master/"
 ...        "src/nlpia/data/stopword_lists.json")
 >>> response = requests.get(url)
->>> stop_words = response.json()['exhaustive']  # <1>
+>>> stopwords = response.json()['exhaustive']  # <1>
 >>> tokens = 'the words were just as I remembered them'.split()  # <2>
->>> tokens_without_stopwords = [x for x in tokens if x not in stop_words]
+>>> tokens_without_stopwords = [x for x in tokens if x not in stopwords]
 >>> print(tokens_without_stopwords)
 ['I', 'remembered']
 ----
-<1> This exhaustive list of stop words was compiled from various public search engine optimization lists as well as NLP toolkits like spaCy and NLTK.
+<1> This exhaustive list of stop words was compiled from various public search engine optimization lists as well as NLP libraries such as spaCy and NLTK.
+
+This is a meaningful sentence from a short story by Ted Chiang about machines helping us remember our statements so we don't have to rely on flawed memories.footnote:[from Ted Chiang, _Exhalation_, "Truth of Fact, Truth of Fiction"]
+In this phrase you lost two thirds of the words and only retained some of the meaning sentence's meaning.
+However you can see that an important token "words" was discarded by using this particularly exhaustive set of stop words.
+You can sometimes get your point across without articles, prepositions, or even forms of the verb "to be."
+But it will reduce the precision and accuracy of your NLP pipeline, but at least some small amount of meaning will be lost.
 
 You can see that some words carry more meaning than others.
-This is a sentence from a short story by Ted Chiang about machines helping us remember our statements so we don't have to rely on flawed memories.footnote:[from Ted Chiang, _Exhalation_, "Truth of Fact, Truth of Fiction"]
-In this phrase you lost two thirds of the words and still retained the bulk of the phrase's meaning.
-However you can see that an import token "words" was discarded by this particular stop words list.
-You can often get your point across without articles, prepositions, or even forms of the verb "to be".
 Imagine someone doing sign language or in a hurry to write a note to themselves.
-Which words would they choose to always skip? That is how stop words are chosen.
+Which words would they choose to skip when they are in a hurry?
+That is the way linguists decide on lists of stop words.
+But if you're in a hurry, and your NLP isn't rushed for time like you are, you probably don't want to waste your time creating and maintaining lists of stop words.
 
 Here's another common stop words list that isn't quite as exhaustive:
 
@@ -1684,7 +1691,7 @@ This function works well for regular cases, but is unable to address more comple
 It also does not handle the "housing" example from your "Portland Housing" search.
 
 Two of the most popular stemming algorithms are the Porter and Snowball stemmers.
-The Porter stemmer is named for the computer scientist Martin Porter.footnote:[See "An algorithm for suffix stripping", 1993 (http://www.cs.odu.edu/~jbollen/IR04/readings/readings5.pdf) by M.F. Porter.]
+The Porter stemmer is named for the computer scientist Martin Porter who spent most of the 80's and 90's fine tuning this hard-coded algorithm.footnote:[See "An algorithm for suffix stripping", 1980 (http://www.cs.toronto.edu/~frank/csc2501/Readings/R2_Porter/Porter-1980.pdf) by M.F. Porter.]
 Porter is also also responsible for enhancing the Porter stemmer to create the Snowball stemmer.footnote:[See the web page titled "Snowball: A language for stemming algorithms" (http://snowball.tartarus.org/texts/introduction.html).]
 Porter dedicated much of his lengthy career to documenting and improving stemmers, due to their value in information retrieval (keyword search).
 These stemmers implement more complex rules than our simple regular expression.

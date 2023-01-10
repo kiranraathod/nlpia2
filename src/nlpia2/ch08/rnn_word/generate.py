@@ -1,5 +1,7 @@
 """
 Generate text starting with word sampled from Wikitext-2 vocabulary (33278 words)
+
+Based on github.com/pytorch/examples/ `word_language_model/generate.py`
 """
 from pathlib import Path
 import argparse
