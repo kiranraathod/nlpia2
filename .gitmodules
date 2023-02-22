@@ -1,0 +1,3 @@
+[submodule "src/nessvec"]
+	path = src/nessvec
+	url = git@gitlab.com:tangibleai/nessvec

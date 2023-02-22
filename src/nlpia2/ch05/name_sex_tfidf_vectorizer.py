@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.linear_model import LogisticRegression, Lasso
-from constants import DATA_DIR
+from nlpia.constants import DATA_DIR
 
 df = pd.read_csv(DATA_DIR / 'baby-names-region.csv.gz')
 

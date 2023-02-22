@@ -1,0 +1,41 @@
+# Official Python language image.
+image: python:3.9
+  - apt-get install -y git curl python-pip python-dev python3-dev build-essential graphviz doxygen miniconda
+  - apt-get update -qy
+  - python -v
+  - conda -v
+
+# Services (typically databases)
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-service
+#services:
+#  - mysql:latest
+#  - redis:latest
+#  - postgres:latest
+
+py39:
+  image: continuumio/miniconda3:latest
+  before_script:
+    - conda env update -n base -f ./environment.yml
+    - git config --global user.email "nlpia2+gitlabcicd@totalgood.com"
+    - git config --global user.name "_NLP in Action 2nd Ed_ Contributors"
+    - python -m pip install -e .
+    - git clone https://gitlab.com/tangibleai/nessvec
+    - python -m pip install -e nessvec
+  script:
+    - pytest
+
+pages:
+  image: python:3.9
+  stage: deploy
+  script:
+    # m2r+mistune versions [required by Sphinx](https://github.com/CrossNox/m2r2/issues/40)
+    - pip install sphinx recommonmark m2r==0.2.1 mistune==0.8.4
+    - cd docs
+    - make html
+    - cp -r _build/html ../public
+  artifacts:
+    paths:
+      - public/
+  only:
+    - main
+

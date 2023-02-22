@@ -14,7 +14,11 @@ Chapter 2:
   - "Is there a website where you can download the token frequencies for most of the words and n-grams ever published? footnote:[Hint: A company that aspired to "do no evil", but now does, created this massive NLP corpus.]"
   - What are the risks and possible benefits of pair coding AI assistants built with NLP? What sort of organizations and algorithms do you trust with your mind and your code?
 Chapter 3:
-  - What is the most memory efficient data structure for storing BOW and TF-IDF vectors?
+  - 
+    Q: What is the most memory efficient data structure for storing BOW and TF-IDF vectors?
+  - 
+    Q: Is it possible to store a million by million array of TF-IDF values in a laptop with only 8 GB of RAM? One million times one million is a thousand billion floating point TF-IDF values.
+    A: On a 64-bit laptop that's typically 8,000 GB if you just stored it all in a naive data structure. You could reduct that a bit to 4,000 GB if you reduced the floating point precision from 64-bit to 32-bit. But the real trick is to store the data in a sparse array so that all the values that are the same. Usually 99.99% of a TF-IDF matrix are zeros or some small fixed value. So a sparse array for a TF-IDF matrix can usually take up 10,000 times less space or maybe 3,000 times less space if you take into account the 2 integers required to keep track of the indexes for the values. 
 Chapter 4:
   - 
     Q: What is the context, or neighborhood of words, that LSA (PCA on BOW or TF-IDF vectors) pays attention to when creating topics?
@@ -35,7 +39,23 @@ Chapter 5:
   - 
     Q: What is the equivalent of a PyTorch `model.forward()` function in SciKit-Learn models?
     A: The `model.predict()` function is what accomplishes inference or prediction in the same way that `model.forward()` does within PyTorch models.
+  -
+    Q: Imagine you want to solve a binary classification problem to predict one particular disease such as Parkinsons disease and your only input features are the genetic sequence from the patients with 10s of thousands of gene SNIPs for each patient. Your training set has fewer than 10 thousand patients and only a small fraction ever contracted the disease. Would you use a SciKit-Learn LogisticRegression model or an equivalent PyTorch neural network model with a single linear layer from the input to the output? Why? How would you deal with the imbalance problem? What about overfitting?
+    A: Your fastest, simplest most accurate approach would be to use a `LogisticRegression`. You could use the `class_weight='balanced'` argument to deal with the imblance. And you could use a small value of `alpha` such as 0.001 in order to regularize your model and deal with overfitting. If you used a PyTorch neural network this process would be more complicated and you would have to use a batch size of about 128 or larger and a high random dropout percentage to deal with overfitting. You would need to do oversampling or use a loss function with class imbalance compensation.
+
 Chapter 6:
   - 
     Q: What is the context, or neighborhood of words, that Word2Vec and GloVE pays attention to when creating semantic embeddings for words?
     A: Word2Vec and GloVE do. Word2Vec and GloVe limit the neighborhood to only those words that occur within 5 words of the _target_ word.
+  - 
+    Q: Create the same graph data structure as was done in this chapter, but use lemmatization rather than noun phrases as labels for your nodes.
+    A: SEE examples in the [`nessvec` Python package](https://gitlab.com/tangibleai/nessvec/-/tree/main/examples)
+  -
+    Q: Create a graph data structure of another chapter in this book.
+    A: SEE examples in the [`nessvec` Python package](https://gitlab.com/tangibleai/nessvec/-/tree/main/examples)
+  -
+    Q: Create a graph data structure of the full book using sentiment analysis for each chapter.
+    A: SEE examples in the [`nessvec` Python package](https://gitlab.com/tangibleai/nessvec/-/tree/main/examples)
+  -
+    Q: Give examples for how word vectors enable at least two of Hofstadter's eight elements of intelligence
+    A: Word analogies ("similarities and differnces in situations") - for example, "embeddings are to words as character sheets are to _____". Another example is the ability for a chatbot to "respond flexibly" by recognizing the meanings of words such as the word "SUP" even if no one has ever used that word as a greeting before. And if my friend Nick said SUP to your bot it could recognize when he was talking about his "Standup Paddleboard" that he paddles to work... when it's not too cold in Portland. 

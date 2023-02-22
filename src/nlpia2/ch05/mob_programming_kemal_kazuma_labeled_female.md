@@ -1,12 +1,14 @@
->>> history ~1/1-1000
->>> history ~2/1-1000
+# What's in a name
+
+Mob programming session for Manning Publications on twitch.tv
+
+```python
 >>> from tqdm import tqdm
 ... import pandas as pd
 ... import numpy as np
 ... from sklearn.feature_extraction.text import TfidfVectorizer
 ... from sklearn.linear_model import LogisticRegression
 ... 
-... df = pd.read_csv('.nlpia2-data/baby-names-region.csv.gz')
 ... istrain = np.random.rand(len(df)) < .9
 ... vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1, 3))
 ... vectorizer.fit(tqdm(df['name'][istrain]))
@@ -51,6 +53,7 @@ Olessya     F
 Una         F
 Hanna       F
 Winnie      F
+... df = pd.read_csv('.nlpia2-data/baby-names-region.csv.gz')
 Olessya     F
 Sylvia      F
 Vish        M
@@ -1230,3 +1233,4 @@ dtype: float64
 array(['F', 'M'], dtype=object)
 >>> hist
 >>> hist -o -p -f kemal_kazuma_labeled_female.md
+```

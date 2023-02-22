@@ -1,0 +1,12 @@
+# Chapter 06 Scratch Pad (where does this go):
+- |+
+  used with each other in the same sentence you may start to understand those words, even before get an idea that they are both pets.
+  perhaps even before you get to see one or the  .
+- |+
+  You isolated words from their neighbors and only worried about whether they were present or absent in each document.
+  We ignored the effect the neighbors of a word have on its meaning and how those relationships affect the overall meaning of a statement.
+  Our bag-of-words concept jumbled all the words from each document together into a statistical bag.
+  In this chapter, you will create much smaller bags of words from a "neighborhood" of only a few words, typically fewer than ten tokens.
+  You will also ensure that these neighborhoods of meaning do not spill over into adjacent sentences.
+  This process will help focus your word vector training on the relevant words.
+

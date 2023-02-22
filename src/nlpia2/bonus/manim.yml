@@ -267,4 +267,3 @@ dependencies:
     - progressbar==2.5
     - pydub==0.23.1
     - tables==3.4.4
-prefix: C:\Users\bshep\AppData\Local\conda\conda\envs\manim

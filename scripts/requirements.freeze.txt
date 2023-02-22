@@ -1,0 +1,237 @@
+alabaster==0.7.12
+anyio==3.6.2
+argon2-cffi==21.3.0
+argon2-cffi-bindings==21.2.0
+asgiref==3.5.2
+astroid==2.12.12
+asttokens==2.1.0
+attrs==22.1.0
+Babel==2.11.0
+backcall==0.2.0
+bandit @ file:///home/hobs/.cache/pypoetry/artifacts/f0/49/b5/f7eef3f37396c309ab2b6498c81d9ab34d2d1734c1831218a4f2603023/bandit-1.7.4-py3-none-any.whl
+beautifulsoup4==4.11.1
+black @ file:///home/hobs/.cache/pypoetry/artifacts/68/c2/8a/f75aaccd5ae45cf4d1d17da7b1b9bc4721fe82dba2779809d07de2117a/black-22.10.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+bleach==5.0.1
+blis @ file:///home/hobs/.cache/pypoetry/artifacts/79/70/09/464bd2444dd23136aa10503518d2c35df4a5fa40edca95cd60c1814d1e/blis-0.7.9-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+boto3==1.26.13
+botocore==1.29.13
+CacheControl @ file:///home/hobs/.cache/pypoetry/artifacts/d5/b9/9f/6cad64e8b9644fd749714931654842b3c03a072a50ebdf4a810dc6b406/CacheControl-0.12.12-py2.py3-none-any.whl
+cachy @ file:///home/hobs/.cache/pypoetry/artifacts/2a/08/31/09a2387915d82f9c0490fc2580274b1955e6f262b36583186346e78d14/cachy-0.3.0-py2.py3-none-any.whl
+camel-converter==2.0.1
+catalogue @ file:///home/hobs/.cache/pypoetry/artifacts/87/56/9c/61c93056f11f294365a984b07565cdc684ae700f4ad1a8ac8af80e4ac1/catalogue-2.0.8-py3-none-any.whl
+certifi==2022.9.24
+cffi==1.15.1
+cfgv==3.3.1
+charset-normalizer==2.1.1
+cleo @ file:///home/hobs/.cache/pypoetry/artifacts/af/25/ea/ce2978fdbad9bb5818bc109d048a76a371e89c0d670118a42b2cb92e40/cleo-1.0.0a5-py3-none-any.whl
+click @ file:///home/hobs/.cache/pypoetry/artifacts/b3/fd/d9/1bf6cc4e6a7fdf7eced662eddb1af6d4b10440530b80397b22db17a805/click-8.0.4-py3-none-any.whl
+cmudict==1.0.2
+commonmark==0.9.1
+ConfigArgParse==1.5.3
+contourpy==1.0.6
+coverage==6.5.0
+crashtest @ file:///home/hobs/.cache/pypoetry/artifacts/2c/e4/c8/9449886bafd96da7bab05848a36915c9244b4d37e3c1ae229136be4203/crashtest-0.3.1-py3-none-any.whl
+cryptography @ file:///home/hobs/.cache/pypoetry/artifacts/55/04/4a/bd66763e5b452e4f854533bceb9c9985f88dd06350c9a0e43398d28406/cryptography-38.0.3-cp36-abi3-manylinux_2_28_x86_64.whl
+cycler==0.11.0
+cymem @ file:///home/hobs/.cache/pypoetry/artifacts/6d/ad/10/32579858ad9564fd7151005b5226970f3cc94ded233c18322e559c182a/cymem-2.0.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Cython==0.29.32
+darglint @ file:///home/hobs/.cache/pypoetry/artifacts/96/d1/6c/f02878c2e8c4678c3bddb09af981373d25ef06204e95910771b3c29aaf/darglint-1.8.1-py3-none-any.whl
+debugpy==1.6.3
+decorator==5.1.1
+defusedxml==0.7.1
+dill==0.3.6
+distlib==0.3.6
+Django==4.1.3
+docutils==0.19
+dparse @ file:///home/hobs/.cache/pypoetry/artifacts/7d/ba/7c/3e4368467cec8878bf9e6f4b9cb337f1e58f3f14bf45b6c3aed6afbf09/dparse-0.6.2-py3-none-any.whl
+dulwich @ file:///home/hobs/.cache/pypoetry/artifacts/b3/72/ef/5bcc08e0ffd3e7e58bc03f796bbf2f11c895ae4e2d11399f31ca185548/dulwich-0.20.50-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+edit-distance==1.0.4
+elastic-transport==8.4.0
+elasticsearch==8.5.0
+entrypoints==0.4
+environment==1.0.0
+exceptiongroup==1.0.4
+executing==1.2.0
+fastjsonschema==2.16.2
+filelock==3.8.0
+fonttools==4.38.0
+gitdb==4.0.9
+GitPython==3.1.29
+graphviz==0.20.1
+h5py==3.7.0
+html2text==2020.1.16
+html5lib==1.1
+huggingface-hub==0.11.0
+identify==2.5.9
+idna==3.4
+imageio==2.22.4
+imagesize==1.4.1
+importlib-metadata @ file:///home/hobs/.cache/pypoetry/artifacts/a8/07/8e/d3d6dea643caa2f3c60f3f83ed33f29e68996d4a56a186aff6bc1bfb03/importlib_metadata-4.13.0-py3-none-any.whl
+iniconfig==1.1.1
+ipykernel==6.17.1
+ipython==8.6.0
+ipython-genutils==0.2.0
+ipywidgets==8.0.2
+isort==5.10.1
+jaraco.classes @ file:///home/hobs/.cache/pypoetry/artifacts/5e/36/93/cd5f9c1c63a451edb0ecc7f2aaa6d729d184c29c6122c08b1b2a49b82a/jaraco.classes-3.2.3-py3-none-any.whl
+jedi==0.18.1
+jeepney @ file:///home/hobs/.cache/pypoetry/artifacts/f8/e3/81/9e6217767d9f90be6425c43ba49a292fe2c1f8e899f1ea6a9058c26d25/jeepney-0.8.0-py3-none-any.whl
+Jinja2==3.1.2
+jmespath==1.0.1
+joblib==1.2.0
+jsonschema==4.17.0
+jupyter==1.0.0
+jupyter-console==6.4.4
+jupyter-server==1.23.2
+jupyter_client==7.4.7
+jupyter_core==5.0.0
+jupyterlab-pygments==0.2.2
+jupyterlab-widgets==3.0.3
+keyring @ file:///home/hobs/.cache/pypoetry/artifacts/47/13/1b/8b41147885500db8deeb69a0b541d187ae968ebc68729569a3311aeecf/keyring-23.11.0-py3-none-any.whl
+kiwisolver==1.4.4
+langcodes @ file:///home/hobs/.cache/pypoetry/artifacts/1c/9d/0c/2748ff5ae9d04e537e54a2b5e8ad3e59ab2a61f82dc245999100de33cf/langcodes-3.3.0-py3-none-any.whl
+lazy-object-proxy==1.8.0
+lxml==4.9.1
+m2r==0.3.1
+MarkupSafe==2.1.1
+matplotlib==3.6.2
+matplotlib-inline==0.1.6
+mccabe==0.7.0
+meilisearch==0.22.2
+mistune==0.8.4
+more-itertools @ file:///home/hobs/.cache/pypoetry/artifacts/20/de/96/351a0ab1d191dfb6a727385255d4b01f02d1ab8adbefaa3db2852942c7/more_itertools-9.0.0-py3-none-any.whl
+msgpack @ file:///home/hobs/.cache/pypoetry/artifacts/80/9a/00/2a55c8c99b7afce7a0601eedcdf81bd5f8fa975201ca6d5093ea413630/msgpack-1.0.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+murmurhash @ file:///home/hobs/.cache/pypoetry/artifacts/a2/48/a1/26dabfba6dcf25322a1c7d11a6c307e3e2fcdb8c39453faae5aa340344/murmurhash-1.0.9-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+mypy @ file:///home/hobs/.cache/pypoetry/artifacts/a1/22/2b/e6215e8bf0650a41823a46242df1b4ce2e42ce610627d17afdc89f67b7/mypy-0.790-py3-none-any.whl
+mypy-extensions @ file:///home/hobs/.cache/pypoetry/artifacts/2f/c6/09/3e1afdcb75322c65b786e63cd7e879b6be3db36dea78ca376db5483ae4/mypy_extensions-0.4.3-py2.py3-none-any.whl
+nbclassic==0.4.8
+nbclient==0.7.0
+nbconvert==6.5.4
+nbformat==5.7.0
+nest-asyncio==1.5.6
+networkx==2.8.8
+nltk==3.7
+nodeenv==1.7.0
+notebook==6.5.2
+notebook_shim==0.2.2
+numpy==1.23.4
+nvidia-cublas-cu11==11.10.3.66
+nvidia-cuda-nvrtc-cu11==11.7.99
+nvidia-cuda-runtime-cu11==11.7.99
+nvidia-cudnn-cu11==8.5.0.96
+packaging==21.3
+pandas @ file:///home/hobs/.cache/pypoetry/artifacts/4e/2f/74/af10579a5fd45a3f3867e35a5b49d45eeef80b46ad75d93dced6de60be/pandas-1.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+pandocfilters==1.5.0
+parso==0.8.3
+pathspec @ file:///home/hobs/.cache/pypoetry/artifacts/6b/16/77/1a41f2c8fe48fa05790cf1678ad486e290004ea71d32e9d3a00ea84b28/pathspec-0.10.2-py3-none-any.whl
+pathy @ file:///home/hobs/.cache/pypoetry/artifacts/46/7b/90/f9317643726ef247182df9f3f32b44cb0eb84fae912bb4d1761417b9fb/pathy-0.8.1-py3-none-any.whl
+pbr @ file:///home/hobs/.cache/pypoetry/artifacts/1a/4b/06/eafed158d794b75c9549557a679b58cf09f63f6096d92dddb5fa447082/pbr-5.11.0-py2.py3-none-any.whl
+pexpect==4.8.0
+pickleshare==0.7.5
+Pillow==9.3.0
+pkginfo @ file:///home/hobs/.cache/pypoetry/artifacts/eb/8d/e1/617618077d2661c6674a1f831778acea5c28c0e96de8b3447ea2911535/pkginfo-1.8.3-py2.py3-none-any.whl
+platformdirs==2.5.4
+pluggy==1.0.0
+poetry @ file:///home/hobs/.cache/pypoetry/artifacts/f7/e2/9d/b3fd5fc661da46ce41a00974068b1c277429a22bbc41710fb015b5f95c/poetry-1.2.2-py3-none-any.whl
+poetry-core @ file:///home/hobs/.cache/pypoetry/artifacts/33/c7/fb/743cfeca123f96057429bf943fec4004bb7db94fc5cc01f7b5b316ea3c/poetry_core-1.3.2-py3-none-any.whl
+poetry-plugin-export @ file:///home/hobs/.cache/pypoetry/artifacts/fc/7c/a8/f275d8d90a5fc96b4c2a12ec4ec45c3a0e867e5cbcda330da22f0513a4/poetry_plugin_export-1.2.0-py3-none-any.whl
+pre-commit==2.20.0
+preshed @ file:///home/hobs/.cache/pypoetry/artifacts/d8/03/ef/9687449b66e86c7c680589c8825ee3318b54edd186497a7b5c86f271e1/preshed-3.0.8-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+prometheus-client==0.15.0
+prompt-toolkit==3.0.32
+pronouncing==0.2.0
+psutil==5.9.4
+ptyprocess==0.7.0
+pure-eval==0.2.2
+py @ file:///home/hobs/.cache/pypoetry/artifacts/71/fb/64/bfdc833c2055a893883f33deaac35ef2cbdd95d58031cfc69a630f32bf/py-1.11.0-py2.py3-none-any.whl
+pycparser==2.21
+pydantic @ file:///home/hobs/.cache/pypoetry/artifacts/c5/d1/3f/913219e7e44cd98f66f67a268d5b0c5119d36d79e2d5419470401ae522/pydantic-1.8.2-py3-none-any.whl
+pydocstyle==6.1.1
+Pygments==2.13.0
+pylev @ file:///home/hobs/.cache/pypoetry/artifacts/73/a3/5f/dcda05c3b14a9eb68dafbacbd3d3c76faebebf5a669f23cce5fabac73d/pylev-1.4.0-py2.py3-none-any.whl
+pylint==2.15.5
+pyparsing==3.0.9
+pyrsistent==0.19.2
+pytest==7.2.0
+pytest-cov==4.0.0
+python-dateutil==2.8.2
+python-dotenv @ file:///home/hobs/.cache/pypoetry/artifacts/1f/de/02/16542facc37cdcf42f7ccb3db0fef44d9f123c9f0f85cada13a648d486/python_dotenv-0.13.0-py2.py3-none-any.whl
+python-slugify==7.0.0
+pytz==2022.6
+pyupgrade @ file:///home/hobs/.cache/pypoetry/artifacts/63/f1/f7/bf7a9e8aa8f47f8efd570c2574ef6abeb07e1990e5434728ba5a5fd954/pyupgrade-3.2.2-py2.py3-none-any.whl
+PyWavelets==1.4.1
+PyYAML==6.0
+pyzmq==24.0.1
+qary==0.7.24
+qtconsole==5.4.0
+QtPy==2.3.0
+rapidfuzz==2.13.2
+recommonmark==0.7.1
+regex==2022.10.31
+requests==2.28.1
+requests-toolbelt @ file:///home/hobs/.cache/pypoetry/artifacts/29/ee/7b/4bd8efb8f90cdc59d6222d701e1c87d0b2af9c6ca781ef9e418c1cff30/requests_toolbelt-0.9.1-py2.py3-none-any.whl
+ruamel.yaml @ file:///home/hobs/.cache/pypoetry/artifacts/83/da/fc/4999c3989394ae7ede9799f870029290e70d3d89709057f3396a366a93/ruamel.yaml-0.17.21-py3-none-any.whl
+ruamel.yaml.clib @ file:///home/hobs/.cache/pypoetry/artifacts/4b/c4/f2/dd7f08fed0636986b3e9072af17c8506e80a9f8ea223bc222b713329bf/ruamel.yaml.clib-0.2.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl
+s3transfer==0.6.0
+safety @ file:///home/hobs/.cache/pypoetry/artifacts/22/e6/0d/b25a4204443943c91fd2a5b5e00e069c84d25334b37342e3fa230a4e0e/safety-2.3.1-py3-none-any.whl
+scikit-image==0.19.3
+scikit-learn==1.1.3
+scipy==1.9.3
+seaborn @ file:///home/hobs/.cache/pypoetry/artifacts/d3/a6/d5/b0ddcb085cc871df72fc2cc4a2df25554db2d5fb1ff7cda68e558e2c73/seaborn-0.11.2-py3-none-any.whl
+SecretStorage @ file:///home/hobs/.cache/pypoetry/artifacts/67/37/15/882630ad7e901b285c7fa882383947b84de4c8a4b97045d71121a7ec93/SecretStorage-3.3.3-py3-none-any.whl
+Send2Trash==1.8.0
+sentence-transformers==2.2.2
+sentencepiece==0.1.97
+setuptools-scm @ file:///home/hobs/.cache/pypoetry/artifacts/36/02/c3/0ec6496fa331b53e7b9112b3dd4e4ab4ca00009701d1d239b61e23b5f8/setuptools_scm-7.0.5-py3-none-any.whl
+shellingham @ file:///home/hobs/.cache/pypoetry/artifacts/f3/e7/4b/1ce870b2e56086370c9676f8c81de275c9636d49c3299a6d8875fd7bc5/shellingham-1.5.0-py2.py3-none-any.whl
+six==1.16.0
+smart-open @ file:///home/hobs/.cache/pypoetry/artifacts/26/5c/d5/d473a57a1ee4f8c35cd96def3d042e8035b29225f1933ba898cd97e684/smart_open-5.2.1-py3-none-any.whl
+smmap==5.0.0
+sniffio==1.3.0
+snowballstemmer==2.2.0
+soupsieve==2.3.2.post1
+spacy @ file:///home/hobs/.cache/pypoetry/artifacts/4b/00/05/dc4e1a1ed12af8729990d076e52537d4b3f5baeec981c2b5572f90feaa/spacy-3.2.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+spacy-legacy @ file:///home/hobs/.cache/pypoetry/artifacts/4f/94/53/a81de581ea1c1b47055f115cd1799294cb3d8d209d0fd065f83c7c19da/spacy_legacy-3.0.10-py2.py3-none-any.whl
+spacy-loggers @ file:///home/hobs/.cache/pypoetry/artifacts/08/2f/02/8a20e2ce406d4aad012eb36e29008378e03597deac8760a08a3ade38a7/spacy_loggers-1.0.3-py3-none-any.whl
+Sphinx==5.3.0
+sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-htmlhelp==2.0.0
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-serializinghtml==1.1.5
+sqlparse==0.4.3
+srsly @ file:///home/hobs/.cache/pypoetry/artifacts/29/a8/18/b5e3ccbd31c9d6e75968654ada32c84c9002200eff2e86925d665a9b97/srsly-2.4.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+stack-data==0.6.1
+stevedore @ file:///home/hobs/.cache/pypoetry/artifacts/5f/3d/ce/fb433118ce565133b9de58c724e7ae929b26f93cca07e8b497b8e2cc8e/stevedore-4.1.1-py3-none-any.whl
+terminado==0.17.0
+text-unidecode==1.3
+thinc @ file:///home/hobs/.cache/pypoetry/artifacts/ae/cb/79/dfb51fea10ba8b5d53cf45a0eb34289e4204052ae7585d12ed73f49e13/thinc-8.0.17-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+threadpoolctl==3.1.0
+tifffile==2022.10.10
+tinycss2==1.2.1
+tokenize-rt @ file:///home/hobs/.cache/pypoetry/artifacts/95/75/c3/3608c731d87fa46749b1a1b107712236510c372052455b6a465690190b/tokenize_rt-5.0.0-py2.py3-none-any.whl
+tokenizers==0.13.2
+toml==0.10.2
+tomli==2.0.1
+tomlkit==0.11.6
+torch==1.13.0
+torchvision==0.14.0
+tornado==6.2
+tox @ file:///home/hobs/.cache/pypoetry/artifacts/5a/19/74/e0c3d68313c3a8b9e2526ac496fe3c986be37c31e959f7977499d4aa30/tox-3.27.1-py2.py3-none-any.whl
+tqdm==4.64.1
+traitlets==5.5.0
+transformers==4.24.0
+typed-ast @ file:///home/hobs/.cache/pypoetry/artifacts/cc/50/4d/e1b50dadd10f8d3f8bd6f6c2e764cf988f0e86c4047c0210353ba77680/typed_ast-1.4.3.tar.gz
+typer @ file:///home/hobs/.cache/pypoetry/artifacts/ae/2e/28/a35d78133fab6b0086593057935d86bcd34c40c8c08dfdde334acbe93e/typer-0.4.2-py3-none-any.whl
+typing_extensions==4.4.0
+urllib3==1.26.12
+virtualenv==20.16.7
+wasabi @ file:///home/hobs/.cache/pypoetry/artifacts/35/17/7e/7b9e86d44765921e76abcb0cd02ab49769b04ba928694c469f7038b486/wasabi-0.10.1-py3-none-any.whl
+wcwidth==0.2.5
+webencodings==0.5.1
+websocket-client==1.4.2
+widgetsnbextension==4.0.3
+wikipedia==1.4.0
+wrapt==1.14.1
+zipp @ file:///home/hobs/.cache/pypoetry/artifacts/8a/50/7b/122d37344ea9793e6ae1001cf8e3e0fce0305d41e11eb0f58aedc553ab/zipp-3.10.0-py3-none-any.whl

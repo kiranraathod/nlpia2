@@ -71,10 +71,16 @@ You can avoid the temptation to use readability scores, or sentiment analyzers t
 You don't even have to squash your vectors with blind (unsupervised) dimension reduction approaches such as stop word filtering, stemming, lemmatizing, LDA, PCA, TSNE, or clustering.
 A neural network *mini-brain* can do this for you, and it will do it optimally, based on the statistics of the relationship between words and your target.
 
-WARNING: Don't use stemmers, lemmatizers or other keyword-based preprocessing in your deep larning pipeline unless you're absolutely sure it is helping you model perform better for you application.
+[IMPORTANT]
+====
+Don't use stemmers, lemmatizers, case folding or other token normalizing and preprocessing in your deep learning pipeline unless you are absolutely certain it is helping your model perform better for your application.
+Language is too fuzzy for these hard-coded rules that "fold" multiple approximate synonyms into the same token in your vocabulary.
+Your understanding of the meanings of words is probably different from your users'.
+Use the power of statistics and machine learning rather than wasting your time trying to guess what text preprocessing will help your model.
+====
 
 If you're doing stemming, lemmatization, or keyword based analyses you probably want to try your pipeline without those filters.
-It doesn't matter whether you use NLTK, Stanford Core NLP, or even SpaCy, hand-crafted lingustics algorithms like lemmatizers are probably not helping.
+It doesn't matter whether you use NLTK, Stanford Core NLP, or even spaCy, hand-crafted lingustics algorithms like lemmatizers are probably not helping.
 These algorithms are limited by the hand-labeled vocabulary and hand-crafted regular expressions that define the algorithm.
 
 Here are some preprocessing algorithms that will likely trip up your neural nets:
@@ -94,7 +100,7 @@ In the past brilliant liguists like Julie Beth Lovins needed to hand-craft algor
 Deep neural networks now make all that laborious work unnecessary.
 Neural networks directly access the meaning of words based on their statistics, without requiring brittle algorithms like stemmers and lemmatizers.
 
-Even powerful feature engineering approaches like the Latent Semantic Analysis LSA of Chapter 4 can't match the NLU capabilities of neural nets.
+Even powerful feature engineering approaches like the Latent Semantic Analysis LSA of chapter 4 can't match the NLU capabilities of neural nets.
 And the automatic learning of decision thresholds with decision trees, random forests, and boosted trees don't provide the depth of language understanding of neural nets.
 Conventional machine learning algorithms made full text search and universally accessible knowledge a reality.
 But deep learning with neural networks makes artificial intelligence and inteligent assistants possible.
