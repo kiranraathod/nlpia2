@@ -65,7 +65,8 @@ import sys
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-REPO_URL = 'https://gitlab.com/tangibleai/qary/-/raw/master'
+# https://gitlab.com/tangibleai/qary/-/raw/main/src/qary/data/faq/short-faqs.csv
+REPO_URL = 'https://gitlab.com/tangibleai/qary/-/raw/main'
 FAQ_DIR = 'src/qary/data/faq'
 FAQ_FILENAME = 'short-faqs.csv'
 DS_FAQ_URL = '/'.join([REPO_URL, FAQ_DIR, FAQ_FILENAME])
@@ -75,8 +76,8 @@ class FAQ():
     def __init__(self, df, **kwargs):
         self.df = df
         self.vectorizer = TfidfVectorizer(**kwargs)
-        self.vectorizer.fit(df['question'])
-        self.q_vectors = self.vectorizer.transform(df['question'])
+        self.vectorizer.fit(self.df['question'])
+        self.q_vectors = self.vectorizer.transform(self.df['question'])
         # self.q_vectors = pd.DataFrame.sparse.from_spmatrix(
         #    self.q_vectors,
         #    columns=vectorizer.get_feature_names())
@@ -92,19 +93,36 @@ class FAQ():
         self.df['question'][idx]
         response = (
             f"Your question:\n  {question}\n"
-            f"Most similar FAQ:\n  {df['question'][idx]}\n"
-            f"Answer to that FAQ:\n  {df['answer'][idx]}\n"
+            f"Most similar FAQ:\n  {self.df['question'][idx]}\n"
+            f"Answer to that FAQ:\n  {self.df['answer'][idx]}\n"
         )
         return response
 
 
-if __name__ == '__main__':
+def run_bot(faq=None):
+    if faq is None:
+        df = pd.read_csv(DS_FAQ_URL)
+        faq = FAQ(df)
+
+    # Ask user for questions/queries to look up in the DB
+    question = ""
     if len(sys.argv) > 1:
-        q = ' '.join(sys.argv[1:])
-    else:
-        q = "overfitting?"
+        question = ' '.join(sys.argv[1:])
+
+    qa_log = []
+    while True:
+        if question:
+            if question.lower().strip().startswith('exit'):
+                break
+            answer = faq.reply(question)
+            qa_log.append([question, answer])
+            print(answer)
+        question = input('Ask me anything: ')
+    return qa_log
+
+
+if __name__ == '__main__':
+    # Create an FAQ database of questions and answers
     df = pd.read_csv(DS_FAQ_URL)
     faq = FAQ(df)
-    idx = faq.find_question_index(q)
-    # 51
-    print(faq.reply(q))
+    qa_log = run_bot(faq)

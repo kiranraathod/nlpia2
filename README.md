@@ -10,18 +10,44 @@
 
 Official [code repository](https://gitlab.com/tangibleai/nlpia2/) for the book [_Natural Language Processing in Action, 2nd Edition_](https://proai.org/nlpia2e) by Maria Dyshel and Hobson Lane at [Tangible AI](https://tangibleai.com) for [Manning Publications](https://manning.com). It would not have happened without the generous work of [contributing authors](AUTHORS.md).
 
-To get the most of this repository, you need to do two things.
+## Quickstart
+
+If you have install python packages from source before, you will probably be able to follow these steps to get going quickly:
+
+```
+git clone git@gitlab.com:tangbileai/nlpia2
+cd nlpia2
+pip install --upgrade pip virtualenv
+python -m virtualenv .venv
+source .venv/bin/activate | source .venv/Scripts/activate
+pip install -e .
+```
+
+Then you can check to see if everything is working by importing the Chapter 3 FAQ chatbot example.
+
+```python
+from nlpia2.ch03.faqbot import run_bot
+run_bot()
+```
+
+## Install
+
+To get the most of this repository, you need to do three things.
 
 1. **Clone the repository** to your local machine if you want to execute the code locally or want local access to the data (recommended).
-2. **Create an environment** that has all the helpful/needed modules for Natural Language Processing In Action, 2nd Edition.
+2. **Create a virtual environment** to hold the `nlpia2` package and it's dependences.
+3. **Install nlpia2** as an `--editable` package so you can contribute to it if you find bugs or things you'd like to add.
 
-## Clone the Repository
 
-If you're currently viewing this file on gitlab, and want in the future to access the data and code local to your machine, you may clone this repository to your local machine. Navigate to your preferred directory to house the local clone (for example, you local _git_ directory) and execute:
+### Clone the Repository
 
-`git clone git@gitlab.com:prosocialai/nlpia2`
+If you're currently viewing this file on GitLab, and you'd rather access the data and code local to your machine, you may clone this repository to your local machine. Navigate to your preferred directory to house the local clone (for example, you local _git_ directory) and execute:
 
-## Create a Conda Environment
+`git clone git@gitlab.com:tangbileai/nlpia2`
+
+
+
+### Create a Virtual Environment
 
 To use the various packages in vogue with today's advanced NLP referenced in the NLPIA 2nd Edition book, such as PyTorch and SpaCy, you need to install them in a conda environment.  To avoid potential conflics of such packages and their dependencies with your other python projects, it is a good practice to create and activate a _new_ conda environment.
 

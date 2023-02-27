@@ -365,8 +365,9 @@ def parse_args(
     return vars(parser.parse_args())
 
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
+    results = None
     if args['input']:
         if Path(args['input']).is_dir():
             results = extract_code_files(adocdir=args['input'])
@@ -377,3 +378,8 @@ if __name__ == '__main__':
             results = extract_code_files()
         if input('Extract urls from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_urls()
+    return results
+
+
+if __name__ == '__main__':
+    results = main()
