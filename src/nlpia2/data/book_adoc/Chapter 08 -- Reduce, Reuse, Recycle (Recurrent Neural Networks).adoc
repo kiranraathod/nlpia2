@@ -84,7 +84,7 @@ And RNNs open up a whole new range of applications.
 | **Type** | **Description** | **Applications**
 |  One to Many  | One input tensor used to generate a sequence of output tensors | Generate chat messages, answer questions, describe images
 |  Many to One  |   sequence of input tensors gathered up into a single output tensor |   Classify or tag text according to its language, intent, or other characteristics
-|  Many to Many |  a sequence of input tensors used to generate a sequence of output tensors | Translate, tag, or annonymize the tokens within a sequence of tokens, answer questions, participate in a conversation
+|  Many to Many |  a sequence of input tensors used to generate a sequence of output tensors | Translate, tag, or anonymize the tokens within a sequence of tokens, answer questions, participate in a conversation
 |===
 
 
