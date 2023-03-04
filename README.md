@@ -14,7 +14,7 @@ Official [code repository](https://gitlab.com/tangibleai/nlpia2/) for the book [
 
 If you have install python packages from source before, you will probably be able to follow these steps to get going quickly:
 
-```
+```bash
 git clone git@gitlab.com:tangbileai/nlpia2
 cd nlpia2
 pip install --upgrade pip virtualenv
