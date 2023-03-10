@@ -1,5 +1,7 @@
 = Natural Language Processing in Action, Second Edition
 :chapter: 6
+:part: 2
+:secnums:
 :sectnumoffset: 5
 :leveloffset: 1
 :imagesdir: .
@@ -11,17 +13,6 @@
 :encoding: UTF-8
 
 = Reasoning with word embeddings (word vectors)
-////
-KM: Overall, this is a really nice chapter with some great examples. I have quite a few comments below, though. Most of these are related to formatting and styles. There are some content questions sprinkled throughout as well. Please review my comments and let me know if you have any questions.
-HL: OK
-////
-
-////
-KM: I've taken out the bold below. Bold is not allowed in Manning styles, nor should there be italics in the intro bullets.
-
-There is also bold in other parts of the chapter. I've changed these to italics, to meet Manning style guidelines.
-HL: OK
-////
 
 This chapter covers
 
@@ -36,13 +27,6 @@ They can give your NLP pipeline a general understanding of words.
 In this chapter you will learn how to apply word embeddings to real world applications.
 And just as importantly you'll learn where not to use word embeddings.
 And hopefully these examples will help you dream up new and interesting applications in business as well as in your personal life.
-
-////
-KM: The first sentence of the paragraph below is confusing.
-HL: Rewrote all these paragraphs and created a new section
-KM: Move text of footnote below to be in the main flow of the chapter. Try parantheses or a note.
-HL: Done
-////
 
 You can think of word vectors as sorta like lists of attributes for Dota 2 heroes or roll playing game (RPG) characters and monsters.
 Now imagine that there was no text on these character sheets or profiles.
@@ -81,14 +65,16 @@ And so they are also a crude representation of the node embeddings for the netwo
 .Word embeddings in your brain
 image::../images/ch06/word-brain-embedding.drawio.png[alt="Figure 6. 1: connections between clusters of neurons representing each word in the phrase 'read the words in'",width=100%,link="../images/ch06/word-brain-embedding.drawio.png"]
 
-You can think of a word embedding as a vector representation of the pattern of neuron firing in your brain when you think about an individual word.
-Whenever you think of a word it creates a wave of electrical charges as neurons fire in your brain, like ripples emanating out from a pebble dropped in a pond.
+You can think of a word embedding as a vector representation of the pattern of neurons firing in your brain when you think about an individual word.
+Whenever you think of a word, the thought creates a wave of electrical charges and chemical reactions in your brain originating at the neurons associated with that word or thought. 
+Neurons within your brain fire in waves, like the circluar ripples emanating out from a pebble dropped in a pond.
 But these electrical signals are selectively flowing out through some neurons and not others.
-As you read the words in this sentence you are sparking flashes of activity in your neurons like those in the sketch in figure 6.1.
-In fact, researchers have found surprising similarity in the patterns of artificial neural network weights for word embeddings and the activity within your brain as you think about words.footnote:["Robust Evaluation of Language-Brain Encoding Experiments" (https://arxiv.org/abs/1904.02547) by Lisa Beinborn (https://beinborn.eu/)] footnote:[
+
+As you read the words in this sentence you are sparking flashes of activity in your neurons like those in the sketch in figure <<word_brain_embedding_figure>>.
+In fact, researchers have found surprising similarity in the patterns of artificial neural network weights for word embeddings, and the patterns of activity within your brain as you think about words.footnote:["Robust Evaluation of Language-Brain Encoding Experiments" (https://arxiv.org/abs/1904.02547) by Lisa Beinborn (https://beinborn.eu/)] footnote:[
 footnote:["Linkng human cognitive patterns to NLP models" (https://soundcloud.com/nlp-highlights/130-linking-human-cognitive-patterns-to-nlp-models-with-lisa-beinborn) interview of Lisa Beinborn (https://beinborn.eu/)]
 
-Electrons flowing out from neurons are like children running out of a school doorway and out into the world when the bell rings.
+Electrons flowing out from neurons are like children running out of a school doorway when the school bell rings for recess.
 The word or thought is like the school bell.
 Of course your thoughts and the electrons in your brain are much faster than students.
 You don't even have to speak or hear the word to trigger its pattern in your brain.
@@ -100,7 +86,7 @@ Your brain is a never ending language learner not too different from Cornell's N
 Some people have gotten carried away with this idea, and they imagine that you can accomplish a form of mind control with words.
 When I was looking for information about NLP research on Reddit I got distracted by the `r/NLP` subreddit.
 It's not what you think.
-It turns out that some motivational speakers have name-squatted the word "NLP" on reddit for their 70's era "Neuro-linguistic Programming" money-making schemes.["Neuro-linguistic programming" explanation on Wikipedia (https://en.wikipedia.org/wiki/Neuro-linguistic_programming) and r/NLP (https://www.reddit.com/r/NLP) vs r/NaturalLanguage (https://www.reddit.com/r/NaturalLanguage)]
+It turns out that some motivational speakers have name-squatted the word "NLP" on reddit for their 70's era "Neuro-linguistic Programming" money-making schemes.footnote:["Neuro-linguistic programming" explanation on Wikipedia (https://en.wikipedia.org/wiki/Neuro-linguistic_programming)"] footnote:["r/NLP/ Subreddit (https://www.reddit.com/r/NLP)"] footnote:["An authentic NLP subreddit at "r/NaturalLanguage/" (https://www.reddit.com/r/NaturalLanguage)"]
 Fortunately word embeddings can handle this ambiguity and misinformation just fine.
 
 You don't even have to tell the word embedding algorithm what you want the word "NLP" to mean.
@@ -111,7 +97,7 @@ You just need a lot of text.
 Later in this chapter you will just gather up a bunch of Wikipedia articles to use as your training set.
 But any text in any language will do, as long as contains a lot of words that you are interested in.
 
-There's a another "brain on words" to think about.
+There's another "brain on words" to think about.
 Words not only affect the way you think but they affect how you communicate.
 And you are sorta like a neuron in the collective consciousness, the brain of society.
 That "sorta" word is an especially powerful pattern of neural connections for me, because I learned what it means from Daniel Dennet's _Intuition Pumps_ book.footnote:[_Intuition Pumps and Other Tools for Thinking_ by Daniel Dennett p.96]
@@ -142,9 +128,6 @@ Even there are many practical applications where your NLP pipeline could take ad
 * Answer word analogy questions
 * Reasoning with words and names
 
-////
-KM: Missing footnote info below. If it's a well-known fact in the industry, then no footnote is needed.
-////
 
 And in the academic world researchers use word embeddings to solve some of the 200+ NLP problems: footnote:[Papers With Code topic "Word Embeddings" (https://paperswithcode.com/task/word-embeddings)]
 
@@ -170,7 +153,7 @@ The embeddings for your search terms provide a direct numerical representation o
 
 [WARNING]
 ====
-Word embeddings to not represent _your_ intended interpretation of words.
+Word embeddings do not represent _your_ intended interpretation of words.
 They represent the average meaning of those words for everyone that composed the documents and pages that were used to train the word embedding language model.
 This means that word embeddings contain all the biases and stereotypes of all the people that composed the web pages used to train the model.
 ====
@@ -260,10 +243,6 @@ Publisher      0.39
 Development    0.40
 ----
 
-////
-KM: LOL at the example below.
-////
-
 Well that's surprising.
 It seems that the title "Developer" is often also associated with the word "Publisher."
 I would have never guessed why this would be before having worked with the Development Editors, Development Managers, and even a Tech Development Editor at Manning Publishing.
@@ -315,12 +294,12 @@ ____
 
 If you enter that sentence into Google or Bing, you may not get the direct answer you are looking for, "Marie Curie."
 Google Search will most likely only give you links to lists of famous physicists, both men and women.
-////
-KM: Move the text of the footnote to the main flow of the chapter. Try parentheses instead.
-////
+
 You would have to skim several pages to find the answer you are looking for.
 But once you found "Marie Curie," Google or Bing would keep note of that.
-They might get better at providing you search results the next time you look for a scientist.footnote:[At least, that is what it did for us in researching this book. We had to use private browser windows to ensure that your search results would be similar to ours.]
+They might get better at providing you search results the next time you look for a scientist.
+(At least, that is what it did for us in researching this book. 
+We had to use private browser windows to ensure that your search results would be similar to ours.)
 
 With word embeddings, you can search for words or names that combine the meaning of the words "woman," "Europe," "physics," "scientist," and "famous," and that would get you close to the token "Marie Curie" that you are looking for.
 And all you have to do to make that happen is add up the vectors for each of those words that you want to combine:
@@ -336,7 +315,7 @@ You can even see how you might be able to use word embedding math to subtract ou
 
 [source,python]
 ----
->>> answer_vector = wv['woman'] + wv['Europe'] + wv[physics'] +\
+>>> answer_vector = wv['woman'] + wv['Europe'] + wv['physics'] +\
 ...     wv['scientist'] - wv['male'] - 2 * wv['man']
 ----
 
@@ -421,25 +400,17 @@ OR
 ANALOGY : WORDS :: ? : NUMBERS
 ----
 
-////
-KM: I don't think listing out "A,B,C,D" and saying "choose from" is any more helpful than just saying multiple choice options. I would take those out, so the sentence reads, "It can be difficult to get analogy questions right, even when you have multiple choice options."
-////
-
 All those "tip of the tongue" questions are a piece of cake for word embeddings, even though they are not multiple choice.
-It can be difficult to get analogy questions right, even when you have **A**, **B**, **C**, and **D** multiple choice options to choose from.
+It can be difficult to get analogy questions right, even when you have multiple choice options to choose from.
 NLP comes to the rescue with word embeddings.
 
-////
-KM: Move the text of the footnote below to the main flow of the chapter.
-////
-
 Word embeddings can be used to answer even these vague questions and analogy problems.
-Word embeddings can help you remember any word or name on the tip of your tongue, as long as the vector for the answer exists in your vocabulary.footnote:[For Google's pretrained Word2Vec model, your word is almost certainly within the 100B word news feed that Google trained it on, unless your word was invented after 2013.]
+Word embeddings can help you remember any word or name on the tip of your tongue, as long as the vector for the answer exists in your vocabulary.
+(For Google's pretrained Word2Vec model, your word is almost certainly within the 100B word news feed that Google trained it on, unless your word after 2013.)
 And embeddings work well even for questions that you cannot even pose in the form of a search query or analogy.
 
 You can learn about some of the math with embeddings in the "analogical reasoning" section later in this chapter.
 
-// TODO: find the dataset parsing section and put this section there (also look for Mikolov
 === Word2Vec Innovation
 
 Words that are used near each other sort of pile up on top of each other in our minds and eventually define what those words mean within the connections of the neurons of our brains.
@@ -461,7 +432,6 @@ John Rubert Firth popularized the concept that "a word is characterized by the c
 But to make word embeddings useful required Tomas Mikolov's focus on a very small "company" of words and the computational power of 21st century computers as well as massive corpora machine-readable text.
 You do not need a dictionary or thesaurus to train your word embeddings.
 You only need a large body of text.
-
 
 That is what you are going to do in this chapter.
 You are going to teach a machine to be sponge, like a toddler.
@@ -495,41 +465,28 @@ This is why dense, high dimensional embeddings are most valuable when you use th
 
 == Artificial Intelligence Relies on Embeddings
 
-Word embeddings were a big leap forward in not only natural language understanding accuracy but also a breakthrough in the hope for general AI.
+Word embeddings were a big leap forward in not only natural language understanding accuracy but also a breakthrough in the hope for Artificial General Intelligence, or AGI. 
 
-////
-KM: Manning is trying to get away from having so many direct quotes in our books. Please paraphrase what is said below and just provide the citation in a footnote.
-HL: What is the goal? To reduce the number of words the reader has to read? To ensure that we don't plagiarize? What is the motivation behind this editorial policy?
-HL: I'll try to find a citation that allow the reader to actually appreciate Hofstadter's original list of intelligence attributes.
-////
+Do you think you could tell the difference between intelligent and unintelligent messages from a machine?
+It may not be as obvious as you think.
+Even the "deep minds" at BigTech were fooled by the surprisingly unintelligent answers from their latest and greatest chatbots in 2023, Bing and Bard.
+Simpler, more authentic conversational search tools such as you.com and neeva.com and their chat interfaces outperform BigTech search on most Internet research tasks.
 
-Hofstadter explained general intelligence like this:
+The philosopher Douglas Hofstader pointed out a few things to look out for when measuring intelligence. footnote[Douglas R. Hofstadter, "Gödel, Escher, Bach: an Eternal Golden Braid (GEB), p. 26]
 
-.Hofstadter on Intelligence
-[quote#hofstadter-intelligence, Douglas R. Hofstadter, "Gödel, Escher, Bach: an Eternal Golden Braid (GEB), p. 26"]
-____
-No one knows where the borderline between non-intelligent behavior and intelligent behavior lies;...
-____
+* flexibility
+* dealing with ambiguity
+* ignoring irrelevant details
+* finding similarities and analogies 
+* generating new ideas
 
-In _GEB_ Hofstadter explains how machines and even software can be intelligent. He suggests that for a machine (or piece of software) to be intelligent it must:
+You'll soon see how word embeddings can enable these aspects of intelligence within your software.
+For example, word embeddings make it possible to respond with flexibility by giving words fuzziness and nuance that previous representations like TF-IDF vectors could not.
+In previous iterations of your chatbot you would have to enumerate all the possible ways to say "Hi" if you want your bot to be flexible in its response to common greetings.
 
-* respond flexibly
-* capitalize on good fortune
-* make sense of contradictions and ambiguity
-* ignore noise and irrelevant information
-* focus attention on important information
-* find similarities between seemingly different situations
-* find differences between seemingly identical situations
-* synthesize new thoughts from old ones
-* generate new ideas
-
-As Hofstadter lists these essential elements of intelligence he is thinking of words and natural language when he talks about "situations" and "ideas".
-You'll soon see how word embeddings enable all of these elements, to various degrees.
-For example, word embeddings make it possible "to respond to situations very flexibly" by giving words fuzziness and flexibility that previous language models couldn't accomplish.
-
-In previous iterations of your chatbot you would have to enumerate all the possible ways to say "Hi" if you want your bot to be flexible in its response to this common greeting.
-But with word embeddings you can recognize the meaning of the word "hi" as long as you have an embedding for it.
-And you can create embeddings for all the words your bot is likely to encounter by just feeding it as much text as you can find.
+But with word embeddings you can recognize the *meaning* of the word "hi", "hello", and "yo" all with a single embedding vector.
+And you can create embeddings for all the concepts your bot is likely to encounter by just feeding it as much text as you can find.
+There is no need to hand-craft your vocabularies anymore.
 
 [CAUTION]
 ====
@@ -538,24 +495,14 @@ This makes _Artificial General Intelligence_ (AGI) an elusive target.
 Be careful not to allow your users or your bosses to thinking that your chatbot is generally intelligent, even if it appears to achieve all of Hofstadter's "essential elements."
 ====
 
-Some children with autism use words and language very precisely and rigidly.
-And their inner dialog sometimes creates an exception aptitude at manipulation of formal languages such as musical notation, computer software, and mathematical formula.footnote:[According to the signs and symptoms section of the Wikipedia article on autism (https://proai.org/wiki-autism)]
-
-////
-KM: The part of the paragraph below doesn't make sense. Is this an example? If it is, please mark it as such.
-////
-
-Autistic children often excel at games and activities
-Autism and German language and affect on precision/explicitness/rigidness of language. Dad's mentioning of it and his way of thinking as a doctor, and his inability to perform abstraction. Early on, machines were like my father, but with the fuzziness of word2vec and GloVe, machines became more adept at analogy and abstraction.
-
 
 == Word2Vec
-////
-KM: Move the text of the first 2 footnotes in the paragraph below to the main flow of the chapter. We don't want people to have to move their eye down to the bottom of the page and back up again to get this info. If it's not important, than take it out.
-////
 
-In 2012, Tomas Mikolov, an intern at Microsoft, found a way to embed the meaning of words into vector space.footnote:[Word embeddings or word vectors typically have 100 to 500 dimensions, depending on the breadth of information in the corpus used to train them.]
-Mikolov trained a neural network footnote:[It is only a single-layer network, so almost any linear machine learning model will also work. Logistic regression, truncated SVD, linear discriminant analysis, or Naive Bayes would all work well.] to predict word occurrences near each target word.
+In 2012, Tomas Mikolov, an intern at Microsoft, found a way to embed the meaning of words into vector space.
+Word embeddings or word vectors typically have 100 to 500 dimensions, depending on the breadth of information in the corpus used to train them.
+Mikolov trained a neural network to predict word occurrences near each target word.
+Mikolov used a network with a single hidden layer, so almost any linear machine learning model will also work.
+Logistic regression, truncated SVD, linear discriminant analysis, or Naive Bayes would all work well and were used successfully by others to duplicates Mikolov's results.
 In 2013, once at Google, Mikolov and his teammates released the software for creating these word vectors and called it "Word2Vec."footnote:["Efficient Estimation of Word Representations in Vector Space" Sep 2013, Mikolov, Chen, Corrado, and Dean (https://arxiv.org/pdf/1301.3781.pdf).]
 
 The Word2Vec language model learns the meaning of words merely by processing a large corpus of unlabeled text.
@@ -579,10 +526,6 @@ A more difficult label for a human might be a percentage score for the hotness c
 Supervised learning is what most people think of when they think of machine learning.
 A supervised model can only get better if it can measure the difference between the expected output (the label) and its predictions.
 ====
-
-////
-KM: Nice distinction between these 2 types of learning!
-////
 
 In contrast, unsupervised learning enables a machine to learn directly from data, without any assistance from humans.
 The training data does not have to be organized, structured, or labeled by a human.
@@ -637,6 +580,7 @@ And Word2Vec word vector "topic" weights can be added and subtracted to create n
 
 ////
 KM: Nice explanation below. Is there a way you could illustrate this visually for the readers?
+HL: I haven't thought of a good one yet.
 ////
 
 A mental model that may help you understand word vectors is to think of word vectors as a list of weights or scores.
@@ -655,18 +599,17 @@ conceptness   -0.32
 femaleness     0.26
 ----
 <1> Don't import this module unless you have a lot of RAM and a lot of time. The pretrained `word2vec` model is huge.
-<2> I'm sure your nessvector dimensions will be much more fun and useful, like "trumpness" and "ghandiness". How about a `nlpia` PR?
+<2> Get creative with nessvec dimensions you find fun, like "trumpness" and "ghandiness". How about an `nessvec` PR?
 
 You can compute "nessvectors" for any word or _n_-gram in the Word2Vec vocabulary using the tools from  `nlpia` (https://gitlab.com/tangibleai/nlpia2/blob/master/src/nlpia/book/examples/ch06_nessvectors.py). And this approach will work for any "ness" components that you can dream up.
 
-////
-KM: Move the text of footnote to the main flow of the text. It might be useful to put this in parantheses.
-////
+
 Mikolov developed the Word2Vec algorithm while trying to think of ways to numerically represent words in vectors.
 He wasn't satisfied with the less accurate word sentiment math you did in chapter 4.
 He wanted to do _analogical reasoning_, like you just did in the previous section with those analogy questions.
 This concept may sound fancy, but really it just means that you can do math with word vectors and that the answer makes sense when you translate the vectors back into words.
-You can add and subtract word vectors to _reason_ about the words they represent and answer questions similar to your examples above, like the following.footnote:[For those not up on sports, the Portland Timbers and Seattle Sounders are Major League Soccer teams.]
+You can add and subtract word vectors to _reason_ about the words they represent and answer questions similar to your examples above, like the following.
+(For those not up on sports in the US, the Portland Timbers and Seattle Sounders are Major League Soccer teams.)
 
 [source,code]
 ----
@@ -687,7 +630,7 @@ Similarly, your analogy question "'Marie Curie' is to 'physics' as ____ is to 'c
 wv['Marie_Curie'] - wv['physics'] + wv['classical_music'] = ?
 ----
 
-In this chapter, we want to improve on the LSA word vector representations we introduced in the previous chapter.
+In this chapter, we want to improve on the LSA word vector representations we introduced in chapter 4.
 Topic vectors constructed from entire documents using LSA are great for document classification, semantic search, and clustering.
 But the topic-word vectors that LSA produces aren't accurate enough to be used for semantic reasoning or classification and clustering of short phrases or compound words.
 You'll soon learn how to train the single-layer neural networks required to produce these more accurate, more fun, word vectors.
@@ -701,10 +644,6 @@ Word2Vec embeddings were four times more accurate (45%) compared to equivalent L
 The accuracy improvement was so surprising, in fact, that Mikolov's initial paper was rejected by the International Conference on Learning Representations.footnote:[See "ICRL2013 open review" (https://openreview.net/forum?id=idpCdOWtqXd60&noteId=C8Vn84fqSG8qa).]
 Reviewers thought that the model's performance was too good to be true.
 It took nearly a year for Mikolov's team to release the source code and get accepted to the Association for Computational Linguistics.
-
-////
-KM: Nice examples and figure below!
-////
 
 Suddenly, with word vectors, questions like
 
@@ -750,10 +689,6 @@ This was accomplished by training it on extremely large corpora.
 The reference implementation was trained on the 100 billion words from the Google News Corpus.
 This is the pretrained model you'll see used in this book a lot.
 ====
-
-////
-KM: Nice examples!
-////
 
 The research team also discovered that the difference between a singular and a plural word is often roughly the same magnitude, and in the same direction:
 
@@ -802,17 +737,12 @@ If you're familiar with these US cities, you might realize that this isn't an ac
 I, for one, often confuse the two large Texas cities, Houston and Dallas, and they have almost identical word vectors.
 And the word vectors for the big California cities make a nice triangle of culture in my mind.
 
-////
-KM: Nice comparison between the Denver omelette and the Denver Nuggets!
-////
-
 And word vectors are great for chatbots and search engines too.
 For these applications, word vectors can help overcome some of the rigidity, brittleness of pattern, or keyword matching.
 Say you were searching for information about a famous person from Houston, Texas, but didn't realize they'd moved to Dallas.
 From figure 6.2, you can can see that a semantic search using word vectors could easily figure out a search involving city names such as Denver and Houston.
 And even though character-based patterns wouldn't understand the difference between "tell me about a Denver omelette" and "tell me about the Denver Nuggets", a word vector pattern could.
 Patterns based on word vectors would likely able to differentiate between the food item (omelette) and the basketball team (Nuggets) and respond appropriately to a user asking about either.
-
 
 === Learning word embeddings
 
@@ -879,7 +809,7 @@ With the CBOW approach you create a huge number of tiny synthetic documents from
 
 [[cbow_neural_network_architecture]]
 .CBOW neural network architecture
-image::../images/ch06/word2vec-skip-gram-whatever-affects-one.drawio.png["Figure 6.4",width=100%,alt="Figure 6.4: CBOW neural network architecture showing 5 highlighted words in the phrase 'Whatever affects one affects us all'. Those 5 words then propogate through the network top to bottom to converge in the weights used for the word embedding at a single dense vector in the middle for each of the 5 words.",link="../images/ch06/word2vec-skip-gram-whatever-affects-one.drawio.png"]
+image::../images/ch06/word2vec-cbow-whatever-affects-one.drawio.png["Figure 6.4",width=100%,alt="Figure 6.4: CBOW neural network architecture showing 5 highlighted words in the phrase 'Whatever affects one affects us all'. Those 5 words then propogate through the network top to bottom to converge in the weights used for the word embedding at a single dense vector in the middle for each of the 5 words.",link="../images/ch06/word2vec-cbow-whatever-affects-one.drawio.png"]
 
 For the _skip-gram_ approach you also create this huge number of synthetic documents.
 You just reverse the prediction target so that you're using the CBOW targets to predict the CBOW features. predicts the context words ("target" words) from a word of interest (the input word).
@@ -922,7 +852,6 @@ image::../images/ch06/we-are-all-one.drawio.png["Flow diagram for creating 2-gra
 
 Here's what the neural network archiecture looks like for the skip-gram approach to creating word embeddings.
 
-
 === Contextualized embeddings
 
 There are two kinds of word embeddings you may encounter in the real world:
@@ -942,10 +871,6 @@ In contrast, contextualized word embeddings can be updated or refined based on t
 And the order a word appears relative to other words matters for contextualized word embeddings.
 This means that for NLU of the bigram "not happy" it would have an embedding much closer to the embedding of "unhappy" for contextualized word embeddings than for static word embeddings.
 
-////
-KM: In the paragraph below, limit down the text of the footnote to just citation. The rest should be in the main flow of the chapter.
-HL: Done
-////
 Though Word2vec was the first word embedding algoirthm, the Papers with Code website lists GloVe and fastText among the top 3 most popular approaches for researchers.
 Here are the most popular software packages for training static word embeddings: footnote:[paperswithcode.com meta study (https://paperswithcode.com/methods/category/static-word-embeddings)]
 
@@ -978,26 +903,8 @@ ELMo is a algorithm and open source software package for creating contextualized
 ELMo requires a bidirectional recurrent neural network which you'll learn about in later chapters.footnote:[The paper "Deep Contextualized Word Representations" paper by the Allen Institute (https://arxiv.org/pdf/1802.05365v2.pdf) describes how to created **E**mbeddings from bidirectional **L**anguage **Mo**dels (ELMo)]
 Nonetheless, pretrained ELMo word embeddings are available from Allen AI.footnote:[See the official ELMo website (https://allenai.org/allennlp/software/elmo)]
 
-////
-KM: Is there a reason the footnote below is all capitalized?
-////
 
-And the creators of SpaCy have come up with an efficient contextualized word embedding algorithm that is as easy to use as the SpaCy package. They called their new package Sense2Vec.footnote:[SENSE2VEC - A FAST AND ACCURATE METHOD FOR WORD SENSE DISAMBIGUATION IN NEURAL WORD EMBEDDINGS (https://arxiv.org/pdf/1511.06388.pdf)]
-
-////
-KM: Don't forget to address your to do's below.
-////
-
-// FIXME:
-// TODO: consolidate the example code snippets in ch06, nlpia2, and nessvec then replace these sections with those examples/snippets
-
-// TODO: improve or delete this as part of the explanation of the pyTorch Word2vec training code
-
-////
-KM: This subsection is quite long and is set as a Heading 3 (4 equal signs). Given how long it is, I'm wondering if it should be a Heading 2 (3 equal signs).
-
-Also, can you divide it up into smaller chunks of steps (each big set of steps would be a Heading 3 (4 equal signs).
-////
+And the creators of SpaCy have come up with an efficient contextualized word embedding algorithm that is as easy to use as the SpaCy package. They called their new package Sense2Vec.footnote:[Sense2Vec - A fast and accurate method for word sense disambiguation in neural network embeddings, Trask et al.: (https://arxiv.org/pdf/1511.06388.pdf)]
 
 ==== What is softmax?
 
@@ -1168,20 +1075,20 @@ The one remaining feature engineering step is to create the skip-gram pairs usin
 ----
 WINDOW_WIDTH = 10
 
-def windowizer(row, wsize=WINDOW_WIDTH):
+>>> def windowizer(row, wsize=WINDOW_WIDTH):
     """ Compute sentence (str) to sliding-window of skip-gram pairs. """
-    doc = row['tokens']
-    out = []
-    for i, wd in enumerate(doc):
-        target = tok2id[wd]
-        window = [
-            i + j for j in range(-wsize, wsize + 1, 1)
-            if (i + j >= 0) & (i + j < len(doc)) & (j != 0)
-        ]
+...    doc = row['tokens']
+...    out = []
+...    for i, wd in enumerate(doc):
+...        target = tok2id[wd]
+...        window = [
+...            i + j for j in range(-wsize, wsize + 1, 1)
+...            if (i + j >= 0) & (i + j < len(doc)) & (j != 0)
+...        ]
 
-        out += [(target, tok2id[doc[w]]) for w in window]
-    row['moving_window'] = out
-    return row
+...        out += [(target, tok2id[doc[w]]) for w in window]
+...    row['moving_window'] = out
+...    return row
 ----
 
 Once you apply the windowizer to your dataset it will have a 'window' key where the windows of tokens will be stored.
@@ -1190,7 +1097,6 @@ Once you apply the windowizer to your dataset it will have a 'window' key where 
 ----
 >>> dset = dset.map(windowizer)
 >>> dset
-
 DatasetDict({
     train: Dataset({
         features: ['text', 'tokens', 'window'],
@@ -1203,47 +1109,39 @@ Here's your skip_gram generator function:
 
 [source,python]
 ----
-def skip_grams(tokens, window_width=WINDOW_WIDTH):
- """
- skip-grams: pairs of words that are within window_width of each other
- """
-    pairs = []
-    for i, wd in enumerate(tokens):
-        target = tok2id[wd]
-        window = [
-            i + j for j in
-            range(-window_width, window_width + 1, 1)
-            if (i + j >= 0)
-            & (i + j < len(tokens))
-            & (j != 0)
-        ]
+>>> def skip_grams(tokens, window_width=WINDOW_WIDTH):
+...    pairs = []
+...    for i, wd in enumerate(tokens):
+...        target = tok2id[wd]
+...        window = [
+...            i + j for j in
+...            range(-window_width, window_width + 1, 1)
+...            if (i + j >= 0)
+...            & (i + j < len(tokens))
+...            & (j != 0)
+...        ]
 
-        pairs.extend([(target, tok2id[tokens[w]]) for w in window])
+...        pairs.extend([(target, tok2id[tokens[w]]) for w in window])
     # huggingface datasets are dictionaries for every text element
-    return pairs
+...    return pairs
 ----
 Your neural network only needs the pairs of skip-grams from the windowed data:
 
 [source,python]
 ----
-from torch.utils.data import Dataset
+>>> from torch.utils.data import Dataset
 
-class Word2VecDataset(Dataset):
-  """
-  Takes a HuggingFace dataset as an input, to be used for a
-  Word2Vec dataloader.
-  """
-
-    def __init__(self, dataset, vocab_size, wsize=WINDOW_WIDTH):
-        self.dataset = dataset
-        self.vocab_size = vocab_size
-        self.data = [i for s in dataset['moving_window'] for i in s]
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
+>>> class Word2VecDataset(Dataset):
+...    def __init__(self, dataset, vocab_size, wsize=WINDOW_WIDTH):
+...        self.dataset = dataset
+...        self.vocab_size = vocab_size
+...        self.data = [i for s in dataset['moving_window'] for i in s]
+...
+...    def __len__(self):
+...        return len(self.data)
+...
+...    def __getitem__(self, idx):
+...        return self.data[idx]
 ----
 
 And your DataLoader will take care of memory management for you.
@@ -1346,13 +1244,13 @@ Word2Vec(
 Now is the fun part!
 You get to watch as Word2Vec quickly learns the meaning of "Dr." and thousands of other tokens, just by reading a lot of text.
 You can go get a tea or some chocolate or just have a 10 minute meditation to contemplate the meaning of life while your laptop contemplates the meaning of words.
+First, let's define some training parameters
 
 [source,python]
 ----
-from tqdm import tqdm  # noqa
-EPOCHS = 10
-# Define training parameters
-LEARNING_RATE = 5e-4
+>>> from tqdm import tqdm  # noqa
+>>> EPOCHS = 10
+>>> LEARNING_RATE = 5e-4
 EPOCHS = 10
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
@@ -1386,13 +1284,14 @@ for epoch in range(EPOCHS):
 save_model(model, loss)
 ----
 
-////
-KM: The 2 subsections below are at the same level. Did you mean for Computational tricks to be a Heading 2 (3 equal signs) and Frequent bigrams to be a Heading 3 (4 equal signs)?
-////
+=== Computational tricks of Word2Vec
 
-==== Computational tricks of Word2Vec
+After the initial publication, the performance of `word2vec` models have been improved through various computational tricks.
+In this section, we highlight the three key improvements that help word embeddings achieve greater accuracy with less computational resources or training data:
 
-After the initial publication, the performance of `word2vec` models have been improved through various computational tricks. In this section, we highlight three improvements.
+1. Add frequent bigrams to the vocabulary
+2. Undersampling (subsampling) frequent tokens
+3. Undersampling of negative examples
 
 ==== Frequent bigrams
 
@@ -1409,21 +1308,19 @@ score(w_{i}, w_{j}) = \frac{count(w_{i} w_{j}) - \delta}{count(w_{i}) \times cou
 ++++
 
 
-
-//If the words stem:[w_i] and stem:[w_j] result in a high score and the score is above the threshold stem:[\delta], they will be included in the Word2Vec vocabulary as a pair term.
-If the words `wpass:n[~i~]` and `wpass:n[~j~]` result in a high score and the score is above the threshold `Δ`, they will be included in the Word2Vec vocabulary as a pair term.
-You'll notice that the vocabulary of the model contains terms like "New_York" or "San Francisco".
-The token of frequently occurring bigrams are combined through a character (usually "\_").
-That way, these terms will be represented as a single one-hot vector instead of two separate ones, such as for "San" and "Francisco".
+When words occurr often enough next to each other, they will be included in the Word2Vec vocabulary as a pair term.
+You'll notice that the vocabulary of many word embeddings models such as Word2vec contains terms like "New_York" or "San_Francisco".
+That way, these terms will be represented as a single vector instead of two separate ones, such as for "San" and "Francisco".
 
 Another effect of the word pairs is that the word combination often represents a different meaning than the sum of the vectors for the individual words.
 For example, the MLS soccer team "Portland Timbers" has a different meaning than the individual words "Portland" or "Timbers".
 But by adding oft-occurring bigrams like team names to the `word2vec` model, they can easily be included in the one-hot vector for model training.
 
-==== Subsampling frequent tokens
+==== Undersampling frequent tokens
 
-Another accuracy improvement to the original algorithm was to subsample frequent words.
-Common words such as the articles "the" and "a" often don't a lot of information and are referred to as stop words.
+Another accuracy improvement to the original algorithm was to undersample (subsample) frequent words.
+This is also referred to as "undersampling the majority classes" in order to balance the class weights.
+Common words such as the articles "the" and "a" often don't contain a lot of information and meaning relevant to most NLP problems so they are referred to as stop words.
 Mikolov and others often chose to _subsample_ these words.
 Subsampling just means you randomly ignore them during your sampling of the corpus of continuous skip-grams or CBOWs.
 Many blogger will take this to the extreme and completely remove them from the corpus during prepossessing.
@@ -1454,12 +1351,10 @@ The `word2vec` C++ implementation uses a slightly different sampling probability
 P(w_{i}) = \frac{f(w_{i})-t}{f(w_{i})} - \sqrt{\frac{t}{f(w_{i})}}
 ++++
 
-//In the preceding equations, stem:[f(w_i)] represents the frequency of a word across the corpus, and stem:[t] represents a frequency threshold above which you want to apply the subsampling probability.
-//The threshold depends on your corpus size, average document length, and the variety of words used in those documents. Values between stem:[10^{-5}] and stem:[10^{-6}] are often found in the literature.
+
 In the preceding equations, `f(wpass:n[~i~])` represents the frequency of a word across the corpus, and `t` represents a frequency threshold above which you want to apply the subsampling probability.
 The threshold depends on your corpus size, average document length, and the variety of words used in those documents. Values between `10pass:n[^-5^]` and `10pass:n[^-6^]` are often found in the literature.
 
-//If a word shows up 10 times across your entire corpus, and your corpus has a vocabulary of one million distinct words, and you set the subsampling threshold to stem:[10^{-6}], the probability of keeping the word in any particular _n_-gram is 68%. You would skip it 32% of the time while composing your _n_-grams during tokenization.
 If a word shows up 10 times across your entire corpus, and your corpus has a vocabulary of one million distinct words, and you set the subsampling threshold to `10pass:n[^-6^]`, the probability of keeping the word in any particular _n_-gram is 68%. You would skip it 32% of the time while composing your _n_-grams during tokenization.
 
 Mikolov showed that subsampling improves the accuracy of the word vectors for tasks such as answering analogy questions.
@@ -1472,17 +1367,17 @@ This changes the values of all the vectors for all the words in your vocabulary.
 But if your vocabulary contains thousands or millions of words, updating all the weights for the large one-hot vector is inefficient.
 To speed up the training of word vector models, Mikolov used negative sampling.
 
-Instead of updating all word weights that weren't included in the word window, Mikolov suggested sampling just a few negative samples (in the output vector) to update their weights. Instead of updating all weights, you pick _n_ negative example word pairs (words that don't match your target output for that example) and update the weights that contributed to their specific output. That way, the computation can be reduced dramatically and the performance of the trained network doesn't decrease significantly.
+Instead of updating all word weights that weren't included in the word window, Mikolov suggested sampling just a few negative samples (in the output vector) to update their weights.
+Instead of updating all weights, you pick _n_ negative example word pairs (words that don't match your target output for that example) and update the weights that contributed to their specific output.
+That way, the computation can be reduced dramatically and the performance of the trained network doesn't decrease significantly.
 
 [NOTE]
 ====
 If you train your word model with a small corpus, you might want to use a negative sampling rate of 5 to 20 samples. For larger corpora and vocabularies, you can reduce the negative sample rate to as low as two to five samples, according to Mikolov and his team.
 ====
 
-////
-KM: Change the heading below to be more active. Instead of "How to use the `gensim.word2vec` module" change it to "Using the `gensim.word2vec` module."
-////
-=== How to use the `gensim.word2vec` module
+
+=== Using the `gensim.word2vec` module
 
 If the previous section sounded too complicated, don't worry. Various companies provide their pretrained word vector models, and popular NLP libraries for different programming languages allow you to use the pretrained models efficiently. In the following section, we look at how you can take advantage of the magic of word vectors. For word vectors you'll use the popular `gensim` library, which you first saw in chapter 4.
 
@@ -1517,11 +1412,6 @@ For the rest of the examples in this chapter, you should use the complete Word2V
 The `gensim.KeyedVectors.most_similar()` method provides an efficient way to find the nearest neighbors for any given word vector.
 The keyword argument `positive` takes a list of the vectors to be added together, similar to your soccer team example from the beginning of this chapter.
 Similarly, you can use the `negative` argument for subtraction and to exclude unrelated terms. The argument `topn` determines how many related terms should be provided as a return value.
-
-////
-KM: Move the explanation of the source to the main flow of the text. Only include the citation in the footnote.
-HL: Done
-////
 
 Unlike a conventional thesaurus, Word2Vec synonomy (similarity) is a continuous score, a distance.
 This is because Word2Vec itself is a continuous vector space model.
@@ -1586,11 +1476,7 @@ If you're wondering what all those numbers _mean_, you can find out. But it woul
 You would need to examine some synonyms and see which of the 300 numbers in the array they all share.
 Alternatively you can find the linear combination of these numbers that make up dimensions for things like "placeness" and "femaleness", like you did at the beginning of this chapter.
 
-////
-KM: Make the heading below more active. Instead of "How to generate your own..." try "Generating your own..."
-////
-
-=== How to generate your own Word vector representations
+=== Generating your own Word vector representations
 
 In some cases you may want to create your own domain-specific word vector models.
 Doing so can improve the accuracy of your model if your NLP pipeline is processing documents that use words in a way that you wouldn't find on Google News before 2006, when Mikolov trained the reference `word2vec` model.
@@ -1620,11 +1506,12 @@ Your training input should look similar to the following structure:
 ]
 ----
 
-////
-KM: Move the explanation of the footnote to the main flow of the text and just keep the citation in the footnote. Since this is one is long, you might want to put it in a note instead.
-////
-
-To segment sentences and then convert sentences into tokens, you can apply the various strategies you learned in chapter 2. Detector Morse is a sentence segmenter that improves upon the accuracy segmenter available in NLTK and `gensim` for some applications.footnote:[Detector Morse, by Kyle Gorman and OHSU on pypi and at https://github.com/cslu-nlp/DetectorMorse, is a sentence segmenter with state-of-the-art performance (98%) and has been pretrained on sentences from years of text in the Wall Street Journal. So if your corpus includes language similar to that in the WSJ, Detector Morse is likely to give you the highest accuracy currently possible. You can also retrain Detector Morse on your own dataset if you have a large set of sentences from your domain.] Once you've converted your documents into lists of token lists (one for each sentence), you're ready for your `word2vec` training.
+To segment sentences and then convert sentences into tokens, you can apply the various strategies you learned in chapter 2. 
+Let's add another one: Detector Morse is a sentence segmenter that improves upon the accuracy segmenter available in NLTK and `gensim` for some applications.footnote:[Detector Morse, by Kyle Gorman and OHSU on pypi and at https://github.com/cslu-nlp/DetectorMorse]
+It has been pretrained on sentences from years of text in the Wall Street Journal. 
+So if your corpus includes language similar to that in the WSJ, Detector Morse is likely to give you the highest accuracy currently possible.
+You can also retrain Detector Morse on your own dataset if you have a large set of sentences from your domain.
+Once you've converted your documents into lists of token lists (one for each sentence), you're ready for your `word2vec` training.
 
 
 ==== Train your domain-specific `word2vec` model
@@ -1759,10 +1646,6 @@ On the Github page of Facebook research, footnote:[See the web page titled "fast
 The pretrained fastText models provided by Facebook have only been trained on the available Wikipedia corpora.
 Therefore the vocabulary and accuracy of the models will vary across languages.
 
-////
-KM: Make the heading below more active. Instead of "How to use the pretrained fastText models" try "Using the pretrained fastText models."
-HL: Done
-////
 ==== Power up your NLP with pretrained model
 
 Supercharge your NLP pipeline by taking advantage of the open source pretrained embeddings from the most powerful corporations on the planet.
@@ -1827,7 +1710,6 @@ LSA topic-document vectors are the sum of the topic-word vectors for all the wor
 If you wanted to get a word vector for an entire document that is analogous to topic-document vectors, you'd sum all the word vectors for your document.
 That's pretty close to how Doc2vec document vectors work.
 
-//If your LSA matrix of topic vectors is of size stem:[N_{words} \times N_{topics}], the LSA word vectors are the rows of that LSA matrix.
 If your LSA matrix of topic vectors is of size `Npass:n[~words~] × Npass:n[~topics~]`, the LSA word vectors are the rows of that LSA matrix.
 These row vectors capture the meaning of words in a sequence of around 200 to 300 real values, like Word2Vec does.
 And LSA topic-word vectors are just as useful as Word2Vec vectors for finding both related and unrelated terms.
@@ -1846,10 +1728,6 @@ And for long documents, it does a better job of discriminating and clustering th
 In fact, Stanford researchers used this faster PCA-based method to train the GloVE vectors.
 You can compare the three most popular word embeddings using the `nessvec` package.footnote:[Nessvec source code (https://gitlab.com/tangibleai/nessvec) and tutorial videos (https://proai.org/nessvec-videos)]
 
-////
-KM: Move the text of the footnote to the main flow of the text; just the citation should be in the footnote.
-HL: Done
-////
 
 The "killer app" for Word2Vec is the semantic reasoning that it made possible.
 LSA topic-word vectors can do that, too, but it usually isn't accurate.
@@ -1929,13 +1807,9 @@ array([ 0.15625   ,  0.18652344,  0.33203125,  0.55859375,  0.03637695,
        ])
 ----
 
-////
-KM: Move the text of the footnote to the main flow of the text. Parentheses might work for this one.
-HL: TODO: Revise or delete this section
-////
-
 The reason we chose the 1 millionth word (in lexical alphabetic order) is because the first several thousand "words" are punctuation sequences like "\#\#\#\#\#" and other symbols that occurred a lot in the Google News corpus.
-We just got lucky that "Illini" footnote:[The word "Illini" refers to a group of people, usually football players and fans, rather than a single geographic region like "Illinois" (where most fans of the "Fighting Illini" live).] showed up in your list.
+We just got lucky that "Illini" showed up in your list.
+The word "Illini" refers to a group of people, usually football players and fans, rather than a single geographic region like "Illinois" -- where most fans of the "Fighting Illini" live.
 Let's see how close this "Illini" vector is to the vector for "Illinois":
 
 .Distance between "Illinois" and "Illini"
@@ -2053,10 +1927,6 @@ We use either the full name of a state or just the abbreviations (whichever one 
 
 Depending on your corpus, your word relationship can represent different attributes, such as geographical proximity or cultural or economic similarities. But the relationships heavily depend on the training corpus, and they will reflect the corpus.
 
-////
-KM: Important warning!
-////
-
 [WARNING]
 .Word vectors are biased!
 ====
@@ -2089,18 +1959,6 @@ Best of all, the PCA algorithm ensures that this projection is the best possible
 PCA is like a good photographer that looks at something from every possible angle before composing the optimal photograph.
 
 You don't even have to normalize the length of the vectors after summing the city + state + abbrev vectors, because PCA  takes care of that for you.
-
-////
-KM: What are you doing with the text below?
-HL: TODO: revise this.
-////
-
-////
-But that last line has quite a bit of "data wrangling" complexity.
-It deals with "South_Carolina" and "South_Dakota", which are surprisingly absent from the Google News word vector embeddings.
-Whenever a state's full name isn't available, you just use the abbreviation twice in the sum.
-That way city vectors in SC and SD won't be shortchanged on the cultural and semantic features of their parent state names too much.
-////
 
 We saved these "augmented" city word vectors in the `nlpia` package so you can load them to use in your application.
 In the following code, you use PCA to project them onto a 2D plot.
@@ -2178,10 +2036,6 @@ You will just average all the embeddings for each word in a sentence to create a
 
 ==== Extreme summarization
 
-// HL: TODO: explain what a sentence/thought embedding is using a single-word summarization of the sentences in this book
-// HL: TODO: show how meaning gets "washed out" with longer and longer phrases
-// HL: TODO: use pip-installed nessvec and pynndescent index for all of the code examples
-
 What does a sentence embedding or thought vector actually contain?
 That depends on how you create it.
 You've already seen how to use SpaCy and `nessvec` to create word embeddings.
@@ -2194,14 +2048,6 @@ from nessvec.files import load_glove
 
 
 ==== Extract natural language from the NLPiA manuscript
-
-////
-KM: I recommend adding a heading 3 (4 equal signs) here to break the text up a bit. Also, you might want to do that again a few other places in this process since it is so long.
-HL: DONE, see section heading above
-HL: TODO for additional sections
-HL: TODO revise all of John's text here
-////
-
 
 The first step is to take this unstructured chapter text and turn it into structured data so that the natural language text can be separated from the code blocks and other "unnatural" text.
 You can use the Python package called `Asciidoc3` to convert any _AsciiDoc_ (.adoc) text file into HTML.
@@ -2222,7 +2068,7 @@ With the HTML text file, we can use the _BeautifulSoup_ to extract the text.
 ...     text = bsoup.get_text()
 
 ----
-<1> You can visit this page for more details on Asciidoc3 and HTML generation from asciidoc: https://asciidoc3.org/userguide.html#_html_generation
+<1> The Asciidoc3 documentation on HTML has more detail: https://asciidoc3.org/userguide.html#_html_generation
 
 Now that we have our text from this chapter, we will run the text through the English model from _spaCy_ to get our sentence embeddings. _spaCy_ will default to simply averaging the _token_ vectors. footnote:[spaCy's vector attribute for the Span object defaults to the average of the token vectors: https://spacy.io/api/span#vector] In addition to getting the sentence vectors, we also want to get the _noun phrases_ footnote:[See the Wiki page titled, 'Noun phrase': https://en.wikipedia.org/wiki/Noun_phrase] footnote:[spaCy's Span.noun_chunks: https://spacy.io/api/span#noun_chunks] from each sentence that will be the labels for our sentence vectors.
 
@@ -2297,28 +2143,33 @@ With the similarity matrix, we can now create an undirected graph with the data.
 <2> This regular expression pattern will help us clean the node labels dictionary of values we do not necessarily want as labels for the nodes
 <3> This threshold is arbitrary. It seemed to be a good cut-off point for this data.
 
-With the graph data structure constructed, we can now use the plotting library `matplotlib.pyplot` to view the graph data structure.
+With the shiny new graph (network) you've assembled, you can now use `matplotlib.pyplot` to visualize it.
 
 .Plotting the Undirected Graph
 [source,python]
 ----
 >>> import matplotlib.pyplot as plt
->>> plt.subplot(1, 1, 1)
+>>> plt.subplot(1, 1, 1) # <1>
 >>> pos = nx.spring_layout(G, k=0.15, seed=42) # <1>
 >>> nx.draw_networkx(G, pos=pos, with_labels=True, labels=node_labels,
     [CA]font_weight='bold')
 >>> plt.show()
 ----
-<1> The argument 'k' denotes the optimal distance between nodes. This number was changed from the default to improve the visual footnote:[See the NetworkX documentation for details: http://mng.bz/gwnl]
+<1> initialize a single figure (plot) with one subplot filling the window
+<2> `k` affects the node separation -- the average "resting" length of the spring forces in the connections between nodes
 
-And finally, we now have our plot of an _undirected graph data structure_ with _nodes_ representing sentences in this chapter and the _edges_ (or lines) representing the similarity or connectedness between sentences. Looking at the plot of the graph data structure, you can see the central big cluster of nodes (sentences) are connected the most, and there are various other clusters of nodes around the central cluster. This central cluster could be interpreted as the central idea of this chapter. This central cluster could be an abstract representation of the chapter `sentiment`. And the other clusters around the central cluster could be interpreted as ideas a little less related to the main point of this chapter because they have fewer connections with the central cluster.
+Finally you can see your _undirected graph_ show the clusters of concepts in the natural language of this book!
+Each _node_ represents the average word embedding for a sentence in this chapter.
+And the _edges_ (or lines) represent the connections between the meaning of those sentences that mean similar things.
+Looking at the plot, you can see the central big cluster of nodes (sentences) are connected the most.
+And there are other smaller clusters of nodes further out from the central cluster for topics such as sports and cities.
 
-.Undirected Graph Plot of Chapter 6
-image::../images/ch06/adjacency_graph_ch_6_with_labels_bold.png[An undirected graph plot of chapter 6 using sentence embeddings and noun phrases as labels,width=100%,link="../images/ch06/adjacency_graph_ch_6_with_labels_bold.png]
+.Connecting concepts to each other with word embeddings  
+image::../images/ch06/adjacency_graph_ch_6_with_labels_bold.png[An undirected graph or network diagram of the natural language in  chapter 6 using sentence embeddings and noun phrases as labels,width=100%,link="../images/ch06/adjacency_graph_ch_6_with_labels_bold.png]
 
-////
-KM: Add a little bit of text in-between the 2 figures to tell readers what the difference between them is exactly.
-////
+The dense cluster of concepts in the center should contain some information about the central ideas of this chapter and how they are related.
+Zooming in you can see these passages are mostly about words and numbers to represent words, because that's what this chapter is about.
+
 
 .Undirected Graph Plot of Chapter 6 Center Zoom-in
 image::../images/ch06/adjacency_graph_ch_6_zoom_in_center_with_labels_bold.png[Center zoom-in of the undirected graph plot of chapter  using sentence embeddings and noun phrases as labels,width=100%,link="../images/ch06/adjacency_graph_ch_6_zoom_in_center_with_labels_bold.png]
@@ -2345,31 +2196,21 @@ Word2Vec has even been used to glean information and relationships from unnatura
 To get the most useful information about the relationship between ID numbers like this, you'll need a variety of sentences that contain those ID numbers. And if the ID numbers often contain a structure where the position of a symbol has meaning, it can help to tokenize these ID numbers into their smallest semantic packet (such as words or syllables in natural languages).
 
 
-////
-KM: Summary should be a heading 1 (2 equal signs). I've changed this for you.
-////
-
 == Summary
 
-////
-KM: We've change the way that we are asking authors to write Summary bullets. Instead of telling readers WHAT they did/learned. We want to remind readers of definitions, facts, tips, and tricks they should know after reading the chapter. We are actually going to be making this interactive in LiveBook so that readers have complete the sentence themselves.
-
-Instead of, "You've learned how word vectors..." change it to be just a fact: "Word vectors and vector-oriented reasoning can solve subtle problems like analogy questions and nonsynonomy relationships between words."
-
-Please fix these below and add any additional facts you can think of from the chapter. As always, please let me know if you have any questions.
-////
-
-* You've learned how word vectors and vector-oriented reasoning can solve some surprisingly subtle problems like analogy questions and nonsynonomy relationships between words
-* You can now train `word2vec` and other word vector embeddings on the words you use in your applications so that your NLP pipeline is "polluted" by the GoogleNews meaning of words inherent in most Word2Vec pretrained models.
-* You used `nessvec` to explore, visualize, and even build your own customized word embeddings and "character sheets".
-* You've learned how to use word embeddings to discover the surprising hidden meaning of the names of people, places, businesses and even occupations
-* A PCA projection of geographic word vectors like US city names cam reveal the cultural closeness of places that are geographically far apart.
-* If you respect sentence boundaries with your _n_-grams and are efficient at setting up word pairs for training you can greatly improve the accuracy of your latent semantic analysis word embeddings (see chapter 4).
+* Word vectors and vector-oriented reasoning can solve some surprisingly subtle problems like analogy questions and nonsynonomy relationships between words.
+* To keep your word vectors current and improve their relevance to the current events and concepts you are interested in you can retrain and fine tune your word embeddings with `gensim` or PyTorch.
+* The `nessvec` package is a fun new tool for helping you find that word on the tip of your tongue or visualize the "character sheet" of a word.
+* Word embeddings can reveal some surprising hidden meanings of the names of people, places, businesses and even occupations
+* A PCA projection of word vectors for cities and countries can reveal the cultural closeness of places that are geographically far apart.
+* The key to turning latent semantic analysis vectors into more powerful word vectors is to respect sentence boundaries when creating your _n_-grams
+* Machines can easily pass the word analogies section of standardized tests with nothing more than pretrained word embeddings
 
 
 == Review
 
 1. Use pretrained word embeddings to compute the strength, agility, and intelligence of Dota 2 heroes based only on the natural language summary.footnote:[The `nessvec` and `nlpia2` packages contain FastText, GloVE and Word2vec loaders (https://gitlab.com/tangibleai/nessvec). nlpia2 contain `ch06_dota2_wiki_heroes.hist.py` (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/etl/ch06_dota2_wiki_heroes.hist.py) `dota2-heroes.csv` (https://gitlab.com/tangibleai/nlpia2/-/raw/main/.nlpia2-data/dota2-heroes.csv?inline=false)]
-2. Create a graph data structure of another chapter in this book.
-3. Create a graph data structure of the full book using sentiment analysis for each chapter.
+2. Visualize the graph of connections between concepts in another chapter of this book (or any other text) that you'd like to understand better.
+3. Try combining graph visualizations of the word embeddings forall the chapters of this book.
 4. Give examples for how word vectors enable at least two of Hofstadter's eight elements of intelligence
+5. Fork the nessvec repository and create your own visualizations or nessvector "character sheets" for your favorite words or famous people. Perhaps the "mindfulness", "ethicalness", "kindness", or "impactfulness" of your heros? Humans are complex and the words used to describe them are multidimensional.
