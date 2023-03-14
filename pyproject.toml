@@ -52,9 +52,9 @@ classifiers = [
 [tool.poetry.build]
 generate-setup-file = true
 
-# [build-system]
-# requires = ["poetry_core>=1.0.0", "setuptools>=54.0.2", "tox", "wheel"]
-# build-backend = "poetry.core.masonry.api"
+[build-system]
+requires = ["poetry_core>=1.0.0", "setuptools>=54.0.2", "tox", "wheel"]
+build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
@@ -130,7 +130,7 @@ wikipedia = "^1.4"
 # wikipedia = { git = "https://gitlab.com/tangibleai/wikipedia.git", tag = "1.4.1" }
 xmltodict = "*"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.dev.dependencies]
 tox = "^3.18"
 pytest = ">=6.2.0"
 pytest-cov = "^3.0.0"

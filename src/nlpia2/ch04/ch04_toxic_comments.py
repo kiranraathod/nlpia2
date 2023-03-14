@@ -66,6 +66,9 @@ comment5       0               0          0.31
 
 """
 
+(1. - (comments.toxic - comments.manual_predict).abs().sum() / len(comments)).round(3)
+
+
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 lda_tfidf = LinearDiscriminantAnalysis()
 lda_tfidf = lda_tfidf.fit(tfidf_docs, comments['toxic'])  # <1>
