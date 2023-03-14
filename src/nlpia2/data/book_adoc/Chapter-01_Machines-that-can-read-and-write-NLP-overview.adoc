@@ -1,6 +1,7 @@
-= Machines that read and write (NLP overview)
+= Natural Language Processing in Action, Second Edition
 :chapter: 1
 :part: 1
+:sectnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
@@ -8,6 +9,8 @@
 :table-caption: Table {chapter}.
 :stem: latexmath
 :toc:
+
+= Machines that read and write (NLP overview)
 
 This chapter covers
 
@@ -78,11 +81,11 @@ Given how differently natural languages and programming languages evolved, it is
 We do not use programming languages to tell each other about our day or to give directions to the grocery store.
 Similarly, natural languages did not evolve to be readily compiled into thought packets that can manipulated by machines to derive conclusions.
 But that's exactly what you are going to learn how to do with this book.
-With NLP you can program machines to process natural language text to derive conclusions, infer new facts, create meaningful abstractions, and even respond meaningfully in a conversation. 
+With NLP you can program machines to process natural language text to derive conclusions, infer new facts, create meaningful abstractions, and even respond meaningfully in a conversation.
 
 Even though there are no compilers for natural language there are _parsers_ and _parser generators_, such as PEGN footnote:[Parsing Expression Grammar Notation home page (https://pegn.dev/)] and SpaCy's Matcher class.
 But there aren't any end-to-end compilers that can generate responses or perform the natural language instructions.
-And SpaCy allows you to define patterns and grammars similar to the ones 
+And SpaCy allows you to define patterns and grammars similar to the ones
 There is no algorithm that takes natural language text and turns it into machine instructions to brew a cup of coffee, even when the natural language text consisted of an explicit list of brewing steps.
 There is single silver bullet that you can use to programmatically turn natural language text into computer instructions or a conversational response.
 But if you understand all the different tools described in this book, you will be able to combine them all together to create remarkably intelligent conversational chatbots that understand and generate meaningful text.
@@ -194,7 +197,7 @@ And this will give you the foundation to customize your NLG pipeline for even th
 This last development in NLG is particularly powerful.
 Machines can now write correct code to match your intent based only on a natural language description.
 
-The combination of NLU and NLG will give you the tools to create machines that interact with humans in surprising ways.footnote:[You may have heard of Microsoft's and OpenAI's Copilot project. GPT-J can do almost as well, and it's completely open source and open data. (https://www.p3r.one/gpt-j/)]
+The combination of NLU and NLG will give you the tools to create machines that interact with humans in surprising ways.footnote:[You may have heard of Microsoft's and OpenAI's Copilot project. GPT-J can do almost as well, and it's completely open source and open data. (https://huggingface.co/models?sort=likes&search=gpt-j)]
 
 === Plumbing it all together for positive impact
 
@@ -362,7 +365,7 @@ And thoughts do affect our behavior.
 
 Though we cannot "program" another human with our words, we can use them to communicate extremely complex ideas.
 When you engage in conversation you are acting as a neuron in the collective consciousness, the hive mind.
-Unfortunately, when profit motives and unfettered competition is the rule of the day, the hornets nest of social media is the result.  
+Unfortunately, when profit motives and unfettered competition is the rule of the day, the hornets nest of social media is the result.
 
 Natural language cannot be directly translated into a precise set of mathematical operations.
 But natural language does contain information and instructions that can be extracted.
@@ -383,11 +386,11 @@ This can help you build a smarter voice assistant when you add your _brains_ to 
 And you'll understand all the helpful NLP that the big boys could be giving you within their voice assistants ... assuming commercial voice assistants wanted to help you with more than just lightening your wallet.
 
 .Speech recognition systems
-=====
+====
 If you want to build a customized speech recognition or generation system, that undertaking is a whole book in itself; we leave that as an "exercise for the reader."
 It requires a lot of high quality labeled data, voice recordings annotated with their phonetic spellings, and natural language transcriptions aligned with the audio files.
 Some of the algorithms you learn in this book might help, but most of the algorithms are quite different.footnote:[Some open source voice assistants you could contribute to (https://gitlab.com/tangibleai/team/-/tree/main/exercises/1-voice/).]
-=====
+====
 
 === The math
 
@@ -484,9 +487,9 @@ And chatbots paired with voice recognition and generation systems can even handl
 NLP systems can answer phones for companies that want something better than a phone tree, but they do not want to pay humans to help their customers.
 
 [WARNING]
-================
+====
 Consider the ethical implications whenever you, or your boss, decide to deceive your users. With its *Duplex* demonstration at Google IO, engineers and managers overlooked concerns about the ethics of teaching chatbots to deceive humans. In most "entertainment" social networks, bots are not required to reveal themselves. We unknowingly interact with these bots on Facebook, Reddit, Twitter and even dating apps. Now that bots and deep fakes can so convincingly deceive us, the AI control problem footnote:[Wikipedia is probably your most objective reference on the "AI control problem" (https://en.wikipedia.org/wiki/AI_control_problem).]. Yuval Harari's cautionary forecast of "Homo Deus"footnote:[WSJ Blog, March 10, 2017 https://blogs.wsj.com/cio/2017/03/10/homo-deus-author-yuval-noah-harari-says-authority-shifting-from-people-to-ai/] may come sooner than we think.
-================
+====
 
 NLP systems exist that can act as email "receptionists" for businesses or executive assistants for managers.
 These assistants schedule meetings and record summary details in an electronic Rolodex, or CRM (customer relationship management system), interacting with others by email on their boss's behalf.
@@ -498,7 +501,7 @@ The most surprising and powerful application of NLP is in psychology.
 If you think that a chatbot could never replace your therapist, you may be surprised by recent advancements.footnote:[John Michael Innes and Ben W. Morrison at the University of South Australia
 "Machines can do most of a psychologist's job", 2021, (https://theconversation.com/machines-can-do-most-of-a-psychologists-job-the-industry-must-prepare-for-disruption-154064)]
 Commercial virtual companions such as Xiaoice in China and Replika.AI in the US helped hundreds of millions of lonely people survive the emotional impact of social isolation during Covid-19 lockdowns in 2020 and 2021.footnote:[C.S. Voll "Humans Bonding with Virtual Companions" (https://medium.com/predict/humans-bonding-with-virtual-companions-6d19beae0077)]
-Fortunately, you don't have to rely on engineers at large corporations to look out for your best interests. Many psychotherapy and cognitive assistant technology is completely free and open source.footnote:[Tangible AI builds open source cognitive assistants that help users take control of their emotions such as Syndee (https://cindy.tangibleai.com) and `qary` (https://gitlab.com/tangibleai/qary) Some of Replika.AI's core technologies are open source (https://github.com/lukalabs)]
+Fortunately, you don't have to rely on engineers at large corporations to look out for your best interests. Many psychotherapy and cognitive assistant technology is completely free and open source.footnote:[Tangible AI builds open source cognitive assistants that help users take control of their emotions such as Syndee (https://syndee.ai) and `qary` (https://gitlab.com/tangibleai/qary) Some of Replika.AI's core technologies are open source (https://github.com/lukalabs)]
 
 
 === Processing programming languages with NLP
@@ -601,11 +604,11 @@ Deep, complex regular grammar rules can often be expressed in a single line of c
 There are successful chatbot frameworks in Python, like `Will`, footnote:[Steven Skoczen's Will chatbot framework (https://github.com/skoczen/will)] and `qary` footnote:[Tangible AI's chatbot framework called `qary` (https://docs.qary.ai) with examples deployed for WeSpeakNYC (https://wespeaknyc.cityofnewyork.us/) and others] that rely exclusively on this kind of language processing to produce some effective chatbots.
 
 [NOTE]
-=====
+====
 Regular expressions implemented in Python and in Posix (Unix) applications such as `grep` are not true regular grammars.
-They have language and logic features such as look-ahead and look-back that make leaps of logic and recursion that aren't allowed in a regular grammar. 
+They have language and logic features such as look-ahead and look-back that make leaps of logic and recursion that aren't allowed in a regular grammar.
 As a result, regular expressions aren't provably halting; they can sometimes "crash" or run forever. footnote:[Stack Exchange Went Down for 30 minutes on July 20, 2016 when a regex "crashed" (http://stackstatus.net/post/147710624694/outage-postmortem-july-20-2016)]
-=====
+====
 
 
 You may be saying to yourself, "I've heard of regular expressions. I use `grep`. But that's only for search!"
@@ -645,7 +648,7 @@ Natural languages are:
 
 * Not regular footnote:["English is not a regular language" (http://cs.haifa.ac.il/~shuly/teaching/08/nlp/complexity.pdf#page=20) by Shuly Wintner]
 * Not context-free footnote:["Is English context-free?" (http://cs.haifa.ac.il/~shuly/teaching/08/nlp/complexity.pdf#page=24) by Shuly Wintner]
-* Can't be defined by any formal grammar footnote:[See the web page titled "1.11. Formal and Natural Languages — How to Think like a Computer Scientist: Interactive Edition" (http://interactivepython.org/runestone/static/CS152f17/GeneralIntro/FormalandNaturalLanguages.html).]
+* Can't be defined by any formal grammar footnote:[See the web page titled "1.11. Formal and Natural Languages — How to Think like a Computer Scientist: Interactive Edition" (https://runestone.academy/ns/books/published/fopp/GeneralIntro/FormalandNaturalLanguages.html).]
 ****
 
 == A simple chatbot
@@ -680,7 +683,7 @@ Human greetings and handshakes are a little more informal and flexible.
 So recognizing the greeting _intent_ won't be as simple as building a machine handshake.
 So you will want a few different approaches in your toolbox.
 
-[Note]
+[NOTE]
 ====
 An intent is a category of possible intentions the user has for the NLP system or chatbot.
 Words "hello" and "hi" might be collected together under the _greeting_ intent, for when the user wants to start a conversation.
@@ -792,14 +795,14 @@ Let's make our regular expression a lot more detailed to try to match more greet
 <3> Our chatbot can separate different parts of the greeting into `groups`, but it will be unaware of Rosa's famous last name, because we do not have a pattern to match any characters after the first name.
 
 [TIP]
-================
+====
 The "r" before the quote symbol (`r'`) indicates that the quoted string literal is a *raw* string.
 The "r" does not mean *regular* expression.
 A Python raw string just makes it easier to use the backslashes used to escape special symbols within a regular expression.
 Telling Python that a `str` is "raw" means that Python will skip processing the backslashes and pass them on to the regular expression parser (`re` package).
 Otherwise you would have to escape each and every backslash in your regular expression with a double-backslash (`'\\'`).
 So the whitespace matching symbol `'\s'` would become `'\\s'`, and special characters like literal curly braces would become `'\\{'` and `'\\}'`.
-================
+====
 
 There is a lot of logic packed into that first line of code, the regular expression.
 It gets the job done for a surprising range of greetings.
@@ -1131,7 +1134,7 @@ Along the way you will probably get ideas about how to expand the breadth of thi
 Figure 1.6 puts the chatbot in its place among the natural language processing systems that are already out there.
 Imagine the chatbots you have interacted with.
 Where do you think they might fit on a plot like this?
-Have you attempted to gauge their intelligence by probing them with difficult questions or something like an IQ test?footnote:[A good question suggested by Byron Reese is: "What's larger? The sun or a nickel?" (https://gigaom.com/2017/11/20/voices-in-ai-episode-20-a-conversation-with-marie-des-jardins). Here are a couple more (https://gitlab.com/tangibleai/nlpia2/blob/master/src/nlpia/data/iq_test.csv) to get you started.]
+Have you attempted to gauge their intelligence by probing them with difficult questions or something like an IQ test?footnote:[A good question suggested by Byron Reese is: "What's larger? The sun or a nickel?" (https://gigaom.com/2017/11/20/voices-in-ai-episode-20-a-conversation-with-marie-des-jardins). Here are a couple more (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/data/iq_test.csv) to get you started.]
 you will get a chance to do exactly that in later chapters, to help you decide how your chatbot stacks up against some of the others in this diagram.
 
 .2D IQ of some natural language processing systems
@@ -1169,9 +1172,8 @@ As you learn the tools of natural language processing, you will be building an N
 
 == Review
 
-[reftext=Listing {counter:listing}]
-.Chapter 1 review questions
-----
+*Chapter 1 review questions*
+
 Here are some review questions for you to test your understanding:
 
 . Why is NLP considered to be a core enabling feature for AGI (human-like AI)?
@@ -1181,14 +1183,14 @@ Here are some review questions for you to test your understanding:
 . How is NLP used within a search engine?
 . Write a regular expression to recognize your name and all the variations on its spelling (including nicknames) that you've seen.
 . Write a regular expression to try to recognize a sentence boundary (usually a period ("."), question mark "?", or exclamation mark "!")
-----
+
 
 [TIP]
-================
+====
 Active learning, quizzing yourself with questions such as these, is a fast way to gain deep understanding for any new topic. It turns out, this same approach is effective for machine learning and model evaluation as well.footnote:[Suggested answers are provided within the Python packages `nlpia` (https://gitlab.com/tangibleai/nlpia) and `qary` (https://gitlab.com/tangibleai/qary) where they are used to evaluate advanced NLP models for reading comprehension and question answering. Pooja Sethi will share active learning NLP insights on Substack (https://activelearning.substack.com) and github (https://poojasethi.github.io) by the time this book goes to print. ProAI.org, the team of contributing authors for this book is doing the same on substack (https://proai.substack.com) and their home page (https://proai.org).
-================
+====
 
-=== Summary
+== Summary
 
 * Good NLP may help save the world.
 * The meaning and intent of words can be deciphered by machines.
@@ -1196,4 +1198,3 @@ Active learning, quizzing yourself with questions such as these, is a fast way t
 * We can teach machines common sense knowledge without spending a lifetime training them.
 * Chatbots can be thought of as semantic search engines.
 * Regular expressions are useful for more than just search.
-

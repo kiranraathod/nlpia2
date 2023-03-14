@@ -1,6 +1,7 @@
 = Finding kernels of knowledge in text with Convolutional Neural Networks (CNNs)
 :chapter: 7
 :part: 2
+:secnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
@@ -8,6 +9,8 @@
 :table-caption: Table {chapter}.
 :stem: latexmath
 :toc:
+
+= Finding Kernels of Knowledge in Text with Convolutional Neural Networks (CNNs)
 
 This chapter covers
 
@@ -55,7 +58,7 @@ You won't need the unaffordable compute and training data that large transformer
 * **CNNs** (in this Chapter): less than 200k parameters
 
 Yes, in this chapter you're going to learn how to build CNNs models that are a million times smaller and faster than the big transformers you read about in the news.
-And CNNs are often the best tool for the job. 
+And CNNs are often the best tool for the job.
 
 === Patterns in sequences of words
 
@@ -77,7 +80,7 @@ For NLP, convolution is used to detect patterns that span multiple words and eve
 The original convolutions were hand crafted on paper with a quill pen, or even a cuneiform on a clay tablet!
 Once computers were invented, researchers and mathematicians would hand-craft the math to match what they wanted to achieve for each problem.
 Common hand-crafted kernels for image processing include Laplacian, Sobel, and Gaussian filters.
-And in digital signal processing similar to what is used in NLP, low pass and high pass convolution filters can be designed from first principles. 
+And in digital signal processing similar to what is used in NLP, low pass and high pass convolution filters can be designed from first principles.
 If you're a visual learner or are into computer vision it might help you grasp convolution if you check out heatmap plots of the kernels used for these convolutional filters on Wikipedia.footnote:["Digital image processing" on Wikipedia (https://en.wikipedia.org/wiki/Digital_image_processing#Filtering)] footnote:["Sobel filter" on Wikipedia (https://en.wikipedia.org/wiki/Sobel_operator)] footnote:["Gaussian filter" (https://en.wikipedia.org/wiki/Gaussian_filter)] These filters might even give you ideas for initializations of your CNN filter weights to speed learning and create more explainable deep learning language models.
 
 But that gets tedious after a while, and we no longer even consider hand-crafted filters to be important in computer vision or NLP.
@@ -99,7 +102,7 @@ And CNNs in your brain seem seem to be responsible for your ability to recognize
 // SUM: The main advantage of CNNs over other NLP neural nets is that they can recognize patterns no matter where they occur in the text (translation invariance) and how spread out they are (scale invariance).
 The main advantage of CNNs over previous NLP algorithms is that they can recognize patterns in text no matter where those patterns occur in the text (_translation invariance_) and how spread out they are (_scale invariance_).
 TF-IDF vectors don't have any way of recognizing and generalizing from patterns in your text.
-And fully connected neural networks over-generalize from particular patterns at particular locations in text. 
+And fully connected neural networks over-generalize from particular patterns at particular locations in text.
 
 As far back as the 1990s famous researchers like Yann LeCun, Yoshua Bengio, and Geoffrey Hinton were using convolution for computer vision and OCR (optical character recognition).footnote:[LeCun, Y and Bengio, Y "Convolutional Networks for Images, Speech, and Time-series" (https://www.iro.umontreal.ca/~lisa/pointeurs/handbook-convo.pdf)]
 They got this idea from our brains.
@@ -133,7 +136,7 @@ In fact its purpose is the same as for correlation, pattern recognition.
 Correlation allows you to detecting the similarity between a series of numbers and and some other series of numbers representing the pattern you're looking to match.
 
 === Stencils for natural language text
-// SUM: Convolution is like passing a stencil over text in order to detect a particular pattern in a sequence of letters or words. But a natural language convolutional kernel (a numerical stencil or filter) is fuzzy so it can detect more general patterns rather than relying on the exact sequences of letters and words. And this stencil is automatically personalized or _learned_ from the patterns that help your natural language model predict the labels in your dataset. 
+// SUM: Convolution is like passing a stencil over text in order to detect a particular pattern in a sequence of letters or words. But a natural language convolutional kernel (a numerical stencil or filter) is fuzzy so it can detect more general patterns rather than relying on the exact sequences of letters and words. And this stencil is automatically personalized or _learned_ from the patterns that help your natural language model predict the labels in your dataset.
 
 Have you ever seen a lettering stencil?
 A lettering stencil is a piece of cardboard or plastic with the outline of printed letters cut out.
@@ -143,7 +146,7 @@ But in this example you're going to use the stencil in reverse.
 Instead of painting words with your stencil, you're going to detect patterns of letters and words with a stencil.
 Your NLP stencil is an array of weights (floating point numbers) called a _filter_ or _kernel_.
 
-So imagine you create a lettering stencil for the nine letters (and one _space_ character) in the text "are sacred". 
+So imagine you create a lettering stencil for the nine letters (and one _space_ character) in the text "are sacred".
 And imagine it was exactly the size and shape of the text in this book that you are reading right now.
 
 .A real-life stencil
@@ -154,7 +157,7 @@ You have to slide that stencil across the page until the stencil lines up with t
 At that point the you'd be able to see the words spelled out clearly through the stencil or mask.
 The black lettering of the text would fill the holes in the stencil.
 And the amount of black that you see is a measure of how good the match is.
-If you used a white stencil, the words "are sacred" would shine through and would be the only words you could see. 
+If you used a white stencil, the words "are sacred" would shine through and would be the only words you could see.
 
 If you used a stencil this way, sliding it across text to find the maximum match between your pattern and a piece of text, you'd be doing _convolution_ with a stencil!
 When talking about deep learning and CNNs the stencil is called a _kernel_ or _filter_.
@@ -183,7 +186,7 @@ This is just the dot product or correlation between the kernel and that particul
 Step 2 is to slide your window across the text and do the dot product of step 1 again.
 This kernel window sliding, multiplying, and summing is called convolution.
 Convolutions turn one sequence of numbers into another sequence of numbers that's about the same size as the original text sequence.
-Depending on the details of how you do this sliding and multiplying (convolution) you can end up with a slightly shorter or longer sequence of numbers. 
+Depending on the details of how you do this sliding and multiplying (convolution) you can end up with a slightly shorter or longer sequence of numbers.
 But either way, the convolution operation outputs a sequence of numerical values, one for every possible position of the kernel in your text.
 
 Step 3 is to decide whether the text contains a good match somewhere within it.
@@ -198,7 +201,7 @@ If the patterns that you are looking for are spread out over multiple different 
 ====
 
 You can see how convolution enables your CNN to extract patterns that depend on the order of words.
-And this allows CNN kernels to recognize subtleties in the meaning of natural language text that are lost if you only use BOW (bag-of-words) representations of text. 
+And this allows CNN kernels to recognize subtleties in the meaning of natural language text that are lost if you only use BOW (bag-of-words) representations of text.
 
 [quote, Tom Stoppard, The Real Thing]
 ____
@@ -219,16 +222,17 @@ Here's how you can label the words in a portion of the quote with their parts of
 
 [source,python]
 ----
-import pandas as pd
-import spacy
-nlp = spacy.load('en_core_web_md')  # <1>
+>>> import pandas as pd
+>>> import spacy
+>>> nlp = spacy.load('en_core_web_md')  # <1>
 
-text = 'right ones in the right order you can nudge the world'
-doc = nlp(text)
-df = pd.DataFrame([
-    {k: getattr(t, k) for k in 'text pos_'.split()}
-    for t in doc])
+>>> text = 'right ones in the right order you can nudge the world'
+>>> doc = nlp(text)
+>>> df = pd.DataFrame([
+...    {k: getattr(t, k) for k in 'text pos_'.split()}
+...    for t in doc])
 ----
+<1> SpaCy uses a pretrained CNN to create these tags
 
 [source,text]
 ----
@@ -245,13 +249,13 @@ df = pd.DataFrame([
 9     the   DET
 10  world  NOUN
 ----
-<1> SpaCy uses a pretrained CNN to create these tags
+
 
 Just as you learned in chapter 6 you want to create a vector representation of each word so that the text can be converted to numbers for use in the CNN.
 
 [source,python]
 ----
-pd.get_dummies(df, columns=['pos_'], prefix='', prefix_sep='')
+>>> pd.get_dummies(df, columns=['pos_'], prefix='', prefix_sep='')
 ----
 
 [source,text]
@@ -330,13 +334,13 @@ Continuing with the remaining words we end up with this 9-element map for the 10
 
 
 |===
-|*Span*| *Pair* | *Is match?* 
-|0, 1  | (right, ones) | *True* (1) 
+|*Span*| *Pair* | *Is match?*
+|0, 1  | (right, ones) | *True* (1)
 |1, 2  | (ones, in) | False (0)
 |2, 3  | (in, the) | False (0)
-|3, 4  | (the, right) | False (0)   
+|3, 4  | (the, right) | False (0)
 |4, 5  | (right, order) | *True* (1)
-|5, 6  | (order, you) | False (0) 
+|5, 6  | (order, you) | False (0)
 |6, 7  | (you, can) | False (0)
 |7, 8  | (can, nudge) | False (0)
 |8, 9  | (nudge, the) | False (0)
@@ -357,14 +361,14 @@ _Convolution_, then, is
 - to produce a map…
 - of where in the input certain conditions existed (e.g. two consecutive adverbs)
 
-Later in the chapter you will use the terms _kernel_ and _stride_ to talk about your stencil and how you slide it across the text. 
+Later in the chapter you will use the terms _kernel_ and _stride_ to talk about your stencil and how you slide it across the text.
 In this case your _stride_ was one and the kernel size was two.
 And for the part-of-speech vectors, your kernel was designed to handle 7-D embedding vectors.
 Had you used the same kernel size of two but stepped it across the text with a stride of two, then you would get the following output:
 
 |===
-|*Span*| *Pair* | *Is match?* 
-|0, 1  | (right, ones) | *True* (1) 
+|*Span*| *Pair* | *Is match?*
+|0, 1  | (right, ones) | *True* (1)
 |2, 3  | (in, the) | False (0)
 |4, 5  | (right, order) | *True* (1)
 |6, 7  | (you, can) | False (0)
@@ -380,18 +384,19 @@ So it is much more common to have a stride of one and kernel sizes of two or mor
 // SUM: Convolution applies correlation to a sliding window of text.
 
 In case you've forgotten, listing 7.1 should remind you what correlation looks like in Python.
+(You can also use `scipy.stats.pearsonr`).
 
 .Python implementation of correlation
 [source,python]
 ----
-def corr(a, b):
-    """ Compute the Pierson correlation coefficient R """
-    a = a - np.mean(a)
-    b = b - np.mean(b)
-    return sum(a * b) / np.sqrt(sum(a*a) * sum(b*b))
+>>> def corr(a, b):
+...    """ Compute the Pearson correlation coefficient R """
+...    a = a - np.mean(a)
+...    b = b - np.mean(b)
+...    return sum(a * b) / np.sqrt(sum(a*a) * sum(b*b))
 
-a = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
-b = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+... a = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
+... b = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
 
 print(corr(a, b))
 0.31622776601683794
@@ -428,7 +433,7 @@ Another advantage of convolution is that it outputs a vector representation of y
 Whether your text is a one-word name or a ten thousand word document, a convolution across that sequence of tokens would output the same size vector to represent the meaning of that text.
 Convolution creates embedding vectors that you can use to make all sorts of predictions with, just like you did with word embeddings in chapter 6.
 But now these embeddings will work on sequences of words, not just individual words.
-Your embedding, your vecgtor representation of meaning, will be the same size no matter whether the text you're processing is the three words "I love you" or much longer: "I feel profound and compersive love for you."
+Your embedding, your vector representation of meaning, will be the same size no matter whether the text you're processing is the three words "I love you" or much longer: "I feel profound and compersive love for you."
 The feeling or sentiment of love will end up in the same place in both vectors despite the word love occurring at different locations in the text.
 And the meaning of the text is spread over the entire vector creating what is called a "dense" vector representation of meaning.
 When you use convolution, there are no gaps in your vector representation for text.
@@ -440,7 +445,7 @@ Unlike the sparse TF-IDF vectors of earlier chapters, the dimensions of your con
 You're going to start with a pure python implementation of convolution.
 This will give you a mental model of the math for convolution, and most importantly, of the shapes of the matrices and vectors for convolution.
 And it will help you appreciate the purpose of each layer in a convolutional neural network.
-For this first convolution you will hard-code the weights in the convolution kernel to compute a 2-day moving average.
+For this first convolution you will hard-code the weights in the convolution kernel to compute a 2-point moving average.
 //MARIA: time references are confusing. Maybe 2-point instead of 2-day?
 This might be useful if you want to extract some machine learning features from daily cryptocurrency prices in Robinhood.
 Or perhaps it would be better to imagine you trying to solve a solvable problem like doing feature engineering of some 2-day averages on the reports of rainfall for a rainy city like Portland, Oregon.
@@ -449,7 +454,7 @@ Because this is a hard-coded kernel, you won't have to worry about training or f
 
 You are going to hard-code this convolution to detect a pattern in a sequence of numbers just like you hard-coded a regular expression to recognize tokens in as sequence of characters in Chapter 2.
 When you hard-code a convolutional filter, you have to know what patterns you're looking for so you can put that pattern into the coefficients of your convolution.
-This works well for easy-to-spot patterns like dips in a value or brief spikes upward in a value. 
+This works well for easy-to-spot patterns like dips in a value or brief spikes upward in a value.
 These are the kinds of patterns you'll be looking for in Morse code "text" later in this chapter.
 In section 3 of this chapter you will learn how to build on this skill to create a convolutional neural network in PyTorch that can _learn_ on its own which patterns to look for in your text.
 
@@ -482,7 +487,7 @@ ____
 The right word may be effective, but no word was ever as effective as a rightly timed pause.
 ____
 
-Can you spot the two adverbs in a row? 
+Can you spot the two adverbs in a row?
 I had to cheat and use SpaCy in order to find this example.
 Subtle patterns of meaning like this are very hard for a human to consciously notice.
 But measuring the the _adverbiness_ of text is just a matter of math for a convolutional filter.
@@ -495,7 +500,7 @@ A convolutional neural network (CNN) looks at your desired output (target variab
 For this example you're defining an adverby sentence as one that contains two adverbs consecutively within a sentence.
 This is just to help you see the math for a very simple problem.
 Adverbiness is just one of many features you need to engineer from text in machine learning pipelines.
-A CNN will automate that engineering for you by learning just the right combination of adverbiness, nounness, stopwordness, and lots of other nesses. 
+A CNN will automate that engineering for you by learning just the right combination of adverbiness, nounness, stopwordness, and lots of other nesses.
 For now you'll just do it all by hand for this one adverbiness feature.
 The goal is to understand the kinds of patterns a CNN can learn to recognize in your data.
 
@@ -506,17 +511,18 @@ Listing 7.2 shows how to tag the quote with parts of speech tags using SpaCy and
 .Tag a quote with parts of speech
 [source,python]
 ----
-nlp = spacy.load('en_core_web_md')
-
-tagged_words = {
-    t.text: [t.pos_, int(t.pos_ == 'ADV')]  # <1>
-    for t in nlp(quote)}                    # <2>
-
-df_quote = pd.DataFrame(tagged_words, index=['POS', 'ADV'])
-print(df_quote)
+>>> nlp = spacy.load('en_core_web_md')
+>>>
+>>> quote = "The right word may be effective, but no word was ever" \
+...    " as effective as a rightly timed pause."
+>>> tagged_words = {
+...    t.text: [t.pos_, int(t.pos_ == 'ADV')]  # <1>
+...    for t in nlp(quote)}                    # <2>
+>>>
+>>> df_quote = pd.DataFrame(tagged_words, index=['POS', 'ADV'])
+>>> print(df_quote)
 ----
 <1> create a binary sequence to indicate adverb occurrences
-<2> you need to create a `quote` string from the Mark Twain quote earlier
 
 ----
      The right  word  may   be  ...    a rightly timed pause      .
@@ -530,16 +536,16 @@ Now you have your sequence of `ADV` ones and zeros so you can process it with co
 .Define your input sequence for convolution
 [source,python]
 ----
-inpt = list(df_quote.loc['ADV'])
-print(inpt)
+>>> inpt = list(df_quote.loc['ADV'])
+>>> print(inpt)
 ----
 
 ----
 [0, 0, 0, ... 0, 1, 1, 0, 0...]
 ----
 
-Wow, this cheating worked too well! 
-We can clearly see there are two adverbs in a row somewhere in the sentence. 
+Wow, this cheating worked too well!
+We can clearly see there are two adverbs in a row somewhere in the sentence.
 Let's use our convolution filter to find where exactly.
 
 
@@ -547,19 +553,19 @@ Let's use our convolution filter to find where exactly.
 .Convolution in pure python
 [source,python]
 ----
-kernel = [.5, .5]                        # <1>
-
-output = []
-for i in range(len(inpt) - 1):           # <2>
-    z = 0
-    for k, weight in enumerate(kernel):  # <3>
-        z = z + weight * inpt[i + k]
-    output.append(z)
-
-print(f'inpt:\n{inpt}')
-print(f'len(inpt): {len(inpt)}')
-print(f'output:\n{[int(o) if int(o)==o else o for o in output]}')
-print(f'len(output): {len(output)}')
+>>> kernel = [.5, .5]                        # <1>
+>>>
+>>> output = []
+>>> for i in range(len(inpt) - 1):           # <2>
+...    z = 0
+...    for k, weight in enumerate(kernel):  # <3>
+...        z = z + weight * inpt[i + k]
+...    output.append(z)
+>>>
+>>> print(f'inpt:\n{inpt}')
+>>> print(f'len(inpt): {len(inpt)}')
+>>> print(f'output:\n{[int(o) if int(o)==o else o for o in output]}')
+>>> print(f'len(output): {len(output)}')
 ----
 <1> the kernel weights .5 and .5 create a 2-gram moving average convolution
 <2> iterate over this is_adv seq and stop at second to last position so window doesn't slide off the end
@@ -588,15 +594,15 @@ Listing 7.5 will create a line plot to help you visualize the convolution output
 .Line plot of input (is_adv) and output (adverbiness)
 [source,python]
 ----
-import pandas as pd
-from matplotlib import pyplot as plt
-plt.rcParams['figure.dpi'] = 120 # <1>
+>>> import pandas as pd
+>>> from matplotlib import pyplot as plt
+>>> plt.rcParams['figure.dpi'] = 120 # <1>
 
-import seaborn as sns
-sns.set_theme('paper')  # <2>
+>>> import seaborn as sns
+>>> sns.set_theme('paper')  # <2>
 
-df = pd.DataFrame([inpt, output], index=['inpt', 'output']).T
-ax = df.plot(style=['+-', 'o:'], linewidth=3)
+>>> df = pd.DataFrame([inpt, output], index=['inpt', 'output']).T
+>>> ax = df.plot(style=['+-', 'o:'], linewidth=3)
 ----
 <1> the default DPI setting is 75, so 120 increases the figure size
 <2> 'notebook', 'talk', 'paper', or 'poster' will change the style of the plot
@@ -623,18 +629,18 @@ This way you can reuse it in later examples.
 .Generalized convolution function
 [source, ipython3]
 ----
-def convolve(inpt, kernel):
-    output = []
-    for i in range(len(inpt) - len(kernel) + 1):  # <1>
-        output.append(
-            sum(
-                [
-                    inpt[i + k] * kernel[k]
-                    for k in range(len(kernel))   # <2>
-                ]
-            )
-        )
-    return output
+>>> def convolve(inpt, kernel):
+...    output = []
+...    for i in range(len(inpt) - len(kernel) + 1):  # <1>
+...        output.append(
+...            sum(
+...                [
+...                    inpt[i + k] * kernel[k]
+...                    for k in range(len(kernel))   # <2>
+...                ]
+...            )
+...        )
+...    return output
 ----
 <1> to generalize the function you stop the convolution based on the size of the kernel
 <2> the inner list comprehension iterates over the kernel length
@@ -672,14 +678,13 @@ Refer back to Listing 7.2 if you need help creating a DataFrame containing the P
 
 [source, python]
 ----
-quote = "The right word may be effective, but no word was ever as effective as a rightly timed pause."
-tags = 'ADV ADJ VERB NOUN'.split()
-tagged_words = [
-    [tok.text] + [int(tok.pos_ == tag) for tag in tags]  # <1>
-    for tok in nlp(quote)]                                      # <2>
-
-df = pd.DataFrame(tagged_words, columns=['token'] + tags).T
-print(df)
+>>> tags = 'ADV ADJ VERB NOUN'.split()
+>>> tagged_words = [
+...    [tok.text] + [int(tok.pos_ == tag) for tag in tags]  # <1>
+...    for tok in nlp(quote)]                                      # <2>
+>>>
+>>> df = pd.DataFrame(tagged_words, columns=['token'] + tags).T
+>>> print(df)
 ----
 <1> `.pos_` contains the name of the POS, `.pos` contains an integer index
 <2> you can create the quote text string from any text you want to try this on
@@ -702,8 +707,9 @@ Instead you must convert all input data to `torch.Tensor` containers with `torch
 .Convert a DataFrame to a tensor with the correct size
 [source,python]
 ----
-x = torch.tensor(df.values, dtype=torch.float32)  # <1>
-x = x.unsqueeze(0)                                # <2>               
+>>> import torch 
+>>> x = torch.tensor(df.iloc[1:].astype(float).values, dtype=torch.float32)  # <1>
+>>> x = x.unsqueeze(0)                                # <2>
 ----
 <1> you can use any floating point `dtype` as long as you are consistent for the entire CNN
 <2> insert a new 0th dimension with a size of 1 for a batch with only 1 example sentence
@@ -716,21 +722,20 @@ Each kernel will be lined up with the others to find the pattern you're looking 
 Before you had only one dimension to worry about, the adverb tag.
 Now you'll need to work with all 4 dimensions of these word vectors to get the pattern right.
 And you need to coordinate four different "features" or channels of data.
-So for a 3-word, 4-channel kernel we need a 4x3 matrix. 
+So for a 3-word, 4-channel kernel we need a 4x3 matrix.
 Each row represents a channel (part of speech tag), and each column represents a word in the sequence.
 The word vectors are 4-D column vectors.
 
 [source,python]
 ----
-kernel = pd.DataFrame(
-           [[1, 0, 0.],
-            [0, 0, 0.],
-            [0, 1, 0.],
-            [0, 0, 1.]], index=tags)
-print(kernel)
+>>> kernel = pd.DataFrame(
+...           [[1, 0, 0.],
+...            [0, 0, 0.],
+...            [0, 1, 0.],
+...            [0, 0, 1.]], index=tags)
+>>> print(kernel)
 ----
 
-image::../images/ch07/conv1d-adv-verb-noun-4x3.df.png[4x3 matrix of 0's and 1's to detect a sequece of ADV, VERB, NOUN. 4 row for ADV ADJ VERB NOUN. ADJ row is all 0's, width=200px]
 
 You can see that this DataFrame is just an exact copy of the sequence of vectors you want to match in your text samples.
 Of course you were only able to do this because you knew what you were looking for in this one toy example.
@@ -755,29 +760,40 @@ Normally this would be the output of an embedding layer and would already be siz
 But since you are hard-coding all the weights and input data to get to know how the Conv1d layer works, you will need to unsqueeze the 2-D tensor matrix to create a 3-D tensor cube.
 Since you only have the one quote you want to push forward through the convolution the dataset you only need a size of 1 in the first dimension.
 
-.Load hard-coded weights into a Conv1d layer 
+.Load hard-coded weights into a Conv1d layer
 [source,python]
 ----
-kernel = torch.tensor(kernel.values, dtype=torch.float32)
-kernel = kernel.unsqueeze(0)                              # <1>
-conv.load_state_dict({'weight': kernel})
-print(conv.weight)
+>>> kernel = torch.tensor(kernel.values, dtype=torch.float32)
+>>> kernel = kernel.unsqueeze(0)                              # <1>
+>>> conv = torch.nn.Conv1d(in_channels=4, 
+...                     out_channels=1,
+...                     kernel_size=3, 
+...                     bias=False)
+>>> conv.load_state_dict({'weight': kernel})
+>>> print(conv.weight)
 
 tensor([[[1., 0., 0.],
          [0., 0., 0.],
          [0., 1., 0.],
          [0., 0., 1.]]])
 ----
-<1> insert a new 0th dimension with a size of 1 for a dataset with a single example sentence 
+<1> insert a new 0th dimension with a size of 1 for a dataset with a single example sentence
 
 Finally you're ready to see if your hand-crafted kernel can detect a sequence of adverb, verb, noun in this text.
 
 .Running a single example through a convolutional layer
 [source,python]
 ----
-y = np.array(conv.forward(x).detach()).squeeze()
-df.loc['y'] = pd.Series(y)
-df
+>>> y = np.array(conv.forward(x).detach()).squeeze()
+>>> df.loc['y'] = pd.Series(y)
+>>> df
+        0      1     2    3    4   ...   15       16     17     18   19
+token  The  right  word  may   be  ...    a  rightly  timed  pause    .
+ADV      0      0     0    0    0  ...    0        1      0      0    0
+ADJ      0      1     0    0    0  ...    0        0      0      0    0
+VERB     0      0     0    1    0  ...    0        0      1      0    0
+NOUN     0      0     1    0    0  ...    0        0      0      1    0
+y      1.0    0.0   1.0  0.0  0.0  ...  0.0      3.0    0.0    NaN  NaN
 ----
 
 // Figure 7.5
@@ -788,7 +804,7 @@ The y value reaches a maximum value of 3 where all 3 values of 1 in the kernel l
 Your kernel correctly detected the adverb, verb, noun sequence at the end of the sentence.
 The value of 3 for your convolution output rightly lines up with the word "rightly", the 16th word in the sequence.
 The is where the sequence of 3 words is located which match your pattern at positions 16, 17, and 18.
-And it makes sense that the output would have a value of three, because each of the three matched parts of speech had a weight of one in your kernel, summing to a total of three matches. 
+And it makes sense that the output would have a value of three, because each of the three matched parts of speech had a weight of one in your kernel, summing to a total of three matches.
 
 Don't worry, you'll never have to hand-craft a kernel for a convolutional neural network ever again... unless you want to remind yourself how the math is working so you can explain it to others.
 
@@ -797,15 +813,10 @@ Don't worry, you'll never have to hand-craft a kernel for a convolutional neural
 // SUM: Polarizing sunglasses, surf, and zebra behind fence are 3 examples convolution in the real world that will help you remember some convolution terminology.
 
 
-// SUM: 
+// SUM:
 In the optical world of eyes and cameras, convolution is everywhere.
 When you look down at the surface of the ocean or a lake with polarizing sunglasses, the lenses do convolution on the light to filter out the noise.
 The lenses of polarized glasses help fishermen filter out the scattered light and see beneath the surface of the water to find fish.
-
-//MARIA: didn't understand the example. Might be better to remove it.
-And for a slightly different optical example think about a time in childhood when you looked through the glass emergency door at the back of an old-school school bus.
-You might have noticed a circular etching on the window called a Fresnel lens.
-This convolution on light waves creates a fisheye view of the road behind the bus and helps the driver avoid backing into well-meaning humans behind the bus.
 
 And for a wilder example, consider a zebra standing behind a fence.
 The stripes on a zebra can be thought of as a visual natural language.
@@ -818,9 +829,9 @@ And convolution is symmetric because multiplication and addition are commutative
 So if you prefer you can think of the zebra stripes as the filter and a long length of fence as the data.
 
 // Figure 7.6
-.Zebra behind a fence
+.Zebra behind a fence footnote:[GDFL (GNU Free Documentation License) pt.wikipedia.org https://pt.wikipedia.org/wiki/Zebra#/media/Ficheiro:Zebra_standing_alone_crop.jpg]
 image::../images/ch07/800x741px_Zebra_standing_behind_cartoon_fence_cropped.png["Photo of a small young wild zebra standing in a dry savanah behind a cartoon brown fence with vertical slats that line up with stripes near the rump", width=80%, link="../images/ch07/800x741px_Zebra_standing_behind_cartoon_fence_cropped.png"]
-footnote:[GDFL (GNU Free Documentation License) pt.wikipedia.org https://pt.wikipedia.org/wiki/Zebra#/media/Ficheiro:Zebra_standing_alone_crop.jpg]
+
 // HL: Alternate image of real bamboo privacy partition "fence": https://www.knaddison.com/sites/knaddison.com/files/space_divider_1.jpg
 
 Imagine the zebra in figure 7.6 walking behind the fence or the fence sliding in front of the zebra.
@@ -899,12 +910,12 @@ For now you probably just want to play the audio track so you can hear what Mors
 .Download secret message
 [source,python]
 ----
-from nlpia2.init import maybe_download
+>>> from nlpia2.init import maybe_download
 
-url = 'https://upload.wikimedia.org/wikipedia/' \
+>>> url = 'https://upload.wikimedia.org/wikipedia/' \
       'commons/7/78/1210secretmorzecode.wav'
-filepath = maybe_download(url)  <1>
-print(filepath)
+>>> filepath = maybe_download(url) # <1>
+>>> print(filepath)
 ----
 <1> `maybe_download` makes sure the data file is available in your `$HOME` directory.
 
@@ -928,13 +939,11 @@ Just make sure you hang onto a computer or phone that can run Python.
 // Listing 7.11
 .Load the secret Morse code wav file
 ----
-from pathlib import Path
-from scipy.io import wavfile
+>>> from scipy.io import wavfile
 
-filepath = Path.home() / '.nlpia2-data' / '1210secretmorzecode.wav'
-sample_rate, audio = wavfile.read(filepath)
-print(f'sample_rate: {sample_rate}')
-print(f'audio:\n{audio}')
+>>> sample_rate, audio = wavfile.read(filepath)
+>>> print(f'sample_rate: {sample_rate}')
+>>> print(f'audio:\n{audio}')
 ----
 
 ----
@@ -951,19 +960,16 @@ Listing 7.12 centers, normalizes, and downsamples the audio data and extracts th
 // Listing 7.12
 .Normalize and downsample the audio signal
 ----
-import numpy as np
-import pandas as pd
-pd.options.display.max_rows = 7
+>>> pd.options.display.max_rows = 7
 
-audio = audio[:sample_rate * 2]                 # <1>
-audio = np.abs(audio - audio.max() / 2) - .5    # <2>
-audio = audio / audio.max()                     # <3>
-audio = audio[::sample_rate // 400]             # <4>
-audio = pd.Series(audio, name='audio')
-audio.index = 1000 * audio.index / sample_rate  # <5>
-audio.index.name = 'time (ms)'
-print(f'sample_rate: {sample_rate}')
-print(f'audio:\n{audio}')
+>>> audio = audio[:sample_rate * 2]                 # <1>
+>>> audio = np.abs(audio - audio.max() / 2) - .5    # <2>
+>>> audio = audio / audio.max()                     # <3>
+>>> audio = audio[::sample_rate // 400]             # <4>
+>>> audio = pd.Series(audio, name='audio')
+>>> audio.index = 1000 * audio.index / sample_rate  # <5>
+>>> audio.index.name = 'time (ms)'
+>>> print(f'audio:\n{audio}')
 ----
 <1> pull out a 2 second clip from the audio data
 <2> rectify and center the oscillating signal
@@ -989,10 +995,10 @@ Lising 7.12 shows how to build dot-detecting kernel.
 .Dot detecting kernel
 [source,python]
 ----
-kernel = [-1] * 24 + [1] * 24 + [-1] * 24                      # <1>
-kernel = pd.Series(kernel, index=2.5 * np.arange(len(kernel)))
-kernel.index.name = 'Time (ms)'
-ax = kernel.plot(linewidth=3, ylabel='Kernel weight')
+>>> kernel = [-1] * 24 + [1] * 24 + [-1] * 24                      # <1>
+>>> kernel = pd.Series(kernel, index=2.5 * np.arange(len(kernel)))
+>>> kernel.index.name = 'Time (ms)'
+>>> ax = kernel.plot(linewidth=3, ylabel='Kernel weight')
 ----
 <1> 24 samples (2.5 ms each) adds up to 60 ms for each of the low, high, low segments
 
@@ -1007,15 +1013,15 @@ You also want your dot detecting convolution to return a low value (close to zer
 .Dot detector convolved with the secret message
 [source,python]
 ----
-kernel = np.array(kernel) / sum(np.abs(kernel))  # <1>
-pad = [0] * (len(kernel) // 2)                   # <2>
-isdot = convolve(audio.values, kernel)
-isdot =  np.array(pad[:-1] + list(isdot) + pad)  # <3>
+>>> kernel = np.array(kernel) / sum(np.abs(kernel))  # <1>
+>>> pad = [0] * (len(kernel) // 2)                   # <2>
+>>> isdot = convolve(audio.values, kernel)
+>>> isdot =  np.array(pad[:-1] + list(isdot) + pad)  # <3>
 
-df = pd.DataFrame()
-df['audio'] = audio
-df['isdot'] = isdot - isdot.min()
-ax = df.plot()
+>>> df = pd.DataFrame()
+>>> df['audio'] = audio
+>>> df['isdot'] = isdot - isdot.min()
+>>> ax = df.plot()
 ----
 <1> Normalize your kernel by dividing by the sum of the absolute value of the kernel weights
 <2> You will pad both sides by half the amount of data that the kernel "lost"
@@ -1033,9 +1039,9 @@ It works faster and gives you more options for the `mode` of handling the paddin
 .Numpy convolve
 [source,python]
 ----
-isdot = np.convolve(audio.values, kernel, mode='same')  # <1>
-df['isdot'] = isdot - isdot.min()
-ax = df.plot()
+>>> isdot = np.convolve(audio.values, kernel, mode='same')  # <1>
+>>> df['isdot'] = isdot - isdot.min()
+>>> ax = df.plot()
 ----
 <1> np.convolve has 3 possible modes.'same' means that the output length is going to be equal to input length.
 
@@ -1043,7 +1049,7 @@ ax = df.plot()
 image::../images/ch07/hand-crafted-dot-detector-numpy-convolution.png["hand-crafted kernel using numpy's kernel with the mode set to "same" produces slightly better results by detecting the symbols at the edge of the signal more reliably.", width=80%, link="../images/ch07/hand-crafted-dot-detector-numpy-convolution.png"]
 
 
-Numpy convolution gives you three possible modes for doing the convolution, in order of increasing output length:  
+Numpy convolution gives you three possible modes for doing the convolution, in order of increasing output length:
 
 1. **valid**: Only output `len(kernel) - 1` values for the convolution as our pure python `
 2. **same**: Output a signal that is the same length as the input by extrapolating the signal beyond the beginning and end of the array.
@@ -1078,10 +1084,9 @@ If you used the smallest GloVe embeddings, your word embeddings are 50 dimension
 Your convolutional layer can process each of these 50 dimensions with a 1-D convolutional kernel to squeeze this matrix of information about your sentence a bit.
 If you used a kernel of size (length) of two, and a stride of two, you would end up with a matrix of size 50 x 3 to represent the sequence of four 50-D word vectors.
 
-//MARIA: Maybe too early? This whole paragraph is very difficult to understand for someone who 
-A pooling layer, typically max pooling, is used to reduce the size of the output even further.
-A single 1-D kernel with max pooling will compress your sequence of three 50-D vectors down to a single 50-D vector.
-As the name implies max pooling will take the largest most impactful output for each channel (dimension) of meaning in your sequence of vectors.
+A _pooling layer_, typically max pooling, is used to reduce the size of the output even further.
+A max pooling layer with 1-D kernel will compress your sequence of three 50-D vectors down to a single 50-D vector.
+As the name implies, max pooling will take the largest most impactful output for each channel (dimension) of meaning in your sequence of vectors.
 Max pooling is usually pretty effective because it allows your convolution to find the most important dimensions of meaning for each n-gram in your original text.
 With multiple kernels they can each specialize on a separate aspect of the text that is influencing your target variable.
 
@@ -1098,9 +1103,9 @@ The encoding vector output by a CNN layer is a vector with whatever size (length
 The length (number of dimensions) of your encoding vector doesn't depend in any way on the length of your input text.
 
 // Figure 7.14
-.CNN processing layers
+.CNN processing layers footnote:["A Unified Architecture for Natural Language Processing" by Ronan Collobert and Jason Weston (https://thetalkingmachines.com/sites/default/files/2018-12/unified_nlp.pdf)]
 image::../images/ch07/cnn_architecture_flow_diagram.drawio.png["Convolutional neural network (CNN) architecture flow diagram showing input text turning into sequences of indices then sequences of word embeddings and passing through a convolutional layer and max pooling to produce an encoding vector for the input sentence", width=80%, link="../images/ch07/cnn_architecture_flow_diagram.drawio.png"]
-footnote:["A Unified Architecture for Natural Language Processing" by Ronan Collobert and Jason Weston (https://thetalkingmachines.com/sites/default/files/2018-12/unified_nlp.pdf)]
+
 
 You're going to need all your skills from the previous chapters to get the text in order so it can be input into your neural network.
 The first few stages of your pipeline in figure 7.14 are the tokenization and case folding that you did in previous chapters.
@@ -1134,7 +1139,7 @@ And that won't work for an encoding, which needs to be size-invariant.
 You want your encoding vectors to always be the same length no matter the size of your input.
 
 This is a fundamental properties of vectors, that they have the same number of dimensions for the entire _vector space_ that you are working in.
-And you want your NLP pipeline to be able to find a particular bit of meaning at the same location, or vector dimension, no matter where that sentiment occurred in a piece of text. 
+And you want your NLP pipeline to be able to find a particular bit of meaning at the same location, or vector dimension, no matter where that sentiment occurred in a piece of text.
 Padding and clipping ensures that your CNN is location (time) and size (duration) invariant.
 Basically your CNN can find patterns in the meaning of text no matter where those patterns are in the text, as long as those patterns are somewhere within the maximum length that your CNN can handle.
 
@@ -1158,7 +1163,7 @@ In listing Listing 7.16 you will load "birdsite" (microblog) posts that have bee
 Later you'll use use your CNN model to predict whether CNN (Cable News Network) would be likely to "pick up" on the news before it spreads on its own in the "miasma."
 
 ////
-KM: Regarding the note below (not sure if you're explaining or if this is text from the blog you mentioned). I'm not against what you're saying, but I honestly don't think Marjan will allow this. We try to be as neutral as possible. I can ask, though. 
+KM: Regarding the note below (not sure if you're explaining or if this is text from the blog you mentioned). I'm not against what you're saying, but I honestly don't think Marjan will allow this. We try to be as neutral as possible. I can ask, though.
 HL: I'll tone it down and shorten it. Please do ask Marjan. I mentioned to Brian during contract negotiation that I planned to double down on the successful prosocial slant of the first-edition.
 ////
 
@@ -1223,7 +1228,8 @@ print(counts.most_common(10))
 <2> ignore the 3 most frequent tokens ("t", "co", "http")
 
 ----
-[('t', 5199), ('co', 4740), ('http', 4309), ('the', 3277), ('a', 2200), ('in', 1986)]
+[('t', 5199), ('co', 4740), ('http', 4309), ('the', 3277), ('a', 2200),
+    ('in', 1986)]
 ----
 
 You can see that the token "t" occurs almost as many times (5199) as there are posts (7613).
@@ -1234,7 +1240,7 @@ If your goal is to build a CNN that reads and understands language like a human,
 Once you have your vocabulary and tokenizer dialed in, you can build a padding function to reuse whenever you need it.
 If you make your `pad()` function general enough, as in listing 7.18, you can use it on both string tokens and integer indexes.
 
-// Listing 7.18 
+// Listing 7.18
 .Multipurpose padding function
 [source,python]
 ----
@@ -1296,7 +1302,7 @@ embedding = nn.Embedding(
     embedding_dim=64,       # <2>
     padding_idx=0)
 ----
-<1> your vocab must be the same same as in your tokenizer 
+<1> your vocab must be the same same as in your tokenizer
 <2> 50-100 dimensions are fine for small vocabularies and corpora
 
 The embedding layer will be the first layer in your CNN.
@@ -1316,9 +1322,9 @@ from nlpia2.ch07.cnn.train79 import Pipeline  # <1>
 pipeline = Pipeline(
     vocab_size=2000,
     embeddings=(2000, 64),
-    epochs=7
+    epochs=7,
     torch_random_state=433994,  # <2>
-    split_random_state=1460940,  
+    split_random_state=1460940,
 )
 
 pipeline = pipeline.train()
@@ -1386,7 +1392,7 @@ If you answered ["disaster", "not", "not", disaster"] then you got all 4 of thes
 But keep going.
 Can you get nineteen out of twenty correct?
 That's what you'd have to do to beat the training set accuracy of this CNN.
-It's no surprise this is a hard problem and your CNN is getting only 79% accuracy on the test set. 
+It's no surprise this is a hard problem and your CNN is getting only 79% accuracy on the test set.
 After all, bots are filling Twitter with disaster-sounding tweets all the time.
 And sometimes even real humans get sarcastic or sensationalist about world events.
 
@@ -1425,7 +1431,7 @@ describe_model(pipeline.model)  # <4>
 [source,text]
 ----
                      learned_params  all_params        size
-name                                                       
+name
 embedding.weight             128064      128064  (2001, 64)  # <1>
 linear_layer.weight            1856        1856   (1, 1856)
 linear_layer.bias                 1           1        (1,)
@@ -1437,10 +1443,10 @@ When you have overfitting you can use pretrained models in your pipeline to help
 === Transfer learning
 
 Another enhancement that can help your CNN models it to use pretrained word embeddings such as GloVe.
-And it's not cheating, because these models have been trained in a self-supervised way, without any labels from your disaster tweets dataset. 
+And it's not cheating, because these models have been trained in a self-supervised way, without any labels from your disaster tweets dataset.
 You can transfer all the learning these GloVe vectors contain from the training that Stanford gave them on all of Wikipedia and other larger corpora.
 This way your model can get a head start learning a vocabulary of words about disasters by using the more general meaning of words.
-You just need to size your embedding layer to make room for the size GloVe embeddings you want to initialize your CNN with. 
+You just need to size your embedding layer to make room for the size GloVe embeddings you want to initialize your CNN with.
 
 .Make room for GloVE embeddings
 [source,python]
@@ -1478,7 +1484,7 @@ zeroes = [0.] * 50
 embed = []
 for tok in vocab:                     # <1>
     if tok in glove.index:
-        embed.append(glove.loc[tok])         
+        embed.append(glove.loc[tok])
     else:
         embed.append(zeros)           # <2>
 embed = np.array(embed)
@@ -1495,7 +1501,7 @@ pd.Series(vocab):
 0               a
 1              in
 2              to
-          ...    
+          ...
 3831         43rd
 3832    beginners
 3833        lover
@@ -1512,7 +1518,6 @@ Now that you have a consistent way of identifying tokens with an integer, you ca
 .Initialize your embedding layer with GloVE vectors
 [source,python]
 ----
-import torch
 embed = torch.Tensor(embed)                         # <1>
 print(f'embed.size(): {embed.size()}')
 embed = nn.Embedding.from_pretrained(embed, freeze=False)  # <2>
@@ -1593,7 +1598,7 @@ Here are the processing steps and the corresponding shapes of the tensors for ea
 It turns out one of the trickiest things about building a new CNN is keeping track of the shaps of your tensors.
 You need to ensure that the shape of the outputs of one layer match the shape of the inputs for the next layer will be the same for this example as for previous examples.
 
-1. Tokenization => `(N_, )` 
+1. Tokenization => `(N_, )`
 2. Padding =>  `(N,)`
 3. Embedding =>  `(M, N)`
 4. Convolution(s) =>  `(M, N - K)`
@@ -1605,7 +1610,7 @@ You need to ensure that the shape of the outputs of one layer match the shape of
 
 And
 
-* `N_` is the number of tokens in your input text. 
+* `N_` is the number of tokens in your input text.
 * `N` is the number of tokens in your padded sequences.
 * `M` is the number of dimensions in your word embeddings.
 * `K` is the size of your kernel.
@@ -1634,7 +1639,7 @@ class CNNTextClassifier(nn.Module):
             seq_len=self.seq_len,
             kernel_lengths=self.kernel_lengths,
             stride=self.stride,
-            )                                      
+            )
 ----
 <1> `N_`: assume a maximum text length of 40 tokens
 <2> `V`: number of unique tokens (words) in your vocabulary
@@ -1648,19 +1653,19 @@ class CNNTextClassifier(nn.Module):
 
 Just as for your hand-crafted convolutions earlier in this chapter, the sequence length is reduced by each convolutional operation.
 And the amount of shortening depends on the size of the kernel and the stride.
-The PyTorch documentation for a `Conv1d` layer provides this formula and a detailed explanation of the terms.
+The PyTorch documentation for a `Conv1d` layer provides this formula and a detailed explanation of the terms.footnote:[(https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html)]
 
 [source,python]
 ----
 def calc_conv_out_seq_len(seq_len, kernel_len,
                           stride=1, dilation=1, padding=0):
-    """ 
+    """
     L_out =     (L_in + 2 * padding - dilation * (kernel_size - 1) - 1)
             1 + _______________________________________________________
                                         stride
     """
     return (
-        1 + (seq_len + 
+        1 + (seq_len +
              2 * padding - dilation * (kernel_len - 1) - 1
             ) //
         stride
@@ -1676,13 +1681,13 @@ You can load these embedding vectors from GloVe or any other pretrained embeddin
 .Initialize CNN embedding
 [source,python]
 ----
-        self.embed = nn.Embedding(
-            self.vocab_size,                            # <1>
-            self.embedding_size,                        # <2>
-            padding_idx=0)
-        state = self.embed.state_dict()
-        state['weight'] = embeddings                    # <3>
-        self.embed.load_state_dict(state)
+self.embed = nn.Embedding(
+    self.vocab_size,                            # <1>
+    self.embedding_size,                        # <2>
+    padding_idx=0)
+state = self.embed.state_dict()
+state['weight'] = embeddings                    # <3>
+self.embed.load_state_dict(state)
 ----
 <1> vocab_size includes a row vector for the padding token
 <2> for pretrained 50-D GloVe vectors set embedding_size to 50
@@ -1692,33 +1697,33 @@ Next you want to build the convolution and pooling layers.
 The output size of each convolution layer can be used to define a pooling layer whose kernel takes up the entire convolutional layer output sequence.
 This is how you accomplish "global" max pooling in PyTorch to produce a single maximum value for each convolutional filter (kernel) output.
 This is what NLP experts like Christopher Manning and Yoon Kim do in the research papers of theirs that achieved state-of-the-art performance.footnote:[Conv Nets for NLP by Chistopher Manning (https://cuuduongthancong.com/dlf/3400312/xu-ly-ngon-ngu-tu-nhien/christopher-manning/cs224n-2020-lecture11-convnets.pdf)]footnote:["A Sensitivity Analysis of CNNs for Sentence Classification" by Ye Zhang and Brian Wallace (https://arxiv.org/pdf/1510.03820.pdf)]
- 
+
 .Construct convolution and pooling layers
 [source,python]
 ----
-        self.convolvers = []
-        self.poolers = []
-        total_out_len = 0
-        for i, kernel_len in enumerate(self.kernel_lengths):
-            self.convolvers.append(
-                nn.Conv1d(in_channels=self.embedding_size,
-                          out_channels=self.out_channels,
-                          kernel_size=kernel_len,
-                          stride=self.stride))
-            print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
-            conv_output_len = calc_conv_out_seq_len(
-                seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)
-            print(f'conv_output_len: {conv_output_len}')
-            self.poolers.append(
-                nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))  # <7>
-            total_out_len += calc_conv_out_seq_len(
-                seq_len=conv_output_len, kernel_len=conv_output_len, stride=self.stride)
-            print(f'total_out_len: {total_out_len}')
-            # Given input size: (32x1x34). Calculated output size: (32x1x0). Output size is too small
-            print(f'poolers[{i}]: {self.poolers[-1]}')
-        print(f'total_out_len: {total_out_len}')
-        self.linear_layer = nn.Linear(self.out_channels * total_out_len, 1)
-        print(f'linear_layer: {self.linear_layer}')
+self.convolvers = []
+self.poolers = []
+total_out_len = 0
+for i, kernel_len in enumerate(self.kernel_lengths):
+    self.convolvers.append(
+        nn.Conv1d(in_channels=self.embedding_size,
+                  out_channels=self.out_channels,
+                  kernel_size=kernel_len,
+                  stride=self.stride))
+    print(f'conv[{i}].weight.shape: {self.convolvers[-1].weight.shape}')
+    conv_output_len = calc_conv_out_seq_len(
+        seq_len=self.seq_len, kernel_len=kernel_len, stride=self.stride)
+    print(f'conv_output_len: {conv_output_len}')
+    self.poolers.append(
+        nn.MaxPool1d(kernel_size=conv_output_len, stride=self.stride))
+    total_out_len += calc_conv_out_seq_len(
+        seq_len=conv_output_len, kernel_len=conv_output_len,
+        stride=self.stride)
+    print(f'total_out_len: {total_out_len}')
+    print(f'poolers[{i}]: {self.poolers[-1]}')
+print(f'total_out_len: {total_out_len}')
+self.linear_layer = nn.Linear(self.out_channels * total_out_len, 1)
+print(f'linear_layer: {self.linear_layer}')
 ----
 
 Unlike the previous examples, you're going to now create multiple convolution and pooling layers.
@@ -1727,9 +1732,6 @@ Instead you will concatenate the convolution and pooling outputs together.
 This is effective because you've limited the dimensionality of your convolution and pooling output by performing global max pooling and keeping the number of output channels much smaller than the number of embedding dimensions.
 
 
-[source, python]
-----
-----
 
 You can use print statements to help debug mismatching matrix shapes for each layer of your CNN.
 And you want to make sure you don't unintentionally create too many trainable parameters that cause more overfitting than you'd like:
@@ -1742,23 +1744,28 @@ So the concatenated and pooled convolution outout is a 5x5 tensor which produces
 conv[0].weight.shape: torch.Size([5, 50, 2])
 conv_output_len: 39
 total_pool_out_len: 1
-poolers[0]: MaxPool1d(kernel_size=39, stride=1, padding=0, dilation=1, ceil_mode=False)
+poolers[0]: MaxPool1d(kernel_size=39, stride=1, padding=0, dilation=1,
+    ceil_mode=False)
 conv[1].weight.shape: torch.Size([5, 50, 3])
 conv_output_len: 38
 total_pool_out_len: 2
-poolers[1]: MaxPool1d(kernel_size=38, stride=1, padding=0, dilation=1, ceil_mode=False)
+poolers[1]: MaxPool1d(kernel_size=38, stride=1, padding=0, dilation=1,
+    ceil_mode=False)
 conv[2].weight.shape: torch.Size([5, 50, 4])
 conv_output_len: 37
 total_pool_out_len: 3
-poolers[2]: MaxPool1d(kernel_size=37, stride=1, padding=0, dilation=1, ceil_mode=False)
+poolers[2]: MaxPool1d(kernel_size=37, stride=1, padding=0, dilation=1,
+    ceil_mode=False)
 conv[3].weight.shape: torch.Size([5, 50, 5])
 conv_output_len: 36
 total_pool_out_len: 4
-poolers[3]: MaxPool1d(kernel_size=36, stride=1, padding=0, dilation=1, ceil_mode=False)
+poolers[3]: MaxPool1d(kernel_size=36, stride=1, padding=0, dilation=1,
+    ceil_mode=False)
 conv[4].weight.shape: torch.Size([5, 50, 6])
 conv_output_len: 35
 total_pool_out_len: 5
-poolers[4]: MaxPool1d(kernel_size=35, stride=1, padding=0, dilation=1, ceil_mode=False)
+poolers[4]: MaxPool1d(kernel_size=35, stride=1, padding=0, dilation=1,
+     ceil_mode=False)
 total_out_len: 5
 linear_layer: Linear(in_features=25, out_features=1, bias=True)
 ----
@@ -1801,7 +1808,7 @@ This is often called a "reduce" operation in the world of "Big Data" where the m
 Convolution and pooling lend themselves well to the map-reduce software pattern and can be parallelized within a GPU automatically using PyTorch.
 You can even use multi-server HPC (high performance computing) systems to speed up your training.
 But CNNs are so efficient, you aren't likely to need this kind of horsepower.
- 
+
 All the statistics you're used to calculating on a matrix of data can be useful as pooling functions for CNNs:
 
 * `min`
@@ -1937,7 +1944,7 @@ Don't believe everything you read on the Internet, especially when it comes to C
 3. What is the best training set accuracy you can achieve after tuning the hyperparameters for the news-worthiness microblog post problem?
 4. How would you extend the model to accommodate an additional class? The `news.csv` file, provided in the `nlpia2` package on gitlab contains famous quotes to give you another level of profundity to attempt to classify with your CNN.
 5. Write 3 kernels, one each for detecting dots, dashes, and pauses. Write a pooling function that _counts_ unique occurrences of these symbols. BONUS: Create a system of functions that _translates_ the secret message audio file into the symbols `"."`, `"-"`, and `" "`.
-6. Find some hyperparameters (don't forget about random seeds) that achieve better than 80% accuracy on the test set for the disaster tweets dataset. 
+6. Find some hyperparameters (don't forget about random seeds) that achieve better than 80% accuracy on the test set for the disaster tweets dataset.
 
 
 == Summary
@@ -1948,4 +1955,4 @@ Don't believe everything you read on the Internet, especially when it comes to C
 * During training, if you sandbag your model a bit with a dropout layer you can keep it from overachieving (over fitting) on your training data.
 * Hyperparameter tuning for neural networks gives you more room to exercise your creativity than conventional machine learning models.
 * You can outperform 90% of bloggers at NLP competitions if your CNNs align the embedding dimension with the convolutional channels.
-* Old-fashioned CNNs may surprise you with their efficiency at solving hard problems such as detecting newsworthy tweets.  
+* Old-fashioned CNNs may surprise you with their efficiency at solving hard problems such as detecting newsworthy tweets.

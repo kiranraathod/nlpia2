@@ -1,6 +1,7 @@
 = Stackable deep learning (Transformers)
 :chapter: 9
 :part: 3
+:secnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
@@ -13,26 +14,43 @@ This chapter covers
 * Seeing how attention networks enable limitless "stacking" options for NLP
 * Understanding what makes transformers so powerful
 * Improving any NLU pipeline that relies on embeddings using sentence transformers
-* Using transfer learning from popular transformers like BERT and GPT (GPT-2)
-* Comparing GPT-Neo, GPT-J, BERT, PaLM, and T5
+* Transfering the learning of popular transformers like BERT and GPT (GPT-2)
+* Choosing and using a LLM (Large Language Model) with prompt engineering
 * Applying transformers to extractive and abstraction summarization of long documents
 * Generating grammatically correct and interesting text with transformers
 * Estimating the information capacity of a transformer network required for a particular problem
 
-// References:
-// - https://www.ibm.com/blogs/watson/2020/12/how-bert-and-gpt-models-change-the-game-for-nlp/
-// - https://towardsdatascience.com/transformers-explained-understand-the-model-behind-gpt-3-bert-and-t5-cdbf3fc8a40a
-// - https://arxiv.org/pdf/2104.08691.pdf
-// - scaling laws for neural language models: https://arxiv.org/pdf/2001.08361.pdf
-// - training compute (FLOPs) for 100s of models: https://arxiv.org/pdf/2202.05924.pdf
-// - parameters and compute trends:  [Compute and Energy Consumption Trends in Deep Learning Inference](https://arxiv.org/pdf/2109.05472.pdf)
+////
+References:
+- https://www.ibm.com/blogs/watson/2020/12/how-bert-and-gpt-models-change-the-game-for-nlp/
+- https://towardsdatascience.com/transformers-explained-understand-the-model-behind-gpt-3-bert-and-t5-cdbf3fc8a40a
+- https://arxiv.org/pdf/2104.08691.pdf
+- scaling laws for neural language models: https://arxiv.org/pdf/2001.08361.pdf
+- training compute (FLOPs) for 100s of models: https://arxiv.org/pdf/2202.05924.pdf
+- parameters and compute trends:  [Compute and Energy Consumption Trends in Deep Learning Inference](https://arxiv.org/pdf/2109.05472.pdf)
+////
+
+Transformers are changing the world.
+They've created and destroyed whole new job categories.
+The concept of prompt engineering came into being as tech companies raced to find engineers to design ChatGPT prompts that could give them a competitive edge.
+Influentual CyberSecurity experts are bragging about spending augmenting their thinking with the help of 40-100 ChatGPT interactions per day.footnote:[For two months after ChatGPT's release, Dan Miessler spent almost half of his "Unsupervised Learning" podcasts discussing ChatGPT, Bard, and Bing (https://danielmiessler.com/)]
+research make money off of ChatGPT.
+Microsoft News and the MSN.com website layed off its journalists in 2020, replacing them with transformer models capable curating and summarizing news article automatically.
+
+You're about to learn how transformers work and how you can put them to work.
+It's not enough just to be able to write a good prompt.
+Almost anyone can learn how to do that.
+The real opportunity is for people who can fine-tune large language models like Chat GPT for their own applications.
+Imagine how sought-after you'd be if you could build a "TutorGPT" that can help students solve arithmetic and math word problems.
+Shabnam Aggarwal at Rising Academies in Kigali is doing just that with her Rori.AI WhatsApp math tutor bot for middle school students.footnote:[Sebastian Larson, an actual middle schooler, won our competition to develop Rori's `mathtext` NLP algorithm (https://gitlab.com/tangibleai/community/team/-/tree/main/exercises/2-mathtext)] footnote:[All of Rori.AI's NLP code is open source and available on Huggingface (https://huggingface.co/spaces/TangibleAI/mathtext-fastapi).]
+And Vishvesh Bhat did this for college math students with his clevrly.io transformer language models.footnote:[Some of vish's fine-tuned transformers is available on Huggingface (https://huggingface.co/clevrly)]
 
 This book promised to use NLP to write some of the content of this book.
 The First Edition attempted to do this with not-so-impressive results.
 NLP technology has advanced a lot since we wrote the first edition and one of the most powerful advancements has been transformers.
-Transformers now make it possible for us to make good on our promise to generate worthy content that can be incorporated into a book like this without you noticing.
+Transformers now make it possible for us to make good on our promise to generate worthy content that can be incorporated into a book like this without you noticing the difference.
 
-== Problems with RNN
+== Problems with RNNs
 
 Encoder-decoder RNN (recurrent neural networks) don't work well for longer passages of text.
 Even long sentences are a challenge for RNNs doing translation.footnote:[http://www.adeveloperdiary.com/data-science/deep-learning/nlp/machine-translation-using-attention-with-pytorch/]
@@ -1146,12 +1164,12 @@ Running the notebook requires registering for access to Google Cloud Platform Co
 At the time of this writing it appears Google continues to offer monetary credits for first-time users, but generally you will have to pay for access to computing power once you have exhausted the initial trial offer credits.
 
 [NOTE]
-=====
+====
 As you go deeper into NLP models, literally with the use of models having deep stacks of transformers, you may find that your current computer hardware is insufficient for computationally expensive tasks of training and/or fine-tuning large models.
 You will want to evaluate the costs of building out a personal computer to meet your workloads and weigh that against pay-per-use cloud and virtual computing offerings for AI.
 We reference basic hardware requirements and compute options in this text, however discussion of the "right" PC setup or providing an exhaustive list of competitive computing options are outside the scope of this book.
 In addition to the Google Compute Engine, just mentioned, the appendix has instructions for setting up Amazon Web Services (AWS) GPU.
-=====
+====
 
 Accepted op-for-op Pytorch versions of BERT models were implemented as _pytorch-pretrained-bert_ footnote:[pytorch-pretrained-bert:https://pypi.org/project/pytorch-pretrained-bert] and then later incorporated in the indispensable HuggingFace _transformers_ library footnote:[HuggingFace transformers:https://huggingface.co/transformers/].
 You would do well to spend some time to read the getting started documentation and the summaries of the transformer models and associated tasks on the site.
@@ -1438,9 +1456,9 @@ For this example pick a `max_sequence_length` of 300, which is between the defau
 Also explicitly select `train_batch_size` and `eval_batch_size` to fit into GPU memory.
 
 [WARNING]
-================
+====
 You'll quickly realize your batch sizes are set too large if a GPU memory exception is displayed shortly after training or evaluation commences.
-================
+====
 
 Recall that in your first fine-tuning run, the model trained for exactly one epoch.
 Your hunch that the model could have trained longer to achieve better results is likely correct.
@@ -1531,6 +1549,72 @@ Now that's looking better. A 0.989 accuracy puts us in contention with the top c
 
 // TODO: this just provides a small taste of fine-tuning with a transformer model...next steps, other options availale (wandb/tensordboard dashboards) for reader to experiment with.
 
+== Robust NLP 
+To illustrate the concept of _robustness_ in natural language processing, here's a small thought experiment:  can you read the following sentence? 
+
+[quote]
+____
+It deosn't mttaer in waht oredr the ltteers in a wrod are, the olny iprmoetnt tihng is taht the frist and lsat ltteer be at the rghit pclae.
+____
+
+Our guess is even though the letters in this sentence are quite heavily jumbled, you were able to figure out its meaning. 
+While it has actually not true that only first and last letter of the word for readability, this phenomenon, called "transposed letter effect"footnote:[Wikipedia article:https://en.wikipedia.org/wiki/Transposed_letter_effect] shows that our brain can do its work where the input is far from being perfectly correct. 
+That's what robustness is - the ability of the algorithm to give the correct answer despite the input being poor quality, noisy, having gaps and missing information, or even specifically engineered to make it fail. 
+It helps us understand how our algorithm will perform in the "real world" once we let it out of "lab conditions" in which it was trained. 
+
+In computer vision, the low robustness of deep learning algorithms 
+
+In NLP, it's sometimes more difficult to measure, or even define robustness. 
+It's relatively straightforward to understand robustness for tasks that involve labels (such as sentiment analysis, or part-of-speech tagging).
+But what about generative tasks? 
+However, there are common techniques for measuring robustness of an NLP algorithm. 
+
+* Seeing how its performance changes once we test it on data from different domain.
+* Introducing slight variations (perturbations) in the input.
+* Testing it on _adversarial examples_ that are deliberately design to get a wrong answer. 
+ 
+Let's see an example of the last technique for a task called _natural language inference_, or NLI. 
+The purpose of NLI is, given a piece of text (a _premise_), to determine whether another piece of text (a hypothesis) logically follows from it. 
+For a given premise and hypothesis, the algorithm can return the label of "entailment" (if the hypothesis )
+
+Here are some sample performances of leading transformer models on Recognizing Textual Entailment (RTE), a popular NLI dataset:footnote:[Source: (https://paperswithcode.com/sota/natural-language-inference-on-rte)] 
+
+.RTE dataset accuracy for transformer models
+[width="80%",cols="1,1",options="header"]
+|===============================
+|Model | Inference Accuracy 
+|RoBERTa | 88.2%
+|XLNEt | 85.9%
+|GPT-3 | 69%
+|===============================
+
+Looks like these models perform reasonably well on the dataset - even the commercial model GPT-3, that lags behind the open-source models.  
+
+However what happens if we create a dataset that's deliberately harder for machines to tackle?
+There are a few ways to do this - the most common approaches called _human-in-the-loop_ and _model-in-the-loop_.
+The former involves human participants to engineer and label examples that will likely cause the model to fail. 
+
+The model-in  chooses those examples automatically, by syntetically generating data and running them through a model and including only the wrongly classified examples.
+For example, for a question answering task, it can generate pairs of questions and answers based on a task, and then choose to add to the dataset only those pairs on which the model (or several models) fail. 
+Researchers have used this approach to create the ANLI (Adversarial Natural Language Inference) dataset. 
+
+Here's how the same models perform on the ANLI dataset:footnote[Source:(https://paperswithcode.com/sota/natural-language-inference-on-anli-test)]
+
+.ANLI dataset accuracy for transformer models
+[width="80%",cols="1,1",options="header"]
+|===============================
+|Model | Inference Accuracy 
+|RoBERTa | 75%
+|XLNEt | 70.3%
+|GPT-3 | 36.8%
+|===============================
+
+What happened here? We see that the open-sourced LLMs results are worse, while GPT-3's performance downright plummets. 
+And the model that performs best is the version of RoBERTa model whose training was optimized for robustness using a process called _adversarial training_.
+Such training can include slight perturbations to the input before feeding it to the model - for example, adding or removing words, swapping word order in a sentence, or replacing words with synonyms. 
+This is one of the many ways researchers use to make their models more "ready" to the real world. 
+
+
 
 == In the real world
 
@@ -1541,6 +1625,16 @@ Transformers have taken off in popularity for a variety of real world applicatio
 * Search engines use BERT to improve search results
 * `nboost` uses transformers to create a semantic search proxy for ElasticSearch
 * aidungeon.io uses GPT-3 to generate an endless variety of rooms
+
+=== Large Language Models (LLMs)
+
+Some popular large language models include:
+
+* GPT3, GPT-Neo, GPT-J
+* BERT, Elmo, BigBird
+* PaLM
+* LLaMMa
+* T5
 
 == Test Yourself
 

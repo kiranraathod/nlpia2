@@ -1,12 +1,25 @@
-= Math with words (TF-IDF vectors)
+= Natural Language Processing in Action, Second Edition
 :chapter: 3
 :part: 1
+:sectnumoffset: 2
+:sectnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
+:leveloffset: 1
+:xrefstyle: short
+// :imagesdir: .
+// :icons!:
 :stem: latexmath
+:toc:
+:source-highlighter: coderay
+:bibliography-database: dl4nlp.bib
+:bibliography-style: ieee
+:index::[]
+
+= Math with words (TF-IDF vectors)
 
 This chapter covers
 
@@ -70,7 +83,7 @@ Let's look at an example where counting occurrences of words is useful:
 >>> doc = nlp(sentence)
 >>> tokens = [token.text for token in doc]
 >>> tokens
-['It', 'has', 'also', 'arisen', 'in', 'criminal', 'justice', ',', 
+['It', 'has', 'also', 'arisen', 'in', 'criminal', 'justice', ',',
 'healthcare', ',', 'and', 'hiring', ',', 'compounding', 'existing',
 'racial', ',', 'economic', ',', 'and', 'gender', 'biases', '.']
 ----
@@ -92,7 +105,7 @@ Counter({',': 5, 'and': 2, 'It': 1, 'has': 1, 'also': 1, 'arisen': 1, ...})
 A `collections.Counter` object is a `dict` under the hood.
 And that means that the keys are technically stored in an unordered collection or `set`, also sometimes called a "bag."
 It may look like this dictionary has maintained the order of the words in your sentence, but that's just an illusion.
-You got lucky because your sentence didn't contain many repeated tokens. 
+You got lucky because your sentence didn't contain many repeated tokens.
 And the latest versions of Python (3.6 and above) maintain the order of the keys based on when you insert new keys into a dictionary.footnote:[StackOverflow discussion of whether to rely on this feature (https://stackoverflow.com/questions/39980323/are-dictionaries-ordered-in-python-3-6/39980744#39980744)]
 But you are about to create vectors out of these dictionaries of tokens and their counts.
 You need vectors in order to do linear algebra and machine learning on a collection of documents (sentences in this case).
@@ -100,13 +113,13 @@ Your bag-of-words vectors will keep track of each unique token with a consistent
 This way the counts for tokens like "and" or the comma add up across all the vectors for your documents -- the sentences in the Wikipedia article titled "Algorithmic Bias."
 
 [IMPORTANT]
-================
+====
 For NLP the order of keys in your dictionary won't matter, because you'll need to work with vectors.
 Just as in chapter 2, your token count vectors arrange the vocabulary (token count dict keys) according to when you processed each of the documents of your corpus.
 And sometimes you may want to alphabetize your vocabulary to make it easier to analyze.
 This means it's critical to record the order of the tokens of your vocabulary when you save or persist your pipeline to disk.
 And if you are trying to reproduce someone else's NLP pipeline you'll want to either use their vocabulary (token list) ordering or make sure you process the dataset in the same order the original code did.
-================
+====
 
 For short documents like this one, the jumbled bag of words still contains a lot of information about the original intent of the sentence.
 And the information in a bag of words is sufficient to do some powerful things such as detect spam, compute sentiment (positivity or other emotions), and even detect subtle intent, like sarcasm.
@@ -207,7 +220,7 @@ You can use this text to "teach" your machine about the importance of "justice."
 And all you need is a few paragraphs from the Wikipedia article on algorithmic bias.
 
 [quote, Wikipedia, Algorithmic Bias (https://en.wikipedia.org/wiki/Algorithmic_bias)]
-_______________________________________________________________
+____
 
 Algorithmic bias describes systematic and repeatable errors in a computer system that create unfair outcomes, such as privileging one arbitrary group of users over others.
 Bias can emerge due to many factors, including but not limited to the design of the algorithm or the unintended or unanticipated use or decisions relating to the way data is coded, collected, selected or used to train the algorithm.
@@ -227,7 +240,7 @@ Problems in understanding, researching, and discovering algorithmic bias persist
 Even when full transparency is provided, the complexity of certain algorithms poses a barrier to understanding their functioning.
 Furthermore, algorithms may change, or respond to input or output in ways that cannot be anticipated or easily reproduced for analysis.
 In many cases, even within a single website or application, there is no single "algorithm" to examine, but a network of many interrelated programs and data inputs, even between users of the same service.
-_______________________________________________________________
+____
 
 Look at a sentence from this article and see if you can figure out how you could use the `Counter` dictionary to help your algorithm understand something about algorithmic bias.
 
@@ -336,12 +349,12 @@ This will reveal the power of vector representations.
 >>> df = pd.DataFrame(counts)
 >>> df = df.fillna(0).astype(int)  # <3>
 >>> df.head()
-    algorithmic  bias  describes  systematic  ...  inputs  between  same  service
-0             1     1          1           1  ...       0        0     0        0
-1             0     1          0           0  ...       0        0     0        0
-2             1     1          0           0  ...       0        0     0        0
-3             1     1          0           1  ...       0        0     0        0
-4             0     1          0           0  ...       0        0     0        0
+  algorithmic bias describes  systematic  ... inputs  between  same service
+0           1    1         1           1  ...      0        0     0       0
+1           0    1         0           0  ...      0        0     0       0
+2           1    1         0           0  ...      0        0     0       0
+3           1    1         0           1  ...      0        0     0       0
+4           0    1         0           0  ...      0        0     0       0
 ----
 <1> Run the SpaCy tokenizer on each line and skip empty lines
 <2> Tokenize text with SpaCy before before lowercasing it, to improve sentence segmentation
@@ -387,12 +400,13 @@ And you might find academics that use the term _corpus_ to describe a collection
 So take a look at the vocabulary or lexicon for this corpus.
 Ignoring proper nouns for now, you can lowercase your words and reduce the vocabulary size a little bit.
 
+//You're missing code annotations below
 [source,python]
 ----
 >>> docs = list(nlp(bias_intro).sents)
 >>> counts = []
 >>> for doc in docs:
-...     counts.append(Counter([t.text.lower() for t in doc])) 
+...     counts.append(Counter([t.text.lower() for t in doc]))
 >>> df = pd.DataFrame(counts)
 >>> df = df.fillna(0).astype(int)  # <1>
 >>> df
@@ -460,7 +474,6 @@ Now you'll make copies of that base vector, update the values of the vector for 
 ...         vec[key] = value / len(lexicon)
 ...     doc_vectors.append(vec)
 ----
-
 <1> `copy.copy()` creates an independent copy, a separate instance of your zero vector, rather than reusing a reference (pointer) to the original object's memory location. Otherwise you'd just be overwriting the same `zero_vector` with new values in each loop, and you wouldn't have a fresh zero on each pass of the loop.
 
 === An easier way to vectorize text
@@ -541,7 +554,7 @@ And it will compute what you're looking for in the fastest possible way, using c
 ====
 If you use vectorization to eleminate some of the `for` loops in your code, you can speed up your NLP pipeline by a 100x or more.
 This is 100x more models that you can try.
-The Berlin Social Science Center (WZB) has a great tutorial on vectorization.footnote:["Vectorization and Parallelization" by WZB.eu (https://datascience.blog.wzb.eu/2018/02/02/vectorization-and-parallelization-in-python-with-numpy-and-pandas/).]. 
+The Berlin Social Science Center (WZB) has a great tutorial on vectorization.footnote:["Vectorization and Parallelization" by WZB.eu (https://datascience.blog.wzb.eu/2018/02/02/vectorization-and-parallelization-in-python-with-numpy-and-pandas/).].
 And if you poke around elsewhere on the site you'll find perhaps the only trustworthy source of statistics and data on the affect NLP and AI is having on society.footnote:["Knowledge and Society in Times of Upheaval" (https://wzb.eu/en/node/60041)]
 ====
 
@@ -567,11 +580,12 @@ The latitude-longitude vector space is not rectilinear, and Euclidean geometry d
 That means you have to be careful when you calculate things like distance or closeness between two points represented by a pair of 2D geographic coordinates, or points in any non-Euclidean space.
 Think about how you would calculate the distance between the latitude and longitude coordinates of Portland, OR and New York, NY.footnote:[You'd need to use a package like GeoPy (geopy.readthedocs.io) to get the math right.]
 
-Figure 3.3 is one way to draw the 2D vectors `(5, 5)`, `(3, 2)`, and `(-1, 1)`.
+Figure <<figure-2d-vectors>> shows one way to visualize the three 2D vectors `(5, 5)`, `(3, 2)`, and `(-1, 1)`.
 The head of a vector (represented by the pointy tip of an arrow) is used to identify a location in a vector space.
 So the vector heads in this diagram will be at those three pairs of coordinates.
 The tail of a position vector (represented by the "rear" of the arrow) is always at the origin, or `(0, 0)`.
 
+[#figure-2d-vectors, reftext={chapter}.{counter:figure}]
 .2D vectors
 image::../images/ch03/vecs.png[2D Vectors, width=80%, link="../images/ch03/vecs.png"]
 
@@ -581,7 +595,7 @@ But you aren't limited to normal 3D space.
 You can have 5 dimensions, 10 dimensions, 5,000, whatever.
 The linear algebra all works out the same.
 You might need more computing power as the dimensionality grows.
-And you'll run into some "curse-of-dimensionality" issues, but you can wait to deal with that until the last chapter, chapter 13.footnote:[The curse of dimensionality is that vectors will get exponentially farther and farther away from one another, in Euclidean distance, as the dimensionality increases. A lot of simple operations become impractical above 10 or 20 dimensions, like sorting a large list of vectors based on their distance from a "query" or "reference" vector (approximate nearest neighbor search). To dig deeper, check out Wikipedia's "Curse of Dimensionality" article (https://en.wikipedia.org/wiki/Curse_of_dimensionality), explore hyperspace with one of this book's authors at bit.ly/explorehyperspace (https://docs.google.com/presentation/d/1SEU8VL0KWPDKKZnBSaMxUBDDwI8yqIxu9RQtq2bpnNg), play with the Python `annoy` package (https://github.com/spotify/annoy), or search Google Scholar for "high dimensional approximate nearest neighbors" (https://scholar.google.com/scholar?q=high+dimensional+approximate+nearest+neighbor)]
+And you'll run into some "curse-of-dimensionality" issues, but you can wait to deal with that until the last chapter, chapter 13.footnote:[The curse of dimensionality is that vectors will get exponentially farther and farther away from one another, in Euclidean distance, as the dimensionality increases. A lot of simple operations become impractical above 10 or 20 dimensions, like sorting a large list of vectors based on their distance from a "query" or "reference" vector (approximate nearest neighbor search). To dig deeper, check out Wikipedia's "Curse of Dimensionality" article (https://en.wikipedia.org/wiki/Curse_of_dimensionality), learn how to "Squash Hyperspace with a Twitter Chatbot" (https://docs.google.com/presentation/d/1SEU8VL0KWPDKKZnBSaMxUBDDwI8yqIxu9RQtq2bpnNg) by H Lane, Zach Kent, Santi Adavani, play with the Python `annoy` package (https://github.com/spotify/annoy), or search Google Scholar for "high dimensional approximate nearest neighbors" (https://scholar.google.com/scholar?q=high+dimensional+approximate+nearest+neighbor)]
 
 For a natural language document vector space, the dimensionality of your vector space is the count of the number of distinct words that appear in the entire corpus.
 For TF (and TF-IDF to come), we call this dimensionality capital letter "K".
@@ -589,8 +603,9 @@ This number of distinct words is also the vocabulary size of your corpus, so in 
 You can then describe each document, within this K-dimensional vector space by a K-dimensional vector.
 K = 18 in your three-document corpus about Harry and Jill (or 16, if your tokenizer drops the punctuation).
 Because humans can't easily visualize spaces of more than three dimensions, let's set aside most of those dimensions and look at two for a moment, so you can have a visual representation of the vectors on this flat page you're reading.
-So in figure 3.4, K is reduced to two for a two-dimensional view of the 18-dimensional Harry and Jill vector space.
+So in figure <<figure-2d-term-frequency-vectors>>, K is reduced to two for a two-dimensional view of the 18-dimensional Harry and Jill vector space.
 
+[#figure-2d-term-frequency-vectors, reftext={chapter}.{counter:figure}]
 .2D term frequency vectors
 image::../images/ch03/harry_faster_vecs.png[2D Term Frequency Vectors, width=80%, link="../images/ch03/harry_faster_vecs.png"]
 
@@ -627,7 +642,7 @@ In Python this would be:
 
 [source,python]
 ----
-A.dot(B) == (np.linalg.norm(A) * np.linalg.norm(B)) * np.cos(angle_between_A_and_B) 
+A.dot(B) == (np.linalg.norm(A) * np.linalg.norm(B)) * np.cos(angle_between_A_and_B)
 ----
 
 If you solve this equation for `np.cos(angle_between_A_and_B)` (called "cosine similarity between vectors A and B") you can derive code to computer the cosine similarity:
@@ -652,6 +667,7 @@ cos(\theta) = \frac{\boldsymbol{A} \cdot \boldsymbol{B}}{|\boldsymbol{A}||\bolds
 
 Or in pure Python without `numpy`:
 
+[[listing-compute-cosine-similarity-in-python]]
 .Compute cosine similarity in python
 [source,python]
 ----
@@ -676,7 +692,9 @@ You then divide by the norm (magnitude or length) of each vector.
 The vector norm is the same as its Euclidean distance from the head to the tail of the vector -- the square root of the sum of the squares of its elements.
 This _normalized dot product_, like the output of the cosine function, will be a value between -1 and 1.
 It is the cosine of the angle between these two vectors.
-It gives you a value for how much the vectors point in the same direction.
+It gives you a value for how much the vectors point in the same direction.footnote:[These videos show how to create vectors for words and then compute their cosine similarity to each other using SpaCy and numpy (https://www.dropbox.com/sh/3p2tt55pqsisy7l/AAB4vwH4hV3S9pUO0n4kTZfGa?dl=0)]
+
+
 
 A cosine similarity of **1** represents identical normalized vectors that point in exactly the same direction along all dimensions.
 The vectors may have different lengths or magnitudes, but they point in the same direction.
@@ -703,8 +721,10 @@ But in the next chapter, we develop a concept of words and topics that are "oppo
 And this will show up as documents, words, and topics that have cosine similarities of less than zero, or even **-1**.
 
 If you want to compute cosine similarity for regular `numpy` vectors, such as those returned by `CountVectorizer`, you can use `scikit-learn`'s built-in tools.
-Here is how you can calculate the cosine similarity between word vectors 1 and 2 that we computed in Listing 3.2:
+Here is how you can calculate the cosine similarity between word vectors 1 and 2 that we computed in <<listing-cosine-similarity>>:
 
+[#listing-cosine-similarity, reftext={chapter}.{counter:listing}]
+.Cosine similarity
 [source,python]
 ----
 >>> from sklearn.metrics.pairwise import cosine_similarity
@@ -732,7 +752,7 @@ First, let's add another sentence to our corpus, which will illustrate why bag-o
 >>> ngram_docs.append(new_sentence)
 ----
 
-If you compute the vector of word counts for this last sentence, using the same model we trained in Listing 3.2, you will see that it is exactly equal to the representation of the second sentence:
+If you compute the vector of word counts for this last sentence, using the same vectorizer we trained in Listing 3.2, you will see that it is exactly equal to the representation of the second sentence:
 
 [source,python]
 ----
@@ -819,13 +839,15 @@ But even to them, this message will be incomprehensible.
 To figure out the meaning of our cryptic piece of text, you'll use the method you just learned - figuring out token frequency.
 Only this time, a little bird is telling you it might be worth to start with character tokens rather than word tokens!
 Luckily, `CountVectorizer` can serve you here as well.
-You can see the results of the code in Figure 3.4a
+You can see the results of listing <<listing-countvectorizer-histogram>> in figure 3.4a
 
+[#listing-countvectorizer-histogram, reftext={chapter}.{counter:listing}]
+.CountVectorizer histogram
 [source,python]
 ----
->>> char_vectorizer = CountVectorizer(ngram_range=(1,1), analyzer='char') # <1>
+>>> char_vectorizer = CountVectorizer(ngram_range=(1,1), analyzer='char') <1>
 >>> s_char_frequencies = char_vectorizer.fit_transform(s)
->>> generate_histogram(s_char_frequencies, s_char_vectorizer) # <2>
+>>> generate_histogram(s_char_frequencies, s_char_vectorizer) <2>
 ----
 <1> This line generates a `CountVectorizer` that generates 1-grams of characters
 <2> To see the code of `generate_histogram`, check out the `nlpia` repository
@@ -933,7 +955,7 @@ Nobel Laureate Paul Krugman, speaking about economic models and Zipf's Law, put 
 
 _The usual complaint about economic theory is that our models are oversimplified -- that they offer excessively neat views of complex, messy reality. [With Zipf's law] the reverse is true: You have complex, messy models, yet reality is startlingly neat and simple._
 
-Here is an updated version of Krugman's city population plot:footnote:[Population data downloaded from Wikipedia using Pandas. See the ``nlpia.book.examples` code on GitHub (https://gitlab.com/tangibleai/nlpia2/blob/main/src/nlpia2/ch03/ch03_zipf.py)]
+Here is an updated version of Krugman's city population plot:footnote:[Population data downloaded from Wikipedia using Pandas. See the ``nlpia.book.examples` code on GitHub (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/ch03/ch03_zipf.py)]
 
 .City population distribution
 image::../images/ch03/log_pop_from_wikipedia.png[City Population Distributions, width=80%, link="../images/ch03/log_pop_from_wikipedia.png"]
@@ -997,7 +1019,7 @@ So with over 1 million tokens, you have something meaty to look at.
 
 A quick glance shows that the word frequencies in the Brown corpus follow the logarithmic relationship Zipf predicted.
 "The" (rank 1 in term frequency) occurs roughly twice as often as "of" (rank 2 in term frequency), and roughly three times as often as "and" (rank 3 in term frequency).
-If you don't believe us, use the example code (https://gitlab.com/tangibleai/nlpia2/blob/master/src/nlpia/book/examples/ch03_zipf.py) in the `nlpia` package to see this yourself.
+If you don't believe us, use the example code (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/ch03/ch03_zipf.py) in the `nlpia` package to see this yourself.
 
 In short, if you rank the words of a corpus by the number of occurrences and list them in descending order, you'll find that, for a sufficiently large sample, the first word in that ranked list is twice as likely to occur in the corpus as the second word in the list.
 And it is four times as likely to appear as the fourth word on the list.
@@ -1021,7 +1043,7 @@ You're going to be counting just by document.
 Let's return to the Algorithmic Bias example from Wikipedia and grab another section (that deals with algorithmic racial and ethnic discrimination) and say it is the second document in your Bias corpus.
 
 [quote, Wikipedia, Algorithmic Bias: Racial and ethnic discrimination ('https://en.wikipedia.org/wiki/Algorithmic_bias#Racial_and_ethnic_discrimination')]
-_______________________________________________________________________
+____
 Algorithms have been criticized as a method for obscuring racial prejudices in decision-making. Because of how certain races and ethnic groups were treated in the past, data can often contain hidden biases. For example, black people are likely to receive longer sentences than white people who committed the same crime. This could potentially mean that a system amplifies the original biases in the data.
 
 In 2015, Google apologized when black users complained that an image-identification algorithm in its Photos application identified them as gorillas. In 2010, Nikon cameras were criticized when image-recognition algorithms consistently asked Asian users if they were blinking. Such examples are the product of bias in biometric data sets. Biometric data is drawn from aspects of the body, including racial features either observed or inferred, which can then be transferred into data points. Speech recognition technology can have different accuracies depending on the user's accent. This may be caused by the a lack of training data for speakers of that accent.
@@ -1031,7 +1053,7 @@ Biometric data about race may also be inferred, rather than observed. For exampl
 In 2019, a research study revealed that a healthcare algorithm sold by Optum favored white patients over sicker black patients. The algorithm predicts how much patients would cost the health-care system in the future. However, cost is not race-neutral, as black patients incurred about $1,800 less in medical costs per year than white patients with the same number of chronic conditions, which led to the algorithm scoring white patients as equally at risk of future health problems as black patients who suffered from significantly more diseases.
 
 A study conducted by researchers at UC Berkeley in November 2019 revealed that mortgage algorithms have been discriminatory towards Latino and African Americans which discriminated against minorities based on "creditworthiness" which is rooted in the U.S. fair-lending law which allows lenders to use measures of identification to determine if an individual is worthy of receiving loans. These particular algorithms were present in FinTech companies and were shown to discriminate against minorities.
-_______________________________________________________________________
+____
 
 First let's get the total word count for each document in your corpus:
 
@@ -1333,9 +1355,9 @@ Most search engines can respond in constant time (latexmath:[O(1)]) because they
 You aren't going to implement an index that can find these matches in constant time here, but if you're interested you might like exploring the state-of-the-art Python implementation in the `Whoosh` footnote:[See the web page titled "Whoosh : PyPI" (https://pypi.python.org/pypi/Whoosh).] package and its source code.footnote:[See the web page titled "GitHub - Mplsbeb/whoosh: A fast pure-Python search engine" (https://github.com/Mplsbeb/whoosh).]
 
 [TIP]
-================
+====
 In the preceding code, you dropped the keys that were not found in your pipeline's lexicon (vocabulary) to avoid a divide-by-zero error. But a better approach is to +1 the denominator of every IDF calculation, which ensures no denominators are zero. In fact this approach is so common it has a name, _additive smoothing_ or "Laplace smoothing" footnote:[See the web page titled "Additive smoothing - Wikipedia" (https://en.wikipedia.org/wiki/Additive_smoothing).] -- will usually improve the search results for TF-IDF keyword-based searches.
-================
+====
 
 === Another vectorizer
 
@@ -1344,16 +1366,18 @@ The `scikit-learn` package you used at the beginning of this chapter has a tool 
 Just as `CountVectorizer` you saw previously, it does tokenization, omits punctuation, and computes the tf-idf scores all in one.
 
 Here's how you can use sklearn to build a TF-IDF matrix.
-You'll find the syntax similar to `CountVectorizer`.
+The syntax is almost exactly the same as for `CountVectorizer`.
 
+[#listing-computing-tfidf-matrix, reftext={chapter}.{counter:listing}]
 .Computing TF-IDF matrix using `scikit-learn`
 [source,python]
 ----
 >>> from sklearn.feature_extraction.text import TfidfVectorizer
 >>> corpus = docs
->>> vectorizer = TfidfVectorizer(min_df=1)
->>> model = vectorizer.fit_transform(corpus)  # <1>
->>> print(model.todense().round(2))  # <2>
+>>> vectorizer = TfidfVectorizer(min_df=1) # <1>
+>>> vectorizer = vectorizer.fit(corpus)  # <2>
+>>> vectors = vectorizer.transform(corpus)  # <3>
+>>> print(vectors.todense().round(2))  # <4>
 [[0.16 0.   0.48 0.21 0.21 0.   0.25 0.21 0.   0.   0.   0.21 0.   0.64
   0.21 0.21]
  [0.37 0.   0.37 0.   0.   0.37 0.29 0.   0.37 0.37 0.   0.   0.49 0.
@@ -1361,8 +1385,10 @@ You'll find the syntax similar to `CountVectorizer`.
  [0.   0.75 0.   0.   0.   0.29 0.22 0.   0.29 0.29 0.38 0.   0.   0.
   0.   0.  ]]
 ----
-<1> `TFIDFVectorizer` model produces a sparse numpy matrix, like other vectorizers
-<2> The `.todense()` method converts a sparse matrix back into a regular 2-D numpy matrix (filling in the gaps with zeros) for your viewing pleasure.
+<1> `min_df` defaults to 1, because a vectorizer can't include a word in your vocabulary if it doesn't appear at least once in your texts
+<2> Count the total word occurrences in your texts to create a vocabulary of words that match your min_df and max_df settings
+<3> `TFIDFVectorizer` transforms text into a sparse numpy matrix
+<4> The `.todense()` method converts a sparse matrix back into a regular 2-D numpy matrix (filling in the gaps with zeros)
 
 With `scikit-learn`, in four lines you created a matrix of your three documents and the inverse document frequency for each term in the lexicon.
 It's very similar to the matrix you got from `CountVectorizer`, only this time it contains TF-IDF of each term, token, or word in your lexicon make up the columns of the matrix.
@@ -1379,19 +1405,19 @@ As a result, researchers and corporations have spent a lot of time trying to opt
 [width="90%",cols="1,6",options="header"]
 |=======
 |Scheme     |Definition
-|None       |\[w_{ij} = f_{ij}\]
-|TD-IDF     |\[w_{ij} = \log \left(f_{ij}\right) \times \log \left(\frac{N}{n_j}\right)\]
-|TF-ICF     |\[w_{ij} = \log \left(f_{ij}\right) \times \log \left(\frac{N}{f_j}\right)\]
-|Okapi BM25 |\[w_{ij} = \frac{f_{ij}}{0.5+ 1.5 \times \frac{f_j}{\frac{f_j}{j}} + f_{ij}} \log \frac{N-n_j+0.5}{f_{ij}+0.5}\]
-|ATC        |\[w_{ij} = \frac{\left(0.5 + 0.5 \times \frac{f_{ij}}{\max_f}\right) \log \left( \frac{N}{n_j} \right) } { \sqrt{\sum_{i=1}^{N} \Big[ \left( 0.5 + 0.5 \times \frac{f_{ij}}{\max_f}\right) \log \left( \frac{N}{n_j} \right) \Big]^2 } } \]
-|LTU        |\[w_{ij} = \frac{ \left( \log \left( f_{ij} \right) + 1.0 \right) \log \left( \frac{N}{n_j} \right) }{0.8 + 0.2 \times f_j \times \frac{j}{f_j}} \]
-|MI         |\[w_{ij} = \log \frac{P\left(t_{ij} \mathbin{\vert} c_j \right) }{ P\left(t_{ij}\right) P\left(c_j \right) } \]
-|PosMI      |\[w_{ij} = \max\left(0, MI\right)\]
-|T-Test     |\[w_{ij} = \frac{P\left(t_{ij} \mathbin{\vert} c_j \right) - P\left(t_{ij}\right) P\left(c_j \right)}{\sqrt{P\left(t_{ij}\right) P\left(c_j \right)}}\]
-| latexmath:[\chi^2] | See section 4.3.5 of _From Distributional to Semantic Similarity_ (https://www.era.lib.ed.ac.uk/bitstream/handle/1842/563/IP030023.pdf#subsection.4.3.5) by James Richard Curran
-|Lin98a     |\[w_{ij} = \frac{f_{ij} \times f}{f_j \times f_j} \]
-|Lin98b     |\[w_{ij} = -1 \times \log \frac{n_j}{N}\]
-|Gref94     |\[w_{ij} = \frac{\log f_{ij} + 1}{\log n_{j} + 1}\]
+|None       |stem:[w_{ij} = f_{ij}]
+|TD-IDF     |stem:[w_{ij} = \log \left(f_{ij}\right) \times \log \left(\frac{N}{n_j}\right)\]
+|TF-ICF     |stem:[w_{ij} = \log \left(f_{ij}\right) \times \log \left(\frac{N}{f_j}\right)\]
+|Okapi BM25 |stem:[w_{ij} = \frac{f_{ij}}{0.5+ 1.5 \times \frac{f_j}{\frac{f_j}{j}} + f_{ij}} \log \frac{N-n_j+0.5}{f_{ij}+0.5}\]
+|ATC        |stem:[w_{ij} = \frac{\left(0.5 + 0.5 \times \frac{f_{ij}}{\max_f}\right) \log \left( \frac{N}{n_j} \right) } { \sqrt{\sum_{i=1}^{N} \Big[ \left( 0.5 + 0.5 \times \frac{f_{ij}}{\max_f}\right) \log \left( \frac{N}{n_j} \right) \Big]^2 } } \]
+|LTU        |stem:[w_{ij} = \frac{ \left( \log \left( f_{ij} \right) + 1.0 \right) \log \left( \frac{N}{n_j} \right) }{0.8 + 0.2 \times f_j \times \frac{j}{f_j}} \]
+|MI         |stem:[w_{ij} = \log \frac{P\left(t_{ij} \mathbin{\vert} c_j \right) }{ P\left(t_{ij}\right) P\left(c_j \right) } \]
+|PosMI      |stem:[w_{ij} = \max\left(0, MI\right)\]
+|T-Test     |stem:[w_{ij} = \frac{P\left(t_{ij} \mathbin{\vert} c_j \right) - P\left(t_{ij}\right) P\left(c_j \right)}{\sqrt{P\left(t_{ij}\right) P\left(c_j \right)}}\]
+| chi^2^ | See section 4.3.5 of _From Distributional to Semantic Similarity_ (https://www.era.lib.ed.ac.uk/bitstream/handle/1842/563/IP030023.pdf#subsection.4.3.5) by James Richard Curran
+|Lin98a     |stem:[w_{ij} = \frac{f_{ij} \times f}{f_j \times f_j} \]
+|Lin98b     |stem:[w_{ij} = -1 \times \log \frac{n_j}{N}\]
+|Gref94     |stem:[w_{ij} = \frac{\log f_{ij} + 1}{\log n_{j} + 1}\]
 |=======
 
 Search engines (information retrieval systems) match keywords (term) between queries and documents in a corpus.
@@ -1476,7 +1502,7 @@ And things only get better from there as we move on to Word2vec word vectors in 
 . What disadvantages of TF-IDF have you seen throughout the chapter? Can you come up with additional ones that weren't mentioned?
 . How would you use TF-IDF as a base to create a better search engine?
 
-=== Summary
+== Summary
 
 * Any web-scale search engine with millisecond response times has the power of a TF-IDF term document matrix hidden under the hood.
 * Zipf's law can help you predict the frequencies of all sorts of things including words, characters, and people.

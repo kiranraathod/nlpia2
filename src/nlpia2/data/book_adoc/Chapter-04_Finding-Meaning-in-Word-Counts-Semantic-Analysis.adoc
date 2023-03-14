@@ -1,15 +1,17 @@
 = Finding meaning in word counts (semantic analysis)
-:encoding: UTF-8
 :chapter: 4
 :part: 1
+:sectnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
-:sectnumoffset: 3
-// :leveloffset: 1
+:leveloffset: 1
+// :sectnumoffset: 2
 :stem: latexmath
+:toc:
+:icons!:
 
 This chapter covers
 
@@ -162,10 +164,11 @@ If you "trained" your topic model like this, without using a computer, just your
 .Sample weights for your topics
 [source,python]
 ----
+>>> import numpy as np 
+
 >>> topic = {}
 >>> tfidf = dict(list(zip('cat dog apple lion NYC love'.split(),
 ...     np.random.rand(6))))  # <1>
-
 >>> topic['petness'] = (.3 * tfidf['cat'] +\
 ...                     .3 * tfidf['dog'] +\
 ...                      0 * tfidf['apple'] +\
@@ -185,7 +188,6 @@ If you "trained" your topic model like this, without using a computer, just your
 ...                         .5 * tfidf['NYC'] +\
 ...                         .1 * tfidf['love'])
 ----
-
 <1> This `tfidf` vector is just a random example, as if it were computed for a single document that contained these words in some random proportion.
 <2> "Hand-crafted" weights (.3, .3, 0, 0, -.2, .2) are multiplied by imaginary `tfidf` values to create `topic` vectors for your imaginary random document. You'll compute real topic vectors later.
 
@@ -261,12 +263,13 @@ These vectors of weights would be your word vectors for your six words:
 >>> word_vector['love'] =  .2*topic['petness'] -\
 ...                        .1*topic['animalness'] +\
 ...                        .1*topic['cityness']
+
 ----
 
-These six word-topic vectors are shown in <<six-lovable-words>>, one for each word, represent the meanings of your six words as 3D vectors.
+These six word-topic vectors shown in Figure <<six-lovable-words>>, one for each word, represent the meanings of your six words as 3D vectors.
 
-[#six-lovable-words]
-.Six lovable words in 3D
+[id=six-lovable-words, reftext={chapter}.{counter:figure}]
+.3D vectors for a thought experiment about six words about pets and NYC
 image::../images/ch04/cats_and_dogs_petness_3D.png["3D plot of six word vectors indicating their x-axis petness, y-axis animalness, and z-axis cityness by their position and listing their weights as 3-tuple of numbers, their x-y-z coordinates",width=650,align="center",link="../images/ch04/cats_and_dogs_petness_3D.png"]
 
 Earlier, the vectors for each topic, with weights for each word, gave you 6-D vectors representing the linear combination of words in your three topics.
@@ -348,8 +351,9 @@ First, let's load our dataset and take a look at it:
 >>> import pandas as pd
 >>> pd.options.display.width = 120  # <1>
 >>>
->>> DATA_DIR = ('https://gitlab.com/tangibleai/nlpia/-/raw/master/
-                'src/nlpia/data')
+>>> DATA_DIR = ('https://gitlab.com/tangibleai/nlpia/-/raw/master/'
+...                'src/nlpia/data')
+
 >>> url= DATA_DIR + '/toxic_comment_small.csv'
 >>>
 >>> comments = pd.read_csv(url)
@@ -387,14 +391,15 @@ To decide, let's look at the TF-IDF vectors first.
 >>> import spacy
 >>> nlp = spacy.load("en_core_web_sm")
 >>>
->>> def spacy_tokenize(sentence)
->>>    return [token.text for token in nlp(sentence.lower())]
+>>> def spacy_tokenize(sentence):
+...    return [token.text for token in nlp(sentence.lower())]
 >>>
 >>> tfidf_model = TfidfVectorizer(tokenizer=spacy_tokenize)
 >>> tfidf_docs = tfidf_model.fit_transform(\
 ...     raw_documents=comments.text).toarray()
 >>> tfidf_docs.shape
 (5000, 19169)
+
 ----
 
 The spaCy tokenizer gave you 19,169 words in your vocabulary.
@@ -429,7 +434,8 @@ Let's perform manually this approximation of LDA, and see how it does on our dat
 ----
 >>> mask = comments.toxic.astype(bool).values  # <1>
 >>> toxic_centroid = tfidf_docs[mask].mean(axis=0) # <2>
->>> nontoxic_centroid = tfidf_docs[~mask].mean(axis=0) #<3>
+>>> nontoxic_centroid = tfidf_docs[~mask].mean(axis=0) # <3>
+
 ----
 <1> You can use this mask to select only the toxic comment rows from a `numpy.array` or `pandas.DataFrame`.
 <2> Because your TF-IDF vectors are *row* vectors, you need to make sure numpy computes the mean for each column (or dimension) independently using `axis=0`.
@@ -478,7 +484,7 @@ Let's see how it did on the rest of the training set.
 
 [source,python]
 ----
->>> (1. - (comments.spam - comments.lda_predict).abs().sum() / len(sms)).round(3)
+>>> (1. - (comments.toxic - comments.manual_predict).abs().sum() / len(comments)).round(3)
 0.895
 ----
 
@@ -525,9 +531,9 @@ And you'll see how the classifier performs on the messages it wasn't trained on.
 >>> X_train, X_test, y_train, y_test = train_test_split(tfidf_docs,\
 ...     comments.toxic.values, test_size=0.5, random_state=271828)
 >>> lda_tfidf = LDA(n_components=1)
->>> lda = lda.fit(X_train, y_train)  # <1>
+>>> lda = lda_tfidf.fit(X_train, y_train)  # <1>
 >>> round(float(lda.score(X_train, y_train)), 3)
-0.99
+0.999
 >>> round(float(lda.score(X_test, y_test)), 3)
 0.554
 ----
@@ -555,7 +561,7 @@ Here's how you do it with an `sklearn function`:
 [source,python]
 ----
 >>> from sklearn.metrics import confusion_matrix
->>> confusion_matrix(comments['toxic'], lda_tfidf.predict(tfidf_docs))
+>>> confusion_matrix(y_test, lda.predict(X_test))
 array([[1261,  913],
        [ 201,  125]], dtype=int64)
 ----
@@ -569,7 +575,7 @@ Let's try it out:
 ----
 >>> import matplotlib.pyplot as plt
 >>> from sklearn.metrics import plot_confusion_matrix
->>> plot_confusion_matrix(lda_tfidf_train,X_test, y_test, cmap="Greys",
+>>> plot_confusion_matrix(lda,X_test, y_test, cmap="Greys",
 ...                     display_labels=['non-toxic', 'toxic'], colorbar=False)
 >>> plt.show()
 ----
@@ -796,7 +802,7 @@ Finally, we can stop "horsing around" and get back to topic modeling!
 Let's see how everything you've learned about dimensionality reduction, PCA and SVD will start making sense when we talk about finding topics and concepts in our text data.
 
 Let's start from the dataset itself.
-You'll use the same SMS corpus you used for the LDA classifier in section 4.1, and transform it into a matrix using TF-IDF.
+You'll use the same comment corpus you used for the LDA classifier in section 4.1, and transform it into a matrix using TF-IDF.
 You might remember that the result is called a term-document matrix.
 This name is useful, because it gives you an intuition on what the rows and the columns of the matrix contain: the rows would be terms, your vocabulary words; and the columns will be documents.
 
@@ -869,10 +875,10 @@ We will start with decreasing the number of dimensions from 9232 to 16 - we'll e
 >>>
 >>> svd = TruncatedSVD(n_components=16, n_iter=100)  # <1>
 >>> columns = ['topic{}'.format(i) for i in range(svd.n_components)]
->>> svd_topic_vectors = svd.fit_transform(tfidf_docs.values)  # <2>
+>>> svd_topic_vectors = svd.fit_transform(tfidf_docs)  # <2>
 >>> svd_topic_vectors = pd.DataFrame(svd_topic_vectors, columns=columns,\
 ...     index=index)
->>> svd_topic_vectors.round(2).head(6)
+>>> svd_topic_vectors.round(3).head(6)
            topic0  topic1  topic2  ...  topic13  topic14  topic15
 comment0    0.121  -0.055   0.036  ...   -0.038    0.089    0.011
 comment1    0.215   0.141  -0.006  ...    0.079   -0.016   -0.070
@@ -890,11 +896,11 @@ This matrix is also called _document-topic_ matrix.
 By looking at the columns, you can see how much every topic is "expressed" in every comment.
 
 [NOTE]
-----
+====
 How do the methods we use relate to the matrix decomposition process we described?
 You might have realized that what the `fit_transform` method returns is exactly \latex{U \cdot S} - your tf-idf vectors projected into the new space.
 And your V matrix is saved inside the `TruncatedSVD` object in the `components_` variable.
-----
+====
 
 If you want to explore your topics, you can find out how much of each word they "contain" by examining the weights of each word, or groups of words, across every topic.
 

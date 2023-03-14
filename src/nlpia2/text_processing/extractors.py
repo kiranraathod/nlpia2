@@ -11,15 +11,17 @@ from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE
 
 
 try:
-    DATA_DIR = Path(__file__).parent.parent / 'data'
+    DATA_DIR = Path(__file__).resolve().absolute().parent.parent / 'data'
 except NameError:
-    DATA_DIR = Path.cwd()
+    DATA_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data'
     print(f'USING CWD AS DATA_DIR: {DATA_DIR}')
 
 assert DATA_DIR.is_dir()
 
-MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
+#MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
+MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
+print(MANUSCRIPT_DIR)
+DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
@@ -30,6 +32,8 @@ def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data
     ast = g.parse(filepath.open().read())
     return ast
 
+def extract_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+    pass
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
     """ Extract lines of Python using DocTestParser, return list of strs """
@@ -52,7 +56,7 @@ def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
         filepath = Path(text)
         filename = filepath.name
-        text = filepath.open('rt').read()
+        text = filepath.read_text(encoding='utf-8')
     urls = []
     for i, line in enumerate(text.splitlines()):
         for k, match in enumerate(re.finditer(RE_URL_SIMPLE, line)):
@@ -345,7 +349,7 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
     destdir = Path(destdir)
     destdir.mkdir(exist_ok=True)
     destpaths = extract_files(extractor=extract_code_file,
-                              adocdir=adocdir, destdir=destdir,
+                              input_dir=adocdir, output_dir=destdir,
                               glob=glob, suffix=suffix)
     return destpaths
 
