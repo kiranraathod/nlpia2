@@ -123,9 +123,10 @@ function upload_with_poetry {
     git commit -am "$VERSION: $MESSAGE"
 
     cp scripts/pyproject.toml .
+    
+    # poetry config pypi-token.pypi "$PYPI__TOKEN__"  # probably need to do this fir
     poetry build
-    poetry publish
-    # poetry public --username=__token__ --password=pypi-...
+    poetry publish  # poetry publish --username=__token__ --password=pypi-...
 
     mv pyproject.toml scripts/
 

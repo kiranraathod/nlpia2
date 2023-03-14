@@ -10,14 +10,10 @@ import tempfile
 from qary.text_processing.re_patterns import RE_URL_WITH_SCHEME
 
 
-try:
-    DATA_DIR = Path(__file__).parent / 'data'
-except NameError:
-    DATA_DIR = Path.cwd()
+from nlpia2 import MANUSCRIPT_DIR
 
-assert DATA_DIR.is_dir()
+MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 
-MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
@@ -365,8 +361,9 @@ def parse_args(
     return vars(parser.parse_args())
 
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
+    results = None
     if args['input']:
         if Path(args['input']).is_dir():
             results = extract_code_files(adocdir=args['input'])
@@ -377,3 +374,8 @@ if __name__ == '__main__':
             results = extract_code_files()
         if input('Extract urls from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_urls()
+    return results
+
+
+if __name__ == '__main__':
+    results = main()

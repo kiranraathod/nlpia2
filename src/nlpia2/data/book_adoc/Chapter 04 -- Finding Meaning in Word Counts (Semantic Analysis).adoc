@@ -263,9 +263,10 @@ These vectors of weights would be your word vectors for your six words:
 ...                        .1*topic['cityness']
 ----
 
-These six word-topic vectors (shown in Figure 4.1), one for each word, represent the meanings of your six words as 3D vectors.
+These six word-topic vectors are shown in <<six-lovable-words>>, one for each word, represent the meanings of your six words as 3D vectors.
 
-.3D vectors for a thought experiment about six words about pets and NYC
+[#six-lovable-words]
+.Six lovable words in 3D
 image::../images/ch04/cats_and_dogs_petness_3D.png["3D plot of six word vectors indicating their x-axis petness, y-axis animalness, and z-axis cityness by their position and listing their weights as 3-tuple of numbers, their x-y-z coordinates",width=650,align="center",link="../images/ch04/cats_and_dogs_petness_3D.png"]
 
 Earlier, the vectors for each topic, with weights for each word, gave you 6-D vectors representing the linear combination of words in your three topics.

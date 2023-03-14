@@ -4,7 +4,8 @@
 name = "nlpia2"
 version = "0.0.22"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
-license = "MIT"
+# https://choosealicense.com/
+license = "AGPLv3"
 readme = "README.md"
 authors = [
     "Hobson Lane <hobson@tangibleai.com>",
@@ -20,18 +21,23 @@ authors = [
 homepage = "https://proai.org"
 repository = "https://gitlab.com/tangibleai/nlpia2"
 documentation = "https://gitlab.com/tangibleai/nlpia2"
-include = [
-    "README.md",
-    "AUTHORS.md",
-    "CONTRIBUTING.md",
-    "install_editable.sh",
-    "src/nlpia2/data",
-    "src/nlpia2/data/",
-    "src/nlpia2/ch07/cnn/data/disaster-tweets.csv",
-    "src/nlpia2/ch07/cnn/data/trec.csv",
-    ]
-exclude = [
-    ".nlpia2-data/",
+# include = [
+#     "README.md",
+#     "AUTHORS.md",
+#     "CONTRIBUTING.md",
+#     "install_editable.sh",
+#     "src/nlpia2/data",
+#     "src/nlpia2/data/",
+#     "src/nlpia2/ch07/cnn/data/disaster-tweets.csv",
+#     "src/nlpia2/ch07/cnn/data/trec.csv",
+#     ]
+# exclude = [
+#     ".nlpia2-data/",
+#     ]
+src_paths = ["src", "tests"]
+packages = [
+    { include = "nlpia2", from = "src" },
+    { include = "wikipedia", from = "src" },
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords
@@ -41,6 +47,7 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing :: Linguistic",
   "Topic :: Text Processing",
@@ -53,20 +60,16 @@ classifiers = [
 generate-setup-file = true
 
 [build-system]
-requires = ["poetry_core>=1.0.0", "setuptools>=54.0.2", "tox", "wheel"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
 
 [tool.poetry.scripts]
 # https://python-poetry.org/docs/pyproject/#scripts
 # TODO: rename cnn-classify-text->cnn   and   main.py->cli.py
 cnn = "nlpia2.ch07.cnn:main"
+adoc_extract = "nlpia2.text_extractors:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8.3,<4"
-pip = ">=22.3.1"
-poetry = "^1"
-
 babel = "^2.11.0"
 beautifulsoup4 = "^4.11"
 bleach = "^5.0"
@@ -101,10 +104,14 @@ mistune = "^0.8.4"
 # # nessvec.branch = "main"
 nltk = "^3.7"
 pandas = "^1.1"
+parsimonious = "*"
 pillow = "^9.3.0"
 pronouncing = "^0.2.0"
 psutil = "^5.9.4"
+pip = ">=22.3.1"
+poetry = "^1"
 PyPDF2 = "^2.1.0"
+python = ">=3.8.3,<4"
 python-dotenv = "^0.13.0"
 python-slugify = "^7.0.0"
 pyyaml = "^6.0"
@@ -130,10 +137,9 @@ wikipedia = "^1.4"
 # wikipedia = { git = "https://gitlab.com/tangibleai/wikipedia.git", tag = "1.4.1" }
 xmltodict = "*"
 
-[tool.poetry.dev.dependencies]
-tox = "^3.18"
-pytest = ">=6.2.0"
-pytest-cov = "^3.0.0"
+[tool.poetry.dev-dependencies]
+tox = "^3"
+pytest-cov = "^4.0"
 # pytest-mock = "^3.5"
 # pytest-sugar = "^0.9"
 pylint = "^2.6.0"
@@ -173,3 +179,5 @@ use_parentheses = true
 # testpaths = [
 #     "tests",
 # ]
+
+
