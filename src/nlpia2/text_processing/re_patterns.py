@@ -18,13 +18,18 @@ import os
 import re
 # import regex
 import string
+from pathlib import Path
+import pandas as pd
+from collections import OrderedDict
 from nlpia2.text_processing.constants import APOSTROPHE_CHARS
-from qary.init import DATA_DIR
-from qary.init import tld_iana, tld_popular, uri_schemes_iana, uri_schemes_popular
 
 log = logging.getLogger('qary')
 
-
+try:
+    DATA_DIR = Path(__file__).parent.parent / 'data'
+except NameError:
+    DATA_DIR = Path.cwd()
+    print(f'USING CWD AS DATA_DIR: {DATA_DIR}')
 #####################################################################################
 #####################################################################################
 # pugnlp.regexes
@@ -192,6 +197,35 @@ nondigit = re.compile(r"[^0-9]")
 nonphrase = re.compile(r"[^-\w\s/&']")
 parenthetical_time = re.compile(r'([^(]*)\(\s*(\d+)\s*(?:min)?\s*\)([^(]*)', re.IGNORECASE)
 
+tld_iana = pd.read_csv(DATA_DIR / 'tlds-from-iana.csv', encoding='utf8')
+tld_iana = OrderedDict(sorted(zip((tld.strip().lstrip('.') for tld in tld_iana.domain),
+                                  [(sponsor.strip(), -1) for sponsor in tld_iana.sponsor]),
+                              key=lambda x: len(x[0]),
+                              reverse=True))
+
+tld_popular = OrderedDict(sorted([
+    ('com', ('Commercial', 4860000000)),
+    ('org', ('Noncommercial', 1950000000)),
+    ('edu', ('US accredited postsecondary institutions', 1550000000)),
+    ('gov', ('United States Government', 1060000000)),
+    ('uk', ('United Kingdom', 473000000)),  # noqa
+    ('net', ('Network services', 206000000)),
+    ('ca', ('Canada', 165000000)),  # noqa
+    ('de', ('Germany', 145000000)),  # noqa
+    ('jp', ('Japan', 139000000)),  # noqa
+    ('fr', ('France', 96700000)),  # noqa
+    ('au', ('Australia', 91000000)),  # noqa
+    ('us', ('United States', 68300000)),  # noqa
+    ('ru', ('Russian Federation', 67900000)),  # noqa
+    ('ch', ('Switzerland', 62100000)),  # noqa
+    ('it', ('Italy', 55200000)),  # noqa
+    ('nl', ('Netherlands', 45700000)),  # noqa
+    ('se', ('Sweden', 39000000)),  # noqa
+    ('no', ('Norway', 32300000)),  # noqa
+    ('es', ('Spain', 31000000)),  # noqa
+    ('mil', ('US Military', 28400000)),
+    ], key=lambda x: len(x[0]), reverse=True))
+
 break_path_lookahead = r'(?:\b|(?=[\s"\'>\].?!\)]))'
 # break_path_lookahead = ''
 fqdn_liberal = r'(\b[-.a-zA-Z0-9]+\b([.]' + r'|'.join(tld_iana) + ')\\b)'
@@ -207,6 +241,7 @@ email_popular = re.compile(r'(\b' + username + r'\b@\b' + fqdn_popular + '\\b)')
 # TODO: unmatched surrounding symbols are accepted/consumed, likewise for multiple dots/ats
 at = r'(([-@="_(\[{\|\s]+(at|At|AT)[-@="_)\]\}\|\s]+)|[@])'
 dot = r'(([-.="_(\[{\|\s]+(dot|dt|Dot|DOT)[-.="_)\]\}\|\s]+)|[.])'
+
 tld_iana = r'(' + r'|'.join(tld_iana) + ')'
 cre_tld_iana = re.compile(tld_iana)
 tld_popular = r'(' + r'|'.join(tld_popular) + ')'
@@ -226,6 +261,14 @@ cre_href = re.compile(href)
 
 # doesn't allow for unescaped quoted or parenthesized query strings like:
 #   ?x="1" ?x='1' ?x=(1) and ?x=[1]
+uri_schemes_iana = sorted(pd.read_csv(DATA_DIR / 'uri-schemes.xhtml.csv',
+                                      index_col=0).index.values,
+                          key=lambda x: len(str(x)), reverse=True)
+uri_schemes_popular = ['chrome-extension', 'example', 'content', 'bitcoin',
+                       'telnet', 'mailto',
+                       'https', 'gtalk',
+                       'http', 'smtp', 'feed',
+                       'udp', 'ftp', 'ssh', 'git', 'apt', 'svn', 'cvs']
 url_path = r'(?:[/][^\s"\'\]\)]*' + break_path_lookahead + ')+'
 url_path = r'(' + url_path + break_path_lookahead + ')'
 url_scheme = r'(\b(' + '|'.join(uri_schemes_iana) + ')[:][/]{2})'

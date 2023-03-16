@@ -10,8 +10,8 @@ import pandas as pd
 from .constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
 from .constants import SRC_DATA_DIR
 from .constants import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
-from .constants import TLDS_POPULAR, tld_popular
-from .constants import TLDS, tld_iana
+# from .constants import TLDS_POPULAR, tld_popular
+# from .constants import TLDS, tld_iana
 
 # from qary.etl.netutils import DownloadProgressBar  # noqa
 

@@ -5,7 +5,6 @@ import pkg_resources
 
 # TODO: move constants.py->constants/__init__.py and constants_*.py to constants/*.py
 from .constants_stopwords import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
-from .constants_tlds import TLDS, tld_iana, TLDS_POPULAR, tld_popular
 from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana
 
 log = logging.getLogger(__name__)
