@@ -9,6 +9,17 @@ import tempfile
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
 
+RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
+RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
+RE_MARKUP_LINE = r"^[\[][A-Za-z0-9,\ ]+[\]]"
+RE_CODE_OR_OUTPUT = r"^(>>>|\.\.\.|[a-z0-9\-\+]+|\(|[\ ]+).*"
+RE_CODE_COMMENT=r"^[<].*"
+RE_METADATA = r"^[:].*"
+RE_EMPTY_LINE = r"^[ \t]*$"
+RE_FIGURE_NAME=r"^[\.].*"
+RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
+RE_COMMENT=r"^(\\\\|\/\/).*"
+
 
 try:
     DATA_DIR = Path(__file__).resolve().absolute().parent.parent / 'data'
@@ -19,10 +30,14 @@ except NameError:
 assert DATA_DIR.is_dir()
 
 #MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
-print(MANUSCRIPT_DIR)
+try:
+    MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
+except NameError:
+    MANUSCRIPT_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data' /'book_adoc'
+
 DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
@@ -32,8 +47,33 @@ def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data
     ast = g.parse(filepath.open().read())
     return ast
 
-def extract_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
-    pass
+def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
+    filepath, filename = '', ''
+    if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
+        filepath = Path(text)
+        filename = filepath.name
+        text = filepath.read_text(encoding='utf-8')
+
+    lines = []
+    for i, line in enumerate(text.splitlines()):
+        lines.append(dict(
+         line_text=line,
+         line_number=i,
+         filename=filename,
+         is_text=(re.match(RE_TEXT_LINE, line) is not None),
+         is_empty=(re.match(RE_EMPTY_LINE, line) is not None),
+         is_code_or_output=(re.match(RE_CODE_OR_OUTPUT, line) is not None),
+         is_title=(re.match(RE_TITLE_LINE, line) is not None),
+         is_metadata=(re.match(RE_METADATA, line) is not None),
+         is_code_comment=(re.match(RE_CODE_COMMENT, line) is not None),
+         is_markup=(re.match(RE_MARKUP_LINE, line) is not None),
+         is_figure_name=(re.match(RE_FIGURE_NAME, line) is not None),
+         is_separator=(re.match(RE_SEPARATOR, line) is not None),
+         is_comment=(re.match(RE_COMMENT, line) is not None)
+            )
+        )
+    return lines
+
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
     """ Extract lines of Python using DocTestParser, return list of strs """
@@ -48,6 +88,8 @@ def extract_expressions(filepath=DEFAULT_FILEPATH):
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     return dtparser.get_examples(text)
+
+
 
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
@@ -118,6 +160,11 @@ def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
         f"{u['line_number']}-{u['url_number']}" for u in urls])
     df['filename'] = filepath.name
     df['filepath'] = str(filepath)
+    return df
+
+def extract_lines_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+    lines = extract_lines(text=filepath, with_meta=with_meta)
+    df = pd.DataFrame(lines)
     return df
 
 
@@ -327,10 +374,26 @@ def extract_url_dfs_from_files(
     adocdir = Path(adocdir)
     dfs = extract_dfs_from_files(
         extractor=extract_urls_df,
-        adocdir=adocdir, destdir=destdir, glob=glob,
+        input_dir=adocdir, output_dir=destdir, glob=glob,
         suffix=suffix)
     return dfs
 
+def extract_big_line_df_from_files(
+        adocdir=MANUSCRIPT_DIR, destdir=None,
+        glob='*.adoc', suffix='.adoc.py'):
+    adocdir = Path(adocdir)
+    output = []
+    for p in adocdir.glob(glob):
+        lines = extract_lines(text=p)
+        output.extend(lines)
+    df = pd.DataFrame(output)
+
+    #for each line, see if we know what its type is
+    one_hot_columns = [col for col in df.columns if col.startswith('is_')]
+    df['num_types'] = df[one_hot_columns].sum(axis=1)
+    df['is_type_defined'] = df[one_hot_columns].sum(axis=1) > 0
+
+    return df
 
 def extract_dfs_from_files(
         input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
@@ -340,6 +403,7 @@ def extract_dfs_from_files(
         df = extractor(filepath=p)
         outputs.append(df)
     return outputs
+
 
 
 def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suffix='.adoc.py'):
@@ -384,6 +448,9 @@ if __name__ == '__main__':
         else:
             results = extract_code_file(filepath=args['input'])
     else:
+        if input('Extract lines from all manuscript/adoc files? ').lower()[0] == 'y':
+            result_df = extract_big_line_df_from_files()
+            result_df.to_csv(DEFAULT_LINES_FILENAME)
         if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_code_files()
             print(results)

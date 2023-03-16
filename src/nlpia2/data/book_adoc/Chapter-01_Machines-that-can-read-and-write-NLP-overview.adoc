@@ -498,8 +498,7 @@ And some inexperienced daredevil NLP textbook authors are letting bots author se
 More on that later.
 
 The most surprising and powerful application of NLP is in psychology.
-If you think that a chatbot could never replace your therapist, you may be surprised by recent advancements.footnote:[John Michael Innes and Ben W. Morrison at the University of South Australia
-"Machines can do most of a psychologist's job", 2021, (https://theconversation.com/machines-can-do-most-of-a-psychologists-job-the-industry-must-prepare-for-disruption-154064)]
+If you think that a chatbot could never replace your therapist, you may be surprised by recent advancements.footnote:[John Michael Innes and Ben W. Morrison at the University of South Australia: "Machines can do most of a psychologist's job", 2021, (https://theconversation.com/machines-can-do-most-of-a-psychologists-job-the-industry-must-prepare-for-disruption-154064)]
 Commercial virtual companions such as Xiaoice in China and Replika.AI in the US helped hundreds of millions of lonely people survive the emotional impact of social isolation during Covid-19 lockdowns in 2020 and 2021.footnote:[C.S. Voll "Humans Bonding with Virtual Companions" (https://medium.com/predict/humans-bonding-with-virtual-companions-6d19beae0077)]
 Fortunately, you don't have to rely on engineers at large corporations to look out for your best interests. Many psychotherapy and cognitive assistant technology is completely free and open source.footnote:[Tangible AI builds open source cognitive assistants that help users take control of their emotions such as Syndee (https://syndee.ai) and `qary` (https://gitlab.com/tangibleai/qary) Some of Replika.AI's core technologies are open source (https://github.com/lukalabs)]
 
