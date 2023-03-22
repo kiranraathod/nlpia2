@@ -7,7 +7,7 @@ import pandas as pd
 import re
 import tempfile
 
-from qary.text_processing.re_patterns import RE_URL_WITH_SCHEME
+from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME
 
 
 from nlpia2 import MANUSCRIPT_DIR
@@ -293,11 +293,13 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 
 
 def extract_files(
-        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
     output_paths = []
-    for p in input_dir.glob(glob):
-        destfile = (output_dir / p.name).with_suffix(suffix)
+    destdir = Path(destdir)
+    assert destdir.is_dir()
+    for p in adocdir.glob(glob):
+        destfile = (destdir / p.name).with_suffix(suffix)
         print(f"{p} => {destfile}")
         code = extractor(filepath=p)
         with destfile.open('wt') as fout:
@@ -318,10 +320,10 @@ def extract_url_dfs_from_files(
 
 
 def extract_dfs_from_files(
-        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        adocdir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
         extractor=extract_urls_df, suffix='.adoc.py'):
     outputs = []
-    for p in input_dir.glob(glob):
+    for p in adocdir.glob(glob):
         df = extractor(filepath=p)
         outputs.append(df)
     return outputs
