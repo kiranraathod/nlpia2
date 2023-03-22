@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 import re
 import tempfile
+from types import MappingProxyType
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME
 
@@ -350,7 +351,7 @@ def parse_args(
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        '--input', type=Path, default=None,
+        '--adocs', type=Path, default=None,
         help=input_help
     )
     parser.add_argument(
@@ -363,14 +364,23 @@ def parse_args(
     return vars(parser.parse_args())
 
 
-def main():
-    args = parse_args()
+DEFAULT_ARGS = MappingProxyType(dict(adocs='manuscript/adoc', output='manuscript/py'))
+
+
+def extract_code(adocs='', output=''):
+    if not adocs and not output:
+        args = parse_args()
+    else:
+        args = dict(
+            adocs=adocs or MANUSCRIPT_DIR / 'adoc',
+            output=output or MANUSCRIPT_DIR / 'py'
+            )
     results = None
-    if args['input']:
-        if Path(args['input']).is_dir():
-            results = extract_code_files(adocdir=args['input'])
+    if args['adocs']:
+        if Path(args['adocs']).is_dir():
+            results = extract_code_files(adocdir=args['adocs'])
         else:
-            results = extract_code_file(filepath=args['input'])
+            results = extract_code_file(filepath=args['adocs'])
     else:
         if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_code_files()
@@ -380,4 +390,4 @@ def main():
 
 
 if __name__ == '__main__':
-    results = main()
+    results = extract_code()
