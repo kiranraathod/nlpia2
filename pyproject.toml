@@ -2,7 +2,7 @@
 # https://python-poetry.org/docs/pyproject/
 # https://github.com/python-poetry/poetry/blob/master/pyproject.toml
 name = "nlpia2"
-version = "0.0.23"
+version = "0.0.24"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 # https://choosealicense.com/
 license = "AGPLv3"
@@ -37,7 +37,6 @@ documentation = "https://gitlab.com/tangibleai/nlpia2"
 src_paths = ["src", "tests"]
 packages = [
     { include = "nlpia2", from = "src" },
-#    { include = "wikipedia", from = "src" },
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords
@@ -137,7 +136,7 @@ sacrebleu = "*"
 tqdm = "^4.64"
 unidecode = "^1.3"
 # typer = "^0.4.1"
-nlpia-wikipedia = {git = "https://gitlab.com/tangibleai/wikipedia", rev = "main"}
+nlpia2-wikipedia = {git = "https://gitlab.com/tangibleai/wikipedia.git", rev = "main"}
 # nlpia2_wikipedia = "^1.5"
 # wikipedia = { git = "https://gitlab.com/tangibleai/wikipedia.git", tag = "1.4.1" }
 xmltodict = "*"
