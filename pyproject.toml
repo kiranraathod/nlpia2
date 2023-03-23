@@ -100,11 +100,11 @@ jupyter-console = ">=6.4.4"
 lxml = "^4.9.1"
 m2r = "^0.3"  # [required by Sphinx & m2r](https://github.com/CrossNox/m2r2/issues/40)
 # mastodonplus_py = "*"  # broken pypi package `Mastodonplus.py`
-mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
-matplotlib = "^3.6"
-matplotlib-inline = "^0.1"
-meilisearch = "^0.22.2"
-mistune = "^0.8.4"
+# mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
+matplotlib = "*"
+matplotlib-inline = "*"
+meilisearch = "*"
+mistune = "*"
 # nessvec = "^0.0.13rc1"
 # nessvec.git = "https://gitlab.com/tangibleai/nessvec.git"
 # nessvec.rev = "a926dff"
