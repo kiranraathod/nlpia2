@@ -6,16 +6,40 @@ from pathlib import Path
 import pandas as pd
 import re
 import tempfile
+from types import MappingProxyType
 
-from qary.text_processing.re_patterns import RE_URL_WITH_SCHEME
+from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
 
+RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
+RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
+RE_MARKUP_LINE = r"^[\[][A-Za-z0-9,\ ]+[\]]"
+RE_CODE_OR_OUTPUT = r"^(>>>|\.\.\.|[a-z0-9\-\+]+|\(|[\ ]+).*"
+RE_CODE_COMMENT=r"^[<].*"
+RE_METADATA = r"^[:].*"
+RE_EMPTY_LINE = r"^[ \t]*$"
+RE_FIGURE_NAME=r"^[\.].*"
+RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
+RE_COMMENT=r"^(\\\\|\/\/).*"
 
 from nlpia2 import MANUSCRIPT_DIR
 
 MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
+try:
+    DATA_DIR = Path(__file__).resolve().absolute().parent.parent / 'data'
+except NameError:
+    DATA_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data'
+    print(f'USING CWD AS DATA_DIR: {DATA_DIR}')
 
-DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
+assert DATA_DIR.is_dir()
+
+try:
+    MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
+except NameError:
+    MANUSCRIPT_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data' /'book_adoc'
+
+DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
@@ -24,6 +48,33 @@ def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data
     g = Grammar(grammarpath.open().read())
     ast = g.parse(filepath.open().read())
     return ast
+
+def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
+    filepath, filename = '', ''
+    if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
+        filepath = Path(text)
+        filename = filepath.name
+        text = filepath.read_text(encoding='utf-8')
+
+    lines = []
+    for i, line in enumerate(text.splitlines()):
+        lines.append(dict(
+         line_text=line,
+         line_number=i,
+         filename=filename,
+         is_text=(re.match(RE_TEXT_LINE, line) is not None),
+         is_empty=(re.match(RE_EMPTY_LINE, line) is not None),
+         is_code_or_output=(re.match(RE_CODE_OR_OUTPUT, line) is not None),
+         is_title=(re.match(RE_TITLE_LINE, line) is not None),
+         is_metadata=(re.match(RE_METADATA, line) is not None),
+         is_code_comment=(re.match(RE_CODE_COMMENT, line) is not None),
+         is_markup=(re.match(RE_MARKUP_LINE, line) is not None),
+         is_figure_name=(re.match(RE_FIGURE_NAME, line) is not None),
+         is_separator=(re.match(RE_SEPARATOR, line) is not None),
+         is_comment=(re.match(RE_COMMENT, line) is not None)
+            )
+        )
+    return lines
 
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
@@ -43,15 +94,19 @@ def extract_expressions(filepath=DEFAULT_FILEPATH):
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
+    filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
-        text = Path(text).open('rt').read()
+        filepath = Path(text)
+        filename = filepath.name
+        text = filepath.read_text(encoding='utf-8')
     urls = []
     for i, line in enumerate(text.splitlines()):
-        for k, groups in enumerate(re.findall(RE_URL_WITH_SCHEME, line)):
-            url, scheme = groups[0], groups[1]
+        for k, match in enumerate(re.finditer(RE_URL_SIMPLE, line)):
             urls.append(dict(
-                scheme=scheme,
-                url=url,
+                scheme=match.group('scheme_type') or '',
+                url=match.group('url') or '',
+                url_path=match.group('path') or '',
+                tld=match.group('tld') or '',
                 line_number=i,
                 url_number=k,
                 line_text=line,
@@ -103,6 +158,11 @@ def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
         f"{u['line_number']}-{u['url_number']}" for u in urls])
     df['filename'] = filepath.name
     df['filepath'] = str(filepath)
+    return df
+
+def extract_lines_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+    lines = extract_lines(text=filepath, with_meta=with_meta)
+    df = pd.DataFrame(lines)
     return df
 
 
@@ -295,6 +355,7 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 def extract_files(
         input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
+    """ Run an extractor on all the text (default=adoc) files in a directory returnning the extracted file paths """
     output_paths = []
     for p in input_dir.glob(glob):
         destfile = (output_dir / p.name).with_suffix(suffix)
@@ -312,10 +373,26 @@ def extract_url_dfs_from_files(
     adocdir = Path(adocdir)
     dfs = extract_dfs_from_files(
         extractor=extract_urls_df,
-        adocdir=adocdir, destdir=destdir, glob=glob,
+        input_dir=adocdir, output_dir=destdir, glob=glob,
         suffix=suffix)
     return dfs
 
+def extract_big_line_df_from_files(
+        adocdir=MANUSCRIPT_DIR, destdir=None,
+        glob='*.adoc', suffix='.adoc.py'):
+    adocdir = Path(adocdir)
+    output = []
+    for p in adocdir.glob(glob):
+        lines = extract_lines(text=p)
+        output.extend(lines)
+    df = pd.DataFrame(output)
+
+    # for each line, see if we know what its type is
+    one_hot_columns = [col for col in df.columns if col.startswith('is_')]
+    df['num_types'] = df[one_hot_columns].sum(axis=1)
+    df['is_type_defined'] = df[one_hot_columns].sum(axis=1) > 0
+
+    return df
 
 def extract_dfs_from_files(
         input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
@@ -334,7 +411,7 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
     destdir = Path(destdir)
     destdir.mkdir(exist_ok=True)
     destpaths = extract_files(extractor=extract_code_file,
-                              adocdir=adocdir, destdir=destdir,
+                              input_dir=adocdir, output_dir=destdir,
                               glob=glob, suffix=suffix)
     return destpaths
 
@@ -348,7 +425,7 @@ def parse_args(
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        '--input', type=Path, default=None,
+        '--adocs', type=Path, default=None,
         help=input_help
     )
     parser.add_argument(
@@ -361,14 +438,23 @@ def parse_args(
     return vars(parser.parse_args())
 
 
-def main():
-    args = parse_args()
+DEFAULT_ARGS = MappingProxyType(dict(adocs='manuscript/adoc', output='manuscript/py'))
+
+
+def extract_code(adocs='', output=''):
+    if not adocs and not output:
+        args = parse_args()
+    else:
+        args = dict(
+            adocs=adocs or MANUSCRIPT_DIR / 'adoc',
+            output=output or MANUSCRIPT_DIR / 'py'
+            )
     results = None
-    if args['input']:
-        if Path(args['input']).is_dir():
-            results = extract_code_files(adocdir=args['input'])
+    if args['adocs']:
+        if Path(args['adocs']).is_dir():
+            results = extract_code_files(adocdir=args['adocs'])
         else:
-            results = extract_code_file(filepath=args['input'])
+            results = extract_code_file(filepath=args['adocs'])
     else:
         if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
             results = extract_code_files()
@@ -378,4 +464,4 @@ def main():
 
 
 if __name__ == '__main__':
-    results = main()
+    results = extract_code()

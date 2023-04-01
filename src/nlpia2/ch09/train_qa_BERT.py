@@ -1,4 +1,10 @@
-# FIXME: see bugs at bottom
+"""
+## References
+
+## FIXME: you.com code has bugs (traceback at bottom)
+- https://you.com/search?q=python+question+answering+transformers+bert
+- https://github.com/huggingface/transformers/tree/main/examples/pytorch/question-answering
+"""
 from transformers import BertForQuestionAnswering, BertTokenizer, TrainingArguments, Trainer
 from transformers.data.processors.squad import SquadV2Processor
 
