@@ -20,7 +20,9 @@ RE_FIGURE_NAME=r"^[\.].*"
 RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
 RE_COMMENT=r"^(\\\\|\/\/).*"
 
+from nlpia2 import MANUSCRIPT_DIR
 
+MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 try:
     DATA_DIR = Path(__file__).resolve().absolute().parent.parent / 'data'
 except NameError:
@@ -29,7 +31,6 @@ except NameError:
 
 assert DATA_DIR.is_dir()
 
-#MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 try:
     MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
 except NameError:
@@ -88,8 +89,6 @@ def extract_expressions(filepath=DEFAULT_FILEPATH):
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     return dtparser.get_examples(text)
-
-
 
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
@@ -357,6 +356,7 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 def extract_files(
         input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
+    """ Run an extractor on all the text (default=adoc) files in a directory returnning the extracted file paths """
     output_paths = []
     for p in input_dir.glob(glob):
         destfile = (output_dir / p.name).with_suffix(suffix)
@@ -388,7 +388,7 @@ def extract_big_line_df_from_files(
         output.extend(lines)
     df = pd.DataFrame(output)
 
-    #for each line, see if we know what its type is
+    # for each line, see if we know what its type is
     one_hot_columns = [col for col in df.columns if col.startswith('is_')]
     df['num_types'] = df[one_hot_columns].sum(axis=1)
     df['is_type_defined'] = df[one_hot_columns].sum(axis=1) > 0
@@ -403,7 +403,6 @@ def extract_dfs_from_files(
         df = extractor(filepath=p)
         outputs.append(df)
     return outputs
-
 
 
 def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suffix='.adoc.py'):
