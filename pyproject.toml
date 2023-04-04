@@ -36,7 +36,11 @@ documentation = "https://gitlab.com/tangibleai/nlpia2"
 #     ]
 src_paths = ["src", "tests"]
 packages = [
+<<<<<<< HEAD
+    { include = "nlpia2", from = "src" } 
+=======
     { include = "nlpia2", from = "src" },
+>>>>>>> 745822a360a0bd6d7a4e8ffd3be5bf3c99354a2e
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords
@@ -105,7 +109,7 @@ matplotlib = "*"
 matplotlib-inline = "*"
 meilisearch = "*"
 mistune = "*"
-# nessvec = "^0.0.13rc1"
+nessvec = {git = "https://gitlab.com/tangibleai/nessvec", rev = "main"}
 # nessvec.git = "https://gitlab.com/tangibleai/nessvec.git"
 # nessvec.rev = "a926dff"
 # # nessvec.tag = "0.0.13rc1"
@@ -120,12 +124,12 @@ pip = ">=22.3.1"
 poetry = "^1"
 PyPDF2 = "^2"
 python = ">=3.8.3,<4"
-python-dotenv = "^0.13.0"
+python-dotenv = "^0.21"
 python-slugify = "^7.0.0"
 rapidfuzz = ">=2.13.2"
 recommonmark = "^0.7"
 scipy = ">=1.9.3"
-seaborn = "^0.11.2"
+seaborn = "^0.12"
 sentence_transformers = "^2.2"
 spacy = "*"
 sphinx = "*"
