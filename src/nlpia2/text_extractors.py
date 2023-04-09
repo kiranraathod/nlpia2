@@ -8,23 +8,71 @@ import re
 import tempfile
 from types import MappingProxyType
 
-from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME
+from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
+from nlpia2.constants import SRC_DATA_DIR
 
+RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
+RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
+RE_MARKUP_LINE = r"^[\[][A-Za-z0-9,\ ]+[\]]"
+RE_CODE_OR_OUTPUT = r"^(>>>|\.\.\.|[a-z0-9\-\+]+|\(|[\ ]+).*"
+RE_CODE_COMMENT=r"^[<].*"
+RE_METADATA = r"^[:].*"
+RE_EMPTY_LINE = r"^[ \t]*$"
+RE_FIGURE_NAME=r"^[\.].*"
+RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
+RE_COMMENT=r"^(\\\\|\/\/).*"
 
 from nlpia2 import MANUSCRIPT_DIR
 
 MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
+DATA_DIR = SRC_DATA_DIR
 
-DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
+assert DATA_DIR.is_dir()
+
+MANUSCRIPT_DIR = SRC_DATA_DIR / 'book_adoc'
+
+assert MANUSCRIPT_DIR.is_dir()
+
+DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
-def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data/grammars/adoc.ppeg')):
+def extract_blocks(
+        filepath=Path('data/tests/test.adoc'),
+        grammarpath=Path(SRC_DATA_DIR / 'grammars' / 'adoc_basic.ppeg')):
     filepath, grammarpath = Path(filepath), Path(grammarpath)
     g = Grammar(grammarpath.open().read())
     ast = g.parse(filepath.open().read())
     return ast
+
+def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
+    filepath, filename = '', ''
+    if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
+        filepath = Path(text)
+        filename = filepath.name
+        text = filepath.read_text(encoding='utf-8')
+
+    lines = []
+    for i, line in enumerate(text.splitlines()):
+        lines.append(dict(
+         line_text=line,
+         line_number=i,
+         filename=filename,
+         is_text=(re.match(RE_TEXT_LINE, line) is not None),
+         is_empty=(re.match(RE_EMPTY_LINE, line) is not None),
+         is_code_or_output=(re.match(RE_CODE_OR_OUTPUT, line) is not None),
+         is_title=(re.match(RE_TITLE_LINE, line) is not None),
+         is_metadata=(re.match(RE_METADATA, line) is not None),
+         is_code_comment=(re.match(RE_CODE_COMMENT, line) is not None),
+         is_markup=(re.match(RE_MARKUP_LINE, line) is not None),
+         is_figure_name=(re.match(RE_FIGURE_NAME, line) is not None),
+         is_separator=(re.match(RE_SEPARATOR, line) is not None),
+         is_comment=(re.match(RE_COMMENT, line) is not None)
+            )
+        )
+    return lines
 
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
