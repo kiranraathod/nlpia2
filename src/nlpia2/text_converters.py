@@ -76,7 +76,7 @@ def get_examples(text, with_headings=True):
     expressions = dtparser.get_examples(text)
     lines = text.splitlines()
 
-    FIXME: need function to convert arrays of lines and expressions into blocks
+    # FIXME: need function to convert arrays of lines and expressions into blocks
     blocks = []
     for i, exp in enumerate(expressions):
         for k in range(expressions['lineno'] - 1, -1, -1):
