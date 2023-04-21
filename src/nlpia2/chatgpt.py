@@ -7,7 +7,7 @@ import jsonlines
 import openai
 import pandas as pd
 
-DATA_DIR = Path.home()
+DATA_DIR = Path.home() / '.nlpia2-data'
 
 dotenv.load_dotenv()
 ENV = dict(os.environ.items())
@@ -15,8 +15,14 @@ ENV = dict(os.environ.items())
 DEFAULT_MODEL = 'gpt-3.5-turbo'
 CONVO_LOG_PATH = DATA_DIR / 'chatgpt-request-response-pairs.jsonl'
 CONTEXT_PROMPT = dict(
+   helpful="You are a helpful assistant that never lies and always admits when it isn't sure about something.",
    honest="You are a helpful and impeccably honest assistant that never deceives me and always admits when it isn't sure about something.",
-   third_grade="You are an extremely kind and thoughtful third grade elementary school math teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.",
+   third_grade="You are an extremely kind and thoughtful third grade elementary school math teacher in a developing "
+               "country where English is a second language. You treat everyone kindly and with sensitivity. "
+               "You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. "
+               "You are careful to be politically correct and avoid sensitive topics. ",
+   transparent="You are an honest and transparent virtual assistant (bot)",
+   teacher="You are a kind and thoughtful teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.",   
    )
 
 openai.api_key = ENV['OPENAI_SECRET_KEY']
@@ -57,19 +63,35 @@ def log_request_response(request, response,
         response=response['choices'][0]['message']['content']
         )])
     try:
-        df = pd.read_csv(csv_path, index_col=0)  # noqa
-        df_row.to_csv(csv_path.open('a'), header=False)
+        df = pd.read_csv(csv_path, index_col=False)  # noqa
+        df_row.to_csv(csv_path.open('a'), index=False, header=False)
     except (FileNotFoundError, pd.errors.EmptyDataError):
-        df_row.to_csv(csv_path.open('a'))
+        df_row.to_csv(csv_path.open('a'), index=False)
     return dict(jsonl_path=path, csv_path=csv_path)
 
+
+def command_line():
+    while True:
+        prompt = input('ChatGPT Prompt: ')
+        kwargs = request_response(prompt)
+        filepath = log_request_response(request=kwargs['request'], response=kwargs['response'])
+        print(f'Logged to: {filepath}')
+        bot_message = kwargs['response']['choices'][0]['message']['content']
+        print(bot_message)
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
     if not len(argv):
         print("USAGE: chatgpt YOUR PROMPT FOR CHATGPT")
     else:
-        print(send_prompt(' '.join(argv)))
+        kwargs = request_response(' '.join(argv))
+        filepath = log_request_response(request=kwargs['request'], response=kwargs['response'])
+        print(f'Logged to: {filepath}')
+        bot_message = kwargs['response']['choices'][0]['message']['content']
+        print(bot_message)
+
+    
+    
 """
 >>> request_00 = dict(
 ...   model="gpt-3.5-turbo",

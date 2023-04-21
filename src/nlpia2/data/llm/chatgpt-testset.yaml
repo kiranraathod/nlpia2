@@ -1,4 +1,23 @@
 -
+  date: 2023-04-19
+  references: "footnote:[Large Language Models are Zero-Shot Reasoners Jan 2023 by Takeshi Kojima et al (https://arxiv.org/pdf/2205.11916.pdf)]"
+  author: Takeshi Kojima et al
+  tags: [few shot, zero shot, benchmark, word problem, elementary school, rori] 
+  prompt: |+
+    Roger has 5 tennis balls. He buys 2 more cans of tennis balls. Each can has 3 tennis balls. How many tennis balls does he have now?
+  replies:
+    GPT-3: The answer is 11. 
+    GPT-3.5-turbo:
+    human:
+      - 11: 1.0
+      - eleven: 0.99
+      - 11 balls: 0.95
+      - Roger now has 11 tennis balls.: 1.0
+      - Roger now has eleven tennis balls.: 1.0
+      - Roger has eleven balls.: 0.9
+      - The answer is 11.: 0.95
+      - The answer is eleven.: 0.95
+-
   date: 2023-03-19
   references:
     - https://blogs.berkeley.edu/2023/03/19/is-chatgpt-a-false-promise/
