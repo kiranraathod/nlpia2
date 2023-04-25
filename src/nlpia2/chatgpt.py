@@ -15,7 +15,12 @@ dotenv.load_dotenv()
 ENV = dict(os.environ.items())
 
 DEFAULT_MODEL = 'gpt-3.5-turbo'
+DEFAULT_MAX_TOKENS = 512
+DEFAULT_TEMPERATURE = 0.01
+DEFAULT_NUM_RESPONSES = 1
+DEFAULT_TOP_P = 1  # nucleus sampling: model considers only p>TOP_P tokens (.9=90% proba)
 CONVO_LOG_PATH = DATA_DIR / 'chatgpt-request-response-pairs.jsonl'
+DEFAULT_CONTEXT_PROMPT = 'third_grade'
 CONTEXT_PROMPT = dict(
     helpful=(
         "You are a helpful assistant that never lies and always admits "
@@ -60,9 +65,14 @@ openai.api_key = ENV['OPENAI_SECRET_KEY']
 
 
 def request_response(prompt,
-        context_prompt='third_grade',
+        context_prompt=DEFAULT_CONTEXT_PROMPT,
         model=DEFAULT_MODEL,
-        convo_log_path=CONVO_LOG_PATH):
+        convo_log_path=CONVO_LOG_PATH,
+        temperature=DEFAULT_TEMPERATURE,
+        max_tokens=DEFAULT_MAX_TOKENS,
+        n=DEFAULT_NUM_RESPONSES,
+        top_p=DEFAULT_TOP_P,
+        **kwargs):
     context_prompt = CONTEXT_PROMPT.get(context_prompt, context_prompt)
     request = dict(
         model=model,
@@ -74,6 +84,11 @@ def request_response(prompt,
             "content": prompt},
         ]
     )
+    request.update(dict(
+        temperature=temperature, max_tokens=max_tokens,
+        top_p=top_p, n=n)
+    )
+    request.update(kwargs)
     response = openai.ChatCompletion.create(**request)
     if hasattr(response, 'to_dict_recursive'):
         response = response.to_dict_recursive()
@@ -81,12 +96,19 @@ def request_response(prompt,
 
 
 def send_prompt(prompt,
-        context_prompt='assistant',
+        context_prompt=DEFAULT_CONTEXT_PROMPT,
         model=DEFAULT_MODEL,
-        convo_log_path=CONVO_LOG_PATH):
+        convo_log_path=CONVO_LOG_PATH,
+        temperature=DEFAULT_TEMPERATURE,
+        max_tokens=DEFAULT_MAX_TOKENS,
+        n=DEFAULT_NUM_RESPONSES,
+        top_p=DEFAULT_TOP_P,
+        **kwargs):
     reqresp = request_response(
         prompt=prompt, context_prompt=context_prompt,
-        model=model, convo_log_path=convo_log_path)
+        temperature=temperature, max_tokens=max_tokens,
+        top_p=top_p, n=n,
+        model=model, convo_log_path=convo_log_path, **kwargs)
     log_request_response(**reqresp)
     return message_from_response(reqresp['response'])
 
