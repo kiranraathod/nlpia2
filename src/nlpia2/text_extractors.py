@@ -74,12 +74,23 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
     return [ex.source for ex in expressions]
 
 
-def extract_expressions(filepath=DEFAULT_FILEPATH):
+def extract_expressions(filepath=DEFAULT_FILEPATH, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
-    text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
-    return dtparser.get_examples(text)
+    
+    text = Path(filepath).open('rt').read()
+    
+    if not section_break:
+        return dtparser.get_examples(text)
 
+    text_sections = ['']
+    for line in text.splitlines():
+        if line.strip() == section_break:
+            text_sections[-1] += f'>>> # {section_break}\n'
+        else:
+            text_sections[-1] += line + '\n'
+    return text_sections
+    
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """

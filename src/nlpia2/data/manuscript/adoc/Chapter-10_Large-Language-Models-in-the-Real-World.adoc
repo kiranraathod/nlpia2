@@ -141,20 +141,26 @@ Great job! How about 11, 12, 13?
 
 >>> print(send_prompt(
 ...     model='gpt-3.5-turbo',
-...     context_prompt='third_grade', # <1>
-...     prompt=prompt))
+...     context_prompt='third_grade',
+...     prompt=prompt))  # <2>
 Good job!
 ----
 <1> See the `nlpia2.chatgpt` module for the full text
+<2> Sending a prompt again starts a fresh conversation in ChatGPT 
 
 As you can see ChatGPT did much better on the second round of testing.
-This second round of testing happened more than a week after the first round.
-It is not surprising that it got better at pretending to be a third grade teacher.
-After all this LLM is similar to others in using reinforcement learning with human feedback to improve the model output over time.
-Improvement in this case means increasing the number of like button clicks from users.
-The fundamental objective of an LLM is determined by the organization training it.
+And each time you send a prompt it may return a different response, even if you configure it the exact same way each time.
+And we ran these tests over several weeks and the reponses got shorter and shorter, perhaps because we and others had instructed it to provide shorter responses.
+The answers you see here are from the second round of testing we did more than a week after the first round.
+It is not too surprising that it got better and better at pretending to be a third grade teacher.
+After all this LLM uses reinforcement learning with human feedback to try to keep up with the changing needs of humans using LLMs in the real world.
+
+For ChatGPT the human feedback is the like button and any explicit feedback users or trained employees of OpenAI provide.
+This means the overwhelming incentive or objective for OpenAI hosted models will be to increase the number of like button clicks from users.
+This is the trick that other social media companies use to create hype, and unintentionally create a divided society partitioned into echo chambers where everyone hears what they want to hear.
+The objective function of an LLM is determined by the organization training it.
 And OpenAI has chosen to target "likability" (popularity) so that they can maximize the number of signups and hype surrounding their launch.
-Their UX is well-designed for this purpose.
+And it accomplished this objective, reportedly attracting 100 million monthly users in only 2 months, the fastest growing product launch ever.
 
 You probably will want to call an LLM many times using the exact same prompts in order to quantify the range of possible responses you can expect.
 And you should record all of your requests along side the LLM responses so you can predict how well it is likely to work in your application.
@@ -369,6 +375,7 @@ And Vicuna was trained on the 90,000 conversations in the ShareGPT dataset on Hu
 Similarly the LLM training data sets and models for the Open Assistant are community generated and publicly accessible under the Apache open source license.
 If you want to contribute to the battle against exploitative and manipulative AI, the Open Assistant project is a great place to start.footnote:[GitHub page for Open Assistant (https://github.com/LAION-AI/Open-Assistant/)]
 
+// SECTIONBREAK
 === Creating your own Generative LLM
 
 To understand how GPT-3.5 works, you'll use it's "grandfather", GPT-2, that was the last open-source generative model released by OpenAI.
@@ -376,7 +383,9 @@ To understand how GPT-3.5 works, you'll use it's "grandfather", GPT-2, that was 
 In this chapter, to get closer to the way NLP is done in the real world, you'll be using HuggingFace classes a lot. 
 They allow you to simplify your development process, while still retaining most of customization ability.  
 
-As usual, you'll start from importing your libraries and setting a random seed - as we're using several libraries and tools, there's a lot of random seeds to set!
+As usual, you'll start from importing your libraries and setting a random seed - as we're using several libraries and tools, there are a lot of random seeds to "plant"!
+
+
 [source, python]
 ----
 >>> from transformers import GPT2LMHeadModel, GPT2Tokenizer
@@ -478,8 +487,8 @@ Let's see what token has a maximum probability for the input sequence "NLP is a"
 
 [source,python]
 ----
->>> prompt='NLP is a'
->>> encoded_prompt =  tokenizer(prompt, return_tensors="pt")["input_ids"]
+>>> encoded_prompt = tokenizer('NLP is a', return_tensors="pt")
+>>> encoded_prompt = encoded_prompt["input_ids"]
 >>> encoded_prompt = encoded_prompt.to(DEVICE)
 >>> output = vanilla_gpt2(input_ids=encoded_prompt)
 >>> next_token_logits = output.logits[0, -1, :]
@@ -539,7 +548,7 @@ Note that because sampling is probabilistic, the generated text will be differen
 ...    'max_length': 50, 
 ...    'top_p': 0.92
 ... }
->>> print(generate(prompt='NLP is', **kwargs))
+>>> print(generate(prompt='NLP is a', **kwargs))
 NLP is a multi-level network protocol, which is one of the most
 well-documented protocols for managing data transfer protocols. This 
 is useful if one can perform network transfers using one data transfer
@@ -568,12 +577,11 @@ Let's also initialize a new version of our GPT-2 model for finetuning. We can re
 >>> df = pd.read_csv(DATASET_URL)
 >>> df = df[df['is_text']]
 >>> lines = df.line_text.copy() 
-
->>> model = GPT2LMHeadModel.from_pretrained("gpt2")
 ----
 
-Time to prepare for training! 
-The following listing creates the PyTorch Dataset that we'll use to feed the data into the model: 
+This will read all the sentences of natural language text in the manuscript for this book.
+Each line or sentence will be a different "document" in your NLP pipeline, so your model will learn how to generate sentences rather than longer passages.
+You want to wrap your list of sentences with a PyTorch `Dataset` class so that your text will be structured in the way that our training pipeline expects. 
 
 [source,python]
 ----
@@ -581,8 +589,7 @@ The following listing creates the PyTorch Dataset that we'll use to feed the dat
 >>> from torch.utils.data import random_split 
 
 >>> class NLPiADataset(Dataset):
->>>     def __init__(self, txt_list, tokenizer,
-...             gpt2_type="gpt2", max_length=768):
+>>>     def __init__(self, txt_list, tokenizer, max_length=768):
 >>>         self.tokenizer = tokenizer
 >>>         self.input_ids = []
 >>>         self.attn_masks = []
@@ -598,6 +605,7 @@ The following listing creates the PyTorch Dataset that we'll use to feed the dat
 >>>     def __getitem__(self, idx):
 >>>         return self.input_ids[idx]
 ----
+
 
 Now, we want to set aside some samples for evaluating our loss mid-training. 
 Usually, we would need to wrap them in the `DataLoader` wrapper, but luckily, the Transformers package simplifies things for us. 
@@ -625,35 +633,71 @@ Easy-peasy.
 
 [source,python]
 ----
+>>> from nlpia2.constants import DATA_DIR  # <1>
 >>> from transformers import TrainingArguments
 >>> from transformers import DataCollatorForLanguageModeling
 >>> training_args = TrainingArguments(
-...    output_dir='./model02_all_huggingface_results',
+...    output_dir=DATA_DIR / 'ch10_checkpoints',
 ...    per_device_train_batch_size=5,
 ...    num_train_epochs=5,
 ...    save_strategy='epoch')
 >>> collator = DataCollatorForLanguageModeling(
-...     tokenizer=tokenizer, mlm=False)  # <1>
+...     tokenizer=tokenizer, mlm=False)  # <2>
 ----
-<1> mlm stands for 'masked language model'. We don't need it here as GPT-2 is a causal model.
+<1> DATA_DIR defaults to `$HOME/.nlpia2-data/` but you can set it manually
+<2> mlm is for 'masked language model' - which we don't need because GPT-2 is causal
 
-And we're ready for training! 
-It's pretty straightforward:
+Now you have a the pieces that a Hugging Face training pipeline needs to know to start training (fine tuning) your model.
+The `TrainingArguments` and `DataCollatorForLanguageModeling` classes helps you comply with the Hugging Face API and best practices.
+It's a good pattern to follow even if you do not plan to use Hugging Face to train your models.
+This pattern will force you to make all your pipelines maintain a consistent interface.
+This allows you to train, test, and upgrade your models quickly each time you want to try out a new base model.
+This will help you keep up with the fast-changing world of open source transformer models.
+You need to move fast to compete with the _chickenized reverse centaur_ algorithms that BigTech is using to try to enslave you.
+
+The `mlm=False` (masked language model) setting is an especially tricky quirk of transformers.
+This is your way of declaring that the dataset used for training your model need only be given the tokens in the causal direction -- left to right for English. 
+You would need to set this to True if you are feeding the trainer a dataset that has random tokens masked.
+This is the kind of dataset used to train bidirectional language models such as BERT.
+
+[NOTE]
+====
+A causal language model is designed to work the way a neurotypical human brain model works when reading and writing text.
+In your mental model of the English language each word is causally linked to the next one you speak or type as you move left to right.  
+You can't go back and revise a word you've already spoken ... unless you're speaking with a keyboard.
+And we use keyboards a lot.
+This has caused us to develop mental models where we can skip around left or right as we read or compose a sentence.
+Perhaps if we'd all been trained to predict masked out words, like BERT was, we would have a different (possibly more efficient) mental model for reading and writing text. 
+Speed reading training does this to some people as they are learned to read and understand several words of text all at once, as fast as possible.
+People who learn their internal language models differently than the typical person might develop the ability to hop around from word to word a the sentence in their mind, as they are reading or writing text.
+Perhaps the language model of someone with symptoms of dyslexia or autism is somehow related to how they learned language.
+Perhaps the language models in neurodivergent brains (and speed readers) are more similar to BERT (bidirectional) rather than GPT (left-to-right).
+====
+
+Now you are ready for training!
+You can use your collator and training args to configure the training and turn it loose on your data.
 
 [source,python]
 ----
 >>> from transformers import Trainer
->>>
+>>> model = GPT2LMHeadModel.from_pretrained("gpt2")  # <1>
+
 >>> trainer = Trainer(
 ...        model,
 ...        training_args,
-...        data_collator=collator,
-...        train_dataset=train_dataset,
+...        data_collator=collator,       # <2>
+...        train_dataset=train_dataset,  # <3>
 ...        eval_dataset=eval_dataset)
 >>> trainer.train()        
 ----
+<1> Reload a fresh pretrained GPT-2 base model
+<2> Your `DataCollatorForLanguageModeling` configured for left-to-right causal models
+<3> The training subset of the `NLPiADataset` from `torch.random_split`
 
-And that's it! 
+This training run can take a couple hours on a CPU.
+So if you have access to a GPU you might want to train your model there.
+The training should run about 100x faster on a GPU.
+
 Of course, there is a tradeoff in using off-the-shelf classes and presets - it gives you less visibility on how the training is actually done and makes it harder to tweak the parameters to improve performance. 
 As a take-home task, see if you can train the model the old way, with a `pytorch` routine. 
 
@@ -1089,8 +1133,10 @@ Let's see how our model deals with a question that doesn't have an answer in the
 [source,python]
 ----
 >>> question = "How can artificial intelligence save the world"
->>> result = pipe.run(query="How can artificial intelligence save the world", params={"Retriever": {"top_k": 10}})
-print_answers(result, details='minimum')
+>>> result = pipe.run(
+...     query="How can artificial intelligence save the world",
+...     params={"Retriever": {"top_k": 10}})
+>>> result
 'Query: How can artificial intelligence save the world'
 'Answers:'
 [   {   'answer': "I don't think it will save the world, but it will make the "
@@ -1153,6 +1199,7 @@ You should see something like the app in Figure <<figure-streamlit-app>>.
 .Question answering streamlit app 
 image::../images/ch10/qa_streamlit_app_v1.png[Screenshot of a question answering streamlit app, width=650, align="center", link="../images/ch10/qa_streamlit_app_v1.png"]
 
+// SECTIONBREAK
 === Wikipedia for the ambitious reader
 
 If training your model on the text in this book seems a little constraining for you, consider going "all in" and training your model on Wikipedia.
