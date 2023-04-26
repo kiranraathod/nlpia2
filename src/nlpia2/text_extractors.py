@@ -66,19 +66,21 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
     return lines
 
 
-def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
-    expressions = extract_expressions(filepath=filepath)
+    text = Path(filepath).open('rt').read()
+    sections = extract_expressions(text=text, section_break=section_break)
+    if isinstance(sections, str):
+        sections = [sections]
+
     if with_metadata:
-        return [vars(ex) for ex in expressions]
-    return [ex.source for ex in expressions]
+        return [[vars(expr) for expr in sect] for sect in sections] 
+    return [expr.source for expr in sections[0]]
 
 
-def extract_expressions(filepath=DEFAULT_FILEPATH, section_break='// SECTIONBREAK'):
+def extract_expressions(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     dtparser = DocTestParser()
-    
-    text = Path(filepath).open('rt').read()
     
     if not section_break:
         return dtparser.get_examples(text)
@@ -89,7 +91,7 @@ def extract_expressions(filepath=DEFAULT_FILEPATH, section_break='// SECTIONBREA
             text_sections[-1] += f'>>> # {section_break}\n'
         else:
             text_sections[-1] += line + '\n'
-    return text_sections
+    return [dtparser.get_examples(text) for text in text_sections]
     
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
