@@ -69,8 +69,11 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     text = Path(filepath).open('rt').read()
-    sections = extract_expressions(text=text, section_break=section_break)
-    if isinstance(sections, str):
+    print(len(text))
+    sections = extract_expression_sections(text=text, section_break=section_break)
+    print(sections)
+    # assert len(sections) > 0
+    if not isinstance(sections, list):
         sections = [sections]
 
     if with_metadata:
@@ -78,7 +81,7 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_br
     return [expr.source for expr in sections[0]]
 
 
-def extract_expressions(text, section_break='// SECTIONBREAK'):
+def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     dtparser = DocTestParser()
     
@@ -87,10 +90,14 @@ def extract_expressions(text, section_break='// SECTIONBREAK'):
 
     text_sections = ['']
     for line in text.splitlines():
+        print(line)
         if line.strip() == section_break:
-            text_sections[-1] += f'>>> # {section_break}\n'
+            text_sections[-1] = text_sections[-1] + '>>> #' + section_break + '\n'
+            text_sections.append('')
         else:
-            text_sections[-1] += line + '\n'
+            text_sections[-1] = text_sections[-1] + line + '\n'
+    print('text_sections:')
+    print(text_sections)
     return [dtparser.get_examples(text) for text in text_sections]
     
 
@@ -160,8 +167,6 @@ def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
 
 
 def expressions_to_doctests(expressions, prompt='>>> ', ellipsis='... ', comment=''):
-    # expressions = extract_expressions(filepath=filepath)
-
     prompt = prompt or ''
     if prompt and prompt[-1] != ' ':
         prompt += ' '
