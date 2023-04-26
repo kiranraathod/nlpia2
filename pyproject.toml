@@ -104,11 +104,8 @@ matplotlib = "*"
 matplotlib-inline = "*"
 meilisearch = "*"
 mistune = "*"
-nessvec = {git = "https://gitlab.com/tangibleai/nessvec", rev = "main"}
-# nessvec.git = "https://gitlab.com/tangibleai/nessvec.git"
-# nessvec.rev = "a926dff"
-# # nessvec.tag = "0.0.13rc1"
-# # nessvec.branch = "main"
+nessvec = "*"
+# nessvec = {git = "https://gitlab.com/tangibleai/nessvec", rev = "main"}
 nltk = "*"
 pandas = "*"
 parsimonious = "*"
@@ -137,7 +134,8 @@ sacrebleu = "*"
 tqdm = "*"
 unidecode = "*"
 # typer = "^0.4.1"
-nlpia2-wikipedia = {git = "https://gitlab.com/tangibleai/wikipedia.git", rev = "main"}
+nlpia2_wikipedia = "*"
+# nlpia2-wikipedia = {git = "https://gitlab.com/tangibleai/wikipedia.git", rev = "main"}
 # nlpia2_wikipedia = "^1.5"
 # wikipedia = { git = "https://gitlab.com/tangibleai/wikipedia.git", tag = "1.4.1" }
 xmltodict = "*"

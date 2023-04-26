@@ -9,7 +9,7 @@ import tempfile
 from types import MappingProxyType
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR
+from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
@@ -22,16 +22,7 @@ RE_FIGURE_NAME=r"^[\.].*"
 RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
 RE_COMMENT=r"^(\\\\|\/\/).*"
 
-from nlpia2 import MANUSCRIPT_DIR
-
-MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 DATA_DIR = SRC_DATA_DIR
-
-assert DATA_DIR.is_dir()
-
-MANUSCRIPT_DIR = SRC_DATA_DIR / 'book_adoc'
-
-assert MANUSCRIPT_DIR.is_dir()
 
 DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
@@ -391,23 +382,26 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
 
 
 def parse_args(
-        description='Transcoder for doctest-formatted code blocks in asciidoc/txt files to py, or ipynb code blocks',
-        input_help='Path to asciidoc or text file containing doctest-format code blocks',
+        adocs=None,
+        adocs_help='Path to asciidoc or text file containing doctest-format code blocks',
+        output=None,
         output_help='Path to new py file created from code blocks in INPUT',
+        description='Transcoder for doctest-formatted code blocks in asciidoc/txt files to py, or ipynb code blocks',
         format_help='Output file format or type (md, py, ipynb, python, or notebook)'):
 
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        '--adocs', type=Path, default=None,
-        help=input_help
+        '--adocs', type=Path, default=adocs,
+        help=adocs_help
     )
     parser.add_argument(
-        '--output', type=Path, default=None,
+        '--output', type=Path, default=output,
         help=output_help,
     )
     parser.add_argument(
-        '--format', type=str, default='py', help=format_help
+        '--format', type=str, default='py',
+        help=format_help
     )
     return vars(parser.parse_args())
 
@@ -415,27 +409,28 @@ def parse_args(
 DEFAULT_ARGS = MappingProxyType(dict(adocs='manuscript/adoc', output='manuscript/py'))
 
 
-def extract_code(adocs='', output=''):
-    if not adocs and not output:
-        args = parse_args()
-    else:
-        args = dict(
-            adocs=adocs or MANUSCRIPT_DIR / 'adoc',
-            output=output or MANUSCRIPT_DIR / 'py'
-            )
-    results = None
+def extract_code(adocs=None, output=None):
+    args = dict(
+        adocs=Path(adocs or MANUSCRIPT_DIR / 'adoc'),
+        output=Path(output or MANUSCRIPT_DIR / 'py')
+        )
+    args = parse_args(**args)
+
     if args['adocs']:
         if Path(args['adocs']).is_dir():
-            results = extract_code_files(adocdir=args['adocs'])
-        else:
-            results = extract_code_file(filepath=args['adocs'])
-    else:
-        if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
-            results = extract_code_files()
-        if input('Extract urls from all manuscript/adoc files? ').lower()[0] == 'y':
-            results = extract_urls()
+            return extract_code_files(adocdir=args['adocs'])
+        elif Path(args['adocs']).is_file():
+            return extract_code_file(filepath=args['adocs'])
+    
+    results = {}
+    if input(f'Extract python from all adoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
+        results['code_file_paths'] = extract_code_files()
+    if input(f'Extract urls from all addoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
+        results['urls'] = extract_urls()
     return results
 
-
 if __name__ == '__main__':
+    assert DATA_DIR.is_dir()
+    assert MANUSCRIPT_DIR.is_dir()
     results = extract_code()
+

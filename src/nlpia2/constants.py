@@ -4,20 +4,20 @@ import logging
 import pkg_resources
 
 # TODO: move constants.py->constants/__init__.py and constants_*.py to constants/*.py
-from .constants_stopwords import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
-from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana
+from .constants_stopwords import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT  # noqa
+from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana  # noqa
 
 log = logging.getLogger(__name__)
-
 
 PKG_DIR = Path(__file__).absolute().resolve().parent
 SRC_DATA_DIR = PKG_DIR / 'data'
 PKG_NAME = PKG_DIR.name
-SRC_DIR = PKG_DIR.parent
-REPO_DIR = SRC_DIR.parent if SRC_DIR.name != PKG_NAME else SRC_DIR
-MANUSCRIPT_DIR = REPO_DIR.parent / 'nlpia-manuscript' / 'manuscript'
-IMAGES_DIR = MANUSCRIPT_DIR / 'images'
+SRC_DIR = PKG_DIR.parent if PKG_DIR.parent != PKG_NAME else PKG_NAME
+REPO_DIR = SRC_DIR.parent
+
+MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
+IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 
 HOME_DIR = Path.home().resolve().absolute()
 DATA_DIR_NAME = '.nlpia2-data'
@@ -85,3 +85,7 @@ REPO_DATA_DIR, DATA_DIR = DATA_DIR, HOME_DATA_DIR
 # DATA_FILENAMES = dict(
 #     DATA_DIR
 # )
+
+if __name__ == '__main__':
+    assert MANUSCRIPT_DIR.is_dir()
+    assert ADOC_DIR.is_dir()
