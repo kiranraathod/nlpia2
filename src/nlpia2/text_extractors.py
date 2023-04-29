@@ -86,7 +86,7 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_br
         return [[vars(expr) for expr in sect] for sect in sections] 
 
     print('WITHOUT_metadata')
-    return [[expr for expr in sect] for sect in sections]
+    return [[ex.source for ex in sect] for sect in sections]
 
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
@@ -345,7 +345,7 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
-    sections_lines = extract_code_lines(filepath=filepath, with_metadata=True)
+    sections_lines = extract_code_lines(filepath=filepath, with_metadata=False)
     if sections_lines:
         print('sections_lines[0]')
         print(sections_lines[0])
