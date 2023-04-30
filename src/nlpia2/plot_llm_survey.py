@@ -102,9 +102,14 @@ FOSS_ORG = {
     'Alpaca': ['https://github.com/tatsu-lab/stanford_alpaca/', 'Stanford'],
     'GPT-4': ['https://openai.com', 'OpenAI'],
     'PanGU-Σ': ['', ''],
+    'Megatron-LM': ['https://github.com/NVIDIA/Megatron-LM', 'NVIDIA', 'https://arxiv.org/pdf/2205.05198.pdf']
 }
 DF_FOSS_ORG = pd.DataFrame(FOSS_ORG).T
 DF_FOSS_ORG.columns = 'Source Organization'.split()
+
+new_models = [
+    {'Name': 'Megatron-LM', 'Release': datetime(2022, 5, 1), 'Size': 8_300_000_000},
+    ]
 
 
 def get_llm_sizes(readme='https://github.com/rucaibox/llmsurvey'):

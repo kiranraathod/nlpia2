@@ -41,15 +41,19 @@ CHAPTER OUTLINE
  * deploying our app as a streamlit app on Huggingface spaces
 ////
 
+If you scale up transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
+Researchers call these surprises "emergent properties." 
+And the most impressive of these surprises is that chatbots built using LLMs generate intelligent sounding text.
+If you've spent time using LLM chatbots such as ChatGPT, Bard, Bing Chat, Perplexity AI, you are probably excited to use them to help you get ahead.
+Finally a search engine and virtual assistant that actually gives direct, smart-sounding answers to your questions.
+Be careful.
+You may be surprised at how unintelligent these trillion-parameter language models really are.
 
 == Large Language Models (LLMs)
 
-If you scale up transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
-Researchers call these surprises "emergent properties." 
-And the most impressive of these surprises is the seeming intelligence of chatbots based on LLMs.
-It may appear to you that maybe true AI has finally arrived. 
-
 The largest of the LLMs have more than a trillion parameters.
+Models this large require expensive specialized hardware and many months of compute on high-performance computing (HPC) platforms.
+At the time of this writing, training a modest 100B parameter model on just the 3 TB of text in Common Crawl would cost at least $3 M.footnote:["Behind the Millions: Estimating the Scale of Large Language Models" by Dmytro Nikolaiev (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fbehind-the-millions-estimating-the-scale-of-large-language-models-97bd7287fb6b)] 
 Even the crudest model of the human brain would have to have more than 100 trillion parameters to account for all the connections between our neurons.
 Not only do LLMs have high capacity "brains" but they have binged on a mountain of text -- all the interesting text that NLP engineers can find on the Internet.
 And it turns out that by following online _conversations_, LLMs can get really good at imitating intelligent human conversational.

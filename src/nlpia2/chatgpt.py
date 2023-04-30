@@ -131,6 +131,8 @@ def message_from_response(response, model=DEFAULT_MODEL):
 def log_request_response(request, response, timestamp=None, model=DEFAULT_MODEL,
         path=CONVO_LOG_PATH):
     path = Path(path)
+    if not path.parent.is_dir():
+        path.parent.mkdir(exist_ok=True, parents=True)
     timestamp = timestamp or datetime.now().isoformat()
     with jsonlines.open(path, 'a') as fout:
         fout.write(dict(request=request, response=response, timestamp=timestamp))
