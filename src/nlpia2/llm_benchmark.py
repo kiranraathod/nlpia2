@@ -85,3 +85,21 @@ def baseline():
     return send_prompt(
         context_prompt="You are an honest virtual assistant (bot)",
         prompt=msg)
+
+
+perplexity_ai_examples = [
+    dict(
+        Q="Suzi has 5 wingeroos. Her girlfriend gives her fiv packets of wingeroos but then takes four back. There are three to a pack. How many wingeroos does she have after all this?",
+        A="I'm sorry, I couldn't find any relevant search results for the given question. However, based on the information provided, we can calculate the number of wingeroos Suzi has after the exchange. Suzi starts with 5 wingeroos. Her girlfriend gives her 5 packets of wingeroos, which would be a total of 15 wingeroos (assuming each packet has 3 wingeroos). However, her girlfriend takes 4 packets back, which would be a total of 12 wingeroos. Therefore, after the exchange, Suzi would have 5 + 12 = 17 wingeroos.",
+        note="from Wolfram Alpha",
+        correct="False",
+        accuracy=.5,
+    ),
+    dict(
+        Q="Suzi has 5 pickleballs. She buys 2 more packs of tennis balls. Each pack has 3 in it. How many balls does he have now?",
+        A="Suzi has 5 pickleballs and buys 2 packs of tennis balls, each containing 3 balls. Therefore, she has a total of: 5+2⋅3=11",
+        note="from Wolfram Alpha, should have asked clarifying questions",
+        correct="False",
+        accuracy=.95,
+    ),
+    ]

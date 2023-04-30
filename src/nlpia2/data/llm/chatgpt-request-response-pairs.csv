@@ -1335,3 +1335,8 @@ You are a virtual assistant.,"
  student: 37 
  teacher: Good work! 101, 102, 103? 
  student: 104",teacher: Excellent job! You're really good at this. Let's try something a little more challenging. What is the sum of 25 and 37?,2023-04-26T13:46:12.927513
+You are a virtual assistant.,Suzi has 5 pickleballs. She buys 2 more packs of tennis balls. Each pack has 3 in it. How many balls does he have now?,"Suzi has 5 pickleballs and she buys 2 packs of tennis balls, each containing 3 balls. So, she has 2 x 3 = 6 tennis balls.
+Therefore, Suzi has a total of 5 + 6 = 11 balls now.",2023-04-29T18:20:21.089948
+You are a virtual assistant.,Suzi has 5 wingeroos. Her girlfriend gives her fiv packets of wingeroos but then takes four back. There are three to a pack. How many wingeroos does she have after all this?,"Suzi initially had 5 wingeroos. Her girlfriend gave her 5 packets of wingeroos, which would be a total of 5 x 3 = 15 wingeroos.
+However, her girlfriend took back 4 packets, which would be a total of 4 x 3 = 12 wingeroos.
+Therefore, Suzi would be left with 15 - 12 = 3 wingeroos after all this.",2023-04-29T18:23:00.699067

@@ -110,7 +110,12 @@ def send_prompt(prompt,
         top_p=top_p, n=n,
         model=model, convo_log_path=convo_log_path, **kwargs)
     log_request_response(**reqresp)
-    return message_from_response(reqresp['response'])
+    reply = json.dumps(dict(
+        context_prompt=context_prompt,
+        message=message_from_response(reqresp['response']),
+        ), indent=4)
+    print(reply)
+    return reply
 
 
 def message_from_response(response, model=DEFAULT_MODEL):
@@ -154,17 +159,30 @@ def log_request_response(request, response, timestamp=None, model=DEFAULT_MODEL,
 
 def command_line(model=DEFAULT_MODEL):
     request_response_cache = []
+    context_prompt = input(f'{model} context prompt: ')
+    
     while True:
         prompt = input(f'{model} Prompt: ')
         if not prompt or prompt.lower().strip() in ('exit', 'quit'):
             break
-        logkwargs = request_response(prompt=prompt, model=model)
+        logkwargs = request_response(
+            context_prompt=context_prompt,
+            prompt=prompt,
+            model=model)
+        for msg_dict in logkwargs['request']['messages']:
+            if msg_dict['role'].lower().strip() == 'system':
+                print('system role message (context_prompt):')
+                print('    ' + msg_dict['content'])
+            if msg_dict['role'].lower().strip() == 'user':
+                print('user role message (prompt):')
+                print('    ' + msg_dict['content'])
         filepath = log_request_response(**logkwargs)
         bot_message = message_from_response(response=logkwargs['response'])
+        print('reply from chatbot:')
         print(bot_message)
         request_response_cache.append(logkwargs)
     print(json.dumps(request_response_cache, indent=4))
-    print(f'Requests & responses logged to: {filepath}:')
+    print(f'Requests & responses logged to: {filepath}')
         
 
 if __name__ == '__main__':
