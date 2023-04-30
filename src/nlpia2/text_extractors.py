@@ -11,8 +11,6 @@ from types import MappingProxyType
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
 from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR
 
-print("IMPORTING TEXT_EXTRACTORS")
-
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
 RE_MARKUP_LINE = r"^[\[][A-Za-z0-9,\ ]+[\]]"
@@ -71,32 +69,21 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     text = Path(filepath).open('rt').read()
-    print('len(text):')
-    print(len(text))
     sections = extract_expression_sections(text=text, section_break=section_break)
-    print('sections:')
-    print(sections)
     # assert len(sections) > 0
     if not isinstance(sections, list):
         sections = [sections]
 
     if with_metadata:
-        print('with_metadata')
-        print(len(sections))
         return [[vars(expr) for expr in sect] for sect in sections] 
-
-    print('WITHOUT_metadata')
     return [[ex.source for ex in sect] for sect in sections]
 
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
-    print('text:')
-    print(text)
     dtparser = DocTestParser()
     
     if not section_break:
-        print('NO SECT_BREAK')
         return [dtparser.get_examples(text)]
 
     text_sections = ['']
@@ -107,8 +94,6 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
             text_sections.append('')
         else:
             text_sections[-1] = text_sections[-1] + line + '\n'
-    print('text_sections:')
-    print(text_sections)
     return [dtparser.get_examples(text) for text in text_sections]
     
 
@@ -342,7 +327,9 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
 
 def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     filepath = Path(filepath)
-    destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
+    if not destfile:
+        destfile = filepath.parent.parent / 'py'
+        destfile.mkdir(exist_ok=True)
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
     sections_lines = extract_code_lines(filepath=filepath, with_metadata=False)
@@ -354,8 +341,13 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
         destfile = Path(destfile)
         if sections_lines:
             for i, lines in enumerate(sections_lines): 
-                sfx = f'.sect{i:02d}{destfile.suffix}'
-                with destfile.with_suffix(sfx).open('wt') as fout:
+                print('destfile lines')
+                print(lines)
+                sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
+                sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
+                print('sect_destfile')
+                print(sect_destfile)
+                with sect_destfile.open('wt') as fout:
                     fout.writelines('\n'.join(lines))
         
     return ''.join(lines)

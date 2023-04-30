@@ -11,19 +11,18 @@
 
 This chapter covers:
 
-* Using LLMs such as ChatGPT productively
-* Scaling up your NLP pipelines to compete with BigTech
+* Using conversational LLMs productively
+* Understanding how conversational LLMs work
+* Engineering prompts for conversational LLMs
 * Finding meaningful search results for your queries (semantic search)
-* Using semantic search to help you write more meaningful text 
-* Generating well-formed text with LLMs (generative models)
-* Understanding how conversational large language models work
-* Engineering prompts for conversational large language models
-* Augmenting your thinking with large language models
-* Building a knowledge graph from text
-* Grounding large language models with information retrieval
+* Speeding up your vector search to compete with BigTech
+* Generating plausible well-formed text with LLMs
+* Augmenting your creativity with large language models
 
 ////
-
+* Using semantic search to help you write more meaningful text 
+* Building a knowledge graph from text
+* Grounding large language models with information retrieval
 CHAPTER OUTLINE 
 == LLMs
  * introduction
@@ -34,13 +33,14 @@ CHAPTER OUTLINE
  * prompt engineering
  * safety
 == Vector/Neural Search
-// * returning to semantic search 
-// * ANNs 
+ * returning to semantic search 
+ * ANNs 
 == Making it real 
-// * Retrieval-Augmented Generation
-// * training a ExtractiveQA and a RAG pipeline in Haystack
-// * deploying our app as a streamlit app on Huggingface spaces
+ * Retrieval-Augmented Generation
+ * training a ExtractiveQA and a RAG pipeline in Haystack
+ * deploying our app as a streamlit app on Huggingface spaces
 ////
+
 
 == Large Language Models (LLMs)
 
@@ -64,18 +64,11 @@ And they can carry out complex instructions to compose essays or poems or even s
 That's the problem.
 LLMs aren't logical, reasonable, intelligent or even intentional.
 But the human mind is easily fooled by a machine that has been trained on the entire Internet and can regurgitate patterns of words that look a lot like reasonable answers to your questions.
- 
 
 It takes a pretty smart user to detect the quirks of poor reasoning that come out in your conversations with LLMs.
 Literally millions were enthralled in just two months.
 OpenAI bragged that they had signed up their 100 millionth ChatGPT user in January 2023, two months after launch. 
 
-As of this writing the flawsa few weeks as they rushed to sign up to play with the largest of these models.
-
-In the past, chatbots required significant development work to build in rules and logic
-
-Researchers aren't sur
-researchers unlocked something powerful and influential.
 Conversational LLMs appear to be intelligent!
 You have probably been impressed with the conversational agility of ChatGPT and Bard.
 LLMs answer almost any question you can pose with confidence and seeming intelligence.
@@ -84,7 +77,7 @@ Keep that in the back of your mind, look at the brief history and and explosive 
 
 [id=figure-llm-survey, reftext={chapter}.{counter:figure}]
 .Large Language Model sizes
-image::../images/ch10/llm_survey.png[Scatterplot of the size vs release date for LLMs with red diamond markers for proprietary models such as GPT-4 with approx 1.5 trillion parameters and blue circles for open source models such as BLOOM with almost 200 billion parameters, width=650, align="center", link="../images/ch10/llm_survey.png"]
+image::../images/ch10/llm_survey.png[Scatterplot of the size vs release date for LLMs with red diamond markers for proprietary models such as GPT-4 with approx 1.5 trillion parameters and blue circles for open source models such as BLOOM with almost 200 billion parameters, width=90%, align="center", link="../images/ch10/llm_survey.png"]
 
 To put these model sizes into perspective, a model with a trillion trainable parameters has less than 1% of the number of connections between neurons than an average human brain has. 
 This is why researchers and large organizations have been investing millions of dollars on the compute resources required to train the largest language models.

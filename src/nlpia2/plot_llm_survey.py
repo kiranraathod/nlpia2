@@ -1,4 +1,5 @@
 # import re
+from datetime import datetime
 from io import TextIOWrapper
 from pathlib import Path
 import sys
@@ -111,6 +112,8 @@ def get_llm_sizes(readme='https://github.com/rucaibox/llmsurvey'):
     df = pd.read_html(readme, match='Release Time',
         parse_dates=True)[0].dropna()
     df.columns = 'Open,Name,Release,Size,Reference'.split(',')
+    df = df.sort_values('Release')
+
     links = pd.read_html(readme, match='Release Time',
         extract_links='body')[0].dropna()
     links = links['Link']['Link'].values
@@ -128,12 +131,12 @@ def get_llm_sizes(readme='https://github.com/rucaibox/llmsurvey'):
 
 
 def plot_llm_sizes(df='https://github.com/rucaibox/llmsurvey',
-        x='Release', y='Size', symbol='Openness', size=16,
+        x='Release', y='Size', symbol='Openness', size=12,
         template="seaborn",
         text='index',
         dest='llm_sizes_scatter.html', display=True, 
         font_size=18,
-        width=1400, height=1000, log_x=False, log_y=True,
+        width=2000, height=500, log_x=False, log_y=True,
         **kwargs):
     """ Scatterplot of LLM size vs release date """
     if isinstance(df, (str, Path, TextIOWrapper)):
@@ -158,8 +161,11 @@ def plot_llm_sizes(df='https://github.com/rucaibox/llmsurvey',
             **kwargs)
         fig.update_layout( 
             font_family="Gravitas One,Arial Bold,Open Sans,Arial",
-            font_size=font_size)
-        fig.update_traces(textposition='top center')
+            font_size=font_size,
+            legend=dict(title=None,
+                yanchor="top", y=0.98,
+                xanchor="left", x=0.02))
+        fig.update_traces(textposition='middle center')
         # scatter = go.Scatter(x=x, y=y, line=None, fill=color)
         plot_html(fig, show_link=False, validate=True, output_type='file', 
             filename=dest,
@@ -195,20 +201,23 @@ if __name__ == '__main__':
     if sys.argv[1:]:
         dest = ' '.join(sys.argv[1:])
         df = get_llm_sizes()
-        df.sort_values(['Release', 'Size'], inplace=True)
+        df = df.sort_values(['Release', 'Size'])
         df = df.drop_duplicates(['Release', 'Size'], keep='last')
-        # df = df.drop(axis=1, index=[
-        #     'mT5', 'Vicuna', 'ERNIE 3.0 Titan', 'WebGPT', 'BLOOMZ', 'LaMDA', 
-        #     'Cohere', 'Jurassic-1']).copy()
-        df = df.drop(axis=1, index=[
-            'mT5', 'ERNIE 3.0 Titan', 'WebGPT', 'BLOOMZ', 'LaMDA', 
-            'Cohere', 'CodeGeeX', 'Jurassic-1']).copy()
-        # df.index = df.index.str.replace('Jurassic-1', 'Jurassic')
-        # df['Name'] = df['Name'].replace({'Jurassic-1': 'Jurassic'})
-        fig = plot_llm_sizes(df, opacity=.4,
+        df = df.sort_values(['Release'])
+        IGNORE_NAMES = ['mT5', 'ERNIE 3.0 Titan', 'WebGPT', 'BLOOMZ', 'LaMDA', 
+            'Cohere', 'CodeGeeX', 'CodeGenX', 'Jurassic-1', 'Koala']
+        for name in IGNORE_NAMES:
+            if name in df.index:
+                df = df.drop(axis=1, index=name)
+        df['Release'] = df['Release'].str.split('/')
+        df['Release'] = df['Release'].apply(lambda x: datetime(int(x[0]), int(x[1]), 1))
+        df.sort_values('Release')
+        df = df.sort_values('Release')
+        # df.index = df['Name'].replace({'OPT': 'OPT  .', 'BLOOM': '.  BLOOM'})
+        fig = plot_llm_sizes(df, opacity=.2,
             x='Release', y='Size', color='Openness', symbol='Openness',
             dest=dest, display=True,
-            width=1200, height=900, log_x=False, log_y=True)
+            width=1400, height=700, log_x=False, log_y=True)
 
 """
 df.columns

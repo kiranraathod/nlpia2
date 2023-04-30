@@ -139,7 +139,7 @@ def offline_plotly_scatter3d(df, x=0, y=1, z=-1):
         data.append(trace)
 
     layout = dict(
-        width=800,
+        width=1200,
         height=550,
         autosize=False,
         title='Iris dataset',
