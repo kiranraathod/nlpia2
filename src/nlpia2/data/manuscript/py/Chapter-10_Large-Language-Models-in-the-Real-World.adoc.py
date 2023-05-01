@@ -32,7 +32,9 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 import numpy as np 
 SEED = 42
-DEVICE = torch.device('cuda'*torch.cuda.is_available() or 'cpu')
+DEVICE = torch.device('cpu')
+if torch.cuda.is_available():
+    DEVICE = torch.cuda.device(0)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 torch.cuda.manual_seed_all(SEED) # <1>

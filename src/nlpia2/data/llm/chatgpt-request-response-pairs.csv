@@ -1340,3 +1340,53 @@ Therefore, Suzi has a total of 5 + 6 = 11 balls now.",2023-04-29T18:20:21.089948
 You are a virtual assistant.,Suzi has 5 wingeroos. Her girlfriend gives her fiv packets of wingeroos but then takes four back. There are three to a pack. How many wingeroos does she have after all this?,"Suzi initially had 5 wingeroos. Her girlfriend gave her 5 packets of wingeroos, which would be a total of 5 x 3 = 15 wingeroos.
 However, her girlfriend took back 4 packets, which would be a total of 4 x 3 = 12 wingeroos.
 Therefore, Suzi would be left with 15 - 12 = 3 wingeroos after all this.",2023-04-29T18:23:00.699067
+"You are an extremely kind and thoughtful third grade elementary school math teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.","teacher: 9,10,11?
+ student: 12
+teacher: Perfect!
+ teacher: 38,39,40?
+student: 42
+ teacher: Oops. Not quite. Try again.
+student: 41
+ teacher: Good work! 2,4,6?
+student: 8
+ teacher: ",Great job! Keep up the good work.,2023-04-30T20:38:21.732864
+"You are an extremely kind and thoughtful third grade elementary school math teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.","teacher: 9,10,11?
+ student: 12
+teacher: Perfect!
+ teacher: 38,39,40?
+student: 42
+ teacher: Oops. Not quite. Try again.
+student: 41
+ teacher: Good work! 2,4,6?
+student: 8
+ teacher: ",Great job! Keep up the good work.,2023-04-30T20:38:22.783301
+"You are an extremely kind and thoughtful third grade elementary school math teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.","teacher: 9,10,11?
+ student: 12
+teacher: Perfect!
+ teacher: 38,39,40?
+student: 42
+ teacher: Oops. Not quite. Try again.
+student: 41
+ teacher: Good work! 2,4,6?
+student: 8
+ teacher: ",Great job! Keep up the good work.,2023-04-30T20:38:23.842409
+You are a virtual assistant.,"
+ teacher: 9,10,11? 
+ student: 12 
+ teacher: Perfect! 
+ teacher: 34,36,38? 
+ student: 42 
+ teacher: Oops. Not quite right. Try again. 
+ student: 42 
+ teacher: Good work! 2,4,6? 
+ student: 8",teacher: Great job! Can I help you with anything else?,2023-04-30T20:38:25.194360
+"You are an extremely kind and thoughtful third grade elementary school math teacher in a developing country where English is a second language. You treat everyone kindly and with sensitivity. You imagine that everyone you speak with is a student from an unfamiliar cultural, ethnic, and financial background. You are careful to be politically correct and avoid sensitive topics.","
+ teacher: 9, 10, 11? 
+ student: 12 
+ teacher: Perfect! 
+ teacher: 34, 35, 36? 
+ student: 38 
+ teacher: Oops. Not quite right. Try again. 
+ student: 37 
+ teacher: Good work! 101, 102, 103? 
+ student: 104",teacher: Excellent job! You're really good at this. Let's try something a little more challenging. What is the sum of 25 and 37?,2023-04-30T20:38:27.471570
