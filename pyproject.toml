@@ -68,15 +68,7 @@ cnn = "nlpia2.ch07.cnn:main"
 adoc_extract = "nlpia2.text_extractors:main"
 
 [tool.poetry.dependencies]
-# sentence-transformers-2.2.2 installs: 
-#      MarkupSafe-2.1.2 certifi-2022.12.7 charset-normalizer-3.1.0 click-8.1.3
-#      cmake-3.26.0 filelock-3.10.2 huggingface-hub-0.13.3 idna-3.4 jinja2-3.1.2
-#      joblib-1.2.0 lit-16.0.0 mpmath-1.3.0 networkx-3.0 nltk-3.8.1 numpy-1.24.2
-#      nvidia-* packaging-23.0 pillow-9.4.0 pyyaml-6.0 
-#      regex-2023.3.22 requests-2.28.2 scikit-learn-1.2.2 scipy-1.10.1 
-#      sentencepiece-0.1.97 sympy-1.11.1 threadpoolctl-3.1.0 tokenizers-0.13.2
-#      torch-2.0.0 torchvision-0.15.1 tqdm-4.65.0 transformers-4.27.2 triton-2.0.0 typing-extensions-4.5.0
-#      urllib3-1.26.15
+
 babel = "^2.11.0"
 beautifulsoup4 = "^4.11"
 bleach = "^5.0"
@@ -84,7 +76,7 @@ bidict = "^0.22"
 boto3 = "^1.26"
 botocore = "^1.29"
 configargparse = "^1.5"
-cython = "^0.29"
+cython = "==0.29.34"
 dataframe-image = "^0.1"
 Django = "^4.1"
 edit-distance = "^1"
@@ -96,18 +88,18 @@ h5py = "^3.7.0"
 html5lib = "^1.1"
 html2text = "^2020.1.16"
 jupyter-console = ">=6.4.4"
-lxml = "^4.9.1"
+lxml = "==4.9.2"
 m2r = "^0.3"  # [required by Sphinx & m2r](https://github.com/CrossNox/m2r2/issues/40)
 # mastodonplus_py = "*"  # broken pypi package `Mastodonplus.py`
 # mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
-matplotlib = "*"
+matplotlib = "==3.7.1"
 matplotlib-inline = "*"
 meilisearch = "*"
 mistune = "*"
-nessvec = "*"
+nessvec = "==0.0.12"
 # nessvec = {git = "https://gitlab.com/tangibleai/nessvec", rev = "main"}
 nltk = "*"
-pandas = "*"
+pandas = "==2.0.1"
 parsimonious = "*"
 pillow = "^9.3"
 pronouncing = "^0.2"
@@ -120,13 +112,24 @@ python-dotenv = "^0.21"
 python-slugify = "^7.0.0"
 rapidfuzz = ">=2.13.2"
 recommonmark = "^0.7"
-scipy = ">=1.9.3"
+# scipy = "==1.10.1"
+# scikit-learn = "==1.2.2"
 seaborn = "^0.12"
-sentence_transformers = "^2.2"
-spacy = "*"
+sentence_transformers = "==2.2.2"
+# sentence-transformers-2.2.2 installs: 
+#      MarkupSafe-2.1.2 certifi-2022.12.7 charset-normalizer-3.1.0 click-8.1.3
+#      cmake-3.26.0 filelock-3.10.2 huggingface-hub-0.13.3 idna-3.4 jinja2-3.1.2
+#      joblib-1.2.0 lit-16.0.0 mpmath-1.3.0 networkx-3.0 nltk-3.8.1 numpy-1.24.2
+#      nvidia-* packaging-23.0 pillow-9.4.0 pyyaml-6.0 
+#      regex-2023.3.22 requests-2.28.2 scikit-learn-1.2.2 scipy-1.10.1 
+#      sentencepiece-0.1.97 sympy-1.11.1 threadpoolctl-3.1.0 tokenizers-0.13.2
+#      torch-2.0.0 torchvision-0.15.1 tqdm-4.65.0 transformers-4.27.2 triton-2.0.0 typing-extensions-4.5.0
+#      urllib3-1.26.15
+spacy = "==3.5.2"
 sphinx = "*"
 toml = "*"
-# torchtext = "*"
+# torch = "==2.0.0"
+# torchtext = "==0.15.1"
 tox = "^3.25.0"
 # transformers = "*"
 evaluate = "*"
