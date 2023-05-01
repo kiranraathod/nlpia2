@@ -96,6 +96,7 @@ h5py = "^3.7.0"
 html5lib = "^1.1"
 html2text = "^2020.1.16"
 jupyter-console = ">=6.4.4"
+jsonlines = "^3.1"
 lxml = "^4.9.1"
 m2r = "^0.3"  # [required by Sphinx & m2r](https://github.com/CrossNox/m2r2/issues/40)
 # mastodonplus_py = "*"  # broken pypi package `Mastodonplus.py`
@@ -107,6 +108,7 @@ mistune = "*"
 nessvec = "*"
 # nessvec = {git = "https://gitlab.com/tangibleai/nessvec", rev = "main"}
 nltk = "*"
+openai = "0.27.5"
 pandas = "*"
 parsimonious = "*"
 pillow = "^9.3"
