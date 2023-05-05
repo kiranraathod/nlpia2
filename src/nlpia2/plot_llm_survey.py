@@ -2,6 +2,7 @@
 from datetime import datetime
 from io import TextIOWrapper
 from pathlib import Path
+import re
 import sys
 
 import pandas as pd
@@ -43,76 +44,106 @@ def extract_text(pdf_path=LLM_PDF, write_file=True, page_sep=FORMFEED, header=''
 
 
 FOSS_ORG = {
-    'T5': ['https://huggingface.co/t5-large', 'Google'],
-    'mT5': ['https://https://huggingface.co/google/mt5-large', 'Google'],
-    'PanGu-α': ['https://huggingface.co/sunzeyeah/pangu-13B', 'PCNL'],
-    'CPM-2': ['https://huggingface.co/mymusise/CPM-GPT2', 'Tsinghua University'],
-    'T0': ['https://huggingface.co/bigscience/T0', 'Hugging Face'],
-    'GPT-NeoX-20B': ['https://huggingface.co/EleutherAI/gpt-neox-20b', 'EleutherAI'],
-    'CodeGen': ['https://huggingface.co/Salesforce/codegen-16B-multi', 'Salesforce'],
-    'Tk-Instruct': ['https://huggingface.co/allenai/tk-instruct-11b-def', 'AllenAI'],
-    'UL2': ['https://huggingface.co/google/flan-ul2', 'Google'],
-    'OPT': ['https://huggingface.co/facebook/opt-66b', 'Facebook'],
-    'NLLB': ['https://huggingface.co/facebook/nllb-200-3.3B', 'Meta'],
-    'BLOOM': ['https://huggingface.co/bigscience/bloom', 'Hugging Face'],
-    'GLM-10b': ['https://huggingface.co/THUDM/glm-10b', 'Tsinghua University'],
-    'GLM': ['https://huggingface.co/THUDM/glm-large-chinese', 'Tsinghua University'],
-    'Flan-T5': ['https://huggingface.co/google/flan-t5-xxl', 'Google'],
-    'mT0': ['https://huggingface.co/bigscience/bloomz', 'Hugging Face'],
-    # 'Galactica-mini': ['https://huggingface.co/facebook/galactica-125m', 'Meta'],
-    # 'Galactica-base': ['https://huggingface.co/facebook/galactica-1.3b', 'Meta'],
-    # 'Galactica-standard': ['https://huggingface.co/facebook/galactica-6.7b', 'Meta'],
-    # 'Galactica-large': ['https://huggingface.co/facebook/galactica-30b', 'Meta'],
-    # 'Galactica-huge': ['https://huggingface.co/facebook/galactica-120b', 'Meta'],
-    'Galactica': ['https://huggingface.co/facebook/galactica-120b', 'Meta'],
-    'BLOOMZ': ['https://huggingface.co/bigscience/bloomz', 'Hugging Face'],
-    'OPT-IML': ['https://huggingface.co/HuggingFaceH4/opt-iml-max-30b', 'Hugging Face'],
-    'Pythia': ['https://github.com/EleutherAI/pythia', 'EleutherAI'],
-    'LLaMA': ['https://github.com/juncongmoo/pyllama', 'Google'],
-    'Vicuna': ['https://vicuna.lmsys.org/', 'Berkeley+CMU+Stanford+UCSD'],
-    'Koala': ['https://vicuna.lmsys.org/', 'Berkeley'],
-    'GShard': ['', ''],
-    'GPT-3': ['https://openai.com', 'OpenAI'],
-    'LaMDA': ['', ''],
-    'HyperCLOVA': ['', ''],
-    'Codex': ['', ''],
-    'ERNIE 3.0': ['', ''],
-    'Jurassic-1': ['', ''],
-    'FLAN': ['', ''],
-    'MT-NLG': ['', ''],
-    'Yuan 1.0': ['', ''],
-    'Anthropic': ['', ''],
-    'WebGPT': ['', ''],
-    'Gopher': ['', ''],
-    'ERNIE 3.0 Titan': ['', ''],
-    'GLaM': ['', ''],
-    'InstructGPT': ['', 'OpenAI'],
-    'AlphaCode': ['', ''],
-    'Chinchilla': ['', ''],
-    'PaLM': ['', 'Google'],
-    'Cohere': ['', ''],
-    'YaLM': ['', ''],
-    'AlexaTM': ['', ''],
-    'Luminous': ['', ''],
-    'Sparrow': ['', ''],
-    'WeLM': ['', ''],
-    'U-PaLM': ['', 'Google'],
-    'Flan-PaLM': ['https://huggingface.co/google/flan-t5-xxl', 'Google'],
-    'Flan-U-PaLM': ['', 'Google'],
-    'Alpaca': ['https://github.com/tatsu-lab/stanford_alpaca/', 'Stanford'],
-    'GPT-4': ['https://openai.com', 'OpenAI'],
-    'PanGU-Σ': ['', ''],
-    'Megatron-LM': ['https://github.com/NVIDIA/Megatron-LM', 'NVIDIA', 'https://arxiv.org/pdf/2205.05198.pdf']
+    'T5': ['https://huggingface.co/t5-large', 'Google', ''],
+    'mT5': ['https://https://huggingface.co/google/mt5-large', 'Google', ''],
+    'PanGu-α': ['https://huggingface.co/sunzeyeah/pangu-13B', 'PCNL', ''],
+    'CPM-2': ['https://huggingface.co/mymusise/CPM-GPT2', 'Tsinghua University', ''],
+    'T0': ['https://huggingface.co/bigscience/T0', 'Hugging Face', ''],
+    'GPT-NeoX-20B': ['https://huggingface.co/EleutherAI/gpt-neox-20b', 'EleutherAI', ''],
+    'CodeGen': ['https://huggingface.co/Salesforce/codegen-16B-multi', 'Salesforce', ''],
+    'Tk-Instruct': ['https://huggingface.co/allenai/tk-instruct-11b-def', 'AllenAI', ''],
+    'UL2': ['https://huggingface.co/google/flan-ul2', 'Google', ''],
+    'OPT': ['https://huggingface.co/facebook/opt-66b', 'Facebook', ''],
+    'NLLB': ['https://huggingface.co/facebook/nllb-200-3.3B', 'Meta', ''],
+    'BLOOM': ['https://huggingface.co/bigscience/bloom', 'Hugging Face', ''],
+    'GLM-10b': ['https://huggingface.co/THUDM/glm-10b', 'Tsinghua University', ''],
+    'GLM': ['https://huggingface.co/THUDM/glm-large-chinese', 'Tsinghua University', ''],
+    'Flan-T5': ['https://huggingface.co/google/flan-t5-xxl', 'Google', ''],
+    'mT0': ['https://huggingface.co/bigscience/bloomz', 'Hugging Face', ''],
+    # 'Galactica-mini': ['https://huggingface.co/facebook/galactica-125m', 'Meta', ''],
+    # 'Galactica-base': ['https://huggingface.co/facebook/galactica-1.3b', 'Meta', ''],
+    # 'Galactica-standard': ['https://huggingface.co/facebook/galactica-6.7b', 'Meta', ''],
+    # 'Galactica-large': ['https://huggingface.co/facebook/galactica-30b', 'Meta', ''],
+    # 'Galactica-huge': ['https://huggingface.co/facebook/galactica-120b', 'Meta', ''],
+    'Galactica': ['https://huggingface.co/facebook/galactica-120b', 'Meta', ''],
+    'BLOOMZ': ['https://huggingface.co/bigscience/bloomz', 'Hugging Face', ''],
+    'OPT-IML': ['https://huggingface.co/HuggingFaceH4/opt-iml-max-30b', 'Hugging Face', ''],
+    'Pythia': ['https://github.com/EleutherAI/pythia', 'EleutherAI', ''],
+    'LLaMA': ['https://github.com/juncongmoo/pyllama', 'Google', ''],
+    'Vicuna': ['https://vicuna.lmsys.org/', 'Berkeley+CMU+Stanford+UCSD', ''],
+    'Koala': ['https://vicuna.lmsys.org/', 'Berkeley', ''],
+    'GShard': ['', '', ''],
+    'GPT-3': ['https://openai.com', 'OpenAI', ''],
+    'LaMDA': ['', '', ''],
+    'HyperCLOVA': ['', '', ''],
+    'Codex': ['', '', ''],
+    'ERNIE 3.0': ['', '', ''],
+    'Jurassic-1': ['', '', ''],
+    'FLAN': ['', '', ''],
+    'MT-NLG': ['', '', ''],
+    'Yuan 1.0': ['', '', ''],
+    'Anthropic': ['', '', ''],
+    'WebGPT': ['', '', ''],
+    'Gopher': ['', '', ''],
+    'ERNIE 3.0 Titan': ['', '', ''],
+    'GLaM': ['', '', ''],
+    'InstructGPT': ['', 'OpenAI', ''],
+    'AlphaCode': ['', '', ''],
+    'Chinchilla': ['', '', ''],
+    'PaLM': ['', 'Google', ''],
+    'Cohere': ['', '', ''],
+    'YaLM': ['', '', ''],
+    'AlexaTM': ['', '', ''],
+    'Luminous': ['', '', ''],
+    'Sparrow': ['', '', ''],
+    'WeLM': ['', '', ''],
+    'U-PaLM': ['', 'Google', ''],
+    'Flan-PaLM': ['https://huggingface.co/google/flan-t5-xxl', 'Google', ''],
+    'Flan-U-PaLM': ['', 'Google', ''],
+    'Alpaca': ['https://github.com/tatsu-lab/stanford_alpaca/', 'Stanford', ''],
+    'GPT-4': ['https://openai.com', 'OpenAI', ''],
+    'PanGU-Σ': ['', '', ''],
+## Added by HL:
 }
 DF_FOSS_ORG = pd.DataFrame(FOSS_ORG).T
-DF_FOSS_ORG.columns = 'Source Organization'.split()
+DF_FOSS_ORG.columns = 'Source Organization Paper'.split()
 
-new_models = [
-    {'Name': 'Megatron-LM', 'Release': datetime(2022, 5, 1), 'Size': 8_300_000_000},
+ADD_LLMS = [
+    {
+        'Name': 'Claude',
+        'Source': 'https://anthropic.org',
+        'Organization': 'Anthropic',
+        'Open': False,
+        'Description': 'Claims to use "Constitutional AI" and "harmless training" to respond appropriately to malicious or toxic conversation partners',
+    },
+    {
+        'Source': 'https://github.com/NVIDIA/Megatron-LM',
+        'Organization': 'NVIDIA',
+        'Paper': 'https://arxiv.org/pdf/2205.05198.pdf',
+        'Name': 'Megatron-LM',
+        'Release': datetime(2022, 5, 1),
+        'Size': 8_300_000_000,
+        'Open': True
+    },
     ]
 
 
-def get_llm_sizes(readme='https://github.com/rucaibox/llmsurvey'):
+def normalize_name(name):
+    return re.sub(r'\W+', '', name.lower().strip())
+
+
+def scrape_wikipedia(
+        url='https://en.wikipedia.org/wiki/Large_language_model',
+        match='large language models',
+        columns='Name Release Organization Size Tokens Openness Description'):
+    df = pd.read_html(url, match=match)[0]
+    df.columns = columns + list(df.columns)[len(columns):]
+    df.index = list(map(normalize_name, df.index.values))
+    df = df.sort_values(['Release', 'Size'])
+    return df
+
+
+def scrape_llm_survey(readme='https://github.com/rucaibox/llmsurvey'):
     """ Scatterplot of LLM size vs release date """
     df = pd.read_html(readme, match='Release Time',
         parse_dates=True)[0].dropna()
@@ -135,6 +166,18 @@ def get_llm_sizes(readme='https://github.com/rucaibox/llmsurvey'):
     return df
 
 
+def merge_llm_dfs(dfs=None):
+    """ Combine open source model information with closed source info from LLM Survey paper """
+    if dfs is None:
+        dfs = [scrape_llm_survey(), DF_FOSS_ORG.copy(), scrape_wikipedia()]
+    for i, df in enumerate(dfs):
+        dfs[i].index = list(map(normalize_name, df.index.values))    
+    df = pd.concat(dfs, axis=1)
+    df.loc['Claude']['Open'] = True
+    return df
+
+
+
 def plot_llm_sizes(df='https://github.com/rucaibox/llmsurvey',
         x='Release', y='Size', symbol='Openness', size=12,
         template="seaborn",
@@ -145,7 +188,7 @@ def plot_llm_sizes(df='https://github.com/rucaibox/llmsurvey',
         **kwargs):
     """ Scatterplot of LLM size vs release date """
     if isinstance(df, (str, Path, TextIOWrapper)):
-        df = get_llm_sizes(readme=df)
+        df = scrape_llm_survey(readme=df)
     df = df.drop_duplicates(subset=['Release', 'Size'], keep='last')
     if 'Openness' not in df.columns:
         df['Openness'] = [
@@ -205,7 +248,7 @@ def plot_llm_sizes(df='https://github.com/rucaibox/llmsurvey',
 if __name__ == '__main__':
     if sys.argv[1:]:
         dest = ' '.join(sys.argv[1:])
-        df = get_llm_sizes()
+        df = scrape_llm_survey()
         df = df.sort_values(['Release', 'Size'])
         df = df.drop_duplicates(['Release', 'Size'], keep='last')
         df = df.sort_values(['Release'])
