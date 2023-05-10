@@ -36,11 +36,7 @@ documentation = "https://gitlab.com/tangibleai/nlpia2"
 #     ]
 src_paths = ["src", "tests"]
 packages = [
-<<<<<<< HEAD
-    { include = "nlpia2", from = "src" } 
-=======
     { include = "nlpia2", from = "src" },
->>>>>>> 745822a360a0bd6d7a4e8ffd3be5bf3c99354a2e
     ]
 
 # https://python-poetry.org/docs/pyproject/#keywords

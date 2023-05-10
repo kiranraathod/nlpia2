@@ -17,6 +17,8 @@ db.sqlite3
 *.pkl
 *.npy
 *.pkl
+*.db
+*.faiss
 **/simple-transformers
 **/albert-large-*
 /char_rnn_from_scratch_refactored.meta.json
