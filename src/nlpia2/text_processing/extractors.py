@@ -8,6 +8,7 @@ import re
 import tempfile
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
+from nlpia2.constants import SRC_DATA_DIR
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
@@ -23,18 +24,13 @@ RE_COMMENT=r"^(\\\\|\/\/).*"
 from nlpia2 import MANUSCRIPT_DIR
 
 MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-try:
-    DATA_DIR = Path(__file__).resolve().absolute().parent.parent / 'data'
-except NameError:
-    DATA_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data'
-    print(f'USING CWD AS DATA_DIR: {DATA_DIR}')
+DATA_DIR = SRC_DATA_DIR
 
 assert DATA_DIR.is_dir()
 
-try:
-    MANUSCRIPT_DIR = Path(__file__).resolve().absolute().parent.parent / 'data' / 'book_adoc'
-except NameError:
-    MANUSCRIPT_DIR = Path.cwd() / 'src' / 'nlpia2' / 'data' /'book_adoc'
+MANUSCRIPT_DIR = SRC_DATA_DIR / 'book_adoc'
+
+assert MANUSCRIPT_DIR.is_dir()
 
 DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
 DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
