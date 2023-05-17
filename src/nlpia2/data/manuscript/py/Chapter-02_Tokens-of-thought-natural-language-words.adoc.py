@@ -33,7 +33,7 @@ displacy.serve(sentence, style="dep")
 !firefox 127.0.0.1:5000
 import requests
 text = requests.get('https://proai.org/nlpia2-ch2.adoc').text
-f'{round(len(text) / 10_000)}0k'  <1>
+f'{round(len(text) / 10_000)}0k'  # <1>
 import spacy
 nlp = spacy.load('en_core_web_sm')
 %timeit nlp(text)  # <1>
@@ -58,16 +58,20 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer = CountVectorizer(ngram_range=(1, 2), analyzer='char')
 vectorizer.fit(texts)
-bpevocab = vectorizer.get_feature_names()
-bpevocab[:7]
+bpevocab_list = [
+   sorted((i, s) for s, i in vectorizer.vocabulary_.items())]
+bpevocab_dict = dict(bpevocab_list[0])
+list(bpevocab_dict.values())[:7]
 vectors = vectorizer.transform(texts)
-df = pd.DataFrame(vectors.todense(), columns=bpevocab)
+df = pd.DataFrame(
+    vectors.todense(), 
+    columns=vectorizer.vocabulary_)
 df.index = [t[:8] + '...' for t in texts]
 df = df.T
 df['total'] = df.T.sum()
 df
 df.sort_values('total').tail()
-df['n'] = [len(tok) for tok in bpevocab]
+df['n'] = [len(tok) for tok in vectorizer.vocabulary_]
 df[df['n'] > 1].sort_values('total').tail()
 hi_text = 'Hiking home now'
 hi_text.startswith('Hi')
@@ -107,12 +111,12 @@ text = "Nice guys finish first."  # <1>
 doc = nlp(text)
 for token in doc:
     print(f"{token.text:<11}{token.pos_:<10}{token.dep:<10}")
-seg_list = jieba.cut("西安是一座举世闻名的文化古城") # <1>
+seg_list = jieba.cut("西安是一座举世闻名的文化古城")  # <1>
 list(seg_list)
 import jieba
 seg_list = jieba.cut("西安是一座举世闻名的文化古城", cut_all=True)  # <1>
 list(seg_list)
-seg_list = jieba.cut_for_search("西安是一座举世闻名的文化古城")  <1>
+seg_list = jieba.cut_for_search("西安是一座举世闻名的文化古城")  # <1>
 list(seg_list)
 import jieba
 from jieba import posseg
@@ -180,7 +184,7 @@ import spacy
 nlp = spacy.load("en_core_web_sm")
 doc = nlp("better good goods goodness best")
 for token in doc:
-print(token.text, token.lemma_)
+    print(token.text, token.lemma_)
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 sa = SentimentIntensityAnalyzer()
 sa.lexicon  # <1>

@@ -280,7 +280,7 @@ So really what your neuron is doing here is equivalent to a logistic regression 
 
 This is the formula for a logistic function implemented in python.
 
-[source, ipython3]
+[source,python]
 ----
 >>> def logistic(x, w=1., phase=0, gain=1):
 ...    return gain / (1. + np.exp(-w * (x - phase)))
@@ -289,7 +289,7 @@ This is the formula for a logistic function implemented in python.
 And here is what a logistic function looks like, and how the coefficient (weight) and phase (intercept) affect its shape.
 
 
-[source, ipython3]
+[source,python]
 ----
 >>> import pandas as pd
 >>> import numpy as np
@@ -735,7 +735,7 @@ Now download the raw data from the `nlpia2` repository and sample only 10,000 ro
 
 The data spans more than 100 years of US birth certificates, but only includes the baby's first name:
 
-[source, python]
+[source,python]
 ----
 [cols=",,,,,,",options="header",]
 |===
@@ -847,7 +847,7 @@ You can deduplicate the names before calculating TF-IDF document frequencies and
 You've aggregated 10,000 name-sex pairs into only 4238 unique name-sex pairings.
 Now you are ready to split the data into training and test sets.
 
-[source, python]
+[source,python]
 ----
 >>> df['istrain'] = np.random.rand(len(df)) < .9
 >>> df
@@ -863,7 +863,7 @@ Now you are ready to split the data into training and test sets.
 
 To ensure you don't accidentally swap the sexes for any of the names, recreate the `name, sex` multiindex:
 
-[source, python]
+[source,python]
 ----
 >>> df.index = pd.MultiIndex.from_tuples(
 ...     zip(df['name'], df['sex']), names=['name_', 'sex_'])
@@ -901,7 +901,7 @@ Machines don't think of words and concepts as hard categories, so neither should
 
 Because of the duplicates the test set flag can be created from the `not` of the `istrain`.
 
-[source, python]
+[source,python]
 ----
 >>> df_most_common['istest'] = ~df_most_common['istrain'].astype(bool)
 >>> df_most_common
@@ -919,7 +919,7 @@ Zylah  F   Zylah   F     5    True   False
 
 Now you can transfer the `istest` and `istrain` flags over to the original dataframe, being careful to fill `NaNs` with False for both the training set and the test set.
 
-[source, ipython3]
+[source,python]
 ----
 >>> df['istest'] = df_most_common['istest']
 >>> df['istest'] = df['istest'].fillna(False)
@@ -1022,7 +1022,7 @@ What's so great about PyTorch?
 Wikipedia has an unbiased and detailed comparison of all DeepLearning frameworks.
 And Pandas let's you load it directly from the web into a `DataFrame`:
 
-[source, ipython3]
+[source,python]
 ----
 >>> import pandas as pd
 >>> import re
@@ -1122,7 +1122,7 @@ Let's put all this into practice by predicting the sex of the names you cleaned 
 
 You can start by using PyTorch to implement a single neuron with logistic activation function - just like the one you used to learn the toy example at the beginning of the chapter.
 
-[source, python]
+[source,python]
 ----
 >>> import torch
 >>> class LogisticRegressionNN(torch.nn.Module):
@@ -1174,7 +1174,7 @@ Here's what Binary Cross Entropy looks like for a single classification probabil
 The logarithmic nature of the function allows it to penalize a "confidently wrong" example, when your model predicts with high probability the sex of a particular name is male, when it is actually more commonly labeled as female.
 We can help it to make the penalties even more related to reality by using another piece of information available to us - the frequency of the name for a particular sex in our dataset.
 
-[source, python]
+[source,python]
 ----
 >>> loss_func_train = torch.nn.BCELoss(
 ...     weight=torch.Tensor(df[['count']][istrain].values))
@@ -1200,7 +1200,7 @@ How do we decide which values to give these two attributes?
 As with other hyperparameters you see in this book, you'll need to optimize your them to see what's the most effective one for your problem.
 For now, you can chose some arbitrary values for the hyperparameters `momentum` and `lr` (learning rate).
 
-[source, python]
+[source,python]
 ----
 >>> from torch.optim import SGD
 >>> hyperparams = {'momentum': 0.001, 'lr': 0.02}    <1>
@@ -1224,7 +1224,7 @@ Parameter Group 0
 
 The last step before running our model training is to get the testing and training datasets into a format that PyTorch models can digest.
 
-[source, python]
+[source,python]
 ----
 >>> X = vecs.values
 >>> y = (df[['sex']] == 'F').values
@@ -1268,7 +1268,7 @@ We can of course look at the loss, but it's also good to gage how our model is d
 
 First, you'll need a function to convert the PyTorch tensors we get from the module back into `numpy` arrays:
 
-[source, python]
+[source,python]
 ----
 >>> def make_array(x):
 ...     if hasattr(x, 'detach'):
@@ -1278,7 +1278,7 @@ First, you'll need a function to convert the PyTorch tensors we get from the mod
 
 Now you use this utility function to measure the accuracy of each iteration on the tensors for your outputs (predictions):
 
-[source, python]
+[source,python]
 ----
 >>> def measure_binary_accuracy(y_pred, y):
 ...     y_pred = make_array(y_pred).round()
@@ -1289,7 +1289,7 @@ Now you use this utility function to measure the accuracy of each iteration on t
 
 Now you can rerun your training using these utility function to see the progress of the model's loss and accuracy with each epoch:
 
-[source, python]
+[source,python]
 ----
 for epoch in range(num_epochs):
     optimizer.zero_grad()

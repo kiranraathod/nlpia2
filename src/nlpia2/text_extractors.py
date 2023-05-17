@@ -78,6 +78,26 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_br
         return [[vars(expr) for expr in sect] for sect in sections] 
     return [[ex.source for ex in sect] for sect in sections]
 
+def extract_image_paths(filepath=DEFAULT_FILEPATH):
+    filepath = Path(filepath)
+    text = filepath.open('rt').read()
+    parent = filepath.parent
+    image_paths = []
+    for line in text.splitlines():
+        match = re.match(r'image::([^\[]+)', line)
+        if match:
+            path = Path(match.groups()[0])
+            if path.is_file():
+                image_paths.append((path.resolve(), 'exists'))
+                continue
+            path = (parent / path)
+            if path.is_file():
+                image_paths.append((path.resolve(), 'exists'))
+                continue
+            image_paths.append((path, ''))
+    return image_paths
+
+
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """

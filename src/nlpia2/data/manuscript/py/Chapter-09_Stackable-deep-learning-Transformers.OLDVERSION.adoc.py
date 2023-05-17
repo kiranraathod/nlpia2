@@ -1,7 +1,21 @@
+from torch import nn
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() *
+                             (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
 import spacy
 spacy_de = spacy.load('de')
 spacy_en = spacy.load('en')
@@ -65,6 +79,53 @@ class TranslationTransformer(nn.Transformer):  #<2>
                  d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6,
                  num_decoder_layers: int = 6, dim_feedforward: int = 2048,
                  dropout: float = 0.1, activation: str = "relu"):
+
+        decoder_layer = CustomDecoderLayer(d_model, nhead, dim_feedforward,  # <3>
+                                           dropout, activation)
+        decoder_norm = nn.LayerNorm(d_model)
+        decoder = CustomDecoder(decoder_layer, num_decoder_layers, decoder_norm)  # <4>
+
+        super(TranslationTransformer, self).__init__(d_model=d_model, nhead=nhead,
+            num_encoder_layers=num_encoder_layers,
+            num_decoder_layers=num_decoder_layers,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout, custom_decoder=decoder)
+        self.src_pad_idx = src_pad_idx
+        self.tgt_pad_idx = tgt_pad_idx
+        self.device = device
+        self.src_emb = nn.Embedding(src_vocab_size, d_model)  #<5>
+        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
+        self.pos_enc = PositionalEncoding(d_model, dropout, max_sequence_length)  #<6>
+        self.linear = nn.Linear(d_model, tgt_vocab_size) #<7>
+    def _make_key_padding_mask(self, t, pad_idx):
+        mask = (t == pad_idx).to(self.device)
+        return mask
+    def prepare_src(self, src, src_pad_idx):
+        src_key_padding_mask = self._make_key_padding_mask(src, src_pad_idx)
+        src = rearrange(src, 'N S -> S N')
+        src = self.pos_enc(self.src_emb(src) * math.sqrt(self.d_model))
+    def prepare_tgt(self, tgt, tgt_pad_idx):
+        tgt_key_padding_mask = self._make_key_padding_mask(tgt, tgt_pad_idx)
+        tgt = rearrange(tgt, 'N T -> T N')
+        tgt_mask = self.generate_square_subsequent_mask(tgt.shape[0]).to(self.device)
+        tgt = self.pos_enc(self.tgt_emb(tgt) * math.sqrt(self.d_model))
+        return tgt, tgt_key_padding_mask, tgt_mask
+    def forward(self, src, tgt):
+        src, src_key_padding_mask = self.prepare_src(src, self.src_pad_idx)
+        tgt, tgt_key_padding_mask, tgt_mask = self.prepare_tgt(tgt, self.tgt_pad_idx)
+        memory_key_padding_mask = src_key_padding_mask.clone()
+
+        output = super(TranslationTransformer, self).forward(src, tgt, tgt_mask=tgt_mask,
+                     src_key_padding_mask=src_key_padding_mask,
+                     tgt_key_padding_mask=tgt_key_padding_mask,
+                     memory_key_padding_mask=memory_key_padding_mask)
+        output = rearrange(output, 'T N E -> N T E')
+        return self.linear(output)
+    def init_weights(self):
+        def _init_weights(m):
+            if hasattr(m, 'weight') and m.weight.dim() > 1:
+            nn.init.xavier_uniform_(m.weight.data)
+        self.apply(_init_weights);  #<1>
 from einops import rearrange
 class TranslationTransformer(nn.Transformer):
     def __init__(self, device: str, src_vocab_size: int, src_pad_idx: int,
@@ -72,6 +133,65 @@ class TranslationTransformer(nn.Transformer):
                  d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6,
                  num_decoder_layers: int = 6, dim_feedforward: int = 2048,
                  dropout: float = 0.1, activation: str = "relu"):
+
+        decoder_layer = CustomDecoderLayer(d_model, nhead, dim_feedforward,
+                                           dropout, activation)
+        decoder_norm = nn.LayerNorm(d_model)
+        decoder = CustomDecoder(decoder_layer, num_decoder_layers, decoder_norm)
+
+        super(TranslationTransformer, self).__init__(d_model=d_model, nhead=nhead,
+                                                     num_encoder_layers=num_encoder_layers,
+                                                     num_decoder_layers=num_decoder_layers,
+                                                     dim_feedforward=dim_feedforward,
+                                                     dropout=dropout, custom_decoder=decoder)
+
+        self.src_pad_idx = src_pad_idx
+        self.tgt_pad_idx = tgt_pad_idx
+        self.device = device
+
+        self.src_emb = nn.Embedding(src_vocab_size, d_model)
+        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
+
+        self.pos_enc = PositionalEncoding(d_model, dropout, max_sequence_length)
+        self.linear = nn.Linear(d_model, tgt_vocab_size)
+    def init_weights(self):
+        def _init_weights(m):
+            if hasattr(m, 'weight') and m.weight.dim() > 1:
+            nn.init.xavier_uniform_(m.weight.data)
+        self.apply(_init_weights);
+    def _make_key_padding_mask(self, t, pad_idx):
+        mask = (t == pad_idx).to(self.device)
+
+        return mask
+
+    def prepare_src(self, src, src_pad_idx):
+        src_key_padding_mask = self._make_key_padding_mask(src, src_pad_idx)
+        src = rearrange(src, 'N S -> S N')
+        src = self.pos_enc(self.src_emb(src) * math.sqrt(self.d_model))
+
+        return src, src_key_padding_mask
+    def prepare_tgt(self, tgt, tgt_pad_idx):
+        tgt_key_padding_mask = self._make_key_padding_mask(tgt, tgt_pad_idx)
+        tgt = rearrange(tgt, 'N T -> T N')
+        tgt_mask = self.generate_square_subsequent_mask(tgt.shape[0]).to(self.device)
+        tgt = self.pos_enc(self.tgt_emb(tgt) * math.sqrt(self.d_model))
+
+        return tgt, tgt_key_padding_mask, tgt_mask
+    def forward(self, src, tgt):
+        src, src_key_padding_mask = self.prepare_src(src, self.src_pad_idx)
+
+        tgt, tgt_key_padding_mask, tgt_mask = self.prepare_tgt(tgt, self.tgt_pad_idx)
+
+        memory_key_padding_mask = src_key_padding_mask.clone()
+
+        output = super(TranslationTransformer, self).forward(src, tgt, tgt_mask=tgt_mask,
+                     src_key_padding_mask=src_key_padding_mask,
+                     tgt_key_padding_mask=tgt_key_padding_mask,
+                     memory_key_padding_mask=memory_key_padding_mask)
+
+        output = rearrange(output, 'T N E -> N T E')
+
+        return self.linear(output)
 SRC_PAD_IDX = SRC.vocab.stoi[SRC.pad_token]
 TRG_PAD_IDX = TRG.vocab.stoi[TRG.pad_token]
 model = TranslationTransformer(device=device,
@@ -87,6 +207,31 @@ LEARNING_RATE = 0.0001
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 criterion = nn.CrossEntropyLoss(ignore_index=TRG_PAD_IDX)  <1>
 def train(model, iterator, optimizer, criterion, clip):
+
+    model.train()  #<1>
+    epoch_loss = 0
+    for i, batch in enumerate(iterator):
+        src = batch.src
+        trg = batch.trg
+
+        optimizer.zero_grad()
+        output = model(src, trg[:,:-1])  #<2>
+
+        output_dim = output.shape[-1]
+        output = output.contiguous().view(-1, output_dim)
+        trg = trg[:,1:].contiguous().view(-1)
+
+        loss = criterion(output, trg)
+
+        loss.backward()
+
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
+
+        optimizer.step()
+
+        epoch_loss += loss.item()
+
+    return epoch_loss / len(iterator)
 def evaluate(model, iterator, criterion):
 def epoch_time(start_time, end_time):
     elapsed_time = end_time - start_time

@@ -629,7 +629,7 @@ This way you can reuse it in later examples.
 
 // Listing 7.6
 .Generalized convolution function
-[source, ipython3]
+[source,python]
 ----
 >>> def convolve(inpt, kernel):
 ...    output = []
@@ -678,7 +678,7 @@ Your CNN is looking for the "rightly timed pause" in the Mark Twain quote.
 Refer back to Listing 7.2 if you need help creating a DataFrame containing the POS tags for the "rightly timed pause" quote.
 
 
-[source, python]
+[source,python]
 ----
 >>> tags = 'ADV ADJ VERB NOUN'.split()
 >>> tagged_words = [
@@ -1742,7 +1742,7 @@ Your pooling outputs each contain a sequence length of 1, but they also contain 
 So the concatenated and pooled convolution outout is a 5x5 tensor which produces a 25-D linear layer for the output tensor that encodes the meaning of each text.
 
 .CNN layer shapes
-[source, python]
+[source,python]
 ----
 conv[0].weight.shape: torch.Size([5, 50, 2])
 conv_output_len: 39

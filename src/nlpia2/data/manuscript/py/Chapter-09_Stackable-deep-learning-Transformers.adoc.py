@@ -270,6 +270,7 @@ model = TranslationTransformer(
     tgt_pad_idx=tokenize_tgt.token_to_id('<pad>')
     ).to(DEVICE)
 model.init_weights()
+model  # <1>
 src = torch.randint(1, 100, (10, 5)).to(DEVICE)  # <1>
 tgt = torch.randint(1, 100, (10, 7)).to(DEVICE)
 with torch.no_grad():

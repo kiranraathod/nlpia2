@@ -12,7 +12,12 @@
 This chapter covers
 
 //// 
-// A summary sentence for each subsection and a way to summarize all of that in the beginning
+References:
+* recent tutorial on towards data science: https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fnlp-with-python-knowledge-graph-12b93146a458
+* Knowledge Representation Learning python library with state of the art performance on academic benchmarks: https://github.com/thunlp/OpenKE
+
+A summary sentence for each subsection and a way to summarize all of that in the beginning:
+
 // SUM: a few sentences
 
 Dependency parsing and Constituency parsing
@@ -35,15 +40,15 @@ Dependency parsing and Constituency parsing
 
 ////
 
-* Sentence segmentation
-* Named entity recognition
-* Numerical information extraction
-* Parts-of-speech (POS) tagging and dependency tree parsing
-* Logical relation extraction and knowledge bases
+* Extracting numerical and math expressions from text
+* Tagging tokens with their part-of-speech (POS)
+* Parsing text to create a dependency tree
+* Using named entity recognition algorithms for information extraction
+* Automatically building knowledge bases from text
 
 One last skill you need before you can build a full-featured chatbot is extracting information or knowledge from natural language text.
 
-== Named entities and relations
+== Named entities and the connections between them
 
 You'd like your machine to extract pieces of information and facts from text so it can know a little bit about what a user is saying.
 For example, imagine a user says "Remind me to read aiindex.org on Monday."

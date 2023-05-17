@@ -27,7 +27,9 @@ url = ('https://gitlab.com/tangibleai/nlpia2/'
        '-/raw/main/src/nlpia2/ch03/bias_intro.txt')
 response = requests.get(url)
 response
-bias_intro = response.content.decode()  # <1>
+bias_intro_bytes = response.content  # <1>
+bias_intro = response.text  # <2>
+assert bias_intro_bytes.decode() == bias_intro    # <3>
 bias_intro[:60]
 tokens = [tok.text for tok in nlp(bias_intro)]
 counts = Counter(tokens)
@@ -35,7 +37,7 @@ counts
 counts.most_common(5)
 counts.most_common()[-4:]
 counts.most_common()[-4:]
-docs = [nlp(s) for s in bias_intro.split_lines() if s.strip()]  # <1>
+docs = [nlp(s) for s in bias_intro.split('\n') if s.strip()]  # <1>
 counts = []
 for doc in docs:
     counts.append(Counter([t.text.lower() for t in doc]))  # <2>
@@ -51,19 +53,20 @@ df = pd.DataFrame(counts)
 df = df.fillna(0).astype(int)  # <1>
 df
 docs_tokens = []
-for doc_text in docs:
-    doc_text = doc_text.lower()  # <1>
-len(doc_tokens[0])
+for doc in docs:
+    doc_text = doc.text.lower()  # <1>
+    docs_tokens.append([tok.text for tok in nlp(doc_text)])
+len(docs_tokens[0])
 all_doc_tokens = []
 for doc_tokens in docs_tokens:
-    all_doc_tokens.extend(all_doc_tokens)
+    all_doc_tokens.extend(doc_tokens)
 len(all_doc_tokens)
 vocab = sorted(set(all_doc_tokens))
 len(vocab)
-lexicon
+vocab
 from collections import OrderedDict
 zero_vector = OrderedDict((token, 0) for token in lexicon)
-list(zero_vector.items())[:10] # <1>
+list(zero_vector.items())[:10]  # <1>
 import copy
 doc_vectors = []
 for doc in docs:
@@ -74,7 +77,7 @@ for doc in docs:
         vec[key] = value / len(lexicon)
     doc_vectors.append(vec)
 from sklearn.feature_extraction.text import CountVectorizer
-corpus = docs
+corpus = [doc.text for doc in docs]
 vectorizer = CountVectorizer()
 count_vectors = vectorizer.fit_transform(corpus)  # <1>
 print(count_vectors.toarray()) # <2>
@@ -103,21 +106,23 @@ from sklearn.metrics.pairwise import cosine_similarity
 vec1 = count_vectors[1,:]
 vec2 = count_vectors[2,:]
 cosine_similarity(vec1, vec2)
-new_sentence = "Is Harry hairy and faster than Jill?"
+new_sentence = "What is algorithmic bias?"
 ngram_docs = copy.copy(docs)
 ngram_docs.append(new_sentence)
-new_sentence_vector = vectorizer_transform(new_sentence)
-print (new_sentence_vector.toarray())
+new_sentence_vector = vectorizer.transform([new_sentence])
+print(new_sentence_vector.toarray())
 cosine_similarity(count_vectors[1,:], new_sentence)
-ngram_vectorizer = CountVectorizer(ngram_range=(1,2))
+ngram_vectorizer = CountVectorizer(ngram_range=(1, 2))
 ngram_vectors = ngram_vectorizer.fit_transform(corpus)
 print(ngram_vectors.toarray())
 cosine_similarity(ngram_vectors[1,:], ngram_vectors[2,:])
 from this import s
 print (s)
-char_vectorizer = CountVectorizer(ngram_range=(1,1), analyzer='char') <1>
+char_vectorizer = CountVectorizer(
+    ngram_range=(1,1), analyzer='char')  # <1>
 s_char_frequencies = char_vectorizer.fit_transform(s)
-generate_histogram(s_char_frequencies, s_char_vectorizer) <2>
+generate_histogram(
+    s_char_frequencies, s_char_vectorizer)  # <2>
 DATA_DIR = ('https://gitlab.com/tangibleai/nlpia/'
             '-/raw/master/src/nlpia/data')
 url = DATA_DIR + '/machine_learning_full_article.txt'
@@ -222,7 +227,7 @@ for key, value in token_counts.items():
     for _doc in docs:
       if key in _doc.lower():
         docs_containing_key += 1
-    if docs_containing_key == 0:  <1>
+    if docs_containing_key == 0:  # <1>
         continue
     tf = value / len(tokens)
     idf = len(docs) / docs_containing_key
@@ -236,5 +241,20 @@ vectorizer = TfidfVectorizer(min_df=1) # <1>
 vectorizer = vectorizer.fit(corpus)  # <2>
 vectors = vectorizer.transform(corpus)  # <3>
 print(vectors.todense().round(2))  # <4>
-DS_FAQ_URL = ('https://gitlab.com/tangibleai/qary/-/raw/master/'
+DS_FAQ_URL = ('https://gitlab.com/tangibleai/qary/-/raw/main/'
 qa_dataset = pd.read_csv(DS_FAQ_URL)
+vectorizer = TfidfVectorizer()
+vectorizer.fit(df['question'])
+tfidfvectors_sparse = vectorizer.transform(df['question']) #<1>
+tfidfvectors = tfidfvectors_sparse.todense() #<2>
+def bot_reply(question):
+   question_vector = vectorizer.transform([question]).todense()
+   idx = question_vector.dot(tfidfvectors.T).argmax() # <1>
+
+   print(
+       f"Your question:\n  {question}\n\n"
+       f"Most similar FAQ question:\n  {df['question'][idx]}\n\n"
+       f"Answer to that FAQ question:\n  {df['answer'][idx]}\n\n"
+   )
+bot_reply("What's overfitting a model?")
+bot_reply('How do I decrease overfitting for Logistic Regression?')

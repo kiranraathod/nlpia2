@@ -13,9 +13,9 @@ This chapter covers
 
 * Understanding what makes transformers so powerful
 * Seeing how transformers enable limitless "stacking" options for NLP
-* Improving embedding-based NLU pipelines with transformers
-* Prompt engineering for LLMs (Large Language Models)
-* Transfer learning and fine tuning of popular transformers (BERT, GPT)
+* Encoding text to create meaningful vector representations
+* Decoding semantic vectors to generate text
+* Fine tuning transformers (BERT, GPT) for your application
 * Applying transformers to extractive and abstraction summarization of long documents
 * Generating grammatically correct and interesting text with transformers
 * Estimating the information capacity of a transformer network required for a particular problem
@@ -32,7 +32,8 @@ References:
 ////
 
 ////
-KM: Great chapter and very timely too! Please see my comments below. 
+KM: Great chapter and very timely too! Please see my comments below.
+HL: Thank you. 
 ////
 
 _Transformers_ are changing the world.
@@ -60,31 +61,69 @@ The conversational interface of LLMs makes it easy to learn how to cajole the sn
 People that understand how LLMs work and can fine tune them for their own applications, those people will have their hands at the helm of a powerful machine.
 Imagine how sought-after you'd be if you could build a "TutorGPT" that can help students solve arithmetic and math word problems.
 Shabnam Aggarwal at Rising Academies in Kigali is doing just that with her Rori.AI WhatsApp math tutor bot for middle school students.footnote:[Sebastian Larson, an actual middle schooler, won our competition to develop Rori's `mathtext` NLP algorithm (https://gitlab.com/tangibleai/community/team/-/tree/main/exercises/2-mathtext)] footnote:[All of Rori.AI's NLP code is open source and available on Huggingface (https://huggingface.co/spaces/TangibleAI/mathtext-fastapi).]
-And Vishvesh Bhat did this for college math students as a passion project transformer language models.footnote:[Vish built an transformer-based teaching assistant called Clevrly for fellow college students (clevrly.io)] footnote:[Some of Vish's fine-tuned transformers are available on Huggingface (https://huggingface.co/clevrly)]
+And Vishvesh Bhat did this for college math students as a passion project.footnote:[Vish built an transformer-based teaching assistant called Clevrly (clevrly.io)] footnote:[Some of Vish's fine-tuned transformers are available on Huggingface (https://huggingface.co/clevrly)]
 
-Transformers are the culmination of decades of research into RNNs.
+== Recursion vs recurrence
+
+Transformers are the latest big leap forward in auto-regressive NLP models.
+Auto-regressive models predict one discrete output value at a time, usually a token or word in natural language text.
+An auto-regressor recycles the output to reuse it as an input for predicting the next output so auto-regressive neural networks are _recursive_.
+Recursive is just a general term for any recycling of outputs back into the input until it "terminates."
+A recursive function in computer science will keep calling itself until it achieves the desired result.
+
+But transformers are recursive in a bigger and more general way than _Recurrent_ Neural Networks.
+Transformers are called _recursive_ NNs rather than _recurrent_ NNs because _recursive_ is a more general term for any system that recycles the input.footnote:[Stats Stack Exchange answer (https://stats.stackexchange.com/a/422898/15974)]
+The term _recurrent_ is used exclusively to describe RNNs such as LSTMs and GRUs where the individual neurons recycle their outputs into the same neuron's input for each step through the sequence tokens.
+
+Transformers are a _recursive_ algorithm but do not contain _recurrent_ neurons.
+As you learned in Chapter 8, recurrent neural networks recycle their output within each individual neuron or RNN _unit_.
+But transformers wait until the very last layer to output a token embedding that can be recycled back into the input. 
+The entire transformer network, both the encoder and the decoder, must be run to predict each token so that token can be used to help it predict the next one.
+In the computer science world you can see that a transformer is one big recursive function calling a series of nonrecursive functions inside.
+The whole transformer is run _recursively_ to generate one token at a time.
+
+image::../images/ch09/transformer_recursion.drawio.png[alt="Block diagram of five stacked encoder layers feeding into five decoder layers. The last decoder layer output tokens are recycled recursively back into the input question 'What is BERT?' and appended to the end of the question one by one so that the  5th input sequence is 'What is BERT ? BERT' and the 6th is 'What is BERT ? BERT is'",width=100%,align="center",link="../images/ch09/transformer-recursion.drawio.png"]
+
+Because there is no recurrence within the inner guts of the transformer it doesn't need to be "unrolled."
+This gives transformers a huge advantage over RNNs.
+The individual neurons and layers in a transformer can be run in parallel all at once.
+For an RNN, you had to run the functions for the neurons and layers one at a time in sequence.
+_Unrolling_ all these recurrent function calls takes a lot of computer and it must be performed in order.
+You can't skip around or run them in parallel.
+them must be run sequentially all the way through the entire text.
+A transformer breaks the problem into a much smaller problem, predicting a single token at a time.
+This way all the neurons of a transformer can be run in parallel on a GPU or multi-core CPU to dramatically speed up the time it takes to make a prediction.
+
+And there's another advantage of re
+Instead of waiting for each neuron or layer in an RNN to produce it's output before  
+recursive function is just intended to be run recursively
+ 
+They use the last predicted output as the input to predict the next output.
+But transformers are _recursive_ not _recurrent_.
+Recurrent neural networks (RNNs) include variational autoencoders, RNNs, LSTMs, and GRUs.
 When researchers combine five NLP ideas to create the transformer architecture, they discovered a total capability that was much greater than the sum of its parts:
 
 ////
 KM: We can't use bold. Please change the terms below that are bolded to be italicized.
+HL: Done
 ////
 
 _Attention_:: Connecting important word patterns together across long stretches of text using a connection matrix (attention)
 _Byte pair encoding (BPE)_:: Tokenizing words based on character sequence statistics rather than spaces and punctuation
 _Positional encoding_:: Keeping track of where each token or pattern is located within the token sequence
 _Stackability_:: Arranging the inputs and outputs of a transformer layer to have the exact same structure so they can be stacked to increase capacity
-_Scalability_:: Training large transformers on web scale data gives transformers unexpected (emmergent) capabilities 
+_Scalability_:: Training large-capacity transformers on web scale data gives transformers unexpected (emergent) capabilities 
 
 ////
 TODO HL: Use this at the end of the chapter as an alternative wording?
-* Global attention - word patterns can be recognized no matter how far apart they are  
+* Global self-attention - word patterns can be recognized no matter how far apart they are  
 * Positional encoding - the model is made aware of the position with modified embedding vectors for all tokens
 * Stackability - layer input and output consistency the outputs of one layer to be input to another layer
 * Scalability - GPU-optimized linear algebra implementations create unprecedented scalability
 ////
 
-Attention gets most of the credit for the success of transformers, because in many ways, it made the other parts possible.
-This was surprising because the attention mechanism removed the recurrence feature of the encoder decoder networks.
+Attention gets most of the credit for the success of transformers, because it made the other parts possible.
+The attention mechanism removes recurrence feature of the encoder and decoder networks.
 Transformers are limited in the length of text they can process because the attention mechanism relies on a fixed-length sequence of embeddings for both the inputs and outputs of each layer.
 And transformers take advantage of the BPE encoding tokenization approach by allowing tokens to be separated according to statistics rather than predetermined spelling rules.
 To help transformers compensate for the loss of recurrence, researchers added positional encoding which gives transformers a way to keep track of how far along they are in processing an input text.
@@ -96,7 +135,20 @@ And this stackability of inputs and outputs created unprecedented scalability.
 Attention, BPE, positional encoding, stackability and scalability all combine to create the power of a transformer.
 But the attention mechanism was the connector between all these ideas that helped them work together effectively.
 
-Every transformer layer outputs an encoding vector with the same structure and shape as the input.
+Every transformer layer outputs a consistent _encoding_ with the same size and shape.
+Encodings are just embeddings but for token sequences instead of individual tokens.
+In fact many NLP beginners use the terms "encoding" and embedding" interchangeably, but after this chapter you will understand the difference.
+The word "embedding", used as a noun, is 3 times more popular than "encoding", but as more people catch up with you in learning about transformers that will change.footnote:[N-Gram Viewer query "embedding_NOUN" / "encoding_NOUN" (https://books.google.com/ngrams/graph?content=embedding_NOUN+%2F+encoding_NOUN&year_start=2010&year_end=2019&corpus=en-2019&smoothing=3)]
+If you don't need to make it clear which ones you are talking about you can use "semantic vector", a term you learned in Chapter 6.
+ 
+Like all vectors, encodings maintain a consistent structure so that they represent the meaning of your token sequence (text) in the same way.
+And transformers are designed to accept these encoding vectors as part of their input to maintain a "memory" of the previous layers' understanding of the text.
+This allows you to stack transformer layers with as many layers as you like, if you have enough training data to utilize all that capacity.
+This "scalability" allows transformers to break through the diminishing returns ceiling of RNNs. 
+FIXME: Trans 
+Transformers are able to generate longer and longer texts as you add layers.
+
+As with CNNs, RNNs, and LSTMs each layer's encoding gives you a representation of the meaning of the text in a hierarchy of meaning and concepts.
 The outputs of one transformer layer can be directly input into the next transformer layer enabling unprecendented _stackability_.
 This creates an encoder-decoder architecture that is stackable.
 The encoder and decoder halves of the network can contain as many transformer layers as you like.
@@ -104,16 +156,16 @@ Without the time sequencing constraint of recurrent networks, many computations 
 
 An even less-appreciated advantage of transformers is the positional encoding which enables nuanced adjustment to a transformer's understanding of tokens depending on their location in a text.
 The word "Sincerely" at the beginning of an email has a different meaning to a transformer than at the end of an email.
-And transformer inputs and outputs are consistent.
-
+And transformer layers are designed to have inputs and outputs with the same size and shape, so that the transformer layers can be stacked like Lego bricks that all have the same shape.
 The transformer innovation that catches most researchers' attention is the _attention mechanism_.
 Start there if you want to understand what makes transformers so exciting to NLP and AI researchers.
-
+Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers which are essentially fully-connected feed forward layers with the same.
 
 // SUM: Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers and fully-connected feed forward layers for the encoder and decoder.
 
 ////
 KM: In the paragraph below, you reference chapter 9 for RNNs, but this is now chapter 9. Please check which chapter you mean now. 
+HL: Fixed!
 ////
 
 In chapter 8, you used RNNs to build encoders and decoders to transform text sequences.
@@ -337,18 +389,20 @@ image::../images/ch09/encoder_decoder.drawio.png[alt="The last top layer of the 
 
 ////
 KM: Interesting example/scenario here!
+HL: Thanks!
 ////
 
 Transformers are suited for many tasks.
-"Attention Is All You Need" demonstrated ground-breaking results in English-German translation.
-Using `torchtext`, you will prepare the Multi30k dataset for training a Transformer for German-English translation using the now standard `torch.nn.Transformer` module.
-We'll take a look at the architecture model and you will customize the decoder to output the multi-head self-attention weights for each sublayer.
-Finally you will train the model and use it for inference on a test set. .i.e. perform some translations.
+The "Attention Is All You Need" paper showed off a transformer that achieved better translation accuracy than any preceding approach.
+Using `torchtext`, you will prepare the Multi30k dataset for training a Transformer for German-English translation using the `torch.nn.Transformer` module.
+In this section you will customize the decoder half of the `Transformer` class to output the self-attention weights for each sublayer.
+You use the matrix of self-attention weights to explain how the words in the input German text were combined together to create the embeddings used to produce the English text in the output.
+After training the model you will use it for inference on a test set to see for yourself how well it translates German text into English.
 
 ==== Preparing the Data
 
 
-You can use the Hugging Face datasets package to simplify the book-keeping required to ensure your text is fed into the Transformer in a predictable format that PyTorch.
+You can use the Hugging Face datasets package to simplify the book-keeping and ensure your text is fed into the Transformer in a predictable format compatible with PyTorch.
 This is one of the trickiest parts of any deep learning project, ensuring the structure and API for your dataset matches what your PyTorch training loop expects.
 Translation datasets are particularly tricky unless you use Hugging Face:
 
@@ -678,7 +732,7 @@ Mathematicians like it for tensor reshaping and shuffling because it uses a synt
 To see why you need to `rearrange()` your tensors refer to the `torch.nn.Transformer` documentation footnote:[Pytorch torch.nn.Transformer documentation:https://pytorch.org/docs/stable/generated/torch.nn.Transformer.html].
 If you get any one of the dimensions of any of the tensors wrong it sill mess up the entire pipeline, sometimes invisibly.
 
-.torch.nn.Transformer "Shape" description (summarized)
+.torch.nn.Transformer "shape" and dimension descriptions
 [source,text]
 ----
 S: source sequence length
@@ -875,10 +929,27 @@ The individual components of the model have been defined and the complete model 
 ----
 <1> mask out all attention to future (subsequent) tokens for the decoder to prevent leakage during training 
 
+Finally, you have a complete transformer all your own!
+And you should be able to use it for translating between virtual any pair of languages, even character-rich languages such as traditional Chinese and Japanese.
+And you have explicit access to all the hyperparameters that you might need to tune your model for your problem.
+For example you can increase the vocabulary size for the target or source languages to efficiently handle _character-rich_ languages such as traditional Chinese and Japanese.
 
-////
-KM: Give us a transitional sentence or two after the listing about what you just completed and what the next sub-section is going to be doing. 
-////
+[NOTE]
+====
+Traditional Chinese and Japanese (kanji) are called _character-rich_ because they have a much larger number of unique characters that European languages.
+Chinese and Japanese languages use logograph characters.
+Logo graph characters look a bit like small pictographs or abstract heirogliphic drawings.
+For example the kanji character "日" can mean day and it looks a little like the day block you might see on a calendar.
+Japanese logographic characters are roughly equivalent to word pieces somewhere between morphemes and words in the English language.
+This means that you will have many more unique characters in logographic languages than in European languages.
+For example traditional Japanese uses about 3500 unique kanji characters.footnote:[Japanese StackExchange answer with counts of Japanese characters (https://japanese.stackexchange.com/a/65653/56506)]
+English has roughly 7000 unique syllables within the most common 20,000 words.
+====
+
+You can even change the number of layers in the encoder and decoder sides of the transformer, depending on the source (encoder) or target (decoder) language.
+You can even create a translation transformer that simplifies text for explaining complex concepts to five year olds, or adults on Mastodon server focused on ELI5 ("explain it like I'm 5") conversations.
+If you reduce the number of layers in the decoder this will create a "capacity" bottleneck that can force your decoder to simplify or compress the concepts coming out of the encoder.
+Similarly the number of attention heads in the encoder or decoder layers can be adjusted to increase or decrease the capacity (complexity) of your transformer. 
 
 ==== Training the TranslationTransformer
 Now create an instance of the model for our translation task and initialize the weights in preparation for training.
@@ -896,9 +967,43 @@ Know that since the encoder and decoder building blocks comprise duplicate, stac
 ...     tgt_pad_idx=tokenize_tgt.token_to_id('<pad>')
 ...     ).to(DEVICE)
 >>> model.init_weights()
+>>> model  # <1>
+----
+<1> display the string representation of your model see what you've created
+
+PyTorch creates a nice `\_\_str\_\_` representation of your model.
+It displays all the layers and their inner structure including the shapes of the inputs and outputs.
+You may even be able to see the parallels between the layers of your models and the diagrams of tranformers that you see in this chapter or online.
+From the first half of the text representation for your transformer you can see that all of the encoder layers have exactly the same structure.
+The inputs and outputs of each `TransformerEncoderLayer` have the same shape, so this ensures that you can stack them without reshaping linear layers between them.
+Transformer layers are like the floors of a sky scraper or a childs stack of wooden blocks.
+Each level has exactly the same 3D shape.
+
+[source,code]
+----
+TranslationTransformer(
+  (encoder): TransformerEncoder(
+    (layers): ModuleList(
+      (0-5): 6 x TransformerEncoderLayer(
+        (self_attn): MultiheadAttention(
+          (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+        )
+        (linear1): Linear(in_features=512, out_features=2048, bias=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+        (linear2): Linear(in_features=2048, out_features=512, bias=True)
+        (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+        (dropout1): Dropout(p=0.1, inplace=False)
+        (dropout2): Dropout(p=0.1, inplace=False)
+      )
+    )
+    (norm): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  )
+...
 ----
 
-You note that you pass the calculated sizes of your source and target vocabularies in the constructor.
+Notice that you set the sizes of your source and target vocabularies in the constructor.
+Th
 Also, you pass the indices for the source and target padding tokens for the model to use in preparing the source, targets, and associated masking sequences.
 Now that you have the model defined, take a moment to do a quick sanity check to make sure there are no obvious coding errors before you setup the training and inference pipeline.
 You can create "batches" of random integer tensors for the sources and targets and pass them to the model as demonstrated in the following listing.

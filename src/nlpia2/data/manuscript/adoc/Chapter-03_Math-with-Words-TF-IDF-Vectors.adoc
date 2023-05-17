@@ -94,6 +94,8 @@ This is called the _vocabulary_ for a particular NLP pipeline (including the cor
 To count up the occurrences of all the words in your vocabulary, you can use a Python `Counter` type.
 In chapter 2 you learned that a `Counter` is a special kind of dictionary where the keys are all the unique objects in your array, and the dictionary values are the counts of each of those objects.
 
+// FIXME: not really a bag of words
+
 [source,python]
 ----
 >>> from collections import Counter
@@ -342,7 +344,7 @@ This will reveal the power of vector representations.
 
 [source,python]
 ----
->>> docs = [nlp(s) for s in bias_intro.split_lines() if s.strip()]  # <1>
+>>> docs = [nlp(s) for s in bias_intro.split('\n') if s.strip()]  # <1>
 >>> counts = []
 >>> for doc in docs:
 ...     counts.append(Counter([t.text.lower() for t in doc]))  # <2>
@@ -364,6 +366,8 @@ And when the dimensions of your vectors are used to hold scores for tokens or st
 That way you can see what each dimension is for.
 Check out that sentence that we started this chapter with.
 It happens to be the eleventh sentence in the Wikipedia article.
+
+// TODO: sort_values?
 
 [source,python]
 ----
@@ -409,23 +413,41 @@ Ignoring proper nouns for now, you can lowercase your words and reduce the vocab
 >>> df = pd.DataFrame(counts)
 >>> df = df.fillna(0).astype(int)  # <1>
 >>> df
->>> docs_tokens = []
->>> for doc_text in docs:
-...     doc_text = doc_text.lower()  # <1>
-        docs_tokens.append([tok.text for tok in nlp(doc_text]))]
->>> len(doc_tokens[0])
-17
+----
 
+
+[source,python]
+----
+>>> docs_tokens = []
+>>> for doc in docs:
+...     doc_text = doc.text.lower()  # <1>
+...     docs_tokens.append([tok.text for tok in nlp(doc_text)])
+>>> len(docs_tokens[0])
+17
+----
+
+Create a list of all the tokens in the paragraph about algorithmic bias.
+
+----
 >>> all_doc_tokens = []
 >>> for doc_tokens in docs_tokens:
-...     all_doc_tokens.extend(all_doc_tokens)
+...     all_doc_tokens.extend(doc_tokens)
 >>> len(all_doc_tokens)
-33
+498
+----
 
+Create a vocabulary from the sequence of tokens for the entire paragraph.
+
+----
 >>> vocab = sorted(set(all_doc_tokens))
 >>> len(vocab)
-18
->>> lexicon
+248
+----
+
+A lexicon is the list of the actual words in your vocabulary.
+
+----
+>>> vocab
 [',',
  '.',
  'and',
@@ -435,7 +457,6 @@ Ignoring proper nouns for now, you can lowercase your words and reduce the vocab
  ...
  'would']
 ----
-<1>
 
 Each of your three document vectors will need to have 18 values, even if the document for that vector does not contain all 18 words in your lexicon.
 Each token is assigned a "slot" in your vectors corresponding to its position in your lexicon.
@@ -445,7 +466,7 @@ Some of those token counts in the vector will be zeros, which is what you want.
 ----
 >>> from collections import OrderedDict
 >>> zero_vector = OrderedDict((token, 0) for token in lexicon)
->>> list(zero_vector.items())[:10] # <1>
+>>> list(zero_vector.items())[:10]  # <1>
 [('got', 0),
   ('to', 0),
   ('hairy', 0),
@@ -495,7 +516,7 @@ It is a _model_ class with `.fit()` and `.transform()` methods that comply with 
 [source,python]
 ----
 >>> from sklearn.feature_extraction.text import CountVectorizer
->>> corpus = docs
+>>> corpus = [doc.text for doc in docs]
 >>> vectorizer = CountVectorizer()
 >>> count_vectors = vectorizer.fit_transform(corpus)  # <1>
 >>> print(count_vectors.toarray()) # <2>
@@ -694,8 +715,6 @@ This _normalized dot product_, like the output of the cosine function, will be a
 It is the cosine of the angle between these two vectors.
 It gives you a value for how much the vectors point in the same direction.footnote:[These videos show how to create vectors for words and then compute their cosine similarity to each other using SpaCy and numpy (https://www.dropbox.com/sh/3p2tt55pqsisy7l/AAB4vwH4hV3S9pUO0n4kTZfGa?dl=0)]
 
-
-
 A cosine similarity of **1** represents identical normalized vectors that point in exactly the same direction along all dimensions.
 The vectors may have different lengths or magnitudes, but they point in the same direction.
 Remember you divided the dot product by the norm of each vector.
@@ -747,7 +766,7 @@ First, let's add another sentence to our corpus, which will illustrate why bag-o
 
 [source,python]
 ----
->>> new_sentence = "Is Harry hairy and faster than Jill?"
+>>> new_sentence = "What is algorithmic bias?"
 >>> ngram_docs = copy.copy(docs)
 >>> ngram_docs.append(new_sentence)
 ----
@@ -756,8 +775,8 @@ If you compute the vector of word counts for this last sentence, using the same 
 
 [source,python]
 ----
->>> new_sentence_vector = vectorizer_transform(new_sentence)
->>> print (new_sentence_vector.toarray())
+>>> new_sentence_vector = vectorizer.transform([new_sentence])
+>>> print(new_sentence_vector.toarray())
 [[1 0 1 0 0 1 1 0 1 1 0 0 1 0 0 0]]
 ----
 
