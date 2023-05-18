@@ -113,8 +113,11 @@ def extract_image_paths(filepath=DEFAULT_FILEPATH):
     return image_paths
 
 
-def tag_code_lines(sections=None, filepath=DEFAULT_FILEPATH):
-    doctests = sections | extract_code_lines(filepath=filepath)
+def extract_tagged_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+    if not with_metadata:
+        print('WARNING: Must extract metadata for extract_tagged_code... with_metadata=True')
+    if not isinstance(filepath, list) or isinstance(filepath, (str, Path)):
+        doctests = extract_code_lines(filepath=filepath, with_metadata=True)
     tagged_lines = [] 
     for k, doc in enumerate(doctests):
         doc['docnum'] = k
@@ -143,6 +146,7 @@ def tag_code_lines(sections=None, filepath=DEFAULT_FILEPATH):
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
+    text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     
     if not section_break:
@@ -161,18 +165,22 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
+    filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
         text = Path(text).open('rt').read()
     urls = []
     for i, line in enumerate(text.splitlines()):
-        for k, groups in enumerate(re.findall(RE_URL_WITH_SCHEME, line)):
-            url, scheme = groups[0], groups[1]
+        for k, match in enumerate(re.finditer(RE_URL_SIMPLE, line)):
             urls.append(dict(
-                scheme=scheme,
-                url=url,
+                scheme=match.group('scheme_type') or '',
+                url=match.group('url') or '',
+                url_path=match.group('path') or '',
+                tld=match.group('tld') or '',
                 line_number=i,
                 url_number=k,
                 line_text=line,
+                filepath=str(filepath),
+                filename=filename
             ))
     return urls
 
@@ -221,6 +229,11 @@ def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
         f"{u['line_number']}-{u['url_number']}" for u in urls])
     df['filename'] = filepath.name
     df['filepath'] = str(filepath)
+    return df
+
+def extract_lines_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+    lines = extract_lines(text=filepath, with_meta=with_meta)
+    df = pd.DataFrame(lines)
     return df
 
 
@@ -387,14 +400,14 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
     return results
 
 
-def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
+def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None, save_sections=False):
     filepath = Path(filepath)
     if not destfile:
         destfile = filepath.parent.parent / 'py'
         destfile.mkdir(exist_ok=True)
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
-    sections_lines = extract_code_lines(
+    sections_lines = extract_tagged_code_lines(
         filepath=filepath, with_metadata=False)
     
     if destfile:
@@ -402,16 +415,18 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     if not sections_lines:
         return ''
     all_lines = []
-    for i, lines in enumerate(sections_lines): 
-        all_lines.extend(lines)
-        if destfile:
-            # print('destfile')
-            # print(lines)
+    all_meta = []
+    for i, lines in enumerate(sections_lines):
+        all_meta.extend(lines)
+        all_lines.extend(lines['source_lines'])
+        if destfile and save_sections:
             sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
             sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
-            print(f'{sect_destfile} ({len(lines)}')
+            print(f'{sect_destfile} ({len(lines["source_lines"])})')
+            # FIXME: only outputs a single line now that using extract_tagged_code_lines
+            # FIXME: tagged code lines should include section_num
             with sect_destfile.open('wt') as fout:
-                fout.writelines('\n'.join(all_lines))
+                fout.writelines('\n'.join(lines['source_lines']))
     return ''.join(all_lines)
 
 
@@ -427,6 +442,7 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 def extract_files(
         adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
+    """ Run an extractor on all the text (default=adoc) files in a directory returning the extracted file paths """
     output_paths = []
     destdir = Path(destdir)
     assert destdir.is_dir()
@@ -450,6 +466,22 @@ def extract_url_dfs_from_files(
         suffix=suffix)
     return dfs
 
+def extract_big_line_df_from_files(
+        adocdir=MANUSCRIPT_DIR, destdir=None,
+        glob='*.adoc', suffix='.adoc.py'):
+    adocdir = Path(adocdir)
+    output = []
+    for p in adocdir.glob(glob):
+        lines = extract_lines(text=p)
+        output.extend(lines)
+    df = pd.DataFrame(output)
+
+    # for each line, see if we know what its type is
+    one_hot_columns = [col for col in df.columns if col.startswith('is_')]
+    df['num_types'] = df[one_hot_columns].sum(axis=1)
+    df['is_type_defined'] = df[one_hot_columns].sum(axis=1) > 0
+
+    return df
 
 def extract_dfs_from_files(
         adocdir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
@@ -484,7 +516,7 @@ def parse_args(
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        'path', type=Path, default=None, help=adocs_help
+        'path', type=Path, default=None, help=adocs_help, nargs='?',
     )
 
     parser.add_argument(

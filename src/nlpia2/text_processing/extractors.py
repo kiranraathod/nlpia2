@@ -6,9 +6,10 @@ from pathlib import Path
 import pandas as pd
 import re
 import tempfile
+from types import MappingProxyType
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR
+from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
@@ -21,24 +22,17 @@ RE_FIGURE_NAME=r"^[\.].*"
 RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
 RE_COMMENT=r"^(\\\\|\/\/).*"
 
-from nlpia2 import MANUSCRIPT_DIR
-
-MANUSCRIPT_DIR = MANUSCRIPT_DIR or Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
 DATA_DIR = SRC_DATA_DIR
 
-assert DATA_DIR.is_dir()
-
-MANUSCRIPT_DIR = SRC_DATA_DIR / 'book_adoc'
-
-assert MANUSCRIPT_DIR.is_dir()
-
-DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
-DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+DEFAULT_FILENAME = 'Chapter-09_Stackable-deep-learning-Transformers.adoc'
+DEFAULT_FILEPATH = MANUSCRIPT_DIR / 'adoc' / DEFAULT_FILENAME
 DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
-def extract_blocks(filepath=Path('data/tests/test.adoc'), grammarpath=Path('data/grammars/adoc.ppeg')):
+def extract_blocks(
+        filepath=Path('data/tests/test.adoc'),
+        grammarpath=Path(SRC_DATA_DIR / 'grammars' / 'adoc_basic.ppeg')):
     filepath, grammarpath = Path(filepath), Path(grammarpath)
     g = Grammar(grammarpath.open().read())
     ast = g.parse(filepath.open().read())
@@ -54,46 +48,126 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
     lines = []
     for i, line in enumerate(text.splitlines()):
         lines.append(dict(
-         line_text=line,
-         line_number=i,
-         filename=filename,
-         is_text=(re.match(RE_TEXT_LINE, line) is not None),
-         is_empty=(re.match(RE_EMPTY_LINE, line) is not None),
-         is_code_or_output=(re.match(RE_CODE_OR_OUTPUT, line) is not None),
-         is_title=(re.match(RE_TITLE_LINE, line) is not None),
-         is_metadata=(re.match(RE_METADATA, line) is not None),
-         is_code_comment=(re.match(RE_CODE_COMMENT, line) is not None),
-         is_markup=(re.match(RE_MARKUP_LINE, line) is not None),
-         is_figure_name=(re.match(RE_FIGURE_NAME, line) is not None),
-         is_separator=(re.match(RE_SEPARATOR, line) is not None),
-         is_comment=(re.match(RE_COMMENT, line) is not None)
+            line_text=line,
+            line_number=i,
+            filename=filename,
+            is_text=bool(re.match(RE_TEXT_LINE, line)),
+            is_empty=bool(re.match(RE_EMPTY_LINE, line)),
+            is_code_or_output=bool(re.match(RE_CODE_OR_OUTPUT, line)),
+            is_title=bool(re.match(RE_TITLE_LINE, line)),
+            is_metadata=bool(re.match(RE_METADATA, line)),
+            is_code_comment=bool(re.match(RE_CODE_COMMENT, line)),
+            is_markup=bool(re.match(RE_MARKUP_LINE, line)),
+            is_figure_name=bool(re.match(RE_FIGURE_NAME, line)),
+            is_separator=bool(re.match(RE_SEPARATOR, line)),
+            is_comment=bool(re.match(RE_COMMENT, line))
             )
         )
     return lines
 
 
-def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+def extract_code_sections(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
-    expressions = extract_expressions(filepath=filepath)
+    text = Path(filepath).open('rt').read()
+    sections = extract_expression_sections(text=text, section_break=section_break)
+    # assert len(sections) > 0
+    if not isinstance(sections, list):
+        sections = [sections]
+
     if with_metadata:
-        return [vars(ex) for ex in expressions]
-    return [ex.source for ex in expressions]
+        return [[vars(expr) for expr in sect] for sect in sections] 
+    return [[ex.source for ex in sect] for sect in sections]
 
 
-def extract_expressions(filepath=DEFAULT_FILEPATH):
+def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
+    """ Extract lines of Python using DocTestParser, return list of strs """
+    sections = extract_code_sections(
+        filepath=filepath,
+        with_metadata=with_metadata,
+        section_break=section_break)
+
+    # flatten the list of lists
+    flat = []
+    for sect in sections:
+        flat.extend(sect)
+    return flat
+
+
+def extract_image_paths(filepath=DEFAULT_FILEPATH):
+    filepath = Path(filepath)
+    text = filepath.open('rt').read()
+    parent = filepath.parent
+    image_paths = []
+    for line in text.splitlines():
+        match = re.match(r'image::([^\[]+)', line)
+        if match:
+            path = Path(match.groups()[0])
+            if path.is_file():
+                image_paths.append((path.resolve(), 'exists'))
+                continue
+            path = (parent / path)
+            if path.is_file():
+                image_paths.append((path.resolve(), 'exists'))
+                continue
+            image_paths.append((path, ''))
+    return image_paths
+
+
+def extract_tagged_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+    if not with_metadata:
+        print('WARNING: Must extract metadata for extract_tagged_code... with_metadata=True')
+    if not isinstance(filepath, list) or isinstance(filepath, (str, Path)):
+        doctests = extract_code_lines(filepath=filepath, with_metadata=True)
+    tagged_lines = [] 
+    for k, doc in enumerate(doctests):
+        doc['docnum'] = k
+        doc['source_lines'] = doc['source'].split('\n')
+        for i, line in enumerate(doc['source_lines']):
+            tagged = doc.copy()
+            tagged['line'] = line
+            tagged['doc_lineno'] = i
+            tagged['file_lineno'] = len(tagged_lines)
+            tagged['prompted_line'] = '>>> ' + line
+            if line.startswith(' ') or tagged['indent']:
+                tagged['prompted_line'] = '... ' + line
+            if "#" in line:
+                # TODO: check for quoted "#"
+                comments = re.findall(r'\s*#\s*<\d+>[ \t]*\n', line)
+                if comments:
+                    tagged['annotation'] = comments[-1]
+                comments = re.findall(r'#[^#]*', line)
+                if comments:
+                    tagged['comment'] = comments[-1]
+                    if len(comments) > 1:
+                        tagged['fixme'] = 'multiple hashes'
+            tagged_lines.append(tagged)
+    return tagged_lines
+
+
+def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
-    return dtparser.get_examples(text)
+    
+    if not section_break:
+        return [dtparser.get_examples(text)]
 
+    text_sections = ['']
+    for line in text.splitlines():
+        print(line)
+        if line.strip() == section_break:
+            text_sections[-1] = text_sections[-1] + '>>> #' + section_break + '\n'
+            text_sections.append('')
+        else:
+            text_sections[-1] = text_sections[-1] + line + '\n'
+    return [dtparser.get_examples(text) for text in text_sections]
+    
 
 def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
-        filepath = Path(text)
-        filename = filepath.name
-        text = filepath.read_text(encoding='utf-8')
+        text = Path(text).open('rt').read()
     urls = []
     for i, line in enumerate(text.splitlines()):
         for k, match in enumerate(re.finditer(RE_URL_SIMPLE, line)):
@@ -213,7 +287,7 @@ def extract_goodreads_quotes(text):
         unicode_quotes=[r'[“”]', r'"'],
         unicode_appostrophes=[r'[‘’]', r"'"],
         quote_text=[r'― ([^,]+),([-!?\w\d ]+)',
-                    r'''
+            r'''
   author: \1
   source: Good Reads
   book: \2
@@ -309,7 +383,7 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
             newlines.append(lines[-1])
         fp, filepath = tempfile.mkstemp(text=True, suffix='.adoc')
         filepath = Path(filepath)
-        print(filepath)
+        print(f"Testing: {filepath}")
         with filepath.open('wt') as fout:
             fout.writelines(newlines)
     results = doctest.testfile(str(filepath),
@@ -328,16 +402,34 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
     return results
 
 
-def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
+def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None, save_sections=False):
     filepath = Path(filepath)
-    destfile = Path(destfile) if destfile else filepath.with_suffix('.adoc.py')
+    if not destfile:
+        destfile = filepath.parent.parent / 'py'
+        destfile.mkdir(exist_ok=True)
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
-    lines = extract_code_lines(filepath=filepath, with_metadata=False)
+    sections_lines = extract_tagged_code_lines(
+        filepath=filepath, with_metadata=False)
+    
     if destfile:
-        with Path(destfile).open('wt') as fout:
-            fout.writelines(lines)
-    return ''.join(lines)
+        destfile = Path(destfile)
+    if not sections_lines:
+        return ''
+    all_lines = []
+    all_meta = []
+    for i, lines in enumerate(sections_lines):
+        all_meta.extend(lines)
+        all_lines.extend(lines['source_lines'])
+        if destfile and save_sections:
+            sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
+            sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
+            print(f'{sect_destfile} ({len(lines["source_lines"])})')
+            # FIXME: only outputs a single line now that using extract_tagged_code_lines
+            # FIXME: tagged code lines should include section_num
+            with sect_destfile.open('wt') as fout:
+                fout.writelines('\n'.join(lines['source_lines']))
+    return ''.join(all_lines)
 
 
 def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
@@ -350,12 +442,14 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 
 
 def extract_files(
-        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
-    """ Run an extractor on all the text (default=adoc) files in a directory returnning the extracted file paths """
+    """ Run an extractor on all the text (default=adoc) files in a directory returning the extracted file paths """
     output_paths = []
-    for p in input_dir.glob(glob):
-        destfile = (output_dir / p.name).with_suffix(suffix)
+    destdir = Path(destdir)
+    assert destdir.is_dir()
+    for p in adocdir.glob(glob):
+        destfile = (destdir / p.name).with_suffix(suffix)
         print(f"{p} => {destfile}")
         code = extractor(filepath=p)
         with destfile.open('wt') as fout:
@@ -370,7 +464,7 @@ def extract_url_dfs_from_files(
     adocdir = Path(adocdir)
     dfs = extract_dfs_from_files(
         extractor=extract_urls_df,
-        input_dir=adocdir, output_dir=destdir, glob=glob,
+        adocdir=adocdir, destdir=destdir, glob=glob,
         suffix=suffix)
     return dfs
 
@@ -392,10 +486,10 @@ def extract_big_line_df_from_files(
     return df
 
 def extract_dfs_from_files(
-        input_dir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        adocdir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
         extractor=extract_urls_df, suffix='.adoc.py'):
     outputs = []
-    for p in input_dir.glob(glob):
+    for p in adocdir.glob(glob):
         df = extractor(filepath=p)
         outputs.append(df)
     return outputs
@@ -408,51 +502,68 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
     destdir = Path(destdir)
     destdir.mkdir(exist_ok=True)
     destpaths = extract_files(extractor=extract_code_file,
-                              input_dir=adocdir, output_dir=destdir,
+                              adocdir=adocdir, destdir=destdir,
                               glob=glob, suffix=suffix)
     return destpaths
 
 
 def parse_args(
-        description='Transcoder for doctest-formatted code blocks in asciidoc/txt files to py, or ipynb code blocks',
-        input_help='Path to asciidoc or text file containing doctest-format code blocks',
+        adocs=None,
+        adocs_help='Path to asciidoc or text file containing doctest-format code blocks',
+        output=None,
         output_help='Path to new py file created from code blocks in INPUT',
+        description='Transcoder for doctest-formatted code blocks in asciidoc/txt files to py, or ipynb code blocks',
         format_help='Output file format or type (md, py, ipynb, python, or notebook)'):
 
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-        '--input', type=Path, default=None,
-        help=input_help
+        'path', type=Path, default=None, help=adocs_help, nargs='?',
+    )
+
+    parser.add_argument(
+        '--adocs', type=Path, default=adocs,
+        help=adocs_help
     )
     parser.add_argument(
-        '--output', type=Path, default=None,
+        '--output', type=Path, default=output,
         help=output_help,
     )
     parser.add_argument(
-        '--format', type=str, default='py', help=format_help
+        '--format', type=str, default='py',
+        help=format_help
     )
     return vars(parser.parse_args())
 
 
+DEFAULT_ARGS = MappingProxyType(dict(adocs='manuscript/adoc', output='manuscript/py'))
+
+
+def extract_code(adocs=None, output=None):
+    args = dict(
+        adocs=Path(adocs or MANUSCRIPT_DIR / 'adoc'),
+        output=Path(output or MANUSCRIPT_DIR / 'py')
+        )
+    args = parse_args(**args)
+
+    if args['path']:
+        args['adocs'] = args['path']
+
+    if args['adocs']:
+        if Path(args['adocs']).is_dir():
+            return extract_code_files(adocdir=args['adocs'])
+        elif Path(args['adocs']).is_file():
+            return extract_code_file(filepath=args['adocs'])
+    
+    results = {}
+    if input(f'Extract python from all adoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
+        results['code_file_paths'] = extract_code_files()
+    if input(f'Extract urls from all addoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
+        results['urls'] = extract_urls()
+    return results
+
 if __name__ == '__main__':
-    args = parse_args()
-    if args['input']:
-        if Path(args['input']).is_dir():
-            results = extract_code_files(adocdir=args['input'])
-        else:
-            results = extract_code_file(filepath=args['input'])
-    else:
-        if input('Extract lines from all manuscript/adoc files? ').lower()[0] == 'y':
-            result_df = extract_big_line_df_from_files()
-            result_df.to_csv(DEFAULT_LINES_FILENAME)
-        if input('Extract python from all manuscript/adoc files? ').lower()[0] == 'y':
-            results = extract_code_files()
-            print(results)
-        if input('Extract urls from all manuscript/adoc files? ').lower()[0] == 'y':
-            results = extract_urls()
-            urls = []
-            for u in results:
-                urls.extend(u)
-            df_urls = pd.DataFrame(urls)
-            print(df_urls)
+    assert DATA_DIR.is_dir()
+    assert MANUSCRIPT_DIR.is_dir()
+    results = extract_code()
+
