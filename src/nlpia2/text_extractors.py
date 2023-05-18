@@ -24,8 +24,8 @@ RE_COMMENT=r"^(\\\\|\/\/).*"
 
 DATA_DIR = SRC_DATA_DIR
 
-DEFAULT_FILENAME = 'Chapter-01_Machines-that-can-read-and-write-NLP-overview'
-DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+DEFAULT_FILENAME = 'Chapter-09_Stackable-deep-learning-Transformers.adoc'
+DEFAULT_FILEPATH = MANUSCRIPT_DIR / 'adoc' / DEFAULT_FILENAME
 DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
@@ -66,7 +66,7 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
     return lines
 
 
-def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
+def extract_code_sections(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     text = Path(filepath).open('rt').read()
     sections = extract_expression_sections(text=text, section_break=section_break)
@@ -77,6 +77,21 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_br
     if with_metadata:
         return [[vars(expr) for expr in sect] for sect in sections] 
     return [[ex.source for ex in sect] for sect in sections]
+
+
+def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
+    """ Extract lines of Python using DocTestParser, return list of strs """
+    sections = extract_code_sections(
+        filepath=filepath,
+        with_metadata=with_metadata,
+        section_break=section_break)
+
+    # flatten the list of lists
+    flat = []
+    for sect in sections:
+        flat.extend(sect)
+    return flat
+
 
 def extract_image_paths(filepath=DEFAULT_FILEPATH):
     filepath = Path(filepath)
@@ -97,6 +112,35 @@ def extract_image_paths(filepath=DEFAULT_FILEPATH):
             image_paths.append((path, ''))
     return image_paths
 
+
+def tag_code_lines(filepath=DEFAULT_FILEPATH):
+    doctests = extract_code_lines(filepath=filepath)
+    tagged_lines = [] 
+    for k, doc in enumerate(doctests):
+        doc['docnum'] = k
+        doc['source_lines'] = doc['source'].split('\n')
+        for i, line in enumerate(doc['source_lines']):
+            tagged = doc.copy()
+            tagged['line'] = line
+            tagged['doc_lineno'] = i
+            tagged['file_lineno'] = len(tagged_lines)
+            tagged['prompted_line'] = '>>> ' + line
+            if line.startswith(' ') or tagged['indent']:
+                tagged['prompted_line'] = '... ' + line
+            if "#" in line:
+                # TODO: check for quoted "#"
+                comments = re.findall(r'\s*#\s*<\d+>[ \t]*\n', line)
+                if comments:
+                    tagged['annotation'] = comments[-1]
+                comments = re.findall(r'#[^#]*', line)
+                if comments:
+                    tagged['comment'] = comments[-1]
+                    if len(comments) > 1:
+                        tagged['fixme'] = 'multiple hashes'
+            tagged_lines.append(tagged)
+    return tagged_lines
+
+    
 
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
@@ -356,21 +400,22 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
     if sections_lines:
         print('sections_lines[0]')
         print(sections_lines[0])
-        
+    
+    all_lines = []
     if destfile:
         destfile = Path(destfile)
-        if sections_lines:
-            for i, lines in enumerate(sections_lines): 
-                print('destfile lines')
-                print(lines)
+    if sections_lines:
+        for i, lines in enumerate(sections_lines): 
+            all_lines.extend(lines)
+            if destfile:
+                # print('destfile')
+                # print(lines)
                 sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
                 sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
-                print('sect_destfile')
-                print(sect_destfile)
+                print(f'{sect_destfile} ({len(lines)}')
                 with sect_destfile.open('wt') as fout:
-                    fout.writelines('\n'.join(lines))
-        
-    return ''.join(lines)
+                    fout.writelines('\n'.join(all_lines))
+    return ''.join(all_lines)
 
 
 def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',

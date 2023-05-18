@@ -94,46 +94,77 @@ them must be run sequentially all the way through the entire text.
 A transformer breaks the problem into a much smaller problem, predicting a single token at a time.
 This way all the neurons of a transformer can be run in parallel on a GPU or multi-core CPU to dramatically speed up the time it takes to make a prediction.
 
-And there's another advantage of re
-Instead of waiting for each neuron or layer in an RNN to produce it's output before  
-recursive function is just intended to be run recursively
- 
 They use the last predicted output as the input to predict the next output.
 But transformers are _recursive_ not _recurrent_.
 Recurrent neural networks (RNNs) include variational autoencoders, RNNs, LSTMs, and GRUs.
 When researchers combine five NLP ideas to create the transformer architecture, they discovered a total capability that was much greater than the sum of its parts:
+
+=== Attention is NOT all you need
+// SUM: Attention, BPE, positional encoding, stackability and scalability all combine to create the power of a transformer, but the attention mechanism created a powerful synergy between these algorithms.
 
 ////
 KM: We can't use bold. Please change the terms below that are bolded to be italicized.
 HL: Done
 ////
 
-_Attention_:: Connecting important word patterns together across long stretches of text using a connection matrix (attention)
-_Byte pair encoding (BPE)_:: Tokenizing words based on character sequence statistics rather than spaces and punctuation
-_Positional encoding_:: Keeping track of where each token or pattern is located within the token sequence
-_Stackability_:: Arranging the inputs and outputs of a transformer layer to have the exact same structure so they can be stacked to increase capacity
-_Scalability_:: Training large-capacity transformers on web scale data gives transformers unexpected (emergent) capabilities 
+* _Byte pair encoding (BPE)_:: Tokenizing words based on character sequence statistics rather than spaces and punctuation
+* _Attention_:: Connecting important word patterns together across long stretches of text using a connection matrix (attention)
+* _Positional encoding_:: Keeping track of where each token or pattern is located within the token sequence
 
-////
-TODO HL: Use this at the end of the chapter as an alternative wording?
-* Global self-attention - word patterns can be recognized no matter how far apart they are  
-* Positional encoding - the model is made aware of the position with modified embedding vectors for all tokens
-* Stackability - layer input and output consistency the outputs of one layer to be input to another layer
-* Scalability - GPU-optimized linear algebra implementations create unprecedented scalability
-////
+Byte pair encoding (BPE) is an often overlooked enhancement of transformers.
+BPE was originally invented to encode text in a compressed binary (byte sequence) format.
+But BPE really came into its own when it was used as a tokenizer in NLP pipelines such as search engines.
+Internet search engines often contain millions of unique words in their vocabulary.
+Imagine all the important names a search engine is expected to understand and index.
+BPE can efficiently reduce your vocabulary several orders of magnitude.
+The typical transformer BPE vocabulary size is only 5000 tokens.
+And when you're storing a long embedding vector for each of your tokens, this is a big deal.
+A BPE vocabulary trained on the entire Internet can easily fit in the RAM of a typical laptop or GPU.
 
 Attention gets most of the credit for the success of transformers, because it made the other parts possible.
-The attention mechanism removes recurrence feature of the encoder and decoder networks.
+The attention mechanism is a much simpler approach than the complicated math (and computational complexity) of CNNs and RNNs.
+The attention mechanism removes the recurrence of the encoder and decoder networks.
+So a transformer has neither the _vanishing gradients_ nor the _exploding gradients_ problem of an RNN.
 Transformers are limited in the length of text they can process because the attention mechanism relies on a fixed-length sequence of embeddings for both the inputs and outputs of each layer.
-And transformers take advantage of the BPE encoding tokenization approach by allowing tokens to be separated according to statistics rather than predetermined spelling rules.
-To help transformers compensate for the loss of recurrence, researchers added positional encoding which gives transformers a way to keep track of how far along they are in processing an input text.
-But this limitation turned out to be transformers' superpower, by enabling transformer layers to be stacked.
-And this stackability of inputs and outputs created unprecedented scalability.
+The attention mechanism is essentially a single CNN kernel that spans the entire sequence of tokens.
+Instead of rolling across the text with convolution or recurrence, the attention matrix is simply multiplied once by the entire sequence of token embeddings.
 
-== Attention is not all you need
-// SUM: Attention, BPE, positional encoding, stackability and scalability all combine to create the power of a transformer, but the attention mechanism created a powerful synergy between these algorithms.
-Attention, BPE, positional encoding, stackability and scalability all combine to create the power of a transformer.
-But the attention mechanism was the connector between all these ideas that helped them work together effectively.
+The loss of recurrence in a transformer creates a new challenge, because the transformer operates on the entire sequence all at once.
+A transformer is _reading_ the entire token sequence all at once.
+And it outputs the tokens all at once as well, making bi-directional transformers an obvious approach.
+Transformers do not care about the normal causal order of tokens while it is reading or writing text.
+To give transformers information about the causal sequence of tokens, positional encoding was added.
+And it doesn't even require additional dimensions within the vector embedding, positional encoding is spread out over the entire embedding sequence by multiplying them by the sine and cosine functions.
+Positional encoding enables nuanced adjustment to a transformer's understanding of tokens depending on their location in a text.
+With positional encoding, the word "sincerely" at the beginning of an email has a different meaning than it does at the end of an email.
+
+Limiting the token sequence length had a cascading effect of efficiency improvements that give transformers an unexpectedly powerful advantage over other architectures: _scalability_.
+BPE plus _attention_ plus positional encoding combine together to create unprecedented scalability.
+These three innovations and simplifications of neural networks combined to create a network that is both much more stackable and much more parallelizable.
+
+* _Stackability_:: The inputs and outputs of a transformer layer have the exact same structure so they can be stacked to increase capacity
+* _Parallelizability_:: The cookie cutter transformer layers all rely heavily on large matrix multiplications rather than complex recurrence and logical switching gates
+
+This stackability of transformer layers combined with the parallelizablity of the matrix multiplication required for the attention mechanism creates unprecedented scalability.
+And when researchers tried out their large-capacity transformers on the largest datasets they could find (essentially the entire Internet), they were taken aback.
+The extremely large transformers trained on extremely large datasets were able solve NLP problems previously thought to be out of reach.
+Smart people are beginning to think that world-transforming conversational machine intelligence (AGI) may only be years away, if it isn't already upon us.
+
+=== Much attention about everything
+// SUM: Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers which are just linear fully-connected feed forward layers.
+
+You might think that all this talk about the power of attention is much ado about nothing.
+Surely transformers are more than just a simple matrix multiplication across every token in the input text.
+Transformers combine many other less well-known innovations such as BPE, self-supervised training, and positional encoding.
+But the attention matrix was the connector between all these ideas that helped them work together effectively.
+And the attention matrix enables a transformer to accurately model the connections between _all_ the words in a long body of text, all at once.
+
+As with CNNs and RNNs (LSTMs & GRUs) each layer of a transformer gives you a deeper and deeper representation of the _meaning_ or _thought_ of the input text.
+But unlike CNNs and RNNs, the encoding that a transformer layer outputs is the exact same size and shape as the previous layers.
+Likewise for the decoder, a transformer layer outputs a fixed-size sequence of embeddings representing the semantics (meaning) of the output token sequence.
+The outputs of one transformer layer can be directly input into the next transformer layer making the layers even more _stackable_ than CNN's.
+And the attention matrix within each layer spans the entire length of the input text, so each transformer layer has exactly the same internal structure and math.
+You can stack as many transformer encoder and decoder layers as you like creating as deep a neural network as you need for the information content of your data.
 
 Every transformer layer outputs a consistent _encoding_ with the same size and shape.
 Encodings are just embeddings but for token sequences instead of individual tokens.
@@ -145,23 +176,16 @@ Like all vectors, encodings maintain a consistent structure so that they represe
 And transformers are designed to accept these encoding vectors as part of their input to maintain a "memory" of the previous layers' understanding of the text.
 This allows you to stack transformer layers with as many layers as you like, if you have enough training data to utilize all that capacity.
 This "scalability" allows transformers to break through the diminishing returns ceiling of RNNs. 
-FIXME: Trans 
-Transformers are able to generate longer and longer texts as you add layers.
 
-As with CNNs, RNNs, and LSTMs each layer's encoding gives you a representation of the meaning of the text in a hierarchy of meaning and concepts.
-The outputs of one transformer layer can be directly input into the next transformer layer enabling unprecendented _stackability_.
-This creates an encoder-decoder architecture that is stackable.
-The encoder and decoder halves of the network can contain as many transformer layers as you like.
-Without the time sequencing constraint of recurrent networks, many computations in transformers can be parallelized and deep models can be trained comparatively more quickly than recurrent counterparts with impressive results.
+And because the attention mechanism is just a connection matrix, it can be implemented as a matrix multiplication with a PyTorch `Linear` layer.
+Matrix multiplications are parallelized when you run your PyTorch network on a GPU or multicore CPU.
+This means that much larger transformers can be parallelized and these much larger models can be trained much faster.
+_Stackability_ plus _Parallelizablity_ equals _Scalability_.
 
-An even less-appreciated advantage of transformers is the positional encoding which enables nuanced adjustment to a transformer's understanding of tokens depending on their location in a text.
-The word "Sincerely" at the beginning of an email has a different meaning to a transformer than at the end of an email.
-And transformer layers are designed to have inputs and outputs with the same size and shape, so that the transformer layers can be stacked like Lego bricks that all have the same shape.
+Transformer layers are designed to have inputs and outputs with the same size and shape, so that the transformer layers can be stacked like Lego bricks that all have the same shape.
 The transformer innovation that catches most researchers' attention is the _attention mechanism_.
 Start there if you want to understand what makes transformers so exciting to NLP and AI researchers.
 Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers which are essentially fully-connected feed forward layers with the same.
-
-// SUM: Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers and fully-connected feed forward layers for the encoder and decoder.
 
 ////
 KM: In the paragraph below, you reference chapter 9 for RNNs, but this is now chapter 9. Please check which chapter you mean now. 
@@ -185,7 +209,7 @@ Similar to the memory and forgetting gates in a GRU or LSTM, the attention mecha
 In the next few sections, you'll walk through the fundamental concepts behind the transformer and take a look at the architecture of the model.
 Then you will use the base pytorch implementation of the Transformer module to implement a language translation model, as this was the reference task in "Attention Is All You Need", to see how it is both powerful and elegant in design.
 
-=== Self-attention
+==== Self-attention
 
 When we were writing the first edition of this book, Hannes and Cole (the first edition coauthors) were already focused on the attention mechanism.
 It's now been 6 years and attention is still the most researched topic in deep learning.
@@ -194,17 +218,25 @@ The attention mechanism enabled a leap forward in capability for problems where 
 ////
 KM: It might be useful to italicize the terms below. 
 ////
+* _Conversation_ -- Generate plausible responses to conversational prompts, queries, or utterances.
+* _Abstractive summarization or paraphrasing_:: Generate a new shorter wording of a long text summarization of sentences, paragraphs, and even several pages of text.
+* _Open domain question answering_:: Answering a general question about anything the transformer has ever read.
+* _Reading comprehension question answering_:: Answering questions about a short body of text (usually less than a page).
+* _Encoding_:: A single vector or sequence of embedding vectors that represent the meaning of body of text in a vector space -- sometimes called _task-independent sentence embedding_.
+* _Translation and code generation_ -- Generating plausible software expressions and programs based on plain English descriptions of the program's purpose.
 
-* _Summarization_ -- abstractive summarization of sentences, paragraphs, and even several pages of text
-* _Question answering -- reading comprehension or open domain general question answering
-* _Embedding_ the meaning of sentences in a vector space -- _task-independent sentence embedding_
-* _Conversation_ -- generate plausible responses to conversational prompts
-
-Self-attention is the most straight-forward and common way to implement attention. takes the input embedding vectors and puts them through linear projections (dot products) to create key, value and query vectors.
-The query vector is used along with the key vector to create a context vector for words embedding vectors related to the query.
+Self-attention is the most straight-forward and common way to implement attention.
+It takes the input sequence of embedding vectors and puts them through linear projections.
+A linear projects is merely a dot product or matrix multiplication.
+This dot product creates key, value and query vectors.
+The query vector is used along with the key vector to create a context vector for the words' embedding vectors and their relation to the query.
 This context vector is then used to get a weighted sum of values.
 In practice, all these operations are done on sets of queries, keys, and values packed together in matrices, _Q_, _K_, and _V_, respectively.
-Of the two types of attention functions commonly used, _additive_ and _dot-product_ attention, the one used in transformers is a scaled version of dot-production attention, in which the scalar products between the query _Q_ and the keys _K_, are scaled down by a factor related to the dimension of the model and the number of attention _heads_ in the multi-head mechanism.
+
+There are two ways to implement the linear algebra of an attention alogrithm: _additive attention_ or _dot-product attention_.
+The one that was most effective in transformers is a scaled version of dot-production attention.
+For dot-product attention, the scalar products between the query vectors _Q_ and the key vectors _K_, are scaled down based on how many dimensions there are in the model.
+This makes the dot product more numerically stable for large dimensional embeddings and longer text sequences.
 Here's how you compute the self-attention outputs for the query, key, and value matrices _Q_, _K_, and _V_.
 
 .Equation 12.1 Self-attention outputs
@@ -213,7 +245,8 @@ Here's how you compute the self-attention outputs for the query, key, and value 
 Attention(Q, K, V ) = softmax(\frac{QK^{T}}{\sqrt{d_{k}}})V
 ++++
 
-To counter the effect of large dot products forcing small gradients in the softmax, the product of the query and key matrices is scaled by latexmath:[\frac{1}{\sqrt{d_{k}}}].
+The high dimensional dot products create small gradients in the softmax due to the law of large numbers.
+To counteract this effect, the product of the query and key matrices is scaled by latexmath:[\frac{1}{\sqrt{d_{k}}}].
 The softmax normalizes the resulting vectors so that they are all positive and sum to 1.
 This "scoring" matrix is then multiplied with the values matrix to get the weighted values matrix in figure <<figure-scaled-dot-product-attention>>.footnote:["Scaled dot product attention from scratch" by Jason Brownlee (https://machinelearningmastery.com/how-to-implement-scaled-dot-product-attention-from-scratch-in-tensorflow-and-keras/)] footnote:["Attention is all you Need" by Ashish Vaswani et al 2017 (https://arxiv.org/abs/1706.03762)]
 
@@ -230,9 +263,12 @@ A toy example is shown in figure <<figure-attention-matrix-illustration>>.
 .Encoder attention matrix as connections between words
 image::../images/ch09/attention_heatmap.png[alt="Heatmap of an illustrative self-attention matrix or self-attention edge list for the phrase 'What is BERT.' showing attention between the words BERT and What as well as the question mark and 'What'.", width=100%, align="center", link="../images/ch09/attention_heatmap.png"]
 
-=== Multi-Head Self-Attention
-Perhaps the most ground-breaking and novel feature of the transformer is the concept of multi-head self-attention.
-The authors linearly project the query, key, and value matrices _n_ times ("heads") with different latexmath:[d_q] , latexmath:[d_k], and latexmath:[d_v] dimensions and compute the attention function on all in parallel.
+==== Multi-Head Self-Attention
+Multi-head self-attention is a expansion of the self-attention approach to create multiple attention heads that each attend to different aspects of the words in a text.
+So if a token has multiple meanings that are all relevant to the interpretation of the input text, they can each be accounted for in the separate attention heads.
+You can think of each attention head as another dimension of the encoding vector for a body of text, similar to the additional dimensions of an embedding vector for an individual token (see Chapter 6).
+The query, key, and value matrices are multiplied _n_ (_n_heads_, the number of attention heads) times by each different latexmath:[d_q] , latexmath:[d_k], and latexmath:[d_v] dimension, to compute the total attention function output.
+The _n_heads_ value is a hyperparameter of the transformer architecture that is typically small, comparable to the number of transformer layers in a transformer model.
 The latexmath:[d_v]-dimensional outputs are concatenated and again projected with a latexmath:[W^o] matrix as shown in the next equation.
 
 .Equation 12.2 Multi-Head self-attention
@@ -258,13 +294,17 @@ This is because it needs It turns out, the multihead attention layer acts a lot 
 .Multi-Head Self-Attention
 image::../images/ch09/multi-head-attention.drawio.png[alt="Multi-Head Self-Attention",width=80%,align="center",link="../images/ch09/transformer_multihead_attention.png"]
 
-It turns out, the multi-head attention mechanism acts a lot like a fully connected linear layer, only the values of the input embeddings are combined together.
+It turns out, the multi-head attention mechanism is just a fully connected linear layer under the hood.
+After all is said and done, the deepest of the deep learning models turned to be nothing more than a clever stacking of what is essentially linear and logistic regressions.
+This is why it was so surprising that transformers were so successful.
+And this is why it was so important for you to understand the basics of linear and logistic regression described in earlier chapters.
 
-
-== Filling the gaps in attention 
+== Filling the attention gaps
+// SUM: A little more detail about positional encoding and a quick look at BERT and bidirectional transformers.
 
 ////
 KM: You don't need to define what RNNs stand for in parantheses below since you've already defined this term in a previous chapter. 
+HL: Done.
 ////
 
 The attention mechanism compensates for some problems with RNNs and CNNs of previous chapters, but creates some additional challenges.
@@ -282,7 +322,7 @@ So CNNs are not stackable, making them tricky to scale up for greater capacity a
 So to give a transformer the uniform data structure it needs for stackability, transformers use byte pair encoding and positional encoding to spread the semantic and position information uniformly across the encoding tensor.
 
 === Positional encoding
-Word order in the input sentences matter, so another facility that is required is a way to bake in some positional meaning with the word embeddings.
+Word order in the input text matters, so you need a way to bake in some positional information into the sequence of embeddings that is passed along between layers in a transformer.
 A positional encoding is simply a function that adds information about the relative or absolute position of a word in a sequence to the input embeddings.
 The encodings have the same dimension, latexmath:[d_{model}], as the input embeddings so they can be summed with the embedding vectors.
 The paper discusses learned and fixed encodings and proposes a sinusoidal function of sin and cosine with different frequencies, defined as:
@@ -371,15 +411,22 @@ image::../images/ch09/transformer_original.png[alt="Original Transfomer from 'At
 In the original transformer, both the encoder and decoder are comprised of _N_ = 6 stacked identical encoder and decoder layers, respectively.
 
 ==== Encoder
-The encoder is composed of two sub-layers, a multi-head attention layer and a position-wise fully connected feed-forward network.
-A residual connection is made around each sub-layer coupled with layer normalization.
-It's important to note that the outputs of all sub-layers in module along with all embeddings are of dimension latexmath:[d_{model}].
-Also notice that the input embedding sequences to the encoder are summed with the positional encodings previously described.
+The encoder is composed of multiple encoder layers.
+Each encoder layer has two sub-layers: a multi-head attention layer and a position-wise fully connected feed-forward network.
+A residual connection is made around each sub-layer.
+And each encoder layer has its output normalized so that all the values of the encodings passed between layers range between zero and one.
+The outputs of all sub-layers in a transformer layer (PyTorch module) that are passed between layers all have dimension latexmath:[d_{model}].
+And the input embedding sequences to the encoder are summed with the positional encodings before being input into the encoder.
 
 ==== Decoder
-The decoder is nearly identical to the encoder in the model, however it has a separate multi-head self-attention sub-layer that applies masking to the output sequences, which are shifted right by one position.
+The decoder is nearly identical to the encoder in the model, but has three sublayers instead of one.
+The new sublayer is a fully connected layer similar to the the multi-head self-attention matrix but contains only zeros and ones.
+This creates a _masking_ of the output sequences that are to the right of the current target token (in a left-to-right language like English).
 This ensures that predictions for position _i_ can depend only on previous outputs, for positions less than _i_.
-i.e. The model cannot look forward in the sequence for making predictions.
+In other words, during training, the attention matrix is not allowed to "peek ahead" at the subsequent tokens that it is supposed to be generating in order to minimize the loss function.
+This prevents _leakage_ or "cheating" during training, forcing the transformer to attend only to the tokens it has already seen or generated.
+Masks are not required within the decoders for an RNN, because each token is only revealed to the network one at a time.
+But transformer attention matrices have access to the entire sequence all at once during training.
 
 [[figure-encoder-decoder-connections]]
 .Connections between encoder and decoder layers
@@ -444,7 +491,10 @@ DatasetDict({
 
 It's always a good idea to examine some examples in your dataset before you start a long training run.
 This can help you make sure the data is what you expect.
-The `opus_books` doesn't contain main books, and it has be segmented into 50,000 aligned sentence pairs.
+The `opus_books` doesn't contain many books.
+So it's not a very diverse (representative) sample of German language.
+It has be segmented into only 50,000 aligned sentence pairs.
+Imagine having to learn German by having only a few translated books to read.
 
 [source,python]
 ----
@@ -538,10 +588,18 @@ You can use any language pair you like, but the original AIAYN paper demo exampl
 <2> The target (`TGT`) language is German or deutsch ('de')
 <3> A `ByteLevel` tokenizer is less efficient than a character (code-point) level tokenizer but more robust (no OOV tokens)
 
-The `ByteLevel` part of your `BPETokenizer` ensures that your tokenizer will never miss a beat (or a byte) as its tokenizing your text.
-It can always construct any character by combining one of the 256 possible single-byte tokens available in its vocabulary.
-This means it can process any language.
-But an average of 70% more tokens will be required to represent a text that it hasn't been trained on.
+The `ByteLevel` part of your BPE tokenizer ensures that your tokenizer will never miss a beat (or byte) as it is tokenizing your text.
+A byte-level BPE tokenizer can always construct any character by combining one of the 256 possible single-byte tokens available in its vocabulary.
+This means it can process any language that uses the unicode character set.
+A byte-level tokenizer will just fall back to representing the individual bytes of a unicode character if it hasn't seen it before or hasn't included it in its token vocabulary.
+A byte-level tokenizer will need an average of 70% more tokens (almost double the vocabulary size) to represent a new text containing characters or tokens that it hasn't been trained on.
+
+Character-level BPE tokenizers have their disadvantages too.
+A character-level tokenizer must hold each one of the multibyte unicode characters in its vocabulary to avoid having any meaningless OOV (out-of-vocabulary) tokens.
+This can create a huge vocabulary for a multilingual transformer expected to handle most of the 161 languages covered by unicode characters.
+There are 149,186 characters with unicode code points for both historical (Egyptian hieroglyphs for example) and modern written languages.
+That's about 10 times the memory to store all the embeddings and tokens in your transformer's tokenizer.
+In the real world it is usually practical to ignore historical languages and some rare modern languages when optimizing your transformer BPE tokenizer for memory and balancing that with your transformer's accuracy for your problem. 
 
 [IMPORTANT]
 ====
@@ -979,18 +1037,21 @@ The inputs and outputs of each `TransformerEncoderLayer` have the same shape, so
 Transformer layers are like the floors of a sky scraper or a childs stack of wooden blocks.
 Each level has exactly the same 3D shape.
 
-[source,code]
+[source,text]
 ----
 TranslationTransformer(
   (encoder): TransformerEncoder(
     (layers): ModuleList(
       (0-5): 6 x TransformerEncoderLayer(
         (self_attn): MultiheadAttention(
-          (out_proj): NonDynamicallyQuantizableLinear(in_features=512, out_features=512, bias=True)
+          (out_proj): NonDynamicallyQuantizableLinear(
+            in_features=512, out_features=512, bias=True)
         )
-        (linear1): Linear(in_features=512, out_features=2048, bias=True)
+        (linear1): Linear(
+          in_features=512, out_features=2048, bias=True)
         (dropout): Dropout(p=0.1, inplace=False)
-        (linear2): Linear(in_features=2048, out_features=512, bias=True)
+        (linear2): Linear(
+          in_features=2048, out_features=512, bias=True)
         (norm1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
         (norm2): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
         (dropout1): Dropout(p=0.1, inplace=False)
@@ -1003,7 +1064,6 @@ TranslationTransformer(
 ----
 
 Notice that you set the sizes of your source and target vocabularies in the constructor.
-Th
 Also, you pass the indices for the source and target padding tokens for the model to use in preparing the source, targets, and associated masking sequences.
 Now that you have the model defined, take a moment to do a quick sanity check to make sure there are no obvious coding errors before you setup the training and inference pipeline.
 You can create "batches" of random integer tensors for the sources and targets and pass them to the model as demonstrated in the following listing.
@@ -1201,13 +1261,18 @@ HL: DONE
 ----
 >>> model.load_state_dict(torch.load(BEST_MODEL_FILE))
 >>> test_loss = evaluate(model, test_iterator, criterion)
-
 >>> print(f'| Test Loss: {test_loss:.3f} | Test PPL: {math.exp(test_loss):7.3f} |')
 | Test Loss: 1.590 | Test PPL:   4.902 |
 ----
 
+Your translation transformer acheives a log loss of about 1.6 on the test set.
+For a translation model trained on such a small dataset this is not too bad.
+Log loss of 1.59 corresponds to a 20% probability (`exp(-1.59)`) of generating the correct token and the exact position it was provided in the test set.
+Because there are many different correct English translations for a given German text, this is a reasonable accuracy for a model that can be trained on a commodity laptop. 
+
 ////
 KM: Do we have output at this point? If so, show that. Also, give us a transitional sentence or two after the listing about what you just completed and what the next sub-section is going to be doing. 
+HL: Done
 ////
 
 ==== TranslationTransformer Inference
@@ -1228,21 +1293,25 @@ The function returns the target indexes converted to tokens (words) and the atte
 .Define _translate_sentence()_ for performing inference
 [source,python]
 ----
->>> def translate_sentence(sentence, src_field, trg_field, model, device, max_len = 50):
+>>> def translate_sentence(sentence, src_field, trg_field,
+...         model, device=DEVICE, max_len=50):
 ...     model.eval()
 ...     if isinstance(sentence, str):
 ...         nlp = spacy.load('de')
 ...         tokens = [token.text.lower() for token in nlp(sentence)]
 ...     else:
 ...         tokens = [token.lower() for token in sentence]
-...     tokens = [src_field.init_token] + tokens + [src_field.eos_token]  # <1>
+...     tokens = ([src_field.init_token] + tokens
+...         + [src_field.eos_token])  # <1>
 ...     src_indexes = [src_field.vocab.stoi[token] for token in tokens]
 ...     src = torch.LongTensor(src_indexes).unsqueeze(0).to(device)
 ...     src, src_key_padding_mask = model.prepare_src(src, SRC_PAD_IDX)
 ...     with torch.no_grad():
-...         enc_src = model.encoder(src, src_key_padding_mask=src_key_padding_mask)
-...     trg_indexes = [trg_field.vocab.stoi[trg_field.init_token]]  # <2>
-
+...         enc_src = model.encoder(src,
+...             src_key_padding_mask=src_key_padding_mask)
+...     trg_indexes = [
+...         trg_field.vocab.stoi[trg_field.init_token]]  # <2>
+...
 ...     for i in range(max_len):
 ...         tgt = torch.LongTensor(trg_indexes).unsqueeze(0).to(device)
 ...         tgt, tgt_key_padding_mask, tgt_mask = model.prepare_tgt(
@@ -1257,7 +1326,8 @@ The function returns the target indexes converted to tokens (words) and the atte
 ...         pred_token = output.argmax(2)[:,-1].item()  # <3>
 ...         trg_indexes.append(pred_token)
 ...
-...         if pred_token == trg_field.vocab.stoi[trg_field.eos_token]:  # <4>
+...         if pred_token == trg_field.vocab.stoi[
+...                 trg_field.eos_token]:  # <4>
 ...             break
 ...
 ...     trg_tokens = [trg_field.vocab.itos[i] for i in trg_indexes]
@@ -1273,12 +1343,20 @@ The function returns the target indexes converted to tokens (words) and the atte
 ////
 KM: Do we have output at this point? If so, show that. Also, give us a transitional sentence or two after the listing about what you just completed and what the next sub-section is going to be doing. 
 ////
+Your `translate_sentence()` wraps up your big transformer into a handy package you can use to translate whatever German sentence you run across.
+
 
 ==== TranslationTransformer Inference Example 1
-Use _translate_sentence()_ on an example from the test data.
+
+Now you can use your _translate_sentence()_ function on an example text.
+Since you probably do not know German, you can use a random example from the test data.
+Try it for the sentence "Eine Mutter und ihr kleiner Sohn genießen einen schönen Tag im Freien."
+In the OPUS dataset the character case was folded so that the text you feed into your transformer should be "eine mutter und ihr kleiner sohn genießen einen schönen tag im freien."
+And the correct translation that you're looking for is: "a mother and her little [or young] son are enjoying a beautiful day outdoors."
 
 ////
 KM: What is the example of data? It might be helpful to spell that out for the reader. 
+HL: Done
 ////
 
 .Load sample at _test_data_ index 10
@@ -1295,7 +1373,13 @@ KM: What is the example of data? It might be helpful to spell that out for the r
  'a', 'beautiful', 'day', 'outside', '.']
 ----
 
-Run the _src_ through your translator.
+It looks like the OPUS dataset is not perfect itself.
+The target (translated) token sequence is missing the verb "are" between "song" and "enjoying".
+And, the German word "kleiner" can be translated as little or young, but OPUS dataset example only provides one possible "correct" translation.
+And what about that "young song," that seems odd.
+Perhaps that's a typo in the OPUS test dataset.
+
+Now you can run the `src` token sequence through your translator to see how it deals with that ambiguity.
 
 .Translate the test data sample
 [source,python]
@@ -1305,8 +1389,9 @@ Run the _src_ through your translator.
 translation = ['a', 'mother', 'and', 'her', 'little', 'son', 'enjoying', 'a', 'beautiful', 'day', 'outside', '.', '<eos>']
 ----
 
-Interestingly, it appears there is a typo in the German word for "son" (sohn?) in the source sentence that has it being translated to "song" in English.
-Based on context, it appears the model did well to infer that a mother is (probably) with her young "son".
+Interestingly, it appears there is a typo in the translation of the German word for "son" ("sohn") in the OPUS dataset.
+The dataset incorrectly translates "sohn" in German to "song" in English.
+Based on context, it appears the model did well to infer that a mother is (probably) with her young (little) "son".
 The model gives us the adjective "little" instead of "young", which is acceptable, given that the direct translation of German word "kleiner" is "smaller".
 
 Let's focus our attention on, um, _attention_.
@@ -1723,7 +1808,7 @@ Next, you'll setup just a few basic parameters and then you will be ready to loa
 
 In the listing below you load the pretrained _bert-base-cased_ model configured to output the number of labels in our toxic comment data (6 total) and initialized for training with your `model_args` dictionary.footnote:[See "Configuring a Simple Transformers Model" section of the following webpage for full list of options and their defaults: https://simpletransformers.ai/docs/usage/]
 
-// TODO: more discussion on model selection, hardware requirements, etc. e.g. For those of you who like power tools, you may be asking why we're using the "base" BERT and not BERT Large?
+// TODO: More discussion on model selection, hardware requirements, etc. e.g. For those of you who like power tools, you may be asking why we're using the "base" BERT and not BERT Large?
 
 .Load pre-trained model and fine-tune
 [source,python]

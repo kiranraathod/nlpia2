@@ -231,7 +231,7 @@ for key, value in token_counts.items():
         continue
     tf = value / len(tokens)
     idf = len(docs) / docs_containing_key
-   query_vec[key] = tf * idf
+    query_vec[key] = tf * idf
 cosine_sim(query_vec, document_tfidf_vectors[0])
 cosine_sim(query_vec, document_tfidf_vectors[1])
 cosine_sim(query_vec, document_tfidf_vectors[2])

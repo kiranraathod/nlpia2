@@ -59,8 +59,10 @@ tagged_words = [
 df = pd.DataFrame(tagged_words, columns=['token'] + tags).T
 print(df)
 import torch
-x = torch.tensor(df.iloc[1:].astype(float).values,
-x = x.unsqueeze(0)                                  <2>
+x = torch.tensor(
+    df.iloc[1:].astype(float).values,
+    dtype=torch.float32)  # <1>
+x = x.unsqueeze(0) # <2>
 kernel = pd.DataFrame(
           [[1, 0, 0.],
            [0, 0, 0.],

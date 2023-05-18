@@ -710,9 +710,10 @@ Instead you must convert all input data to `torch.Tensor` containers with `torch
 [source,python]
 ----
 >>> import torch
->>> x = torch.tensor(df.iloc[1:].astype(float).values,
-[CA] dtype=torch.float32)    <1>
->>> x = x.unsqueeze(0)                                  <2>
+>>> x = torch.tensor(
+...     df.iloc[1:].astype(float).values,
+...     dtype=torch.float32)  # <1>
+>>> x = x.unsqueeze(0) # <2>
 ----
 <1> you can use any floating point `dtype` as long as you are consistent for the entire CNN
 <2> insert a new 0th dimension with a size of 1 for a batch with only 1 example sentence
