@@ -12,6 +12,7 @@
 This chapter covers:
 
 * Using conversational LLMs productively
+* Recognizing errors, misinformation, and biases in LLM output 
 * Understanding how conversational LLMs work
 * Engineering prompts for conversational LLMs
 * Finding meaningful search results for your queries (semantic search)
@@ -42,12 +43,26 @@ CHAPTER OUTLINE
 ////
 
 If you scale up transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
-Researchers call these surprises "emergent properties." 
-And the most impressive of these surprises is that chatbots built using LLMs generate intelligent sounding text.
-If you've spent time using LLM chatbots such as ChatGPT, Bard, Bing Chat, Perplexity AI, you are probably excited to use them to help you get ahead.
-Finally a search engine and virtual assistant that actually gives direct, smart-sounding answers to your questions.
-Be careful.
-You may be surprised at how unintelligent these trillion-parameter language models really are.
+Researchers call these surprises "emergent properties" but they may be a mirage.footnote:["AI's Ostensible Emergent Abilities Are a Mirage" 2023 by Katharine Miller (https://hai.stanford.edu/news/ais-ostensible-emergent-abilities-are-mirage)]
+The most sensational of these surprises is that chatbots built using LLMs generate intelligent sounding text.
+You've probably spent some time using LLM chatbots such as ChatGPT, Bard, Bing Chat, Perplexity AI, and they may be helping you get ahead in your career by helping you craft words, code, or ideas faster.
+Like most, you are probably relieved to finally have a search engine and virtual assistant that actually gives you direct, smart-sounding answers to your questions.
+This chapter will help you use LLMs smartly so you can do more than merely _sound_ intelligent.
+
+This chapter will help you recognize the problems with LLMs so you can use them smartly and minimize their harm to you and others.
+
+* _Misinformation_:: LLMs trained on social media will amplify misinformation
+* _Errors_:: LLMs will insert pernicious errors and into your code and words
+* _Learning_:: Used incorrectly, LLMs can reduce your metacognition skill
+* _Collective intelligence_:: LLMs are dumbing down society, making us more reactive and less thoughtful
+* _Bias_:: LLMs have algorithmic biases that are harming millions 
+* _Accessibility_:: The resources and skills required for LLMs are out of reach for millions
+* _Environmental impact_:: LLMs are notoriously wasteful and polluting footnote:[ChatGPT carbon footpring estimate on Towards Data Science (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fthe-carbon-footprint-of-chatgpt-66932314627d)] footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)]
+
+You can mitigate all these harms by building and using LLMs that are smarter and more efficient.
+That's what this chapter is about.
+Your will soon learn how to build LLMs that generate more intelligent, trustworthy, equitable words.
+And you will learn how to make your LLMs more efficient and less wasteful, not only reducing the engironmental impact but also helping more people gain access to the power of LLMs.
 
 == Large Language Models (LLMs)
 

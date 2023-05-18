@@ -48,19 +48,19 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
     lines = []
     for i, line in enumerate(text.splitlines()):
         lines.append(dict(
-         line_text=line,
-         line_number=i,
-         filename=filename,
-         is_text=(re.match(RE_TEXT_LINE, line) is not None),
-         is_empty=(re.match(RE_EMPTY_LINE, line) is not None),
-         is_code_or_output=(re.match(RE_CODE_OR_OUTPUT, line) is not None),
-         is_title=(re.match(RE_TITLE_LINE, line) is not None),
-         is_metadata=(re.match(RE_METADATA, line) is not None),
-         is_code_comment=(re.match(RE_CODE_COMMENT, line) is not None),
-         is_markup=(re.match(RE_MARKUP_LINE, line) is not None),
-         is_figure_name=(re.match(RE_FIGURE_NAME, line) is not None),
-         is_separator=(re.match(RE_SEPARATOR, line) is not None),
-         is_comment=(re.match(RE_COMMENT, line) is not None)
+            line_text=line,
+            line_number=i,
+            filename=filename,
+            is_text=bool(re.match(RE_TEXT_LINE, line)),
+            is_empty=bool(re.match(RE_EMPTY_LINE, line)),
+            is_code_or_output=bool(re.match(RE_CODE_OR_OUTPUT, line)),
+            is_title=bool(re.match(RE_TITLE_LINE, line)),
+            is_metadata=bool(re.match(RE_METADATA, line)),
+            is_code_comment=bool(re.match(RE_CODE_COMMENT, line)),
+            is_markup=bool(re.match(RE_MARKUP_LINE, line)),
+            is_figure_name=bool(re.match(RE_FIGURE_NAME, line)),
+            is_separator=bool(re.match(RE_SEPARATOR, line)),
+            is_comment=bool(re.match(RE_COMMENT, line))
             )
         )
     return lines
@@ -113,8 +113,8 @@ def extract_image_paths(filepath=DEFAULT_FILEPATH):
     return image_paths
 
 
-def tag_code_lines(filepath=DEFAULT_FILEPATH):
-    doctests = extract_code_lines(filepath=filepath)
+def tag_code_lines(sections=None, filepath=DEFAULT_FILEPATH):
+    doctests = sections | extract_code_lines(filepath=filepath)
     tagged_lines = [] 
     for k, doc in enumerate(doctests):
         doc['docnum'] = k
@@ -139,8 +139,6 @@ def tag_code_lines(filepath=DEFAULT_FILEPATH):
                         tagged['fixme'] = 'multiple hashes'
             tagged_lines.append(tagged)
     return tagged_lines
-
-    
 
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
@@ -274,7 +272,7 @@ def extract_goodreads_quotes(text):
         unicode_quotes=[r'[“”]', r'"'],
         unicode_appostrophes=[r'[‘’]', r"'"],
         quote_text=[r'― ([^,]+),([-!?\w\d ]+)',
-                    r'''
+            r'''
   author: \1
   source: Good Reads
   book: \2
@@ -370,7 +368,7 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
             newlines.append(lines[-1])
         fp, filepath = tempfile.mkstemp(text=True, suffix='.adoc')
         filepath = Path(filepath)
-        print(filepath)
+        print(f"Testing: {filepath}")
         with filepath.open('wt') as fout:
             fout.writelines(newlines)
     results = doctest.testfile(str(filepath),
@@ -396,25 +394,24 @@ def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None):
         destfile.mkdir(exist_ok=True)
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
-    sections_lines = extract_code_lines(filepath=filepath, with_metadata=False)
-    if sections_lines:
-        print('sections_lines[0]')
-        print(sections_lines[0])
+    sections_lines = extract_code_lines(
+        filepath=filepath, with_metadata=False)
     
-    all_lines = []
     if destfile:
         destfile = Path(destfile)
-    if sections_lines:
-        for i, lines in enumerate(sections_lines): 
-            all_lines.extend(lines)
-            if destfile:
-                # print('destfile')
-                # print(lines)
-                sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
-                sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
-                print(f'{sect_destfile} ({len(lines)}')
-                with sect_destfile.open('wt') as fout:
-                    fout.writelines('\n'.join(all_lines))
+    if not sections_lines:
+        return ''
+    all_lines = []
+    for i, lines in enumerate(sections_lines): 
+        all_lines.extend(lines)
+        if destfile:
+            # print('destfile')
+            # print(lines)
+            sfx = f'.sect{i:02d}' if len(sections_lines) > 1 else ''
+            sect_destfile = destfile.with_suffix(sfx + destfile.suffix)
+            print(f'{sect_destfile} ({len(lines)}')
+            with sect_destfile.open('wt') as fout:
+                fout.writelines('\n'.join(all_lines))
     return ''.join(all_lines)
 
 
@@ -487,6 +484,10 @@ def parse_args(
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
+        'path', type=Path, default=None, help=adocs_help
+    )
+
+    parser.add_argument(
         '--adocs', type=Path, default=adocs,
         help=adocs_help
     )
@@ -510,6 +511,9 @@ def extract_code(adocs=None, output=None):
         output=Path(output or MANUSCRIPT_DIR / 'py')
         )
     args = parse_args(**args)
+
+    if args['path']:
+        args['adocs'] = args['path']
 
     if args['adocs']:
         if Path(args['adocs']).is_dir():
