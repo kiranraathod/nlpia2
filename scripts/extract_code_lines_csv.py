@@ -9,7 +9,7 @@ for f in Path('../nlpia-manuscript/manuscript/adoc').glob('*.adoc'):
     df['filename'] = f.name
     dfs.append(df)
 df = pd.concat(dfs)
-df
-df.to_csv('../nlpia-manuscript/manuscript/csv/code_lines_all.csv')
-mkdir ../nlpia-manuscript/manuscript/csv/
-df.to_csv('../nlpia-manuscript/manuscript/csv/code_lines_all.csv')
+datadir = Path('../nlpia-manuscript/manuscript/csv/')
+datadir.mkdir(exist_ok=True)
+df.to_csv(datadir / 'code_lines_all.csv')
+
