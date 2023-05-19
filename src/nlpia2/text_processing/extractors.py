@@ -146,7 +146,8 @@ def extract_tagged_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
 
 def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
-    text = Path(filepath).open('rt').read()
+    if len(text) < 128 and Path(text).is_file():
+        text = Path(text).open('rt').read()
     dtparser = DocTestParser()
     
     if not section_break:
