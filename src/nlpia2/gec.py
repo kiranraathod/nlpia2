@@ -29,6 +29,9 @@ class Corrector:
         self.tgt = self.tokenizer.detokenize(self.tgt_tokens)
         return self.tgt
 
+    def __call__(self, src):
+        return self.correct(src)
+
 
 def highlight_diff(src_tokens, tgt_tokens):
     differ = difflib.Differ()
@@ -40,12 +43,14 @@ def highlight_diff(src_tokens, tgt_tokens):
         print (i_s, s), (i_t, t)
 
 
+corrector = Corrector()
+
+
 if __name__ == '__main__':
     src = input("Enter an example paragraph: ")
     src = (src or
         "The water arent hot. My friends are going to be late. Today mine mother is in Barcelona."
-        )
-    corrector = Corrector()
+        )    
     print(f"Attempting to correct:\n{src}\n")
     tgt = corrector.correct(src)
     delta = highlight_diff(corrector.src_tokens, corrector.tgt_tokens)
