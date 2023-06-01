@@ -1,18 +1,21 @@
 """ Load a pretrained GEC (Grammar Error Corrector) for English based on Open NMT (Neural Machine Translation) model"""
 # from jordimas/gec-opennmt-english
-
+from pathlib import Path
 import ctranslate2
 import pyonmttok
 from huggingface_hub import snapshot_download
 import difflib
 
 class Corrector:
-    def __init__(self, repo_id="jordimas/gec-opennmt-english", model_dir=None):
+    def __init__(self,
+            repo_id="jordimas/gec-opennmt-english",
+            model_dir=None,
+            revision="main"):
         if model_dir is None:
             self.model_dir = snapshot_download(
-                repo_id="jordimas/gec-opennmt-english", revision="main")
+                repo_id=repo_id, revision=revision)
         else:
-            self.model_dir = model_dir
+            self.model_dir = Path(model_dir)
         self.tokenizer = pyonmttok.Tokenizer(
             mode="none",
             sp_model_path=self.model_dir + "/sp_m.model")

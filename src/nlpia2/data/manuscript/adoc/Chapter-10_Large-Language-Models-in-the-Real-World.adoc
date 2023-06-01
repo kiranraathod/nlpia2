@@ -39,7 +39,7 @@ CHAPTER OUTLINE
 == Making it real 
  * Retrieval-Augmented Generation
  * training a ExtractiveQA and a RAG pipeline in Haystack
- * deploying our app as a streamlit app on Huggingface spaces
+ * deploying our app as a Streamlit app on Huggingface spaces
 ////
 
 If you scale up transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
@@ -57,12 +57,12 @@ This chapter will help you recognize the problems with LLMs so you can use them 
 * _Collective intelligence_:: LLMs are dumbing down society, making us more reactive and less thoughtful
 * _Bias_:: LLMs have algorithmic biases that are harming millions 
 * _Accessibility_:: The resources and skills required for LLMs are out of reach for millions
-* _Environmental impact_:: LLMs are notoriously wasteful and polluting footnote:[ChatGPT carbon footpring estimate on Towards Data Science (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fthe-carbon-footprint-of-chatgpt-66932314627d)] footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)]
+* _Environmental impact_:: LLMs emit 10-1000 kg/day CO2e (carbon dioxide equivalent) footnote:footnote:[ChatGPT likely emits more than 20 kg/day CO2e based on estimate by (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fthe-carbon-footprint-of-chatgpt-66932314627d)] footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)] footnote:["Sustainable AI: Environmental Implications, Challenges and Opportunities" 2022 by Carole-Jean Wu et al. (https://arxiv.org/pdf/2111.00364.pdf)]
 
 You can mitigate all these harms by building and using LLMs that are smarter and more efficient.
-That's what this chapter is about.
-Your will soon learn how to build LLMs that generate more intelligent, trustworthy, equitable words.
-And you will learn how to make your LLMs more efficient and less wasteful, not only reducing the engironmental impact but also helping more people gain access to the power of LLMs.
+That's what this chapter is all about.
+You will see how to build LLMs that generate more intelligent, trustworthy, equitable words.
+And you will learn how to make your LLMs more efficient and less wasteful, not only reducing the environmental impact but also helping more people gain access to the power of LLMs.
 
 == Large Language Models (LLMs)
 

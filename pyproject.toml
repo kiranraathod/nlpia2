@@ -46,74 +46,78 @@ cnn = "nlpia2.ch07.cnn:main"
 adoc_extract = "nlpia2.text_extractors:main"
 
 [tool.poetry.dependencies]
+#      cmake-3.26.0 filelock-3.10.2 huggingface-hub-0.13.3 idna-3.4 jinja2-3.1.2
+#      joblib-1.2.0 lit-16.0.0 mpmath-1.3.0 networkx-3.0 nltk-3.8.1 numpy-1.24.2
+#      MarkupSafe-2.1.2 certifi-2022.12.7 charset-normalizer-3.1.0 click-8.1.3
+#      nvidia-* packaging-23.0 pillow-9.4.0 pyyaml-6.0 
+#      regex-2023.3.22 requests-2.28.2 scikit-learn-1.2.2 scipy-1.10.1 
+#      sentencepiece-0.1.97 sympy-1.11.1 threadpoolctl-3.1.0 tokenizers-0.13.2
+#      torch-2.0.0 torchvision-0.15.1 tqdm-4.65.0 transformers-4.27.2 triton-2.0.0 typing-extensions-4.5.0
+#      urllib3-1.26.15
+# ^ redundant with sentence-transformers = "2.2.2"
 babel = "*"
 beautifulsoup4 = "*"
-bleach = "*"
 bidict = "*"
+bleach = "*"
 boto3 = "*"
 botocore = "*"
 configargparse = "*"
 cython = "*"
 dataframe-image = "*"
+dateparser = "*"  # ch11
 django = "*"
 edit-distance = "*"
 einops = "*"
 environment = "*"
+evaluate = "*"
 gitpython = "*"
 graphviz = "*"
 h5py = "*"
-html5lib = "*"
 html2text = "*"
+html5lib = "*"
+jsonlines = "*"
 jupyter-console = "*"
 lxml = "*"
-jsonlines = "*"
 m2r = "*"
 matplotlib = "*"
 matplotlib-inline = "*"
 meilisearch = "*"
 mistune = "*"
 nessvec = "*"
+nlpia2-wikipedia = "*"
 nltk = "*"
 openai = "*"
 pandas = "*"
 parsimonious = "*"
 pillow = "*"
-pronouncing = "*"
-psutil = "*"
 pip = "*"
 poetry = "*"
+pronouncing = "*"
+psutil = "*"
+pygraphviz = "*"  # ch11
 pypdf2 = "*"
 python = ">=3.9.16"
 python-dotenv = "*"
 python-slugify = "*"
-# pyyaml = "==6.0"
+# pyyaml = "==6.0"  # redundant
 rapidfuzz = ">=2.13.2,<2.14"
 recommonmark = "*"
-# scipy = "==1.10.1"
-# scikit-learn = "==1.2.2"
+sacrebleu = "*"
+# scikit-learn = "==1.2.2"  # redundant
+# scipy = "==1.10.1"  # redundant
 seaborn = "*"
 sentence_transformers = "*"
-# sentence-transformers-2.2.2 installs: 
-#      MarkupSafe-2.1.2 certifi-2022.12.7 charset-normalizer-3.1.0 click-8.1.3
-#      cmake-3.26.0 filelock-3.10.2 huggingface-hub-0.13.3 idna-3.4 jinja2-3.1.2
-#      joblib-1.2.0 lit-16.0.0 mpmath-1.3.0 networkx-3.0 nltk-3.8.1 numpy-1.24.2
-#      nvidia-* packaging-23.0 pillow-9.4.0 pyyaml-6.0 
-#      regex-2023.3.22 requests-2.28.2 scikit-learn-1.2.2 scipy-1.10.1 
-#      sentencepiece-0.1.97 sympy-1.11.1 threadpoolctl-3.1.0 tokenizers-0.13.2
-#      torch-2.0.0 torchvision-0.15.1 tqdm-4.65.0 transformers-4.27.2 triton-2.0.0 typing-extensions-4.5.0
-#      urllib3-1.26.15
-torch = "*"
 spacy = "*"
 sphinx = "*"
+textacy = "*"  # ch11
 toml = "*"
-# torch = "==2.0.0"
-# torchtext = "==0.15.1"
+torch = "*"
+# torch = "==2.0.0"  # redundant with transformers?
+# torchtext = "==0.15.1"  # redundant with transformers?
 tox = "*"
-evaluate = "*"
-sacrebleu = "*"
 tqdm = "*"
 unidecode = "*"
-nlpia2-wikipedia = "*"
+wikipedia_api = "*"  # ch11
 xmltodict = "*"
 
 [tool.poetry.dev-dependencies]
