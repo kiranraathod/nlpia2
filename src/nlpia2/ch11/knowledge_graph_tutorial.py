@@ -198,13 +198,7 @@ def extract_triples(sentences):
     for i, sent in enumerate(sentences):
         sent_triples = textacy.extract.subject_verb_object_triples(sent)  
         for t in sent_triples:
-            print(t)
-            # triples.append(dict(
-            #     id=i, text=t.text,
-            #     ent="_".join(map(str, t.subject)),
-            #     rel="_".join(map(str, t.verb)),  # predicate
-            #     obj="_".join(map(str, t.object)),
-            #     ))
+            triples.append(t._asdict())
 
     return pd.DataFrame(triples)
 

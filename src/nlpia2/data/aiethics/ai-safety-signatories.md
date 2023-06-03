@@ -1,4 +1,17 @@
-# ai-safety-signatories 
+# Center for AI Safety signatories
+
+Around 200 CEOs and researchers signed the Center for AI Safety open letter.
+It only had one sentence:
+
+"""
+Mitigating the risk of extinction from AI should be a global priority alongside other societal-scale risks such as pandemics and nuclear war.
+"""
+
+[safe.ai](https://www.safe.ai/statement-on-ai-risk)
+
+## AI Safety Signatories 
+
+```yaml
 -
   - Geoffrey Hinton
   - Emeritus Professor of Computer Science, University of Toronto
@@ -455,3 +468,4 @@
 -
   - Dan Hendrycks
   - Executive Director, Center for AI Safety
+```
