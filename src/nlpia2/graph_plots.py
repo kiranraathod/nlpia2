@@ -4,11 +4,6 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from nlpia2.nell import read_nell_tsv
 import pandas as pd
-from .constants import BIGDATA_DIR
-
-NELL_DIR = BIGDATA_DIR / 'nell'
-NELL_DIR.mkdir(exist_ok=True, parents=True)
-DEFAULT_PATH = NELL_DIR / 'NELL.08m.1115.esv.csv.gz'
 
 
 def create_layout(G, layout='spring', **kwargs):
@@ -18,7 +13,7 @@ def create_layout(G, layout='spring', **kwargs):
         layout = getattr(nx, f'{layout}_layout')
     if not callable(layout) and not isinstance(layout, dict):
         layout = nx.spring_layout
-    layout = layout(G, **kwargs) # draw graph
+    layout = layout(G, **kwargs)  # draw graph
     return layout
 
 
@@ -39,11 +34,12 @@ def filter_triples_df(df, entities=None, relations=None, max_nodes=None, max_edg
     return df
 
 
-def plotly_edge_trace(G, width=0.5, color='#888', hoverinfo='none', mode='lines', layout=None, **scatter_kwargs):
+def plotly_edge_trace(G, layout=None, width=0.5, color='#888', hoverinfo='none', mode='lines', **scatter_kwargs):
     """ Create a plotly edge_trace for the edges in a NetworkX graph object """
     if layout is None:
         layout = 'spring'
-
+    if isinstance(layout, str):
+        layout = create_layout(layout)
     edge_x = []
     edge_y = []
     for edge in G.edges():
@@ -98,7 +94,10 @@ def plot_nx_graph(G, layout=None, show=True, node_color='b', width=2, with_label
 
 def plotly_node_trace(G, layout=None, marker=DEFAULT_NODE_MARKER, **layout_kwargs): 
     """ Create a plotly node_trace for the nodes in a NetworkX graph object """
-    layout = create_layout(layout, **layout_kwargs)
+    if layout is None:
+        layout = 'spring'
+    if isinstance(layout, str):
+        layout = create_layout(layout, **layout_kwargs)
     node_x = []
     node_y = []
     for node in G.nodes():
@@ -122,7 +121,7 @@ DEFAULT_ANNOTATION = dict(
             )
 
 
-def plotly_graph(edge_trace, node_trace, path=None, show=None,
+def plotly_graph(edge_trace, node_trace, layout='spring', path=None, show=None,
         title='Network (Graph)',
         titlefont_size=16,
         showlegend=False,
@@ -162,8 +161,15 @@ def plotly_graph(edge_trace, node_trace, path=None, show=None,
     return fig.to_html()
 
 
-def plot_graph(df_or_G=None, filter_kwargs=None):
+def plot_graph(df_or_G=None, layout='spring', nrows=20000, filter_kwargs=None, **layout_kwargs):
     """ Plot a scatter plot of nodes and edges in a DataFrame(columns=graph object """
+    if layout is None:
+        layout = 'spring'
+    if isinstance(layout, str):
+        layout = create_layout(layout, **layout_kwargs)
+
+    if df_or_G is None:
+        df_or_G = read_nell_tsv(total=3_000_000, nrows=nrows)
     if isinstance(df_or_G, pd.DataFrame):
         if filter_kwargs:
             df_or_G = filter_triples_df(df_or_G, **filter_kwargs)
@@ -178,5 +184,6 @@ def plot_graph(df_or_G=None, filter_kwargs=None):
 
 
 if __name__ == '__main__':
-    df = read_nell_tsv(total=3_000_000)
-    html = plot_graph(df)
+
+    dfsmall = read_nell_tsv(total=3_000_000, skiprows=None, nrows=20000)
+    html = plot_graph(dfsmall)

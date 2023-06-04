@@ -23,12 +23,13 @@ NELL Knowledge Graph schema:
 from .constants import BIGDATA_DIR
 NELL_DIR = BIGDATA_DIR / 'nell'
 NELL_DIR.mkdir(exist_ok=True, parents=True)
+NELL_NUM_RELATIONS = 2_766_079
 DEFAULT_PATH = NELL_DIR / 'NELL.08m.1115.esv.csv.gz'
 DEFAULT_LAYOUT = 'spring'
 DEFAULT_TOTAL = 3_000_000  # default number of rows expected
 
 
-def read_nell_tsv(path=DEFAULT_PATH, total=DEFAULT_TOTAL, header=[0]):
+def read_nell_tsv(path=DEFAULT_PATH, total=DEFAULT_TOTAL, header=[0], skiprows=None, nrows=None, **kwargs):
     """ Read 13-column TSV containing facts/knowledge for a NELL triple, return DataFrame
 
     entity -> relation -> value(object)
@@ -45,17 +46,20 @@ def read_nell_tsv(path=DEFAULT_PATH, total=DEFAULT_TOTAL, header=[0]):
     header = int(header) + 1
     lines = []
     with gzip.open(path) as fin:
+        total = min([total, nrows])
         for i, line in enumerate(tqdm(fin, total=total)):
             if i < header:
                 continue
             line = line.decode('latin')
             # print(i, len(line.split('\t')))
             lines.append(line.split('\t'))
-    return pd.DataFrame(lines,
+            if i > nrows:
+                break
+    return pd.DataFrame(lines[skiprows:nrows],
         columns=('entity relation value iteration prob source entities values '
             'best_entity_str best_value_str entity_categories value_categories '
-            'candidate_source').split())
+            'candidate_source').split(), **kwargs)
 
 
 if __name__ == '__main__':
-    df = read_nell_tsv(total=3_000_000)  # total=2_76X_XXX
+    df = read_nell_tsv(total=NELL_NUM_RELATIONS)  # total=2_76X_XXX
