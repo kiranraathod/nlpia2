@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-REPO_URL = 'https://gitlab.com/tangibleai/qary/-/raw/master'
+REPO_URL = 'https://gitlab.com/tangibleai/qary/-/raw/main'
 FAQ_DIR = 'src/qary/data/faq'
 FAQ_FILENAME = 'short-faqs.csv'
 DS_FAQ_URL = '/'.join([REPO_URL, FAQ_DIR, FAQ_FILENAME])
@@ -34,15 +34,17 @@ print(
 #   When your test set accuracy is significantly lower than your training set accuracy?
 
 
-question = 'What causes a model to overfit?'
-question_vector = vectorizer.transform([question]).todense()
-idx = question_vector.dot(tfidfvectors.T).argmax()
-# 35
-print(
-    f"Your question:\n  {question}\n\n"
-    f"Most similar FAQ question:\n  {df['question'][idx]}\n\n"
-    f"Answer to that FAQ question:\n  {df['answer'][idx]}\n\n"
-)
+question = 'How can I'
+
+def bot_reply(question):
+    question_vector = vectorizer.transform([question]).todense()
+    idx = question_vector.dot(tfidfvectors.T).argmax()
+    # 35
+    print(
+        f"Your question:\n  {question}\n\n"
+        f"Most similar FAQ question:\n  {df['question'][idx]}\n\n"
+        f"Answer to that FAQ question:\n  {df['answer'][idx]}\n\n"
+    )
 # Your question:
 #   What causes a model to overfit?
 

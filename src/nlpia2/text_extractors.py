@@ -68,7 +68,7 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
 
 def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
-    text = Path(filepath).open('rt').read()
+    text = Path(filepath).read_text(encoding='utf-8')
     sections = extract_expression_sections(text=text, section_break=section_break)
     # assert len(sections) > 0
     if not isinstance(sections, list):
