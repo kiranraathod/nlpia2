@@ -10,11 +10,12 @@ FIXME: Duplicate forms of regular expressions from master and develop branch nee
 >>> re.findall(RE_URL_SIMPLE, 'Google github totalgood [github.com/totalgood]!')[0][0]
 'github.com/totalgood'
 """
-from nlpia2.constants import logging, DATA_DIR
+from ..constants import logging, SRC_DATA_DIR
 import re
 import regex
 import copy
 
+REGEX_DATA_DIR = SRC_DATA_DIR
 log = logging.getLogger(__name__)
 
 CRE_NONES = re.compile(r'[nN][oO][nN][eE]|[Nn][uU][lL][lL]|[Nn][aA][nN]')
@@ -128,7 +129,7 @@ def splitext(filepath):
 # RE_URL_BASH_ESCAPE = '((http|ftp|https)://)?[^/:\(\[\"'"'"'\`\)\] \t\n]+[.](com|org|edu|gov|net|mil|uk|ca|de|jp|fr|au|us|ru|ch|it|nl|se|no|es|io|me)[^\"'"'"'\`\)\] \t\n]*'  # noqa
 
 
-def regexes_to_tsv(path=DATA_DIR / 'regexes.tsv'):
+def regexes_to_tsv(path=REGEX_DATA_DIR / 'regexes.tsv'):
     """ Save all regular expressions to a tsv file so they can be more easily copy/pasted in Sublime """
     with path.open(mode='wt') as fout:
         vars = copy.copy(tuple(globals().items()))

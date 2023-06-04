@@ -22,30 +22,55 @@ from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana  # noqa
 
 log = logging.getLogger(__name__)
 
-LINESEP = linesep
+EOL = LINESEP = linesep
+HTML_TAGS = '<HTML', '<A HREF=', '<P>', '<BOLD>', '<SCRIPT', '<DIV', '<TITLE', '<BODY', '<HEADER'
+
 PKG_DIR = Path(__file__).absolute().resolve().parent
-SRC_DATA_DIR = PKG_DIR / 'data'
 PKG_NAME = PKG_DIR.name
-SRC_DIR = PKG_DIR.parent if PKG_DIR.parent != PKG_NAME else PKG_NAME
+SRC_DIR = PKG_DIR.parent
 REPO_DIR = SRC_DIR.parent
 
+BIGDATA_DIR_NAME = '.nlpia2-data'
+SRC_DATA_DIR_NAME = 'data'
+HOME_DIR = Path.home().resolve().absolute()
+
+SRC_DATA_DIR = PKG_DIR / SRC_DATA_DIR_NAME
+# nlpia2.config.py
+from pathlib import Path
+
+try:
+    MODULE_DIR = Path(__file__).resolve().absolute().parent
+except NameError:
+    MODULE_DIR = Path.cwd()
+assert MODULE_DIR.is_dir()
+
+SRC_DATA_DIR = MODULE_DIR / SRC_DATA_DIR_NAME
+SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
+
+BASE_DIR = MODULE_DIR.parent
+if BASE_DIR.name == 'src':
+    BASE_DIR = MODULE_DIR.parent
+
+BIGDATA_DIR = HOME_DATA_DIR = HOME_DIR / BIGDATA_DIR_NAME
+BIGDATA_DIR.mkdir(exist_ok=True, parents=True)
+
+# FIXME: code to download manuscript from dropbox/Public and put it in nlpia2-data
+MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
+# MANUSCRIPT_DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
+# MANUSCRIPT_DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
+# DEFAULT_DOCTEST_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 
-HOME_DIR = Path.home().resolve().absolute()
-DATA_DIR_NAME = 'data'
-DATA_DIR = PKG_DIR / DATA_DIR_NAME
-if not DATA_DIR.is_dir():
-    DATA_DIR = REPO_DIR / DATA_DIR_NAME
-if not DATA_DIR.is_dir():
-    DATA_DIR = HOME_DIR / DATA_DIR_NAME
-    # try/except this and use tempfiles python module as backup
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_INFO_FILE = SRC_DATA_DIR / 'data_info.csv'
+BIGDATA_INFO_FILE = SRC_DATA_DIR / 'bigdata_info.csv'
+BIGDATA_INFO_LATEST = BIGDATA_INFO_FILE.with_suffix('.latest.csv')
 
-LOG_DIR = Path(DATA_DIR) / 'log'
-CONSTANTS_DIR = Path(DATA_DIR) / 'constants'
-HISTORY_PATH = Path(DATA_DIR) / 'history.yml'
+CHECPOINT_DIR = CHECKPOINT_PATH = BIGDATA_DIR / 'checkpoints'
+LOG_DIR = Path(BIGDATA_DIR) / 'log'
+CONSTANTS_DIR = Path(BIGDATA_DIR) / 'constants'
+HISTORY_PATH = Path(BIGDATA_DIR) / 'history.yml'
 Path(LOG_DIR).mkdir(exist_ok=True)
 Path(CONSTANTS_DIR).mkdir(exist_ok=True)
 
@@ -80,6 +105,11 @@ def get_version():
 
 
 __version__ = get_version()
+
+
+def no_tqdm(it, total=1, **kwargs):
+    """ Do-nothing iterable wrapper to subsitute for tqdm when verbose==False """
+    return it
 
 # DONE: create nlpia2/init.py
 # DONE: add maybe_download() to init.py

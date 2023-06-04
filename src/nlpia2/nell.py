@@ -1,7 +1,6 @@
 from tqdm import tqdm
 import gzip
 import pandas as pd
-from pathlib import Path
 
 """
 NELL Knowledge Graph schema:
@@ -21,10 +20,10 @@ NELL Knowledge Graph schema:
 14. candidate_source: A free-form amalgamation of more specific provenance information describing the justification(s) NELL has for possibly believing this category or relation instance. 
 """
 
-
-DATA_DIR = Path.home() / '.nlpia2-data' / 'nell'
-DATA_DIR.mkdir(exist_ok=True, parents=True)
-DEFAULT_PATH = DATA_DIR / 'NELL.08m.1115.esv.csv.gz'
+from .constants import BIGDATA_DIR
+NELL_DIR = BIGDATA_DIR / 'nell'
+NELL_DIR.mkdir(exist_ok=True, parents=True)
+DEFAULT_PATH = NELL_DIR / 'NELL.08m.1115.esv.csv.gz'
 DEFAULT_LAYOUT = 'spring'
 DEFAULT_TOTAL = 3_000_000  # default number of rows expected
 

@@ -3,11 +3,12 @@ import networkx as nx
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from nlpia2.nell import read_nell_tsv
+import pandas as pd
+from .constants import BIGDATA_DIR
 
-
-DATA_DIR = Path.home() / '.nlpia2-data' / 'nell'
-DATA_DIR.mkdir(exist_ok=True, parents=True)
-DEFAULT_PATH = DATA_DIR / 'NELL.08m.1115.esv.csv.gz'
+NELL_DIR = BIGDATA_DIR / 'nell'
+NELL_DIR.mkdir(exist_ok=True, parents=True)
+DEFAULT_PATH = NELL_DIR / 'NELL.08m.1115.esv.csv.gz'
 
 
 def create_layout(G, layout='spring', **kwargs):
@@ -22,6 +23,7 @@ def create_layout(G, layout='spring', **kwargs):
 
 
 def df_to_nx(df, columns='entity relation value prob'.split()):
+    """ Convert a DataFrame for a knowledge graph (entity-relation-value triples) into a NetworkX Graph obj"""
     columns = columns or 'entity relation value prob'.split()
     triples = df[columns].T.values
     G = nx.DiGraph()
@@ -38,6 +40,7 @@ def filter_triples_df(df, entities=None, relations=None, max_nodes=None, max_edg
 
 
 def plotly_edge_trace(G, width=0.5, color='#888', hoverinfo='none', mode='lines', layout=None, **scatter_kwargs):
+    """ Create a plotly edge_trace for the edges in a NetworkX graph object """
     if layout is None:
         layout = 'spring'
 
@@ -83,6 +86,7 @@ DEFAULT_NODE_MARKER = dict(
 
 
 def plot_nx_graph(G, layout=None, show=True, node_color='b', width=2, with_labels=True, **kwargs):
+    """ Plot a scatter plot of nodes in a NetworkX graph object """
     layout = create_layout(layout=layout)
     obj = nx.draw(G, layout, 
         node_color=node_color, width=width, with_labels=with_labels
@@ -93,6 +97,7 @@ def plot_nx_graph(G, layout=None, show=True, node_color='b', width=2, with_label
 
 
 def plotly_node_trace(G, layout=None, marker=DEFAULT_NODE_MARKER, **layout_kwargs): 
+    """ Create a plotly node_trace for the nodes in a NetworkX graph object """
     layout = create_layout(layout, **layout_kwargs)
     node_x = []
     node_y = []
@@ -141,6 +146,7 @@ def plotly_graph(edge_trace, node_trace, path=None, show=None,
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
             )
+    """ Display a plotly network (graph) diagram defined by and edge_trace + node_trace """
     if show:
         if isinstance(show, (str, Path)) and not path:
             path = show
@@ -156,11 +162,14 @@ def plotly_graph(edge_trace, node_trace, path=None, show=None,
     return fig.to_html()
 
 
-def plot_graph(df, filter_kwargs=None):
-    """ Plot a scatter plot of nodes in a NetworkX graph object """
-    if filter_kwargs:
-        df = filter_triples_df(df, **filter_kwargs)
-    G = df_to_nx(df)
+def plot_graph(df_or_G=None, filter_kwargs=None):
+    """ Plot a scatter plot of nodes and edges in a DataFrame(columns=graph object """
+    if isinstance(df_or_G, pd.DataFrame):
+        if filter_kwargs:
+            df_or_G = filter_triples_df(df_or_G, **filter_kwargs)
+        G = df_to_nx(df_or_G)
+    elif isinstance(df_or_G, (nx.Digraph, nx.Graph)):
+        G = df_or_G
     edge_trace = plotly_edge_trace(G)
     node_trace = plotly_node_trace(G)
     html = plotly_graph(edge_trace=edge_trace, node_trace=node_trace, path=None)
