@@ -57,7 +57,7 @@ def plotly_edge_trace(G, layout=None, width=0.5, color='#888', hoverinfo='none',
         y=edge_y,
         line=dict(width=width, color=color),
         hoverinfo=hoverinfo,
-        mode=mode
+        mode=mode,
         **scatter_kwargs)
 
 
@@ -184,6 +184,18 @@ def plot_graph(df_or_G=None, layout='spring', nrows=20000, filter_kwargs=None, *
 
 
 if __name__ == '__main__':
-
-    dfsmall = read_nell_tsv(total=3_000_000, skiprows=None, nrows=20000)
-    html = plot_graph(dfsmall)
+    from matplotlib import pyplot as plt
+    from nlpia2.nell import read_nell_tsv
+    from nlpia2.graph_plots import df_to_nx
+    import networkx as nx
+    from nlpia2.graph_plots import plotly_node_trace, plotly_edge_trace
+    df = read_nell_tsv(total=3_000_000, skiprows=None, nrows=250)
+    df.shape
+    df.columns
+    G = df_to_nx(df)
+    layout = nx.spring_layout(G)
+    nx.draw(G, pos=layout, node_color='b', width=2, with_labels=True)
+    plt.show()
+    node_trace = plotly_node_trace(G=Gtiny, layout=layout)
+    edge_trace = plotly_edge_trace(G=Gtiny, layout=layout)
+    html = plot_graph(df)

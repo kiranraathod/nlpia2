@@ -118,6 +118,8 @@ docs/**/*.html
 .env
 **/*secret*
 **/*private*
+**/*credential*
+!.env_template
 
 # Big Data
 src/nlpia2/data/meuller/*.pdf
