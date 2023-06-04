@@ -24,7 +24,7 @@ from doctest import DocTestParser
 from pathlib import Path
 import re
 import nbformat as nbf
-from nlpia2.text_extractors import parse_args
+from nlpia2.text_processing.extractors import parse_args
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
 
 HEADER_TEXT = f"""\

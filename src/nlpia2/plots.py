@@ -1,9 +1,7 @@
 # from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 # import plotly.graph_objs as go
-
-import os
-
 from matplotlib import pyplot as plt
+import numpy as np
 import seaborn as sns
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa
@@ -11,21 +9,27 @@ import pandas as pd
 
 try:
     import plotly.chartstudio as plotly
+    from plotly.offline.offline import _plot_html
 except ImportError:
-    import plotly.plotly as plotly
-from plotly.offline.offline import _plot_html
-from pugnlp.util import clean_columns
+    try:
+        import plotly.plotly as plotly
+        from plotly.offline.offline import _plot_html
+    except ImportError:
+        import plotly
+        from plotly.offline.offline import plot as _plot_html
+
+from .util import clean_columns
+
 # from plotly import graph_objs  # Scatter, scatter.Marker, Layout, layout.YAxis, layout.XAxis
 from plotly.graph_objs import Scatter, Layout
 from plotly.graph_objs.scatter import Marker
 from plotly.graph_objs.layout import XAxis, YAxis
 # import cufflinks as cf  # noqa
 
-from nlpia2.constants import SRC_DATA_DIR as DATA_DIR
+# from nlpia2.config import SRC_DATA_DIR as DATA_DIR
 
 sns.set_style('whitegrid')
 
-np = pd.np
 
 PLOTLY_HTML = """
 <html>
@@ -191,7 +195,9 @@ def annotate(row, ax, x='x', y='y', text='name', xytext=(7, -5), textcoords='off
 
 
 def offline_plotly_data(data, filename=None, config=None, validate=True,
-                        default_width='100%', default_height=525, global_requirejs=False):
+                        default_width='100%', 
+                        default_height=525, global_requirejs=False,
+                        plotlyjs=''):
     r""" Write a plotly scatter plot to HTML file that doesn't require server
 
     >>> from nlpia.loaders import get_data
@@ -220,7 +226,7 @@ def offline_plotly_data(data, filename=None, config=None, validate=True,
         validate=validate,
         default_width=default_width, default_height=default_height,
         global_requirejs=global_requirejs)
-    html = PLOTLY_HTML.format(plotlyjs=js, plotlyhtml=html)
+    html = PLOTLY_HTML.format(plotlyjs=plotlyjs, plotlyhtml=html)
     if filename and isinstance(filename, str):
         with open(filename, 'wt') as f:
             f.write(html)

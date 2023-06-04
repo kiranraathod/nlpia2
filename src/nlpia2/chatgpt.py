@@ -9,8 +9,6 @@ import jsonlines
 import openai
 import pandas as pd
 
-DATA_DIR = Path.home() / '.nlpia2-data'
-
 dotenv.load_dotenv()
 ENV = dict(os.environ.items())
 
@@ -19,7 +17,8 @@ DEFAULT_MAX_TOKENS = 512
 DEFAULT_TEMPERATURE = 0.01
 DEFAULT_NUM_RESPONSES = 1
 DEFAULT_TOP_P = 1  # nucleus sampling: model considers only p>TOP_P tokens (.9=90% proba)
-CONVO_LOG_PATH = DATA_DIR / 'chatgpt-request-response-pairs.jsonl'
+from .constants import BIGDATA_DIR
+CONVO_LOG_PATH = BIGDATA_DIR / 'chatgpt-request-response-pairs.jsonl'
 DEFAULT_CONTEXT_PROMPT = 'third_grade'
 CONTEXT_PROMPT = dict(
     helpful=(

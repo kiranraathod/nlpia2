@@ -85,10 +85,12 @@ With NLP you can program machines to process natural language text to derive con
 
 Even though there are no compilers for natural language there are _parsers_ and _parser generators_, such as PEGN footnote:[Parsing Expression Grammar Notation home page (https://pegn.dev/)] and SpaCy's Matcher class.
 But there aren't any end-to-end compilers that can generate responses or perform the natural language instructions.
-And SpaCy allows you to define patterns and grammars similar to the ones
-There is no algorithm that takes natural language text and turns it into machine instructions to brew a cup of coffee, even when the natural language text consisted of an explicit list of brewing steps.
-There is single silver bullet that you can use to programmatically turn natural language text into computer instructions or a conversational response.
-But if you understand all the different tools described in this book, you will be able to combine them all together to create remarkably intelligent conversational chatbots that understand and generate meaningful text.
+And SpaCy allows you to define patterns and grammars with a syntax similar to regular expressions.
+But there is no single algorithm or Python package that takes natural language text and turns it into machine instructions for automatic computation or execution.
+Stephen Wolfram has essentially spent his life trying to build a general purpose intelligent "computational" machine that can interact with us in plain English.
+Even he has resorted to assembling a system out of many different NLP and AI algorthms that must be constantly expanded and evolved to handle new kinds of natural language instruc tions.footnote:[(https://writings.stephenwolfram.com/2023/02/a-50-year-quest-my-personal-journey-with-the-second-law-of-thermodynamics/)]
+If you understand all tools described in this book, you too will be able to combine these approaches together to create remarkably intelligent conversational chatbots.
+They may even understand and generate more meaningful and truthful text than ChatGPT or the next hype-optimizing closed-source model from BigTech.
 
 .Natural language processing
 [IMPORTANT, definition]

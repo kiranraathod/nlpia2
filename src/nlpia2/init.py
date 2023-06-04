@@ -1,15 +1,15 @@
 # init.py
-import json
+# import json
 import logging
 from pathlib import Path
 import shutil
 from urllib.request import urlretrieve, urljoin
 
-import pandas as pd
+# import pandas as pd
+# import numpy as np
 
-from .constants import PKG_NAME, DATA_DIR, HOME_DATA_DIR
-from .constants import SRC_DATA_DIR
-from .constants import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
+from .constants import PKG_NAME, BIGDATA_DIR, HOME_DATA_DIR
+# from .constants import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DICT
 # from .constants import TLDS_POPULAR, tld_popular
 # from .constants import TLDS, tld_iana
 
@@ -46,7 +46,7 @@ def maybe_download(
     assert filepath is None or filename is None, f"Cannot specify both filepath='{filepath}' and filename='{filename}', they are synonymous."
     filename = filepath if filename is None else filename
     log.warning(f'filename: {filename}')
-    src_filepath = SRC_DATA_DIR / filename
+    src_filepath = BIGDATA_DIR / filename
     log.warning(f'src_filepath: {src_filepath}')
     home_filepath = HOME_DATA_DIR / filename
     log.warning(f'home_filepath: {home_filepath}')
@@ -82,7 +82,7 @@ def maybe_download(
     if not destination_dir.exists():
         destination_dir.mkdir(parents=True, exist_ok=True)  # FIXME add , reporthook=DownloadProgressBar())
 
-    local_data_filepath = Path(DATA_DIR) / filename
+    local_data_filepath = Path(BIGDATA_DIR) / filename
     if local_data_filepath.is_file() and not filepath.is_file():
         # TODO: use shutil.copy() to avoid running out of memory on large files
         filepath.write_bytes(local_data_filepath.read_bytes())
@@ -139,4 +139,4 @@ def download_important_data(filenames=DATA_FILENAMES, force=False):
 
 def init(data_filenames=DATA_FILENAMES, force=False):
 
-    download_important_data(data_filenames=datafilenames, force=force)
+    download_important_data(data_filenames=data_filenames, force=force)

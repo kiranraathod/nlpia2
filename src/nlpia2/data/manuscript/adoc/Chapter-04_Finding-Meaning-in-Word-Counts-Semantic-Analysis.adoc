@@ -1329,7 +1329,7 @@ It looks like the values in LDiA topic vectors have much higher spread than LSA 
 Let's do the same trick you did when performing topic modeling with LSA.
 We can look at typical "toxic" words and see how pronounced they are in every topic.
 
-[source, python]
+[source,python]
 ----
 >>> toxic_terms= components.loc['pathetic crazy stupid lazy idiot hate die kill'.split()].round(2)
 >>> toxic_terms
@@ -1712,7 +1712,7 @@ The next step is to represent both the questions and our query as vectors.
 This is where we need to add just a few lines to make our representations semantic.
 Because our qestion dataset is small, we won't need to apply LSH or any other indexing algorithm.
 
-[source, python]
+[source,python]
 ----
 >>> vectorizer = TfidfVectorizer()
 >>> vectorizer.fit(df['question'])

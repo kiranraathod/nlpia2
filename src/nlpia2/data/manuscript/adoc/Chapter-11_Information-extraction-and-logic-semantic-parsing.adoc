@@ -12,7 +12,13 @@
 This chapter covers
 
 //// 
-// A summary sentence for each subsection and a way to summarize all of that in the beginning
+References:
+* Stanford KG Course by Vinay: http://www.web.stanford.edu/~vinayc/kg/notes/How_Do_Users_Interact_With_a_Knowledge_Graph.html
+* recent tutorial on towards data science: https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fnlp-with-python-knowledge-graph-12b93146a458
+* Knowledge Representation Learning python library with state of the art performance on academic benchmarks: https://github.com/thunlp/OpenKE
+
+A summary sentence for each subsection and a way to summarize all of that in the beginning:
+
 // SUM: a few sentences
 
 Dependency parsing and Constituency parsing
@@ -35,22 +41,48 @@ Dependency parsing and Constituency parsing
 
 ////
 
-* Sentence segmentation
-* Named entity recognition
-* Numerical information extraction
-* Parts-of-speech (POS) tagging and dependency tree parsing
-* Logical relation extraction and knowledge bases
+* Extracting numerical and math expressions from text
+* Tagging tokens with their part-of-speech (POS)
+* Parsing text to create a dependency tree
+* Using named entity recognition algorithms for information extraction
+* Using transformers to create a knowledge base from text
+* Querying the Wikidata knowledge base for fact checking 
 
-One last skill you need before you can build a full-featured chatbot is extracting information or knowledge from natural language text.
+In the last chapter you learned how to use transformers to generate smart sounding words.
+Now you're ready to learn how to generate genuinely intelligent text.
+To do this you need to know how to extract knowledge from text.
+This can help fill the _common sense knowledge_ gap in large language models.
+To fill that gap you will store that extracted knowledge in a data structure called a _knowledge graph_.
+Your machines and algorithms can programmatically query a knowledge graph for facts about the world
+A _knowledge base_ is a database management system that stores knowledge efficiently and gives you query language similar to SQL which you can use ask questions about the knowledge in the data base. 
 
-== Named entities and relations
+Once you have a knowledge base, you can use it to programmatically generate logical statements that make sense because they logically follow from the knowledge you stored in your knowledge base.
+You can even use it to infer new facts or _logical inferences_ about the world.
+This is why you may hear people call forward propagation "inference," because researchers are hoping that it will some day match human's ability to logically infer things about the world.
+But you're not going to use deep learning for logical inference this time, you're going to use the tried and true approach called "symbolic reasoning."
+
+Your chatbots and AI agents will now have a way to correctly reason about the world in an explainable way that agrees with the knowledge you've given it.
+This is called symbolic reasoning as opposed to the probabilistic reasoning of deep learning.
+It's also called GOFAI (Good Old Fashioned AI), and it's back in fashion as researchers struggle to build general intelligence that is grounded in reality.
+Besides helping ground in factual knowledge, you will now be able to have your AI explain its reasoning in a valid way, instead of just making things up. 
+
+== Named entities and the connections between them
 
 You'd like your machine to extract pieces of information and facts from text so it can know a little bit about what a user is saying.
 For example, imagine a user says "Remind me to read aiindex.org on Monday."
 You'd like that statement to trigger a calendar entry or alarm for the next Monday after the current date.
+Easier said that done.
 
-To trigger those actions, you'd need to know that "me" represents a particular kind of _named entity_: a person.
-And the chatbot should know that it can expand or _resolve_ that word by replacing it with that person's username.
+To trigger correct actions with natural language you need something an NLU pipeline or parser that is little less fuzzy than a transformer or large language model.
+You need to know that "me" represents a particular kind of _named entity_: a person.
+Named entities are natural language terms or n-grams that refer to a particular thing in the real world, for example a person, place or thing.
+Sound familiar?
+In English grammar, the _part of speech_ (POS) for a person, place or thing is "noun".
+So you'll see that the POS tag that SpaCy associates with the tokens for a named entity is "NOUN".
+And the SpaCy package knows how to recognize the relationships (dependencies) between words and phrases.
+Once you have a _dependency tree_ of the hierarchy of grammatical relationships between words you have a way to process the logical meaning of a sentence. 
+
+And the chatbot should know that it can expand or _resolve_ that word by replacing it with that person's username or other identifying information.
 You'd also need your chatbot to recognize that "aiindex.org" is an abbreviated URL, a named entity, the name of a specific instance of something, like a website or company.
 And you need to know that a normalized spelling of this particular kind of named entity might be "http://aiindex.org", "https://aiindex.org", or maybe even "https://www.aiindex.org".
 Likewise you need your chatbot to recognize that Monday is one of the days of the week (another kind of named entity called an "event") and be able to find it on the calendar.

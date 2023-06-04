@@ -173,6 +173,61 @@ Fortunately, there is another approach we can take, based on search.
 
 == Generative
 
+== Bringing it all together
+// SUM: Modern chatbot engineers have converged on the hybrid chatbot architecture that we introduced in the first edition. Modern chatbots combine generative deep learning models with template, information retrieval, logic rules, template interpolation, and grammar parsers to create intelligent-sounding chatbots.
+    
+All the previous chapters have been building up your skills and toolbox so you can assemble a chatbot from all the algorithms.
+Figure <<figure-chatbot-flow-diagram>> shows you how all these pieces fit together.
+
+[[figure-chatbot-flow-diagram]]
+.Chatbot flow diagram
+image::../images/ch12/chatbot-flow-diagram.drawio.png[Chatbot Techniques Used for Some Example Applications, width=80%, link="../images/ch12/chatbot-flow-diagram.drawio.png]
+
+=== Maintaining a chatbot
+
+You learned in Chapter 9 and 10 the importance of human feedback to help train your NLP models to get smarter and smarter over time.
+You can increase your chatbot's breadth of knowledge by add new branches in the dialog tree.
+And you can increase a chatbots ability to understand what your users are saying by finding and labeling utterances that your chatbot misunderstood.
+Figure <<figure-chatbot-convo-design>> shows how to enable your conversation designers to be "data driven."
+Rather than guessing what your users will find helpful, you want to analyze their interactions with your system and use that to identify the most popular user _pain points_ that you can address with better conversation design.
+A data driven organization pays attention to their users and builds what they need, rather than what they _think_ the users need.
+
+As a data-driven conversation designer you'll want to prioritize the most frequent messages from their users for labeling and conversation design.
+One way to do that is to sort your users' utterances by the maximum predicted label confidence (probability from ``predict_probas()``).
+You can scan the lowest confident utterance label predictions to see if any can be labeled with one of your existing intents.
+Labeling utterances with existing intents is the fastest way to improve the user experience.
+There's nothing worse than having a chatbot that is always falling back to it's "I don't understand" response.
+
+And you also want to look for _false positives_ where the bot has misunderstood in a more insidious way.
+If a chatbot thinks it understands your user and provides it with a reply that doesn't fit what the user expects, that's an even bigger problem for your users.
+Unfortunately those false positive intent labels are harder to find and correct. 
+But you're in luck if your chatbot is asking the user questions, such as with a quiz bot or socratic education chatbot similar to Rori.ai. 
+You can look at all the answers to a particular question that the chatbot recognized as being incorrect answers to its question.
+If it looks like the chatbot made a _grading error_ by incorrectly understanding the student's answer, you can simply add the utterance to this list of possible correct answers.
+And you can label it with the appropriate intent in your labeled dataset to improve the NLU in the future.
+
+Building a chatbot is an iterative process.
+Don't try to build it all at once.
+Add one new branch in the dialog at a time. 
+And pay attention to how your users use your bot to decide whether you need to add a new intent or branch in the dialog tree.
+
+[[figure-chatbot-convo-design]]
+.Conversation design workflow
+image::../images/ch12/chatbot-convo-design.drawio.png["A block at the top shows the conversation design or content management system. The next block down shows the utterance labeling system such as Label Studio. The labeled utterance dataset is passed to the machine learning models for training or reinforcement learning. And the conversation design is passed into the chatbot backend server for interaction with the user. The users interactions are then recorded in a message log and analyzed to help inform the conversation design and data labeling steps at the top of the diagram.", width=80%, link="chatbot-convo-design.drawio.png]
+
+The block at the top of Figure <<figure-chatbot-convo-design>> shows the conversation design or content management system. 
+The next block down shows the utterance labeling system such as Label Studio. The labeled utterance dataset is passed to the machine learning models for training or reinforcement learning.
+And the conversation design is passed into the chatbot backend server for interaction with the user.
+The users interactions are then recorded in a message log and analyzed to help inform the conversation design and data labeling steps at the top of the diagram.
+
+[TIP]
+====
+In any organization building chatbots nearly everyone will have an opinion about what your chatbot should.
+Sometimes you can get some good ideas for features to test with your users by just imagining what will help your users.
+This is especially useful if you know of some software or data or approach that you can use to quickly try the idea.
+To avoid debates about which features are more important you can be data driven.
+If you can sort all of your team's ideas according to what your user's appear to need, based on message statistics, you can help lead your team to think about the right problems rather than getting lost in endless debates.
+====
 
 
 == Real-world frameworks
@@ -458,6 +513,10 @@ And you'll build an "objective function" that will take into account the goals o
 So let's dive in to each of these four approaches, one at a time.
 For each one, we build a chatbot that uses only the technique we're learning.
 But in the end we show you how to combine them all together.
+
+
+
+
 
 == Pattern-matching approach
 

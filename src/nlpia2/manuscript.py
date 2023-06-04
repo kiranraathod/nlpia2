@@ -3,7 +3,7 @@
 from pathlib import Path
 import shutil
 
-from nlpia2.config import DATA_DIR, MANUSCRIPT_DIR
+from nlpia2.constants import BIGDATA_DIR, MANUSCRIPT_DIR
 
 
 def translate_matko(path):
@@ -58,7 +58,7 @@ def translate_hobs(path):
     return path
 
 
-def update_nlpia2_data(src=MANUSCRIPT_DIR, dst=DATA_DIR):
+def update_nlpia2_data(src=MANUSCRIPT_DIR, dst=BIGDATA_DIR):
     path_pairs = rename_path_pairs()
     for orig_path, dest_path in path_pairs:
         shutil.copyfile(orig_path, dst=str(dst / Path(dest_path).name))

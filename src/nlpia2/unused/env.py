@@ -1,5 +1,9 @@
 from pathlib import Path
 
+import dotenv
+dotenv.load_dotenv()
+ENV = dotenv.dotenv_values()
+globals().update(ENV)
 
 BASE_DIR = Path(__file__).resolve().absolute().parent
 
@@ -26,7 +30,7 @@ def find_env_file(path=BASE_DIR):
     return None
 
 
-ENV_PATH = find_env_file(path=__file__.parent)
+# ENV_PATH = find_env_file(path=Path(__file__).parent)
 
 
 def get_env(env_path=ENV_PATH):

@@ -12,6 +12,7 @@
 This chapter covers:
 
 * Using conversational LLMs productively
+* Recognizing errors, misinformation, and biases in LLM output 
 * Understanding how conversational LLMs work
 * Engineering prompts for conversational LLMs
 * Finding meaningful search results for your queries (semantic search)
@@ -38,16 +39,30 @@ CHAPTER OUTLINE
 == Making it real 
  * Retrieval-Augmented Generation
  * training a ExtractiveQA and a RAG pipeline in Haystack
- * deploying our app as a streamlit app on Huggingface spaces
+ * deploying our app as a Streamlit app on Huggingface spaces
 ////
 
 If you scale up transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
-Researchers call these surprises "emergent properties." 
-And the most impressive of these surprises is that chatbots built using LLMs generate intelligent sounding text.
-If you've spent time using LLM chatbots such as ChatGPT, Bard, Bing Chat, Perplexity AI, you are probably excited to use them to help you get ahead.
-Finally a search engine and virtual assistant that actually gives direct, smart-sounding answers to your questions.
-Be careful.
-You may be surprised at how unintelligent these trillion-parameter language models really are.
+Researchers call these surprises "emergent properties" but they may be a mirage.footnote:["AI's Ostensible Emergent Abilities Are a Mirage" 2023 by Katharine Miller (https://hai.stanford.edu/news/ais-ostensible-emergent-abilities-are-mirage)]
+The most sensational of these surprises is that chatbots built using LLMs generate intelligent sounding text.
+You've probably spent some time using LLM chatbots such as ChatGPT, Bard, Bing Chat, Perplexity AI, and they may be helping you get ahead in your career by helping you craft words, code, or ideas faster.
+Like most, you are probably relieved to finally have a search engine and virtual assistant that actually gives you direct, smart-sounding answers to your questions.
+This chapter will help you use LLMs smartly so you can do more than merely _sound_ intelligent.
+
+This chapter will help you recognize the problems with LLMs so you can use them smartly and minimize their harm to you and others.
+
+* _Misinformation_:: LLMs trained on social media will amplify misinformation
+* _Errors_:: LLMs will insert pernicious errors and into your code and words
+* _Learning_:: Used incorrectly, LLMs can reduce your metacognition skill
+* _Collective intelligence_:: LLMs are dumbing down society, making us more reactive and less thoughtful
+* _Bias_:: LLMs have algorithmic biases that are harming millions 
+* _Accessibility_:: The resources and skills required for LLMs are out of reach for millions
+* _Environmental impact_:: LLMs emit 10-1000 kg/day CO2e (carbon dioxide equivalent) footnote:footnote:[ChatGPT likely emits more than 20 kg/day CO2e based on estimate by (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fthe-carbon-footprint-of-chatgpt-66932314627d)] footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)] footnote:["Sustainable AI: Environmental Implications, Challenges and Opportunities" 2022 by Carole-Jean Wu et al. (https://arxiv.org/pdf/2111.00364.pdf)]
+
+You can mitigate all these harms by building and using LLMs that are smarter and more efficient.
+That's what this chapter is all about.
+You will see how to build LLMs that generate more intelligent, trustworthy, equitable words.
+And you will learn how to make your LLMs more efficient and less wasteful, not only reducing the environmental impact but also helping more people gain access to the power of LLMs.
 
 == Large Language Models (LLMs)
 
@@ -216,6 +231,22 @@ bit later
 But if you dig deeper you quickly find th
 .footnote:["GPT-4 Technical Report" (https://arxiv.org/pdf/2303.08774.pdf)]
 
+=== Smarter smaller LLMs
+// Open source systems like AgentGPT, BLOOMZ, and InstructGPT have been better-trained and pruned to make them more efficient and more robust (smarter) than model 100x larger.
+
+Open source models like AgentGPT, BLOOMZ, and InstructGPT have been better-trained and pruned to make them more efficient and more robust (smarter) than model 100x larger.
+Bigger is better if you're optimizing for likes, but smaller is smarter if what you care about is intelligence.
+OpenAI placed a billion-dollar bet on the idea that bigger models and training sets would create emergent behaviors that are valuable.
+They were right, Microsoft invested more than a billion in ChatGPT's emergent ability to respond plausibly to complex questions.
+But in computer science, smart algorithms almost always win in the end.
+And it turns out that the collective intelligence of open source communities is a lot smarter than the research labs at large corporations.
+Open source communities freely brainstorm together and share their best ideas with the world, ensuring that the widest diversity of people can implement their smartest ideas.
+So bigger is better, if you're talking about open source communities rather than LLMs.
+
+One great idea that came out of the opensource community was building higher level _meta models_ that utilize LLMs other NLP pipelines to accomplish their goals.
+If you break down a prompt into the steps needed to accomplish a task, you can then ask an LLM to generate the API queries that can reach out into the world and accomplish those tasks efficiently.
+
+
 === Generating warm words
 
 How does a generative model create new text?
@@ -383,7 +414,7 @@ They allow you to simplify your development process, while still retaining most 
 As usual, you'll start from importing your libraries and setting a random seed - as we're using several libraries and tools, there are a lot of random seeds to "plant"!
 
 
-[source, python]
+[source,python]
 ----
 >>> from transformers import GPT2LMHeadModel, GPT2Tokenizer
 >>> import torch
@@ -400,7 +431,7 @@ As usual, you'll start from importing your libraries and setting a random seed -
 
 You can do all this seed-setting with a single line of code in Hugging Face's Transformers package: 
 
-[source, python]
+[source,python]
 ----
 >>> from transformers import set_seed
 >>> set_seed(SEED)
@@ -408,7 +439,7 @@ You can do all this seed-setting with a single line of code in Hugging Face's Tr
 
 Now, you can load our model and tokenizer. You'll use the pretrained model that the package provides out-of-the-box.
 
-[source, python]
+[source,python]
 ----
 >>> tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 >>> tokenizer.pad_token = tokenizer.eos_token  # <1>
@@ -420,7 +451,7 @@ Let's see how good this model is in generating useful text.
 You probably know already that you need an input prompt to start generating. 
 For GPT-2, the prompt will simply serve as the beginning of the sentence. 
 
-[source, python]
+[source,python]
 ----
 >>> def generate(prompt,
 ...        model=vanilla_gpt2,
@@ -469,7 +500,7 @@ If you dabbled with neural networks before this book, you might be familiar with
 It is the inverse of the softmax function - it maps probabilities (in range between 0 to 1) to real numbers (between \latexmath{\inf} and \latexmath{-\inf}) and is often used as the last layer of a neural network. 
 But what's the shape of our logit tensor in this case? 
 
-[source, python]
+[source,python]
 ----
 >>> output = vanilla_gpt2(input_ids=input_ids)
 >>> output.logits.shape
@@ -1097,7 +1128,7 @@ We can continue using the same retriever, but this time, we'll use one of Haysta
 Instead of a Reader, as in a previous example, it includes a Generator, that generates text based on the answers the retriever found. 
 So there are only a few lines of code that we need to change. 
 
-[source, python]
+[source,python]
 ----
 >>> from haystack.nodes import Seq2SeqGenerator
 >>> from haystack.pipelines import GenerativeQAPipeline

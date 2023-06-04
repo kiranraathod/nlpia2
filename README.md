@@ -126,3 +126,9 @@ And off you go tackle some serious Natural Language Processing, in order to make
 
 Run a jupyter notebook server within docker:
 `jupyter-repo2docker --editable .`
+
+### TODO
+
+- [ ] dictionary of .nlpia2 filepaths and their corresponding remote URLs and proai.org shorturls
+- [ ] download if necessary to cache all required datasets in .nlpia2-data
+- [ ] collect_data.py using 

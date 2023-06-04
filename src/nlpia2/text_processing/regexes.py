@@ -10,15 +10,15 @@ FIXME: Duplicate forms of regular expressions from master and develop branch nee
 >>> re.findall(RE_URL_SIMPLE, 'Google github totalgood [github.com/totalgood]!')[0][0]
 'github.com/totalgood'
 """
-from nlpia.constants import logging, DATA_PATH
+from ..constants import logging, SRC_DATA_DIR
 import re
 import regex
-import os
 import copy
 
-from pugnlp.regexes import *  # noqa
-
+REGEX_DATA_DIR = SRC_DATA_DIR
 log = logging.getLogger(__name__)
+
+CRE_NONES = re.compile(r'[nN][oO][nN][eE]|[Nn][uU][lL][lL]|[Nn][aA][nN]')
 
 # kind of like stopwords, but just the words that are commonly lowercased in article titles
 TITLE_LOWERWORDS = sorted('of a in the on as if and or but with'.split())
@@ -47,6 +47,12 @@ RE_STYLE_START = '(?:' + '|'.join(
 RE_STYLE_END = '(?:' + '|'.join(
     [RE_BOLD_END, RE_BOLD_CHAR_END, RE_ITALIC_END, RE_ITALIC_CHAR_END]
 ) + ')'
+from .re_patterns import sentence_sep as RE_SENTENCE_SEP
+CRE_SENTENCE_SEP = re.compile(RE_SENTENCE_SEP)
+
+from .re_patterns import word_sep_except_external_appostrophe as RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE
+CRE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE = re.compile(RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE)
+
 
 PATTERNS = {
     'word': RE_ENGLISH_WORD, 'word0': RE_OPTIONAL_WORD,
@@ -123,9 +129,9 @@ def splitext(filepath):
 # RE_URL_BASH_ESCAPE = '((http|ftp|https)://)?[^/:\(\[\"'"'"'\`\)\] \t\n]+[.](com|org|edu|gov|net|mil|uk|ca|de|jp|fr|au|us|ru|ch|it|nl|se|no|es|io|me)[^\"'"'"'\`\)\] \t\n]*'  # noqa
 
 
-def to_tsv():
+def regexes_to_tsv(path=REGEX_DATA_DIR / 'regexes.tsv'):
     """ Save all regular expressions to a tsv file so they can be more easily copy/pasted in Sublime """
-    with open(os.path.join(DATA_PATH, 'regexes.tsv'), mode='wt') as fout:
+    with path.open(mode='wt') as fout:
         vars = copy.copy(tuple(globals().items()))
         for k, v in vars:
             if k.lower().startswith('cre_'):
