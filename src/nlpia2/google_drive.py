@@ -7,7 +7,7 @@ https://stackoverflow.com/a/39225039/623735
 import sys
 import requests
 from tqdm import tqdm
-from nlpia.loaders import get_url_title
+from nlpia2.loaders import get_url_title
 
 
 def get_url_filename(url=None, driveid=None):
