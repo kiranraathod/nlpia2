@@ -9,7 +9,7 @@ import tempfile
 from types import MappingProxyType
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR
+from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, REPO_DIR
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
@@ -22,11 +22,13 @@ RE_FIGURE_NAME=r"^[\.].*"
 RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
 RE_COMMENT=r"^(\\\\|\/\/).*"
 
-DATA_DIR = SRC_DATA_DIR
+ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
+LINES_FILENAME = 'nlpia_lines.csv'
+LINES_FILEPATH = SRC_DATA_DIR / LINES_FILENAME  # src/nlpia2/data/nlpia_lines.csv
 
-DEFAULT_FILENAME = 'Chapter-09_Stackable-deep-learning-Transformers.adoc'
-DEFAULT_FILEPATH = MANUSCRIPT_DIR / 'adoc' / DEFAULT_FILENAME
-DEFAULT_LINES_FILENAME = 'nlpia_lines.csv'
+# ch10 haystack section: 'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/nlpia_lines.csv'
+DEFAULT_ADOC_FILENAME = 'Chapter-09_Stackable-deep-learning-Transformers.adoc'
+DEFAULT_ADOC_FILEPATH = ADOC_DIR / DEFAULT_ADOC_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
@@ -38,7 +40,8 @@ def extract_blocks(
     ast = g.parse(filepath.open().read())
     return ast
 
-def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
+
+def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
         filepath = Path(text)
@@ -66,7 +69,7 @@ def extract_lines(text=DEFAULT_FILEPATH, with_meta=True):
     return lines
 
 
-def extract_code_sections(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
+def extract_code_sections(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     text = Path(filepath).open('rt').read()
     sections = extract_expression_sections(text=text, section_break=section_break)
@@ -79,7 +82,7 @@ def extract_code_sections(filepath=DEFAULT_FILEPATH, with_metadata=True, section
     return [[ex.source for ex in sect] for sect in sections]
 
 
-def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_break=None):
+def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     sections = extract_code_sections(
         filepath=filepath,
@@ -93,7 +96,7 @@ def extract_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True, section_br
     return flat
 
 
-def extract_image_paths(filepath=DEFAULT_FILEPATH):
+def extract_image_paths(filepath=DEFAULT_ADOC_FILEPATH):
     filepath = Path(filepath)
     text = filepath.open('rt').read()
     parent = filepath.parent
@@ -113,7 +116,7 @@ def extract_image_paths(filepath=DEFAULT_FILEPATH):
     return image_paths
 
 
-def extract_tagged_code_lines(filepath=DEFAULT_FILEPATH, with_metadata=True):
+def extract_tagged_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
     if not with_metadata:
         print('WARNING: Must extract metadata for extract_tagged_code... with_metadata=True')
     if not isinstance(filepath, list) or isinstance(filepath, (str, Path)):
@@ -164,7 +167,7 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     return [dtparser.get_examples(text) for text in text_sections]
     
 
-def extract_urls_from_text(text=DEFAULT_FILEPATH, with_meta=True):
+def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
@@ -223,7 +226,7 @@ def extract_urls(texts=MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
     return extract_urls_from_text(text=texts, with_meta=with_meta)
 
 
-def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
     """ Use regex to extract URLs from text file, return DataFrame with url column """
     urls = extract_urls_from_text(filepath=filepath, with_meta=with_meta)
     df = pd.DataFrame(urls, index=[
@@ -232,7 +235,8 @@ def extract_urls_df(filepath=DEFAULT_FILEPATH, with_meta=True):
     df['filepath'] = str(filepath)
     return df
 
-def extract_lines_df(filepath=DEFAULT_FILEPATH, with_meta=True):
+
+def extract_lines_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
     lines = extract_lines(text=filepath, with_meta=with_meta)
     df = pd.DataFrame(lines)
     return df
@@ -318,7 +322,7 @@ re_ipython_shabang = r'([>]{2,3}|[.]{2,3})?[ ]*[!].*'
 re_codeblock_horizontal_line = r'[ ]*[-]{2,80}[ ]*'
 
 
-def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
+def test_file(filepath=DEFAULT_ADOC_FILEPATH, skip=0, adoc=True,
               cleanup=True,  # whether to remove the temporary adoc file containing preprocessed code blocks
               optionflags=DEFAULT_OPTIONFLAGS,
               name=None,
@@ -403,7 +407,7 @@ def test_file(filepath=DEFAULT_FILEPATH, skip=0, adoc=True,
     return results
 
 
-def extract_code_file(filepath=DEFAULT_FILEPATH, destfile=None, save_sections=False):
+def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_sections=False):
     filepath = Path(filepath)
     if not destfile:
         destfile = filepath.parent.parent / 'py'
@@ -469,6 +473,7 @@ def extract_url_dfs_from_files(
         suffix=suffix)
     return dfs
 
+
 def extract_big_line_df_from_files(
         adocdir=MANUSCRIPT_DIR, destdir=None,
         glob='*.adoc', suffix='.adoc.py'):
@@ -485,6 +490,7 @@ def extract_big_line_df_from_files(
     df['is_type_defined'] = df[one_hot_columns].sum(axis=1) > 0
 
     return df
+
 
 def extract_dfs_from_files(
         adocdir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
@@ -506,6 +512,16 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
                               adocdir=adocdir, destdir=destdir,
                               glob=glob, suffix=suffix)
     return destpaths
+
+
+def update_nlpia_lines(adoc_dir=None, dest=LINES_FILEPATH):
+    if not adoc_dir:
+        adoc_dir = REPO_DIR.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+        if not adoc_dir.is_dir():
+            adoc_dir = ADOC_DIR
+    df = extract_big_line_df_from_files(adoc_dir)
+    df.to_csv(dest)
+    return df
 
 
 def parse_args(
@@ -563,8 +579,11 @@ def extract_code(adocs=None, output=None):
         results['urls'] = extract_urls()
     return results
 
+
+
 if __name__ == '__main__':
-    assert DATA_DIR.is_dir()
+    assert SRC_DATA_DIR.is_dir()
     assert MANUSCRIPT_DIR.is_dir()
     results = extract_code()
+
 

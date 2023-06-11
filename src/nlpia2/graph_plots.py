@@ -121,7 +121,7 @@ DEFAULT_ANNOTATION = dict(
             )
 
 
-def plotly_graph(edge_trace, node_trace, layout='spring', path=None, show=None,
+def plotly_graph(node_trace, edge_trace=None, layout='spring', path=None, show=None,
         title='Network (Graph)',
         titlefont_size=16,
         showlegend=False,
@@ -183,19 +183,37 @@ def plot_graph(df_or_G=None, layout='spring', nrows=20000, filter_kwargs=None, *
     return html
 
 
+def plot_subgraph(df, ent_match=r'(computer_science__)?artificial_intelligence', savefig=None):
+    df = df[df['entity'].str.match(ent_match)]
+    G = df_to_nx(df)
+    layout = nx.spring_layout(G)
+    nx.draw(G, pos=layout, node_color='#0343df', font_size=24,
+        alpha=.5, width=2, with_labels=True)
+    # nx.draw_edges(G, pos=layout, edge_color='g', font_size=20,
+    #     alpha=.5, width=3, with_labels=True)
+    # nx.draw_networkx_edge_labels(G, pos=layout, label_pos=0.75)
+    if savefig:
+        plt.savefig(savefig)
+    plt.show(block=False)
+    return df, G
+
+
 if __name__ == '__main__':
     from matplotlib import pyplot as plt
     from nlpia2.nell import read_nell_tsv
     from nlpia2.graph_plots import df_to_nx
     import networkx as nx
-    from nlpia2.graph_plots import plotly_node_trace, plotly_edge_trace
-    df = read_nell_tsv(total=3_000_000, skiprows=None, nrows=250)
+    from nlpia2.graph_plots import plotly_node_trace, plotly_edge_trace, simplify_names
+    df = read_nell_tsv(total=2_766_079, skiprows=None, nrows=250)
+    labels = df.columns[:3]
+    for c in labels:
+        df[c] = df[c].str.split(':').apply(lambda x: x[-1])
+    df[labels].head()
     df.shape
-    df.columns
     G = df_to_nx(df)
     layout = nx.spring_layout(G)
     nx.draw(G, pos=layout, node_color='b', width=2, with_labels=True)
-    plt.show()
+    plt.show(block=False)
     node_trace = plotly_node_trace(G=Gtiny, layout=layout)
     edge_trace = plotly_edge_trace(G=Gtiny, layout=layout)
     html = plot_graph(df)
