@@ -95,7 +95,6 @@ pip = "*"
 poetry = "*"
 pronouncing = "*"
 psutil = "*"
-pydoxtools = "*"
 pygraphviz = "*"  # ch11
 pypdf2 = "*"
 python = ">=3.9.16"
