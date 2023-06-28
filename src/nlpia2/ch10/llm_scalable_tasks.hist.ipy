@@ -33,7 +33,7 @@
 210                      parsinlu qa.        PaLM-62B
 
 [211 rows x 2 columns]
->>> df['Emergence'].apply(lambda x: 'linear' in x or 'flat' in x or not x)
+>>> scales = df['Emergence'].apply(lambda x: 'line' in x or 'flat' in x)
 0       True
 1       True
 2       True
