@@ -1,6 +1,6 @@
-# ch11 information extraction
+# ch11 information extraction 
 
-## 2022-07-22 sprint planning
+## 2022-07-22 Vish sprint planning
 
 - clone the manuscript repo: https://gitlab.com/tangibleai/nlpia-manuscript
 - create a vish-ch11 branch

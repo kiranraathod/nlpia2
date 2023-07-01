@@ -1251,7 +1251,7 @@ $ pip install wikipedia
 
 [source,python]
 ----
->>> import wikipedia as wiki
+>>> from nlpia2_wikipedia import wikipedia as wiki
 >>> wiki.page("AI")
 DisambiguationError                       Traceback (most recent call last)
 ...
@@ -1281,8 +1281,8 @@ $ pip install nlpia2_wikipedia
 
 [source,python]
 ----
->>> from nlpia2_wikipedia import wikipedia
->>> page = wikipedia.page('AI')
+>>> from nlpia2_wikipedia import wikipedia as wiki
+>>> page = wiki.page('AI')
 >>> page.title
 'Artificial intelligence'
 >>> print(page.content)
@@ -1290,7 +1290,7 @@ Artificial intelligence (AI) is intelligence—perceiving, synthesizing,
 and inferring information—demonstrated by machines, as opposed to 
 intelligence displayed by non-human animals or by humans. 
 Example tasks ...
->>> wikipedia.search('AI')
+>>> wiki.search('AI')
 ['Artificial intelligence',
  'Ai',
  'OpenAI',
@@ -1301,8 +1301,8 @@ Now you can use Wikipedia's full text search API to feed your retrieval-augmente
 And even if powerful people are trying to hide the truth from you, there's likely a lot of others in your "village" that have contributed to Wikipedia in your language.
 
 ---- 
->>> wikipedia.set_lang('zh')
->>> wikipedia.search('AI')
+>>> wiki.set_lang('zh')
+>>> wiki.search('AI')
 ['AI',
  'AI-14',
  'AI-222',
