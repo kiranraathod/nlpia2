@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "nlpia2"
-version = "0.0.29"
+version = "0.0.30"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "AGPLv3"
 readme = "README.md"
@@ -88,7 +88,7 @@ nessvec = "*"
 nlpia2-wikipedia = ">=1.5.4"
 nltk = "*"
 openai = "*"
-pandas = "*"
+pandas = ">=1.5.3,<2.0.0"  # argilla requires pandas <2.0
 parsimonious = "*"
 pillow = "*"
 pip = "*"
