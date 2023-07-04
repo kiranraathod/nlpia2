@@ -1312,33 +1312,7 @@ And even if powerful people are trying to hide the truth from you, there's likel
 ----
 
 
-
-
 == Test yourself 
 * How is generative model in this chapter different from the BERT model you've seen in the previos one?
 * We indexed the sentences of this book as the context for a Longformer-based reading comprehension question answering model. How it get better or worse if you use Wikipedia sections for the context? What about an entire Wikipedia article? footnote:[See the wik] answers to complex questions about prosocial AI. if you give it passages longer thanlonger passages of "context" material to work with?
 
-
-////
-TODO: Find a place for this content
-* Few shot learners and zero shot reasoners and prompt engineering footnote:[Large Language Models are Zero-Shot Reasoners Jan 2023 by Takeshi Kojima (https://arxiv.org/pdf/2205.11916.pdf)]
-* GPT-4 % undesired behavior for sensitive/disallowed prompts: footnote:["GPT-4 Technical Report" (https://arxiv.org/pdf/2303.08774.pdf)]
-    * text_davinci-003 47/22%
-    * gpt-3.5-turbo 41/3.5%
-    * gpt-4 23/.5%
-* GPT-4 is 10x more expensive and slower and has 8x more context memory (8k vs 64k tokens) footnote:["GPT-4 vs. ChatGPT-3.5" by CNETMarch 2023(https://www.pcmag.com/news/the-new-chatgpt-what-you-get-with-gpt-4-vs-gpt-35)]
-* GPT-4 experiments and benchmark test examples: footnote:["Sparks of Artificial General Intelligence: Early experiments with GPT-4" (https://arxiv.org/pdf/2303.12712v3.pdf)]
-* LLM survey: footnote:["A Survey of Large Language Models" 2023 by Wayne Xin Zhao et al (https://arxiv.org/pdf/2303.18223.pdf)]
-* Elastic search now supports embedding vector search with vector fields footnote:[Augmenting elastic search with text embeddings for Stack Overflow article search (https://github.com/jtibshirani/text-embeddings)]
-* An NLP pipeline that can extract scientific knowledge from unstructured text (journal articles) and store it in a knowledge graph footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-* "Rational" thinking (thinking slow) can sometime undermine our prosocial instinct (thinking fast) to cooperate with others in zero-sum one-shot games footnote:["Intuition, deliberation, and the evolution of cooperation" by Adam Beara, David G. Rand 2015 (https://www.pnas.org/doi/pdf/10.1073/pnas.1517780113)]
-* footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-* footnote:["KG-BART: Knowledge Graph-Augmented BART for Generative Commonsense Reasoning" by Ye Liu et al. (https://ojs.aaai.org/index.php/AAAI/article/view/16796/16603)]
-* footnote:["Barack's Wife Hillary: Using Knowledge Graphs for Fact-Aware Language Modeling Robert L. Logan IV" (https://arxiv.org/pdf/1906.07241)]
-* footnote:["Entity Linking from Joint Encoding ..." code (https://github.com/nitishgupta/neural-el)]
-* footnote:[visualization of linked entities in the wikitext-2 dataset with entities from wikidata (https://rloganiv.github.io/linked-wikitext-2/#/explore)]
-* open source conversational LLM that runs on your laptop: footnote:[GPT4All git repo (https://github.com/nomic-ai/gpt4all)]
-* build a knowledge graph from text with REBEL, BART and WikiText: footnote:[Medium article (https://medium.com/nlplanet/building-a-knowledge-base-from-texts-a-full-practical-example-8dbbffb912fa)]
-* footnote:["REBEL: Relation Extraction By End-to-end Language generation" by Pere-Lluis Huguet Cabot, Roberto Navigli 2021, paper with code (https://paperswithcode.com/paper/rebel-relation-extraction-by-end-to-end)]
-* footnote:[Admins, Mods, and Benevolent Dictators for Life: The Implicit Feudalism of Online Communities 2021 by Nathan Schneider (https://files.osf.io/v1/resources/sf432/providers/osfstorage/5ff89882e80d370172a5785a?action=download&direct&version=7)]
-////
