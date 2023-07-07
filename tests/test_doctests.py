@@ -4,8 +4,8 @@ import pytest  # noqa
 import doctest
 import nlpia2
 import nlpia2.ch06
-import nlpia2.ch06.spell
-from nlpia2.text_extractors import test_file
+import nlpia2.ch06.spell  # noqa
+from nlpia2.text_processing.extractors import test_file
 
 from pathlib import Path
 

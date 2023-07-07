@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import doctest
-from nlpia2.text_extractors import test_file
+from nlpia2.text_processing.extractors import test_file
 
 from pathlib import Path
 

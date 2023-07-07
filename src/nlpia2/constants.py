@@ -41,18 +41,26 @@ from pathlib import Path
 try:
     MODULE_DIR = Path(__file__).resolve().absolute().parent
 except NameError:
+    log.warning('nlpia2.constants should not be run as a script, only as a module')
     MODULE_DIR = Path.cwd()
 assert MODULE_DIR.is_dir()
 
 SRC_DATA_DIR = MODULE_DIR / SRC_DATA_DIR_NAME
-SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
+try:
+    SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
+except FileExistsError as e:
+    log.warninge(e)
+
 
 BASE_DIR = MODULE_DIR.parent
 if BASE_DIR.name == 'src':
     BASE_DIR = MODULE_DIR.parent
 
 BIGDATA_DIR = HOME_DATA_DIR = HOME_DIR / BIGDATA_DIR_NAME
-BIGDATA_DIR.mkdir(exist_ok=True, parents=True)
+try:
+    BIGDATA_DIR.mkdir(exist_ok=True, parents=True)
+except FileExistsError as e:
+    log.warning(e)
 
 # FIXME: code to download manuscript from dropbox/Public and put it in nlpia2-data
 MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
@@ -69,10 +77,17 @@ BIGDATA_INFO_LATEST = BIGDATA_INFO_FILE.with_suffix('.latest.csv')
 
 CHECPOINT_DIR = CHECKPOINT_PATH = BIGDATA_DIR / 'checkpoints'
 LOG_DIR = Path(BIGDATA_DIR) / 'log'
+try:
+    LOG_DIR.mkdir(exist_ok=True)
+except (FileExistsError, FileNotFoundError) as e:
+    log.warning(e)
+
 CONSTANTS_DIR = Path(BIGDATA_DIR) / 'constants'
 HISTORY_PATH = Path(BIGDATA_DIR) / 'history.yml'
-Path(LOG_DIR).mkdir(exist_ok=True)
-Path(CONSTANTS_DIR).mkdir(exist_ok=True)
+try:
+    CONSTANTS_DIR.mkdir(exist_ok=True)
+except (FileExistsError, FileNotFoundError) as e:
+    log.warning(e)
 
 QUESTIONWORDS = set('who what when were why which how'.split() + ['how come', 'why does', 'can i', 'can you', 'which way'])
 QUESTION_STOPWORDS = QUESTIONWORDS | set(STOPWORDS)
@@ -183,14 +198,14 @@ HIST_CONFIG = {
 }
 
 # these may not all be the sames isinstance types, depending on the env
-FLOAT_TYPES = tuple([t for t in set(np.typeDict.values()) if t.__name__.startswith('float')] + [float])
+FLOAT_TYPES = tuple([t for t in set(np.sctypeDict.values()) if t.__name__.startswith('float')] + [float])
 FLOAT_DTYPES = tuple(set(np.dtype(typ) for typ in FLOAT_TYPES))
-INT_TYPES = tuple([t for t in set(np.typeDict.values()) if t.__name__.startswith('int')] + [int])
+INT_TYPES = tuple([t for t in set(np.sctypeDict.values()) if t.__name__.startswith('int')] + [int])
 INT_DTYPES = tuple(set(np.dtype(typ) for typ in INT_TYPES))
 NUMERIC_TYPES = tuple(set(list(FLOAT_TYPES) + list(INT_TYPES)))
 NUMERIC_DTYPES = tuple(set(np.dtype(typ) for typ in NUMERIC_TYPES))
 
-DATETIME_TYPES = tuple([t for t in set(np.typeDict.values()) if t.__name__.startswith('datetime')] +
+DATETIME_TYPES = tuple([t for t in set(np.sctypeDict.values()) if t.__name__.startswith('datetime')] +
                        [datetime.datetime, pd.DatetimeTZDtype, pd.Timestamp])
 DATE_TYPES = (datetime.datetime, datetime.date)
 

@@ -85,7 +85,7 @@ matplotlib-inline = "*"
 meilisearch = "*"
 mistune = "*"
 nessvec = "*"
-nlpia2-wikipedia = ">=1.5.4"
+nlpia2_wikipedia = ">=1.5.6"
 nltk = "*"
 openai = "*"
 pandas = ">=1.5.3,<2.0.0"  # argilla requires pandas <2.0
