@@ -24,7 +24,7 @@ This chapter covers
 * Classifying text
 
 // SUM: CNNs detect patterns word sequences using kernels that work no matter where the patterns appear in text, and CNNs are faster than other models for text classification and information retrieval (search, question answering).
-In this chapter you will unlock the misunderstood superpowers of convolution for Natural Language Processing.
+In this chapter, you will unlock the misunderstood superpowers of convolution for Natural Language Processing.
 This will help your machine understand words by detecting patterns in sequences of words and how they are related to their neighbors.
 
 _Convolutional Neural Networks_ (CNNs) are all the rage for _computer vision_ (image processing).
@@ -34,16 +34,16 @@ For example, in 2022 Cole Howard and Hannes Hapke (coauthors on the first editio
 And deep learning deep thinkers in academia like Christopher Manning and Geoffrey Hinton use CNNs to crush the competition in NLP.
 You can too.
 
-So why haven't CNNs caught on with industry and big tech corporations?
+So why haven't CNNs caught on with the industry and big tech corporations?
 Because they are too good -- too efficient.
-CNNs don't need the massive amounts of data and compute resources that is central to Big Tech's monopoly power in AI.
+CNNs don't need the massive amounts of data and compute resources that are central to Big Tech's monopoly power in AI.
 They are interested in models that "scale" to huge datasets, like reading the entire Internet.
 Researchers with access to big data focus on problems and models that leverage their competitive advantage with data, "the new oil."footnote:[Wired Magazine popularized the concept of data as the new oil in a 2014 article by that title (https://www.wired.com/insights/2014/07/data-new-oil-digital-economy/)]
 It's hard to charge people much money for a model anyone can train and run on their own laptop.
 
 Another more mundane reason CNNs are overlooked is that properly configured and tuned CNNs for NLP are hard to find.
-I wasn't able to find a single reference implementation of CNNs for NLP in the PyTorch, Keras, or Tensorflow.
-And the unofficial implementations seemed to transpose the CNN channels used for image processing to creation convolutions in embedding dimensions rather than convolution in time.
+I wasn't able to find a single reference implementation of CNNs for NLP in PyTorch, Keras, or TensorFlow.
+And the unofficial implementations seemed to transpose the CNN channels used for image processing to create convolutions in embedding dimensions rather than convolution in time.
 You'll soon see why that is a bad idea.
 But don't worry, you'll soon see the mistakes that others have made and you'll be building CNNs like a pro.
 Your CNNs will be more efficient and performant than anything coming out of the blogosphere.
@@ -59,52 +59,52 @@ You won't need the unaffordable compute and training data that large transformer
 * **GPT-J**: 6B parameters (FOSS, outperforms GPT-3)
 * **CNNs** (in this Chapter): less than 200k parameters
 
-Yes, in this chapter you're going to learn how to build CNNs models that are a million times smaller and faster than the big transformers you read about in the news.
+Yes, in this chapter you're going to learn how to build CNN models that are a million times smaller and faster than the big transformers you read about in the news.
 And CNNs are often the best tool for the job.
 
-=== Patterns in sequences of words
+== Patterns in sequences of words
 
 Individual words worked well for you in the previous chapters.
 You can say a lot with individual words.
-You just need to chose the right words or find the keywords in a passage of text and that can usually capture the meaning.
+You just need to choose the right words or find the keywords in a passage of text and that can usually capture the meaning.
 And the order doesn't matter too much for the kinds of problems you solved in previous chapters.
-If you throw all the words from a job title such as "Junior Engineer" or "Data Scientist" into a bag of words (BOW) vector, the jumbled up BOW contains most of the information content of the original title.
+If you throw all the words from a job title such as "Junior Engineer" or "Data Scientist" into a bag of words (BOW) vector, the jumbled-up BOW contains most of the information content of the original title.
 That's why all the previous examples in this book worked best on short phrases or individual words.
 That's why keywords are usually enough to learn the most important facts about a job title or get the gist of a movie title.
+
 And that's why it's so hard to choose just a few words to summarize a book or job with its title.
 For short phrases, the occurrence of words is all that matters.
-
 When you want to express a complete thought, more than just a title, you have to use longer sequences of words.
 And the order matters.
 
-Before NLP, and even before computers, humans have used a mathematical operation called _convolution_ to detect patterns in sequences.
+Before NLP, and even before computers, humans used a mathematical operation called _convolution_ to detect patterns in sequences.
 For NLP, convolution is used to detect patterns that span multiple words and even multiple sentences.
-The original convolutions were hand crafted on paper with a quill pen, or even a cuneiform on a clay tablet!
-Once computers were invented, researchers and mathematicians would hand-craft the math to match what they wanted to achieve for each problem.
+The original convolutions were handcrafted on paper with a quill pen or even a cuneiform on a clay tablet!
+Once computers were invented, researchers and mathematicians would handcraft the math to match what they wanted to achieve for each problem.
 Common hand-crafted kernels for image processing include Laplacian, Sobel, and Gaussian filters.
 And in digital signal processing similar to what is used in NLP, low pass and high pass convolution filters can be designed from first principles.
 If you're a visual learner or are into computer vision it might help you grasp convolution if you check out heatmap plots of the kernels used for these convolutional filters on Wikipedia.footnote:["Digital image processing" on Wikipedia (https://en.wikipedia.org/wiki/Digital_image_processing#Filtering)] footnote:["Sobel filter" on Wikipedia (https://en.wikipedia.org/wiki/Sobel_operator)] footnote:["Gaussian filter" (https://en.wikipedia.org/wiki/Gaussian_filter)] These filters might even give you ideas for initializations of your CNN filter weights to speed learning and create more explainable deep learning language models.
 
-But that gets tedious after a while, and we no longer even consider hand-crafted filters to be important in computer vision or NLP.
+But that gets tedious after a while, and we no longer even consider handcrafted filters to be important in computer vision or NLP.
 Instead, we use statistics and neural networks to automatically _learn_ what patterns to look for in images and text.
 Researchers started with linear fully connected networks (multi-layer perceptrons).
 But these had a real problem with over-generalization and couldn't recognize when a pattern of words moved from the beginning to the end of the sentence.
-Fully-connect neural networks are not scale and translation invariant should look like to do their job.
+Fully-connect neural networks are not scale- and translation-invariant.
 But then David Rumelhart invented and Geoffrey Hinton popularized the backpropagation approach that helped CNNs and deep learning bring the world out of a long AI winter.footnote:[ May 2015, _nature_, "Deep Learning" by Hinton, LeCunn, and Benjio (https://www.nature.com/articles/nature14539)] footnote:["A Brief History of Neural Nets and Deep Learning" by Andrey Kurenkov (https://www.skynettoday.com/overviews/neural-net-history)]
-This approached birthed the first practical CNNs for computer vision, time series forecasting and NLP.
+This approach birthed the first practical CNNs for computer vision, time series forecasting and NLP.
 
 Figuring out how to combine convolution with neural networks to create CNNs was just the boost neural networks needed.
 CNNs now dominate computer vision.
 And for NLP, CNNs are still the most efficient models for many advanced natural language processing problems.
 For example, spaCy switched to CNNs for version 2.0.
 CNNs work great for _named entity recognition_ (NER) and other word tagging problems.footnote:[SpaCy NER documentation (https://spacy.io/universe/project/video-spacys-ner-model)]
-And CNNs in your brain seem seem to be responsible for your ability to recognize language patterns that are too complex for other animals.
+And CNNs in your brain seem to be responsible for your ability to recognize language patterns that are too complex for other animals.
 
 === Scale and Translation Invariance
 // SUM: The main advantage of CNNs over other NLP neural nets is that they can recognize patterns no matter where they occur in the text (translation invariance) and how spread out they are (scale invariance).
 The main advantage of CNNs over previous NLP algorithms is that they can recognize patterns in text no matter where those patterns occur in the text (_translation invariance_) and how spread out they are (_scale invariance_).
 TF-IDF vectors don't have any way of recognizing and generalizing from patterns in your text.
-And fully connected neural networks over-generalize from particular patterns at particular locations in text.
+And fully connected neural networks over-generalize from particular patterns at particular locations in the text.
 
 As far back as the 1990s famous researchers like Yann LeCun, Yoshua Bengio, and Geoffrey Hinton were using convolution for computer vision and OCR (optical character recognition).footnote:[LeCun, Y and Bengio, Y "Convolutional Networks for Images, Speech, and Time-series" (https://www.iro.umontreal.ca/~lisa/pointeurs/handbook-convo.pdf)]
 They got this idea from our brains.
@@ -114,7 +114,6 @@ And because CNNs are based on brains, they can be used for all kinds of "off-lab
 NLP CNNs are useful for any series of symbols or numerical vectors (embeddings).
 This intuition empowers you to apply your NLP CNNs to a wide variety of problems that you will run into at your job - such as financial time series forecasting and weather forecasting.
 
-Convolutions in our brains give us the ability to process and understand verbal communication in a _scale invariant_ and _translation invariant_ way.
 The scale invariance of convolution means you can understand others even if they stretch out the patterns in their words over a long time by speaking slowly or adding a lot of filler words.
 And translation invariance means you can understand peoples' intent whether they lead with the good news or the bad news.
 You've probably gotten pretty good at handling feedback from your parents, teachers, and bosses whether it is authentic constructive criticism or even if the "meat" is hidden inside a "praise sandwich."footnote:[Sometimes "feedback sandwich" or "sh-t sandwich."]
@@ -124,9 +123,9 @@ And some people have as many as 3 layers of convolutions happening within the pa
 
 You'll soon see how to incorporate the power of translation and scale invariant convolutional filters into your own neural networks.
 You will use CNNs to classify questions and toots (Mastodon footnote:[Mastodon is a community-owned, ad-free social network: https://joinmastodon.org/] posts) and even the beeps and boops of Morse code.
-Your machine will soon be able to tell whether a question is about a person, thing, historical date, or general concept.
+Your machine will soon be able to tell whether a question is about a person, a thing, a historical date, or a general concept.
 You'll even try to see if a question classifier can tell if someone is asking you out on a date.
-And you might be surprised to learn that CNNs can detect subtle differences between catastrophes you might read about online: catastrophic birdsite post vs a real world disaster.
+And you might be surprised to learn that CNNs can detect subtle differences between catastrophes you might read about online: catastrophic birdsite post vs a real-world disaster.
 
 == Convolution
 // SUM: Convolution is multiplying a window of numbers on your sequence of Embedding vectors
@@ -134,17 +133,17 @@ And you might be surprised to learn that CNNs can detect subtle differences betw
 The concept of _convolution_ is not as complicated as it sounds.
 The math is almost the same as for calculating the correlation coefficient.
 Correlation helps you measure the covariance or similarity between a pattern and a signal.
-In fact its purpose is the same as for correlation, pattern recognition.
-Correlation allows you to detecting the similarity between a series of numbers and and some other series of numbers representing the pattern you're looking to match.
+In fact, its purpose is the same as for correlation - pattern recognition.
+Correlation allows you to detect the similarity between a series of numbers and some other series of numbers representing the pattern you're looking to match.
 
 === Stencils for natural language text
 // SUM: Convolution is like passing a stencil over text in order to detect a particular pattern in a sequence of letters or words. But a natural language convolutional kernel (a numerical stencil or filter) is fuzzy so it can detect more general patterns rather than relying on the exact sequences of letters and words. And this stencil is automatically personalized or _learned_ from the patterns that help your natural language model predict the labels in your dataset.
 
 Have you ever seen a lettering stencil?
 A lettering stencil is a piece of cardboard or plastic with the outline of printed letters cut out.
-When you want paint words onto something, such as a storefront sign, or window display, you can use a stencil to make your sign come out looking just like printed text.
-You use a stencil like movable masking tape to keep you from painting in the wrong places.
-But in this example you're going to use the stencil in reverse.
+When you want to paint words onto something, such as a storefront sign, or window display, you can use a stencil to make your sign come out looking just like printed text.
+You use a stencil like a movable masking tape to keep you from painting in the wrong places.
+But in this example, you're going to use the stencil in reverse.
 Instead of painting words with your stencil, you're going to detect patterns of letters and words with a stencil.
 Your NLP stencil is an array of weights (floating point numbers) called a _filter_ or _kernel_.
 
@@ -156,23 +155,23 @@ image::../images/ch07/cnn-stencil-sliding-over-phrase-words-are-sacred_drawio.pn
 
 Now, in your mind, set the stencil down on top of the book so that it covers the page and you can only see the words that "fit" into the stencil cutout.
 You have to slide that stencil across the page until the stencil lines up with this pair of words in the book.
-At that point the you'd be able to see the words spelled out clearly through the stencil or mask.
+At that point, you'd be able to see the words spelled out clearly through the stencil or mask.
 The black lettering of the text would fill the holes in the stencil.
 And the amount of black that you see is a measure of how good the match is.
 If you used a white stencil, the words "are sacred" would shine through and would be the only words you could see.
 
-If you used a stencil this way, sliding it across text to find the maximum match between your pattern and a piece of text, you'd be doing _convolution_ with a stencil!
+If you used a stencil this way, sliding it across the text to find the maximum match between your pattern and a piece of text, you'd be doing _convolution_ with a stencil!
 When talking about deep learning and CNNs the stencil is called a _kernel_ or _filter_.
-In CNNs the _kernel_ is an array of floating point numbers rather than a cardboard cutout.
+In CNNs, a _kernel_ is an array of floating point numbers rather than a cardboard cutout.
 And the kernel is designed to match a general pattern in the text.
 Your text has also been converted to an array of numerical values.
-And convolution is process of sliding that kernel across your numerical representation of text to see what pops out.
+Convolution is the process of sliding that kernel across your numerical representation of text to see what pops out.
 
 Just a decade or so ago, before CNNs, you would have had to hand-craft your kernels to match whatever patterns you could dream up.
 But with CNNs you don't have to program the kernels at all, except to decide how wide the kernels are - how many letters or words you think will capture the patterns you need.
 Your CNN optimizer will fill in the weights within your kernel.
 As you train a model, the optimizer will find the best array of weights that matches the patterns that are most predictive of the target variable in your NLP problem.
-The back propagation algorithm will incrementally adjust the weights bit by bit until they match the right patterns for your data.
+The backpropagation algorithm will incrementally adjust the weights bit by bit until they match the right patterns for your data.
 
 You need to add a few more steps to your mental model of stencils and kernels to give you a complete understanding of how CNNs work.
 A CNN needs to do 3 things with a kernel (stencil) to incorporate it into a natural language processing pipeline.
@@ -182,7 +181,7 @@ A CNN needs to do 3 things with a kernel (stencil) to incorporate it into a natu
 3. Convert the maximum value to a binary value or probability using an activation function
 
 You can think of the amount of blackness that pops through your stencil as a measure of the amount of match between your stencil and the text.
-So step 1 for a CNN, is to multiply the weights in your kernel by the numerical values for a piece of text and adding up all those products to create a total match score.
+So step 1 for a CNN, is to multiply the weights in your kernel by the numerical values for a piece of text and to add up all those products to create a total match score.
 This is just the dot product or correlation between the kernel and that particular window of text.
 
 Step 2 is to slide your window across the text and do the dot product of step 1 again.
@@ -192,10 +191,10 @@ Depending on the details of how you do this sliding and multiplying (convolution
 But either way, the convolution operation outputs a sequence of numerical values, one for every possible position of the kernel in your text.
 
 Step 3 is to decide whether the text contains a good match somewhere within it.
-For this your CNN converts the sequence of values output by convolution into a single value.
-The end result is a single value representing the likelihood that the kernel's pattern was somewhere in the text.
+For this, your CNN converts the sequence of values output by convolution into a single value.
+The result is a single value representing the likelihood that the kernel's pattern was somewhere in the text.
 Most CNNs are designed to take the maximum value of this sequence of numbers as a measure of a match.
-This approach called _max pooling_ because it collects or pools all of the values from the convolution into a single maximum value.
+This approach is called _max pooling_ because it collects or pools all of the values from the convolution into a single maximum value.
 
 [NOTE]
 ====
@@ -210,7 +209,7 @@ ____
 Words are sacred. If you get the right ones in the right order you can nudge the world a little.
 ____
 
-In the first few chapters you treated words as sacred by learning how best to tokenize text into words and then compute vector representations of individual words.
+In the first few chapters, you treated words as sacred by learning how best to tokenize text into words and then compute vector representations of individual words.
 Now you can combine that skill with convolution to give you the power to "nudge the world a little" with your next chatbot on Mastodon.footnote:[Mastodon is a FOSS ad-free microblogging platform similar to Twitter with an open standard API for retrieving NLP datasets (https://mastodon.social)]
 
 === A bit more stenciling
@@ -253,7 +252,7 @@ Here's how you can label the words in a portion of the quote with their parts of
 ----
 
 
-Just as you learned in chapter 6 you want to create a vector representation of each word so that the text can be converted to numbers for use in the CNN.
+Just as you learned in Chapter 6, you want to create a vector representation of each word so that the text can be converted to numbers for use in the CNN.
 
 [source,python]
 ----
@@ -300,8 +299,8 @@ Just as you learned in chapter 6 you want to create a vector representation of e
 
 Now your stencil or kernel will have to be expanded a bit to span two of the 7-D one-hot vectors.
 You will create imaginary cutouts for the 1's in the one-hot encoded vectors so that the pattern of holes matches up with the sequence of parts of speech you want to match.
-Your adjective-noun stencil has holes in the first row and the first column the adjective at the beginning of a 2-gram.
-You will need a hole in the second row and fifth column for the noun as the second word in the 2-gram.
+Your adjective-noun stencil has holes in the first row and the first column for the adjective at the beginning of a 2-gram.
+You will need a hole in the second row and the fifth column for the noun as the second word in the 2-gram.
 As you slide your imaginary stencil over each pair of words it will output a boolean `True` or `False` depending on whether the stencil matches the text or not.
 
 The first pair of words will create a match:
@@ -363,8 +362,8 @@ _Convolution_, then, is
 - to produce a map…
 - of where in the input certain conditions existed (e.g. two consecutive adverbs)
 
-Later in the chapter you will use the terms _kernel_ and _stride_ to talk about your stencil and how you slide it across the text.
-In this case your _stride_ was one and the kernel size was two.
+Later in the chapter, you will use the terms _kernel_ and _stride_ to talk about your stencil and how you slide it across the text.
+In this case, your _stride_ was one and the kernel size was two.
 And for the part-of-speech vectors, your kernel was designed to handle 7-D embedding vectors.
 Had you used the same kernel size of two but stepped it across the text with a stride of two, then you would get the following output:
 
@@ -377,7 +376,7 @@ Had you used the same kernel size of two but stepped it across the text with a s
 |8, 9  | (nudge, the) | False (0)
 |===
 
-In this case you got lucky with your stride because the two adjective-noun pairs were an even number of words apart.
+In this case, you got lucky with your stride because the two adjective-noun pairs were an even number of words apart.
 So your kernel successfully detected both matches for your pattern.
 But you would only get luck 50% of the time with this configuration.
 So it is much more common to have a stride of one and kernel sizes of two or more.
@@ -412,7 +411,7 @@ And you definitely want to create some math that can work with patterns that are
 That's how mathematicians came up with the concept of convolution.
 They split the longer sequence into smaller ones that are the same length as the shorter one and then apply the correlation function to each of these pairs of sequences.
 That way convolution can work for any 2 sequences of numbers no matter how long or short they are.
-So in NLP we can make our pattern (called a _kernel_) as short as we need to.
+So in NLP, we can make our pattern (called a _kernel_) as short as we need to.
 And the series of tokens (text) can be as long as you like.
 You compute correlation over a sliding window of text to create a sequence of correlation coefficients that represent the meaning of the text.
 
@@ -425,15 +424,15 @@ That will come later with the _reduce_ part of the pipeline.
 Pay attention to the size of the outputs of each convolutional layer.
 
 The math of convolution allows you to detect patterns in text no matter where (or when) they occur in that text.
-We call an NLP algorithm "time invariant" if it produces feature vectors that are the same no matter where (when) a particular pattern of words occurs.
+We call an NLP algorithm "time-invariant" if it produces feature vectors that are the same no matter where (when) a particular pattern of words occurs.
 Convolution is a time-invariant operation, so it's perfect for text classification and sentiment analysis and NLU.
 Time invariance is a big advantage of convolution over other approaches you've used so far.
 Your CNN output vector gives you a consistent representation of the thought expressed by a piece of text no matter where in the text that thought is expressed.
 Unlike word embedding representations, convolution will pay attention to the meaning of the order of the vectors and won't smush them all together into a pointless average.
 
 Another advantage of convolution is that it outputs a vector representation of your text that is the same size no matter how long your text is.
-Whether your text is a one-word name or a ten thousand word document, a convolution across that sequence of tokens would output the same size vector to represent the meaning of that text.
-Convolution creates embedding vectors that you can use to make all sorts of predictions with, just like you did with word embeddings in chapter 6.
+Whether your text is a one-word name or a ten-thousand-word document, a convolution across that sequence of tokens would output the same size vector to represent the meaning of that text.
+Convolution creates embedding vectors that you can use to make all sorts of predictions, just like you did with word embeddings in Chapter 6.
 But now these embeddings will work on sequences of words, not just individual words.
 Your embedding, your vector representation of meaning, will be the same size no matter whether the text you're processing is the three words "I love you" or much longer: "I feel profound and compersive love for you."
 The feeling or sentiment of love will end up in the same place in both vectors despite the word love occurring at different locations in the text.
@@ -444,30 +443,29 @@ Unlike the sparse TF-IDF vectors of earlier chapters, the dimensions of your con
 === Python convolution example
 // SUM: How to do convolution in pure python: dot product of a small vector over a rolling window of token embeddings or a sequence of is_adverb 0's and 1's.
 
-You're going to start with a pure python implementation of convolution.
+You're going to start with a pure Python implementation of convolution.
 This will give you a mental model of the math for convolution, and most importantly, of the shapes of the matrices and vectors for convolution.
 And it will help you appreciate the purpose of each layer in a convolutional neural network.
-For this first convolution you will hard-code the weights in the convolution kernel to compute a 2-point moving average.
-//MARIA: time references are confusing. Maybe 2-point instead of 2-day?
+For this first convolution, you will hard-code the weights in the convolution kernel to compute a 2-point moving average.
 This might be useful if you want to extract some machine learning features from daily cryptocurrency prices in Robinhood.
-Or perhaps it would be better to imagine you trying to solve a solvable problem like doing feature engineering of some 2-day averages on the reports of rainfall for a rainy city like Portland, Oregon.
+Or perhaps it would be better to imagine you trying to solve a solvable problem like doing feature engineering of some 2-point averages on the reports of rainfall for a rainy city like Portland, Oregon.
 Or even better yet, imagine you are trying to build a detector that detects a dip in the part-of-speech tag for an adverb in natural language text.
 Because this is a hard-coded kernel, you won't have to worry about training or fitting your convolution to data just yet.
 
-You are going to hard-code this convolution to detect a pattern in a sequence of numbers just like you hard-coded a regular expression to recognize tokens in as sequence of characters in Chapter 2.
+You are going to hard-code this convolution to detect a pattern in a sequence of numbers just like you hard-coded a regular expression to recognize tokens in a sequence of characters in Chapter 2.
 When you hard-code a convolutional filter, you have to know what patterns you're looking for so you can put that pattern into the coefficients of your convolution.
 This works well for easy-to-spot patterns like dips in a value or brief spikes upward in a value.
 These are the kinds of patterns you'll be looking for in Morse code "text" later in this chapter.
-In section 3 of this chapter you will learn how to build on this skill to create a convolutional neural network in PyTorch that can _learn_ on its own which patterns to look for in your text.
+In section 3 of this chapter, you will learn how to build on this skill to create a convolutional neural network in PyTorch that can _learn_ on its own which patterns to look for in your text.
 
 In computer vision and image processing you would need to use a 2-D convolutional filter so you can detect both vertical and horizontal patterns, and everything in-between.
-For natural language processing you only need 1-dimensional convolutional filters.
+For natural language processing, you only need 1-dimensional convolutional filters.
 You're only doing convolution in one dimension, the time dimension, the position in your sequence of tokens.
 You can store the components of your embedding vectors, or perhaps other parts of speech, in `channels` of a convolution.
 More on that later, once you're done with the pure Python convolution.
 Here's the Python for perhaps the simplest possible useful 1-D convolution.
 
-Listing 7.4 shows you how to create a 1-D convolution in pure python for a hard-coded kernel (`[.5, .5]`) with only two weights of `.5` in it.
+Listing 7.4 shows you how to create a 1-D convolution in pure Python for a hard-coded kernel (`[.5, .5]`) with only two weights of `.5` in it.
 
 This kernel is computing the rolling or moving average of two numbers in a sequence of numbers.
 For natural language processing, the numbers in the input sequence represent the occurrence (presence or absence) of a token in your vocabulary.
@@ -477,9 +475,9 @@ Or the input could be the fluctuating numerical values of a dimension in your wo
 This moving average filter can detect the occurrence of two things in a row because `(.5 * 1 + .5 * 1)` is `1`.
 A `1` is how your code tells you it has found something.
 Convolution is great at detecting _patterns_ like this that other NLP algorithms would miss.
-Rather than looking for two occurrences a word, you are going to look for two aspects of meaning in a row.
+Rather than looking for two occurrences of a word, you are going to look for two aspects of meaning in a row.
 And you've just learned all about the different aspects of meaning in the last chapter, the dimensions of word vectors.
-For now you're just looking for a single aspect of words, their part of speech.
+For now, you're just looking for a single aspect of words, their part of speech.
 You are looking for one particular part of speech, adverbs.
 You're looking for two adverbs in a row.
 
@@ -490,20 +488,20 @@ The right word may be effective, but no word was ever as effective as a rightly 
 ____
 
 Can you spot the two adverbs in a row?
-I had to cheat and use SpaCy in order to find this example.
+I had to cheat and use SpaCy to find this example.
 Subtle patterns of meaning like this are very hard for a human to consciously notice.
-But measuring the the _adverbiness_ of text is just a matter of math for a convolutional filter.
+But measuring the _adverbiness_ of text is just a matter of math for a convolutional filter.
 And convolution will work in parallel for all the other aspects of meaning that you might be looking for.
 In fact, once you're done with this first example, you will run convolution on _all_ of the dimensions of words.
 Convolution works best when you use the word embeddings from the previous chapter that keep track of all the dimensions of words in vectors.
 
 Not only will convolution look at all the dimensions of meaning in words but also all the _patterns_ of meaning in all those dimensions of words.
 A convolutional neural network (CNN) looks at your desired output (target variable) to find all the patterns in all dimensions of word embeddings that influence your target variable.
-For this example you're defining an adverby sentence as one that contains two adverbs consecutively within a sentence.
+For this example, you're defining an "adverby" sentence as one that contains two adverbs consecutively within a sentence.
 This is just to help you see the math for a very simple problem.
 Adverbiness is just one of many features you need to engineer from text in machine learning pipelines.
-A CNN will automate that engineering for you by learning just the right combination of adverbiness, nounness, stopwordness, and lots of other nesses.
-For now you'll just do it all by hand for this one adverbiness feature.
+A CNN will automate that engineering for you by learning just the right combination of adverbiness, nounness, stopwordness, and lots of other "nesses".
+For now, you'll just do it all by hand for this one adverbiness feature.
 The goal is to understand the kinds of patterns a CNN can learn to recognize in your data.
 
 
@@ -552,7 +550,7 @@ Let's use our convolution filter to find where exactly.
 
 
 // Listing 7.4
-.Convolution in pure python
+.Convolution in pure Python
 [source,python]
 ----
 >>> kernel = [.5, .5]                          <1>
@@ -570,7 +568,7 @@ Let's use our convolution filter to find where exactly.
 >>> print(f'len(output): {len(output)}')
 ----
 <1> the kernel weights .5 and .5 create a 2-gram moving average convolution
-<2> iterate over this is_adv seq and stop at second to last position so window doesn't slide off the end
+<2> iterate over this is_adv seq and stop at the second to last position so that the window doesn't slide off the end
 <3> iterate over the 2 weights in the kernel
 
 ----
@@ -583,9 +581,9 @@ len(output): 19
 ----
 
 You can see now why you had to stop the `for` loop 1 short of the end of the input sequence.
-Otherwise our kernel with 2 weights in it would have overflowed off the end of the input sequence.
-You may have seen this kind of software pattern called "map reduce" elsewhere.
-And you can see how you might to use the Python built-in functions `map()` and `filter()` to implement the code in listing 7.4.
+Otherwise, our kernel with 2 weights in it would have overflowed off the end of the input sequence.
+You may have seen this kind of software pattern called "map-reduce" elsewhere.
+And you can see how you might use the Python built-in functions `map()` and `filter()` to implement the code in listing 7.4.
 
 You can create a moving average convolution that computes the adverbiness of a text according to our 2-consecutive-adverb definition if you use the sum function as your _pooling_ function.
 If you want it to compute an unweighted moving average you then just have to make sure your kernel values are all `1 / len(kernel)` so that they sum to 1 and are all equal.
@@ -619,12 +617,12 @@ So this particular kernel (`[.5, .5]`) is a very small (two-sample) moving avera
 .Line plot of `is_adv` and `adverbiness` convolution
 image::../images/ch07/square-wave-pure-python.png["Line plot of an input square wave of 3 ones, followed by 3 zeros, then 2 ones. Convolution by the kernel (.5, .5) is a moving average so it produces a trapezoidal wave that stops one short of the end of the square wave input sequence.", width=80%, link="../images/ch07/square-wave-pure-python.png"]
 
-Looking at figure 7.2 you might notice that it looks a bit like the moving average or smoothing filters for financial time series data or daily rainfall values.
-For a 7-day moving average of your GreenPill token prices, you would use a size 7 convolution kernel with values of one seventh (`0.142`) for each day of the week.footnote:[GreenPill is a regenerative economics initiative that encourages crypto investors to contibute to public goods (https://greenpill.party).]
+Looking at Figure 7.2 you might notice that it looks a bit like the moving average or smoothing filters for financial time series data or daily rainfall values.
+For a 7-day moving average of your GreenPill token prices, you would use a size 7 convolution kernel with values of one-seventh (`0.142`) for each day of the week.footnote:[GreenPill is a regenerative economics initiative that encourages crypto investors to contribute to public goods (https://greenpill.party).]
 A size 7 moving average convolution would just smooth your spikes in adverbiness even more, creating a much more curved signal in your line plots.
 But you'd never achieve a 1.0 adverbiness score on any organic quotes unless you carefully crafted a statement yourself that contained seven adverbs in a row.
 
-You can generalize your python script in listing 7.6 to create a convolution function that will work even when the size of the kernel changes.
+You can generalize your Python script in Listing 7.6 to create a convolution function that will work even when the size of the kernel changes.
 This way you can reuse it in later examples.
 
 // Listing 7.6
@@ -657,22 +655,22 @@ This combination makes the convolution algorithm a _map reduce_ operation that y
 ====
 Map-reduce operations such as convolution are highly parallelizable.
 Each of the kernel multiplications by a window of data could be done simultaneously in parallel.
-This parallelizablity is what makes convolution such a powerful, efficient, and successful way to process natural language data.
+This parallelizability is what makes convolution such a powerful, efficient, and successful way to process natural language data.
 ====
 
 === PyTorch 1-D CNN on 4-D embedding vectors
 
 You can see how 1-D convolution is used to find simple patterns in a sequence of tokens.
-In previous chapters you used regular expressions to find patterns in a 1-D sequence of characters.
+In previous chapters, you used regular expressions to find patterns in a 1-D sequence of characters.
 But what about more complex patterns in grammar that involve multiple different aspects of the meaning of words?
-For that you will need to use word embeddings (from chapter 6) combined with a _convolutional neural network_.
+For that, you will need to use word embeddings (from Chapter 6) combined with a _convolutional neural network_.
 You want to use PyTorch to take care of all the bookkeeping of all these linear algebra operations.
 You'll keep it simple with this next example by using 4-D one-hot encoded vectors for the parts of speech of words.
 Later you'll learn how to use 300-D GloVE vectors that keep track of the meaning of words in addition to their grammatical role.
 
 Because word embeddings or vectors capture all the different components of meaning in words, they include parts of speech.
 Just as in the adverby quote example earlier, you will match a grammatical pattern based on the parts of speech of words.
-But this time your words will have a 3-D part of speech vector representing the parts of speech noun, verb, and adverb.
+But this time your words will have a 3-D part-of-speech vector representing the parts of speech noun, verb, and adverb.
 And your new CNN can detect a very specific pattern, an adverb followed by a verb then a noun.
 Your CNN is looking for the "rightly timed pause" in the Mark Twain quote.
 Refer back to Listing 7.2 if you need help creating a DataFrame containing the POS tags for the "rightly timed pause" quote.
@@ -704,7 +702,7 @@ NOUN    0      0     1    0   0  ...  0        0      0      1  0
 image::../images/ch07/conv1d-pos-rightly-timed-pause_df.png["DataFrame with ADV ADJ VERB NOUN tags for 'rightly timed pause' Mark Twain quote", width=90%]
 
 To keep things efficient, PyTorch does not accept arbitrary Pandas or numpy objects.
-Instead you must convert all input data to `torch.Tensor` containers with `torch.float` or `torch.int` data type (`dtype`) objects inside.
+Instead, you must convert all input data to `torch.Tensor` containers with `torch.float` or `torch.int` data type (`dtype`) objects inside.
 
 .Convert a DataFrame to a tensor with the correct size
 [source,python]
@@ -727,7 +725,7 @@ Before you had only one dimension to worry about, the adverb tag.
 Now you'll need to work with all 4 dimensions of these word vectors to get the pattern right.
 And you need to coordinate four different "features" or channels of data.
 So for a 3-word, 4-channel kernel we need a 4x3 matrix.
-Each row represents a channel (part of speech tag), and each column represents a word in the sequence.
+Each row represents a channel (part-of-speech tag), and each column represents a word in the sequence.
 The word vectors are 4-D column vectors.
 
 [source,python]
@@ -742,22 +740,22 @@ The word vectors are 4-D column vectors.
 
 
 You can see that this DataFrame is just an exact copy of the sequence of vectors you want to match in your text samples.
-Of course you were only able to do this because you knew what you were looking for in this one toy example.
-In a real neural network the deep learning optimizer will use back propagation to _learn_ the sequences of vectors that are most helpful in predicting your target variable (the label).
+Of course, you were only able to do this because you knew what you were looking for in this one toy example.
+In a real neural network, the deep learning optimizer will use backpropagation to _learn_ the sequences of vectors that are most helpful in predicting your target variable (the label).
 
 How is it possible for a machine to match patterns?
 What is the math that causes a kernel to always match the pattern that it contains?
-In Figure 7.4 you can do the math yourself for a couple strides of the filter across your data.
+In Figure 7.4 you can do the math yourself for a couple of strides of the filter across your data.
 This will help you see how all this works and why it's so simple and yet so powerful.
 
 // Figure 7.4
-.Check the convolution pattern match yourself
-image::../images/ch07/conv1d-pos-rightly-timed-pause-squares_drawio.png["The top row of the kernel weights for the adverb pattern is '1 0 0' and when multiplied by '0 0 1' for the "as a rightly" it gives a total of 0, but when multiplied by the '1 0 0' for the words 'rightly timed pause it gives a total of 1. Doing this for the other parts of speech in the pattern give a total of 0 for the nonmatching trigram and 3 for the matching phrase 'rightly timed pause'.", width=80%, link="../images/ch07/conv1d-pos-rightly-timed-pause-squares_drawio.png"]
+.Check the convolution pattern matching yourself
+image::../images/ch07/conv1d-pos-rightly-timed-pause-squares_drawio.png["The top row of the kernel weights for the adverb pattern is '1 0 0' and when multiplied by '0 0 1' for the "as a rightly" it gives a total of 0, but when multiplied by the '1 0 0' for the words 'rightly timed pause it gives a total of 1. Doing this for the other parts of speech in the pattern gives a total of 0 for the nonmatching trigram and 3 for the matching phrase 'rightly timed pause'.", width=80%, link="../images/ch07/conv1d-pos-rightly-timed-pause-squares_drawio.png"]
 
 Have you checked the math in Figure 7.4?
 Make sure you do this before you let PyTorch do the math, to embed this pattern of math in your neural network so you can do it in the future if you ever need to debug problems with your CNN.
 
-In PyTorch or any other deep learning framework designed to process multiple samples in parallel you have to unsqueeze the kernel to add a dimension to hold additional samples.
+In PyTorch or any other deep learning framework designed to process multiple samples in parallel, you have to unsqueeze the kernel to add a dimension to hold additional samples.
 Your unsqueezed kernel (weight matrix) needs to be the same shape as your batch of input data.
 The first dimension is for the samples from your training or test datasets that are being input to the convolutional layer.
 Normally this would be the output of an embedding layer and would already be sized appropriately.

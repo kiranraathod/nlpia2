@@ -251,7 +251,7 @@ You may have heard of tokenizers before.
 If you took a computer science class you likely learned about how programming language compilers work.
 A tokenizer that is used to compile computer languages is called a _scanner_ or _lexer_.
 In some cases your computer language parser can work directly on the computer code and doesn't need a tokenizer at all.
-And for natural language processing, the only parser typically outputs a vector representation, rather than  If the tokenizer functionality is not separated from the compiler, the parser is often called a scannerless _parser_.
+And for natural language processing, the only parser typically outputs a vector representation, //putting these sentances together might need some work// rather than  if the tokenizer functionality is not separated from the compiler, the parser is often called a scannerless _parser_.
 
 The set of valid tokens for a particular computer language is called the _vocabulary_ for that language, or more formally its _lexicon_.
 Linguistics and NLP researchers use the term "lexicon" to refer to a set of natural language tokens.
@@ -463,8 +463,9 @@ Let's see how spaCy handles our collection of deep thinker quotes:
 [source,python]
 ----
 >>> import spacy  # <1>
->>> spacy.cli.download('en_core_web_sm')  # <2>
->>> nlp = spacy.load('en_core_web_sm')  # <3>
+>>> from nlpia2.spacy_language_model.load  # <2>
+>>> load = spacy_language_model.load
+>>> nlp = load('en_core_web_sm')  # <3>
 >>> doc = nlp(texts[-1])
 >>> type(doc)
 <class 'spacy.tokens.doc.Doc'>
@@ -477,7 +478,7 @@ Let's see how spaCy handles our collection of deep thinker quotes:
 ['fittest', '.', 'Survival', 'of', 'the', 'most', 'adequate', ',']
 ----
 <1> If this is your first time to use spacy you should download the small language model with `spacy.cli.download('en_core_web_sm')`
-<2> To avoid unnecessarily re-downloading the language model use `from spacy_language_model import nlp`
+<2> To avoid unnecessarily re-downloading the SpaCy language model, use `nlpia2.spacy_language_model.load` rather than `spacy.load`
 <3> `sm` stands for "small" (17 MB), `md` is medium (45 MB), `lg` is "large" (780 MB)
 
 That tokenization may be more useful to you if you're comparing your results to academic papers or colleagues at work.
@@ -519,9 +520,12 @@ First download the AsciiDoc text file for this chapter:
 ----
 >>> import requests
 >>> text = requests.get('https://proai.org/nlpia2-ch2.adoc').text
->>> f'{round(len(text) / 10_000)}0k'  <1>
+>>> f'{round(len(text) / 10_000)}0k'  # <1>
 '160k'
 ----
+////
+#// I got '60k' don't know if it's changed since you wrote this //
+////
 <1> I divided by 10,000 and rounded it, so that Doctests would continue to pass as I revise this text.
 
 There were about 160 thousand ASCII characters in this AsciiDoc file where I wrote this sentence that you are reading right now.
@@ -529,11 +533,10 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 
 [source,python]
 ----
->>> import spacy
->>> nlp = spacy.load('en_core_web_sm')
+>>> from nlpia2.spacy_language_model import load
+>>> nlp = load('en_core_web_sm')
 >>> %timeit nlp(text)  # <1>
 4.67 s ± 45.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-
 >>> f'{round(len(text) / 10_000)}0k'
 '160k'
 >>> doc = nlp(text)
@@ -542,6 +545,9 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 >>> f'{round(len(doc) / 1_000 / 4.67)}kWPS'  # <2>
 '7kWPS'
 ----
+////
+1.59 s ± 19.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+////
 <1> `%timeit` is a magic function within `jupyter notebook`, `jupyter console` or `ipython`
 <2> kWPS is for thousands of words (tokens) per second
 
@@ -562,6 +568,9 @@ If that's not fast enough for your application you can disable any of the taggin
 >>> %timeit nlp(text)
 199 ms ± 6.63 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 ----
+////
+82.6 ms ± 1e+03 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+////
 <1> The `pipe_names` lists all the currently enabled elements of your spaCy `nlp` pipeline
 
 You can disable the pipeline elements you don't need to speed up the tokenizer:
@@ -587,7 +596,10 @@ True
 >>> f'{round(len(tokens) / 10_000)}0k'
 '30k'
 ----
-
+////
+33.7 ms ± 269 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+'1Ok'
+////
 Could it be that you found a winner for the tokenizer race?
 Not so fast.
 Your regular expression tokenizer has some pretty simple rules, so it should run pretty fast as well:
@@ -601,6 +613,10 @@ Your regular expression tokenizer has some pretty simple rules, so it should run
 >>> %timeit re.findall(pattern, text)
 8.77 ms ± 29.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 ----
+////
+'20k'
+5.14 ms ± 43.7 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+////
 <1> Try precompiling with `re.compile` to learn something about how smart the core Python developers are
 
 Now that's not surprising.
@@ -685,7 +701,7 @@ A machine can see how _most_ people use language.
 You are only familiar with what _you_ mean when you use particular words or syllables.
 Transformers have now surpassed human readers and writers at some natural language understanding and generation tasks, including finding meaning in subword tokens.
 
-One complication you have not yet encounter is the dilemma of what to do when you encounter a new word.
+One complication you have not yet encountered is the dilemma of what to do when you encounter a new word.
 In the previous examples, we just keep adding new words to our vocabulary.
 But in the real world your pipeline will have been trained on an initial corpus of documents that may or may not represent all the kinds of tokens it will ever see.
 If your initial corpus is missing some of the words that you encounter later on, you will not have a slot in your vocabulary to put your counts of that new word.
@@ -717,10 +733,20 @@ Let's see how it works on our text corpus:
 >>> vectorizer = CountVectorizer(ngram_range=(1, 2), analyzer='char')
 >>> vectorizer.fit(texts)
 CountVectorizer(analyzer='char', ngram_range=(1, 2))
+----
 
->>> bpevocab = vectorizer.get_feature_names()
->>> bpevocab[:7]
-[' ', ' a', ' c', ' f', ' h', ' i', ' l']
+You've created a `CountVectorizer` class that will tokenize the text into characters instead of words.
+And it will count token pairs (character 2-grams) in addition to single character tokens. 
+These are the byte pairs in BPE encoding.
+Now you can examine your vocabulary to see what they look like.
+
+[source,python]
+----
+>>> bpevocab_list = [
+...    sorted((i, s) for s, i in vectorizer.vocabulary_.items())]
+>>> bpevocab_dict = dict(bpevocab_list[0])
+>>> list(bpevocab_dict.values())[:7]
+['  ', ' a', ' c', ' f', ' h', ' i', ' l']
 ----
 
 We configured the `CountVectorizer` to split the text into all the possible character 1-grams and 2-grams found in the texts.
@@ -730,25 +756,27 @@ Once the vectorizer knows what tokens it needs to be able to count, it can trans
 [source,python]
 ----
 >>> vectors = vectorizer.transform(texts)
->>> df = pd.DataFrame(vectors.todense(), columns=bpevocab)
+>>> df = pd.DataFrame(
+...     vectors.todense(), 
+...     columns=vectorizer.vocabulary_)
 >>> df.index = [t[:8] + '...' for t in texts]
 >>> df = df.T
 >>> df['total'] = df.T.sum()
 >>> df
     Trust me...  There's ...  total
-             31           14     45
- a            3            2      5
- c            1            0      1
- f            0            1      1
- h            3            0      3
-..          ...          ...    ...
-wr            1            0      1
-y             2            1      3
-y             1            0      1
-y,            1            0      1
-yb            0            1      1
+ t           31      14          45
+ r            3       2           5
+ u            1       0           1
+ s            0       1           1
+              3       0           3
+..           ...     ...        ...
+at            1       0           1
+ma            2       1           3
+yb            1       0           1
+be            1       0           1
+e.            0       1           1
 <BLANKLINE>
-[148 rows x 3 columns]
+[149 rows x 3 columns]
 ----
 
 The DataFrame contains a column for each sentence and a row for each character 2-gram.
@@ -761,28 +789,28 @@ And BPE will work on substitution cypher text like ROT13, a toy cypher that rota
 ----
 >>> df.sort_values('total').tail()
         Trust me...  There's ...  total
-    he           10            3     13
-    h            14            5     19
-    t            11            9     20
-    e            18            8     26
-                 31           14     45
+    en        10           3       13
+    an        14           5       19
+    uc        11           9       20
+    e         18           8       26
+    t         31          14       45
 ----
 
 A BPE tokenizer then finds the most frequent 2-grams and adds them to the permanent vocabulary.
 Over time it deletes the less frequent character pairs as it gets less and less likely that they won't come up a lot more later in your text.
 
 ----
->>> df['n'] = [len(tok) for tok in bpevocab]
+>>> df['n'] = [len(tok) for tok in vectorizer.vocabulary_]
 >>> df[df['n'] > 1].sort_values('total').tail()
-    Trust me...  There's ...  total  n
-,             6            1      7  2
-e             7            2      9  2
- t            8            3     11  2
-th            8            4     12  2
-he           10            3     13  2
+    Trust me...  There's ...      total  n
+ur           8          4            12  2
+en          10          3            13  2
+an          14          5            19  2
+uc          11          9            20  2
+e           18          8            26  2
 ----
 
-So the next round of preprocessing in the BPE tokenizer would retain the character 2-grams "he" and "th" and even " t" and "e ".
+So the next round of preprocessing in the BPE tokenizer would retain the character 2-grams "en" and "an" and even " t" and "e ".
 Then the BPE algorithm would make another pass through the text with this smaller character bigram vocabulary.
 It would look for frequent pairings of these character bigrams with each other and individual characters.
 This process would continue until the maximum number of tokens is reached and the longest possible character sequences have been incorporated into the vocabulary.
@@ -1002,7 +1030,7 @@ You just want to capture most of the meaning (information) in a document, not al
 
 Is there any way to squeeze all those _player piano music rolls_ into a single vector?
 Vectors are a great way to represent any object.
-With vectors we could compare documents to each other just be checking the Euclidian distance between them.
+With vectors we could compare documents to each other just by checking the Euclidian distance between them.
 Vectors allow us to use all your linear algebra tools on natural language.
 And that's really the goal of NLP, doing math on text.
 
@@ -1220,7 +1248,7 @@ The `accurate mode` in `jieba` causes it to segment the sentence this way so tha
 .Jieba in accurate mode
 [source,python]
 ----
->>> seg_list = jieba.cut("西安是一座举世闻名的文化古城") # <1>
+>>> seg_list = jieba.cut("西安是一座举世闻名的文化古城")  # <1>
 >>> list(seg_list)
 ['西安', '是', '一座', '举世闻名', '的', '文化', '古城']
 ----
@@ -1248,7 +1276,7 @@ Now you can try search engine mode to see if it's possible to break up these tok
 .Jieba in search engine mode
 [source,python]
 ----
->>> seg_list = jieba.cut_for_search("西安是一座举世闻名的文化古城")  <1>
+>>> seg_list = jieba.cut_for_search("西安是一座举世闻名的文化古城")  # <1>
 >>> list(seg_list)
 ['西安', '是', '一座', '举世', '闻名', '举世闻名', '的', '文化', '古城']
 ----
@@ -1849,7 +1877,7 @@ You can easily implement lemmatization in spaCy by the following:
 >>> nlp = spacy.load("en_core_web_sm")
 >>> doc = nlp("better good goods goodness best")
 >>> for token in doc:
->>> print(token.text, token.lemma_)
+>>>     print(token.text, token.lemma_)
 better well
 good good
 goods good
@@ -2244,7 +2272,7 @@ If you put them all into a Pandas DataFrame that will make them easier to work w
 <1> This prints a wide `DataFrame` in the console so they look prettier.
 <2> NLTK's `casual_tokenize` can handle emoticons, unusual punctuation, and slang better than `TreebankWordTokenizer`
 <3> `Counter` takes a list (or iterable) of objects and counts them up, returning a `dict` where the keys are the objects (tokens in your case) and the values are the counts.
-<4> The `from_records()` DataFrame constructor takes a sequence of dict objects. The `dict` keys become columns, and the values for missing keys are set to `NaN`.
+<4> The `from_records()` DataFrame constructor takes a sequence of `dict` objects. The `dict` keys become columns, and the values for missing keys are set to `NaN`.
 <5> NumPy and Pandas can only represent NaNs within a float dtype. So fill NaNs with zeros before converting to integers.
 <6> A BOW table can get really big if you don't do dimension reduction or feature selection.
 
@@ -2295,17 +2323,17 @@ id
 
 This is a pretty good start at building a sentiment analyzer with only a few lines of code (and a lot of data).
 You did not have to guess at the sentiment associated with a list of 7500 words and hard code them into an algorithm such as VADER.
-Instead you told the machine the sentiment ratings for whole text snippets.
+Instead, you told the machine the sentiment ratings for whole text snippets.
 And then the machine did all the work to figure out the sentiment associated with each word in those texts.
 That is the power of machine learning and NLP!
 
-How well do you think this model will generalize to a completely different set text examples such as product reviews?
+How well do you think this model will generalize to a completely different set of text examples such as product reviews?
 Do people use the same words to describe things they like in movie and product reviews such as electronics and household goods?
 Probably not.
 But it's a good idea to check the robustness of your language models by running it against challenging text from a different domain.
 And by testing your model on new domains, you can get ideas for more examples and datasets to use in your training and test sets.
 
-First you need to load the product reviews.
+First, you need to load the product reviews.
 
 [source,python]
 ----
@@ -2316,7 +2344,7 @@ First you need to load the product reviews.
 >>> df_product_bows = df_product_bows.fillna(0).astype(int)
 >>> df_all_bows = df_bows.append(df_product_bows)
 >>> df_all_bows.columns  # <1>
-Index(['!', '"', '#', '#38', '$', '%', '&', ''', '(', '(8',
+Index(['!', '"', '#', '#38', '$', '%', '&', '(', '(8',
        ...
        'zoomed', 'zooming', 'zooms', 'zx', 'zzzzzzzzz', '~', '½', 'élan',
        '–', '’'],
@@ -2329,7 +2357,7 @@ Index(['!', '"', '#', '#38', '$', '%', '&', ''', '(', '(8',
 (10605, 20756)
 ----
 <1> Your new bags of words have some tokens that were not in the original bags of words DataFrame (23302 columns now instead of 20756 before).
-<2> You need to make sure your new product DataFrame of bags of words has the exact same columns (tokens) in the exact same order as the original one used to train your Naive Bayes model.
+<2> You need to make sure your new product DataFrame of bags of words has the same columns (tokens) in the exact same order as the original one used to train your Naive Bayes model.
 <3> The movie bags of words have the same size vocabulary (columns) as for products.
 
 Now you need to convert the labels to mimic the binary classification data that you trained your model on.
@@ -2356,7 +2384,7 @@ Now you need to convert the labels to mimic the binary classification data that 
 So your Naive Bayes model does a  poor job of predicting whether a product review is positive (thumbs up).
 One reason for this subpar performance is that your vocabulary from the `casual_tokenize` product texts has 2546 tokens that were not in the movie reviews.
 That is about 10% of the tokens in your original movie review tokenization, which means that all those words will not have any weights or scores in your Naive Bayes model.
-Also the Naive Bayes model does not deal with negation as well as VADER does.
+Also, the Naive Bayes model does not deal with negation as well as VADER does.
 You would need to incorporate _n_-grams into your tokenizer to connect negation words (such as "not" or "never") to the positive words they might be used to qualify.
 
 We leave it to you to continue the NLP action by improving on this machine learning model.
@@ -2367,7 +2395,7 @@ And you can check your progress relative to VADER at each step of the way to see
 . How does a lemmatizer increase the likelihood that your DuckDuckGo search results contain what you are looking for?
 . Is there a way to optimally decide the _n_ in the _n_-gram range you use to tokenize your documents?
 . Does lemmatization, case folding, or stopword removal help or hurt your performance on a model to predict misleading news articles with this Kaggle dataset:
-. How could your find out the best sizes for the word pieces or sentence pieces for your tokenizer?
+. How could you find out the best sizes for the word pieces or sentence pieces for your tokenizer?
 . Is there a website where you can download the token frequencies for most of the words and n-grams ever published?footnote:[Hint: A company that aspired to "do no evil", but now does, created this massive NLP corpus.]
 . What are the risks and possible benefits of pair coding AI assistants built with NLP? What sort of organizations and algorithms do you trust with your mind and your code?
 

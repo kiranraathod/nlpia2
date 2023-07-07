@@ -359,7 +359,7 @@ To put it in different words, the weights for the inputs to a single neuron are 
 
 [TIP]
 ====
-Just as with the SciKit-Learn machine learning models, the individual features are denoted as `x~i~` or in Python as `x[i]`.
+Just as with the Scikit-Learn machine learning models, the individual features are denoted as `x~i~` or in Python as `x[i]`.
 The _i_ is an indexing integer denoting the position within the input vector.
 And the collection of all features for a given example are within the vector **x**.
 
@@ -455,7 +455,7 @@ Your _loss function_ will measure how much error your model has.
 
 Make sure this Python implementation of the math in a neuron makes sense to you.
 Keep in mind, the code we've written is only for the _feed forward_ path of a neuron.
-The math is very similar to what you would see in the `LogisticRegression.predict()` function in SciKit-Learn for a 4-input, 1-output logistic regression.footnote:[https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression]
+The math is very similar to what you would see in the `LogisticRegression.predict()` function in Scikit-Learn for a 4-input, 1-output logistic regression.footnote:[https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression]
 
 [NOTE]
 ====
@@ -593,7 +593,7 @@ The base unit of any neural network is the neuron. And the basic perceptron is a
 
 It turns out your already familiar with a very common kind of perceptron or neuron.
 When you use the logistic function for the _activation function_ on a neuron, you've essentially created a logistic regression model.
-A single neuron with the logistic function for its activation function is mathematically equivalent to the `LogisticRegression` model in SciKit-Learn.
+A single neuron with the logistic function for its activation function is mathematically equivalent to the `LogisticRegression` model in Scikit-Learn.
 The only difference is how they're trained.
 So you are going to first train a logistic regression model and compare it to a single-neuron neural network trained on the same data.
 
@@ -1089,10 +1089,10 @@ ONNX also has some optimization and pruning capabilities that will allow your mo
 And just for comparison, how does SciKit Learn stack up to PyTorch for building a neural network model?
 
 [id=best_figure, reftext={chapter}.{counter:table}]
-.SciKit-Learn vs PyTorch
+.Scikit-Learn vs PyTorch
 [cols="1,1"]
 |===
-|SciKit-Learn
+|Scikit-Learn
 |PyTorch
 
 |for Machine Learning
@@ -1473,7 +1473,7 @@ Bigger is not always better, especially for small problems.
 
 . What is the simple AI logic "problem" that Rosenblatt's artifical neurons couldn't?
 . What minor change to Rosenblatt's architecture "fixed" perceptrons and ended the first "AI Winter"?
-. What is the equivalent of a PyTorch `model.forward()` function in SciKit-Learn models?
+. What is the equivalent of a PyTorch `model.forward()` function in Scikit-Learn models?
 . What test set accuracy can you achieve with the sex-predicting `LogisticRegression` model if you aggregate names across year and region? Don't forget to stratify your test set to avoid cheating.
 
 == Summary

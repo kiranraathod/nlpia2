@@ -38,9 +38,9 @@ If you have an idea about the frequency with which those words appear in a docum
 In this chapter, you'll learn about a more nuanced, less binary measure of words and their usage within a document.
 This approach has been the mainstay for generating features from natural language for commercial search engines and spam filters for decades.
 
-The next step in your adventure is to turn the words of chapter 2 into continuous numbers rather than just integers representing word counts or binary "bit vectors" that detect the presence or absence of particular words.
+The next step in your adventure is to turn the words of Chapter 2 into continuous numbers rather than just integers representing word counts or binary "bit vectors" that detect the presence or absence of particular words.
 With representations of words in a continuous space, you can operate on their representation with more exciting math.
-Your goal is to find numerical representation of words that somehow capture the importance or information content of the words they represent. You'll have to wait until chapter 4 to see how to turn this information content into numbers that represent the **meaning** of words.
+Your goal is to find numerical representations of words that somehow capture the importance or information content of the words they represent. You'll have to wait until chapter 4 to see how to turn this information content into numbers that represent the **meaning** of words.
 
 In this chapter, we look at three increasingly powerful ways to represent words and their importance in a document:
 
@@ -92,9 +92,7 @@ You could tokenize the entire Wikipedia article to get a sequence of tokens (wor
 With the Python `set()` type you could get the set of unique words in your document.
 This is called the _vocabulary_ for a particular NLP pipeline (including the corpus used to train it).
 To count up the occurrences of all the words in your vocabulary, you can use a Python `Counter` type.
-In chapter 2 you learned that a `Counter` is a special kind of dictionary where the keys are all the unique objects in your array, and the dictionary values are the counts of each of those objects.
-
-// FIXME: not really a bag of words
+In Chapter 2, you learned that a `Counter` is a special kind of dictionary where the keys are all the unique objects in your array, and the dictionary values are the counts of each of those objects.
 
 [source,python]
 ----
@@ -110,14 +108,14 @@ It may look like this dictionary has maintained the order of the words in your s
 You got lucky because your sentence didn't contain many repeated tokens.
 And the latest versions of Python (3.6 and above) maintain the order of the keys based on when you insert new keys into a dictionary.footnote:[StackOverflow discussion of whether to rely on this feature (https://stackoverflow.com/questions/39980323/are-dictionaries-ordered-in-python-3-6/39980744#39980744)]
 But you are about to create vectors out of these dictionaries of tokens and their counts.
-You need vectors in order to do linear algebra and machine learning on a collection of documents (sentences in this case).
+You need vectors to do linear algebra and machine learning on a collection of documents (sentences in this case).
 Your bag-of-words vectors will keep track of each unique token with a consistent index number for a position within your vectors.
 This way the counts for tokens like "and" or the comma add up across all the vectors for your documents -- the sentences in the Wikipedia article titled "Algorithmic Bias."
 
 [IMPORTANT]
 ====
 For NLP the order of keys in your dictionary won't matter, because you'll need to work with vectors.
-Just as in chapter 2, your token count vectors arrange the vocabulary (token count dict keys) according to when you processed each of the documents of your corpus.
+Just as in Chapter 2, your token count vectors arrange the vocabulary (token count `dict` keys) according to when you processed each of the documents of your corpus.
 And sometimes you may want to alphabetize your vocabulary to make it easier to analyze.
 This means it's critical to record the order of the tokens of your vocabulary when you save or persist your pipeline to disk.
 And if you are trying to reproduce someone else's NLP pipeline you'll want to either use their vocabulary (token list) ordering or make sure you process the dataset in the same order the original code did.
@@ -160,13 +158,13 @@ also           0.043478
 <3> the sum of the counts is equivalent to the `len` of the sentence in words
 
 The number of times a word occurs in a given document is called the _term frequency_, commonly abbreviated "TF."
-In some examples you may see the count of word occurrences normalized (divided) by the number of terms in the document.
+In some examples, you may see the count of word occurrences normalized (divided) by the number of terms in the document.
 This would give you the relative frequency independent of the length of the document.
 
 So your top two terms or tokens in this particular sentence are ",", and "and".
 This is a pretty common problem with natural language text -- the most common words are often the least meaningful.
 The word "and" and the comma (",") aren't very informative about the intent of this document.
-And these uninformative tokens are likely to appear a lot as you wage battle against bias and injustice.
+And these uninformative tokens are likely to appear a lot as you wage a battle against bias and injustice.
 
 [source,python]
 ----
@@ -179,9 +177,9 @@ And these uninformative tokens are likely to appear a lot as you wage battle aga
 
 This is the _normalized term frequency_ of the term "justice" in this particular document which happens to be a single sentence.
 It's important to normalize word counts to help your NLP pipeline detect important words and to compare usages of words in documents of different lengths.
-But normalizing by document length doesn't really help you a whole lot in this case.
+But normalizing by document length doesn't help you a whole lot in this case.
 But this is because you're only looking at a single document.
-Imagine you had one really long sentence and one really long document, say the entire Wikipedia article.
+Imagine you had one really long sentence and one very long document, say the entire Wikipedia article.
 If the sentence and the article were both talking about "justice" about the same amount, you would want this _normalized term frequency_ score to produce roughly the same value.
 
 ////
@@ -209,15 +207,15 @@ Now you have something you can see that describes "something" about the two docu
 So instead of raw word counts to describe your documents in a corpus, you can use term frequencies.
 ////
 
-Now you know how to calculate normalized term frequency and get the relative importance of each term to that document where it was used.
+Now you know how to calculate normalized term frequency and get the relative importance of each term to the document where it was used.
 So you've progressed nicely from just detecting the presence and absence of a word to counting up its usage frequency and now you know how to normalize this frequency.
 You're not done yet.
 This is where things get really meaningful.
 Now you know how important the word "justice" is to the meaning of this text.
 But how can a machine get that same sense that you have?
 
-For that you're going to have to show the machine how much "justice" is used in a lot of other texts.
-Fortunately for budding NLP engineers Wikipedia is full of high quality accurate natural language text in many languages.
+For that, you're going to have to show the machine how much "justice" is used in a lot of other texts.
+Fortunately for budding NLP engineers, Wikipedia is full of high quality accurate natural language text in many languages.
 You can use this text to "teach" your machine about the importance of "justice."
 And all you need is a few paragraphs from the Wikipedia article on algorithmic bias.
 
@@ -279,7 +277,7 @@ The key to frequency analysis and term frequency vectors is the statistics of wo
 So we need to input the other sentences and create some useful word counts.
 To really grok "Algorithmic Bias" you could type all of the Wikipedia article into Python yourself.
 Or you can download it from Wikipedia directly into Python using the `wikipedia` Python package, so that you can save time to build less biased algorithms.
-And we've given you a head start by giving you these paragraphs in the `nlpia2` package that comes with this book:
+And we've given you a head start by giving you these paragraphs in the `nlpia2` package that comes with this book.
 
 [source,python]
 ----
@@ -289,11 +287,29 @@ And we've given you a head start by giving you these paragraphs in the `nlpia2` 
 >>> response = requests.get(url)
 >>> response
 <Response [200]>
+----
 
->>> bias_intro = response.content.decode()  # <1>
+The `requests` package returns a request object with header and content attributes containing the headers and body of an HTTP response.
+For a plain text document you can the `response.content` attributes contains the `bytes` of the raw document.
+If you want to retrieve a string you can use the `response.text` property to automatically decode the bytes content to create a unicode `str`.
+
+[source,python]
+----
+>>> bias_intro_bytes = response.content  # <1>
+>>> bias_intro = response.text  # <2>
+>>> assert bias_intro_bytes.decode() == bias_intro    # <3>
 >>> bias_intro[:60]
 'Algorithmic bias describes systematic and repeatable errors '
+----
+<1> `requests.get` returns an object with a `bytes` in the `content` attribute
+<2> the `.text` property contains the unicode `str` for the HTTP body
+<3> `bytes.decode()` transforms the content into a unicode `str`
 
+The `Counter` class from the Python standard library in the `collections` module is great for efficiently counting any sequence of objects.
+That's perfect for NLP when you want to count up occurrences of unique words and punctuation in a list of tokens:
+
+[source,python]
+----
 >>> tokens = [tok.text for tok in nlp(bias_intro)]
 >>> counts = Counter(tokens)
 >>> counts
@@ -301,7 +317,6 @@ Counter({'Algorithmic': 3, 'bias': 6, 'describes': 1, 'systematic': 2, ...
 >>> counts.most_common(5)
 [(',', 35), ('of', 16), ('.', 16), ('to', 15), ('and', 14)]
 ----
-<1> `requests.get` returns an object with a `bytes` object. Use `bytes.decode()` to transform it into a regular unicode `str`.
 
 Okay, now that's a bit more statistically significant counts.
 But that is a lot of meaningless words and punctuation.
@@ -501,18 +516,18 @@ Now you'll make copies of that base vector, update the values of the vector for 
 
 Now that you've manually created your Bag of Words vector, you might wonder if someone already found a faster way to do it.
 And indeed, there is!
-You can avoid going through tokenizing, frequency counting and manually vectorizing your bag of words vector using `scikit-learn` package.footnote:[You can check out this package's full documentation on its webpage (http://scikit-learn.org/) - we'll be using it a lot in this book.]
+You can avoid going through tokenizing, frequency counting and manually vectorizing your bag of words vector using Scikit-Learn (`sklearn`) package.footnote:[You can check out this package's full documentation on its webpage (http://scikit-learn.org/) - we'll be using it a lot in this book.]
 If you haven't already set up your environment using Appendix A so that it includes this package, here's one way to install it.
 
 [source,bash]
 pip install scipy
 pip install sklearn
 
-Here is how you would create the term frequency vector in `scikit-learn`.
+Here is how you would create the term frequency vector in Scikit-Learn.
 We'll use the `CountVectorizer` class.
 It is a _model_ class with `.fit()` and `.transform()` methods that comply with the sklearn API for all machine learning models.
 
-.Using `scikit-learn` to compute word count vectors
+.Using `sklearn` to compute word count vectors
 [source,python]
 ----
 >>> from sklearn.feature_extraction.text import CountVectorizer
@@ -532,7 +547,7 @@ Now you have a matrix (practically a list of lists in Python) that represents th
 That was fast!
 With just 1 line of code, `vectorize.fit_transform(corpus)`, we have gotten to the same result as with dozens of lines you needed to manually tokenize, create a lexicon and count the terms.
 Note that these vectors have the length of 16, rather than 18 like the vectors you created manually.
-That's because `scikit-learn` tokenizes the sentences slightly differently (it only considers words of 2 letters or more as tokens) and drops the punctuation.
+That's because Scikit-Learn tokenizes the sentences slightly differently (it only considers words of 2 letters or more as tokens) and drops the punctuation.
 
 So, you have three vectors, one for each document.
 Now what?
@@ -643,12 +658,36 @@ Probably not.
 You'd like your estimate of document similarity to find use of the same words about the same number of times in similar proportions.
 This accurate estimate would give you confidence that the documents they represent are probably talking about similar things.
 
-.2D thetas
-image::../images/ch03/vecs_cosine.png[2D Vectors and Cosine, width=80%, link="../images/ch03/vecs_cosine.png"]
+[figure-vecs-cosine]
+.2D vectors and the angles between them
+image::../images/ch03/vecs_cosine.png["2D vectors and cosine distance between them (angle between them and the perpendicular shadow of one on the other)", width=80%, link="../images/ch03/vecs_cosine.png"]
+// FIXME: Redraw this diagram and rewrite the text.
+//        This figure refers to 'TF of "harry"' in the diagram and the thetas are numbered and diagrammed incorrectly.
 
-_Cosine similarity_, is merely the cosine of the angle between two vectors (theta), shown in figure 3.5, which can be calculated from the Euclidian dot product using <<equation_3_3>>.
-Cosine similarity is efficient to calculate because the dot product does not require evaluation of any trigonometric functions.
-In addition, cosine similarity has a convenient range for most machine learning problems: -1 to +1.
+_Cosine similarity_, is the cosine of the angle between two vectors (theta).
+Figure <<figure-vecs-cosine>> shows how you can compute the cosine similarity dot product using <<equation_3_3>>.
+Cosine similarity is a popular among NLP engineers because:
+
+* Fast to compute even for high dimensional vectors
+* Sensitive to changes in a single dimension
+* Work well for high dimensional vectors
+* Has a value between -1 and 1
+
+You can use cosine similarity without bogging down your NLP pipeline because you only need to compute the dot product.
+And you may be surprised to learn that you do not need to compute the cosine function to get the cosine similarity.
+You can use the the linear algebra dot product, which does not require any trigonometric function evaluation.
+This makes it very efficient (fast) to calculate.
+And cosine similarity considers each dimension independently and their affect on the direction of the vector adds up, even for high dimensional vectors.
+TF-IDF can have thousands or even millions of dimensions, so you need to use a metric that doesn't degrade in usefulness as the number of dimensions increases (called the curse of dimensionality).
+
+Another big advantage of cosine similarity is that it outputs a value between -1 and +1:
+
+* -1 means the vectors point in exactly oposite directions - this can only happen for vectors that have negative values (TF-IDF vectors do not) 
+* 0 means the vectors are perpendicular or orthogonal - this happens whenever your two TF-IDF vectors do not share any of the same words (dimensions)
+* +1 means the two vectors are perfectly aligned - this can happen whenever your two documents use the same words with the same relative frequency
+
+This makes it easier to guess at good thresholds to use in conditional expression within your pipeline.
+Here's what the normalized dot product looks like in your linear algebra textbook:
 
 [[equation_3_3]]
 .equation 3.3
@@ -659,7 +698,7 @@ In addition, cosine similarity has a convenient range for most machine learning 
 \end{equation}
 ++++
 
-In Python this would be:
+In Python you might use code like this to compute cosine similarity:
 
 [source,python]
 ----
@@ -739,7 +778,7 @@ You won't see any negative cosine similarity values for pairs of vectors for nat
 But in the next chapter, we develop a concept of words and topics that are "opposite" to each other.
 And this will show up as documents, words, and topics that have cosine similarities of less than zero, or even **-1**.
 
-If you want to compute cosine similarity for regular `numpy` vectors, such as those returned by `CountVectorizer`, you can use `scikit-learn`'s built-in tools.
+If you want to compute cosine similarity for regular `numpy` vectors, such as those returned by `CountVectorizer`, you can use Scikit-Learn's built-in tools.
 Here is how you can calculate the cosine similarity between word vectors 1 and 2 that we computed in <<listing-cosine-similarity>>:
 
 [#listing-cosine-similarity, reftext={chapter}.{counter:listing}]
@@ -792,7 +831,7 @@ Let's now do the same vectorization process we did a few pages ago with `CountVe
 
 [source,python]
 ----
->>> ngram_vectorizer = CountVectorizer(ngram_range=(1,2))
+>>> ngram_vectorizer = CountVectorizer(ngram_range=(1, 2))
 >>> ngram_vectors = ngram_vectorizer.fit_transform(corpus)
 >>> print(ngram_vectors.toarray())
 [[1 0 0 1 2 0 1 1 0 0 1 0 0 1 0 0 0 0 0 1 0 2 1 1 1]
@@ -864,9 +903,11 @@ You can see the results of listing <<listing-countvectorizer-histogram>> in figu
 .CountVectorizer histogram
 [source,python]
 ----
->>> char_vectorizer = CountVectorizer(ngram_range=(1,1), analyzer='char') <1>
+>>> char_vectorizer = CountVectorizer(
+...     ngram_range=(1,1), analyzer='char')  # <1>
 >>> s_char_frequencies = char_vectorizer.fit_transform(s)
->>> generate_histogram(s_char_frequencies, s_char_vectorizer) <2>
+>>> generate_histogram(
+...     s_char_frequencies, s_char_vectorizer)  # <2>
 ----
 <1> This line generates a `CountVectorizer` that generates 1-grams of characters
 <2> To see the code of `generate_histogram`, check out the `nlpia` repository
@@ -1299,20 +1340,21 @@ You won't likely ever have to implement the preceding formulas for computing TF-
 
 As you saw earlier, you can easily compare two vectors and get their similarity, but you have since learned that merely counting words isn't as descriptive as using their TF-IDF, so in each document vector let's replace each word's word_count with the word's TF-IDF.
 Now your vectors will more thoroughly reflect the meaning, or topic, of the document.
+// FIXME: What about harry?
 Back to your Harry example:
 
 [source,python]
 ----
->>> document_tfidf_vectors = []
->>> for doc in docs:
-...     vec = copy.copy(zero_vector)  # <1>
+>>> doc_tfidf_vectors = []
+>>> for doc in docs:  # <1>
+...     vec = copy.copy(zero_vector)  # <2>
 ...     tokens = [token.text for token in nlp(doc.lower())]
 ...     token_counts = Counter(tokens)
 ...
-...     for key, value in token_counts.items():
+...     for token, count in token_counts.items():
 ...         docs_containing_key = 0
-...         for _doc in docs:
-...             if key in _doc:
+...         for d in docs:
+...             if token in d:
 ...                 docs_containing_key += 1
 ...         tf = value / len(lexicon)
 ...         if docs_containing_key:
@@ -1320,9 +1362,10 @@ Back to your Harry example:
 ...         else:
 ...             idf = 0
 ...         vec[key] = tf * idf
-...     document_tfidf_vectors.append(vec)
+...     doc_tfidf_vectors.append(vec)
 ----
-<1> You need to copy the `zero_vector` to create a new, separate object. Otherwise you'd end up overwriting the same object/vector each time through the loop.
+<1> The `docs` variable is a list of SpaCy `Doc` objects - sentences from the Wikipedia article on bias.
+<2> Copy the `zero_vector` to create a new object to hold the tfidf vector for this document (sentence about bias)
 
 With this setup, you have K-dimensional vector representation of each document in the corpus.
 And now on to the hunt!
@@ -1349,16 +1392,16 @@ If you take your three documents about Harry, and make the query "How long does 
 ...     for _doc in docs:
 ...       if key in _doc.lower():
 ...         docs_containing_key += 1
-...     if docs_containing_key == 0:  <1>
+...     if docs_containing_key == 0:  # <1>
 ...         continue
 ...     tf = value / len(tokens)
 ...     idf = len(docs) / docs_containing_key
-...    query_vec[key] = tf * idf
->>> cosine_sim(query_vec, document_tfidf_vectors[0])
+...     query_vec[key] = tf * idf
+>>> cosine_sim(query_vec, doc_tfidf_vectors[0])
 0.5235048549676834
->>> cosine_sim(query_vec, document_tfidf_vectors[1])
+>>> cosine_sim(query_vec, doc_tfidf_vectors[1])
 0.0
->>> cosine_sim(query_vec, document_tfidf_vectors[2])
+>>> cosine_sim(query_vec, doc_tfidf_vectors[2])
 0.0
 ----
 <1> You didn't find that token in the lexicon, so go to the next key.
@@ -1381,14 +1424,14 @@ In the preceding code, you dropped the keys that were not found in your pipeline
 === Another vectorizer
 
 Now that was a lot of code for things that have long since been automated.
-The `scikit-learn` package you used at the beginning of this chapter has a tool for TF-IDF too.
+The `sklearn` package you used at the beginning of this chapter has a tool for TF-IDF too.
 Just as `CountVectorizer` you saw previously, it does tokenization, omits punctuation, and computes the tf-idf scores all in one.
 
 Here's how you can use sklearn to build a TF-IDF matrix.
 The syntax is almost exactly the same as for `CountVectorizer`.
 
 [#listing-computing-tfidf-matrix, reftext={chapter}.{counter:listing}]
-.Computing TF-IDF matrix using `scikit-learn`
+.Computing TF-IDF matrix using Scikit-Learn
 [source,python]
 ----
 >>> from sklearn.feature_extraction.text import TfidfVectorizer
@@ -1397,19 +1440,16 @@ The syntax is almost exactly the same as for `CountVectorizer`.
 >>> vectorizer = vectorizer.fit(corpus)  # <2>
 >>> vectors = vectorizer.transform(corpus)  # <3>
 >>> print(vectors.todense().round(2))  # <4>
-[[0.16 0.   0.48 0.21 0.21 0.   0.25 0.21 0.   0.   0.   0.21 0.   0.64
-  0.21 0.21]
- [0.37 0.   0.37 0.   0.   0.37 0.29 0.   0.37 0.37 0.   0.   0.49 0.
-  0.   0.  ]
- [0.   0.75 0.   0.   0.   0.29 0.22 0.   0.29 0.29 0.38 0.   0.   0.
-  0.   0.  ]]
+[[0.16 0.   0.48 0.21 0.21 0.   0.25 0.21 ... 0.21 0.   0.64 0.21 0.21]
+ [0.37 0.   0.37 0.   0.   0.37 0.29 0.   ... 0.   0.49 0.   0.   0.  ]
+ [0.   0.75 0.   0.   0.   0.29 0.22 0.   ... 0.   0.   0.   0.   0.  ]]
 ----
 <1> `min_df` defaults to 1, because a vectorizer can't include a word in your vocabulary if it doesn't appear at least once in your texts
 <2> Count the total word occurrences in your texts to create a vocabulary of words that match your min_df and max_df settings
 <3> `TFIDFVectorizer` transforms text into a sparse numpy matrix
 <4> The `.todense()` method converts a sparse matrix back into a regular 2-D numpy matrix (filling in the gaps with zeros)
 
-With `scikit-learn`, in four lines you created a matrix of your three documents and the inverse document frequency for each term in the lexicon.
+With Scikit-Learn, in four lines of code, you created a matrix of your three documents and the inverse document frequency for each term in the lexicon.
 It's very similar to the matrix you got from `CountVectorizer`, only this time it contains TF-IDF of each term, token, or word in your lexicon make up the columns of the matrix.
 On large texts this or some other pre-optimized TF-IDF model will save you scads of work.
 
@@ -1480,21 +1520,83 @@ First, let's load our data.
 You'll use the corpus of data science questions that Hobson was asked by his mentees in the last few years.
 They are located  in the `qary` repository:
 
+//The code for this section is in nlpia2/src/nlpia2/ch03/ch03-bot.py
+
 [source,python]
 ----
->>> DS_FAQ_URL = ('https://gitlab.com/tangibleai/qary/-/raw/master/'
+>>> DS_FAQ_URL = ('https://gitlab.com/tangibleai/qary/-/raw/main/'
                   'src/qary/data/faq/faq-python-data-science-cleaned.csv')
 >>> qa_dataset = pd.read_csv(DS_FAQ_URL)
 ----
 
 Next, let's create TF-IDF vectors for the questions in our dataset.
-You'll use the `scikit-learn` TfidfVectorizer class you've seen in the previous section.
+You'll use the Scikit-Learn TfidfVectorizer class you've seen in the previous section.
+
+[source,python]
+----
+>>> vectorizer = TfidfVectorizer()
+>>> vectorizer.fit(df['question'])
+>>> tfidfvectors_sparse = vectorizer.transform(df['question']) #<1>
+>>> tfidfvectors = tfidfvectors_sparse.todense() #<2>
+----
+<1> Vectorizing all the questions in our dataset
+<2> Making the vectors dense so that we can do cosine similarity
 
 We're now ready to implement the question-answering itself.
 Your bot will reply to the user's question by using the same vectorizer you trained on the dataset, and finding the most similar questions.
 
+[source,python]
+----
+>>> def bot_reply(question):
+...    question_vector = vectorizer.transform([question]).todense()
+...    idx = question_vector.dot(tfidfvectors.T).argmax() # <1>
+...
+...    print(
+...        f"Your question:\n  {question}\n\n"
+...        f"Most similar FAQ question:\n  {df['question'][idx]}\n\n"
+...        f"Answer to that FAQ question:\n  {df['answer'][idx]}\n\n"
+...    )
+----
+<1> We find the cosine similarity of every question with our query and find the most similar one
+
 And your first question-answering chatbot is ready!
-Let's try to ask it a couple of data science questions:
+Let's ask it its first question: 
+
+[source,python]
+----
+>>> bot_reply("What's overfitting a model?")
+Your question:
+  What's overfitting a model?
+
+Most similar FAQ question:
+  What is overfitting?
+
+Answer to that FAQ question:
+  When your test set accuracy is significantly lower than your training set accuracy?
+----
+
+Try to play with it and ask it a couple more questions, such as: 
+- What is a Gaussian distribution? 
+- Who came up with the perceptron algorithm?
+
+You'll realize quickly, however, that your chatbot fails quite often - and not just because the dataset you trained it upon is small. 
+
+For example, let's try the following question:
+
+[source,python]
+----
+>>> bot_reply('How do I decrease overfitting for Logistic Regression?')
+Your question:
+  How do I decrease overfitting for Logistic Regression?
+Most similar FAQ question:
+  How to decrease overfitting in boosting models?
+Answer to that FAQ question:
+  What are some techniques to reduce overfitting in general? Will they work with boosting models?
+----
+
+If you looked closely at the dataset, you might have seen it actually has an answer about decreasing overfitting for boosting models. 
+However, our vectorizer is just a little bit too literal - and when it saw the word "decrease" in the wrong question, that caused the dot product to be higher for the wrong question.
+In the next chapter, we'll see how we can overcome this challenge by looking at _meaning_ rather than particular words. 
 
 
 == What's next
@@ -1503,8 +1605,13 @@ Now that you can convert natural language text to numbers, you can begin to mani
 Numbers firmly in hand, in the next chapter you'll refine those numbers to try to represent the *meaning* or *topic* of natural language text instead of just its words.
 In subsequent chapters, we show you how to implement a semantic search engine that finds documents that "mean" something similar to the words in your query rather than just documents that use those exact words from your query.
 Semantic search is much better than anything TF-IDF weighting and stemming and lemmatization can ever hope to achieve.
+State of the art search engines combine both TF-IDF vector and semantic embedding vectors to achieve both higher accuracy than conventional search.
+
+The well-funded OpenSearch project, an ElasticSearch fork, is now leading the way in search innovation.footnote:["The ABCs of semantic search in OpenSearch" by Milind Shyani (https://opensearch.org/blog/semantic-science-benchmarks/)]
+ElasticSearch started walling off their technology garden in 2021.
 The only reason Google and Bing and other web search engines don't use the semantic search approach is that their corpus is too large.
 Semantic word and topic vectors don't scale to billions of documents, but millions of documents are no problem.
+And some scrappy startups such as You.com are learning how to use open source to enable semantic search and conversational search (chat) on a web scale. 
 
 So you only need the most basic TF-IDF vectors to feed into your pipeline to get state-of-the-art performance for semantic search, document classification, dialog systems, and most of the other applications we mentioned in chapter 1.
 TF-IDFs are just the first stage in your pipeline, a basic set of features you'll extract from text.

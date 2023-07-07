@@ -15,7 +15,6 @@ This chapter covers
 * Getting familiar with popular chatbot use cases
 * Understanding four chatbot approaches
 // (Pattern-matching: AIML, SQL-based chatbot)
-// (Grounding: session data + user data information, pharma chatbot)
 // (Search/retrieval: intent recognition, entities, etc., qary's architecture?)
 // (Generation: dialoGPT)
 * Combining the different approaches using hierarchical chatbot architectures
@@ -28,30 +27,100 @@ This chapter covers
 // (chatbot evaluation metrics: accuracy metrics, user experience metrics)
 
 Human languages evolved not to communicate facts or deliver messages but to help our ancestors cooperate and compete with our fellow cave people not sciencing.footnote:[E. J. Enfield's _Langage vs. Reality: Why Language Is Good for Laywers and Bad for Scientists_ (http://nickenfield.org/books/)]
-But our ancestor
+
+
+== Time to get conversational
+
+You finally have all the pieces you need to assemble a chatbot -- more formally, a _dialog system_ or _dialog engine_.
+You'll build an NLP pipeline that can participate in natural language conversations.
+
+Let's make sure we're on the same page about what a chatbot is.
+When we say chatbot, we mean a computer program that engages in back-and-forth conversation with a human using human language - whether through text or speech. 
+Though we haven't talked much about speech processing in this book, voice assistants operate in a manner much similar to text chatbots. 
+
+In some communities, the word "chatbot" is used in a slightly derogatory way to refer to "canned response" systems.footnote:[Wikipedia "Canned Response" https://en.wikipedia.org/wiki/Canned_response]
+And indeed, until recently, most conversational assistants weren't too impressive in terms of their capability, being able to only respond to a limited set of questions and commands, and using the content pre-written by their human creators.
+All that changed at the end of 2022, when generative conversational assistants entered the public spotlight and made people aware of what such systems are capable of.
+
+However, even with "basic capabilities", chatbots turned out to be useful in a wide variety of use cases. 
+Let's look briefly at some of the popular ones, to give you some inspiration for your own chatbot projects.
+
+== Chatbots everywhere
+
+The list of applications we present below is by no means exhaustive. 
+Some of the use cases will be familiar to you; others may be new.
+Hopefully, this list will give you some ideas about what _your_ chatbot application will be.
+
+=== Virtual assistants
+
+Virtual assistants, such as Alexa and Google Assistant, are helpful when you have a goal in mind.
+Goals or intents are usually simple things such as launching an app, setting a reminder, playing some music, or turning on the lights in your home.
+For this reason, virtual assistants are often called goal-based dialog engines.
+Dialog with such chatbots is intended to conclude quickly, with the user being satisfied that a particular action has been accomplished or some bit of information has been retrieved.
+
+
+=== Customer service chatbots 
+Customer service is the most frequent use case for conversational assistants in the enterprise world. 
+Customer service chatbots are often the only "person" available when you visit an online store.
+In other cases, they serve as a triage mechanism between the customer and a human representative. 
+Dozens of platforms exist to create and power these customer assistants, including IBM Watson, RASA, and Google's Dialogflow.
+They often combine both question-answering skills with virtual assistance skills.
+These chatbots should be very well grounded. 
+And the knowledge base used to "ground" their answers to reality must be kept current, which enables customer service chatbots to answer questions about orders or products as well as initiate actions such as placing or canceling orders.
+
+=== Sales and marketing chatbots 
+
+
+=== Entertainment chatbots 
+
+Entertainment chatbots, such as Steve Warwick's Kuki (previously known as Mitsuku)footnote:[(https://chat.kuki.ai)], are built to maintain a conversation. 
+But doing conversation well is an ever-evolving challenge.
+The "accuracy" or performance of a conversational chatbot is usually measured with something like a Turing test.
+In a typical Turing test, humans interact with another chat participant through a terminal and try to figure out if it is a bot or a human.
+The better the chatbot is at being indistinguishable from a human, the better its performance on a Turing test metric.
+An alternative metric used in some competitions is how long the user is willing to interact with the chatbot. 
+
+Competitions such as Loebner Prize footnote:[(https://en.wikipedia.org/wiki/Loebner_Prize)] used to be held to choose a bot that is most human-like. 
+However, the Loeber Prize was discontinued in 2019, and with the appearance of generative chatbots, new measures will be needed to evaluate the quality of chatbot conversations. 
+
+
+=== Healthcare and mental health chatbots 
+
+
+=== Impact chatbots 
+
+Most of the use cases above show how chatbots can be used for commercial purposes. 
+However, the nonprofit and social impact world has also widely adopted chatbots to help people in need.  
+One of the reasons for this is that chatbots are a great way to reach people who have limited Internet access. 
+In a lot of Low and Middle-Income Countries (LMICs), even basic commodities such as power and running water may be scarce in rural areas. 
+However, phone ownership in LMICs keeps growing at remarkable rates. 
+
 
 
 == Choosing your approach
-As chatbot-building exploded in the recent 5 years, more and more different recipes and platforms appeared that allowed people to create their own conversational assistants.
-However, most of these can be classified into 4 categories:
+As chatbot-building exploded in the recent 7 years, more and more different recipes and platforms appeared that allowed people to create their own conversational assistants.
+However, most of these can be classified into 3 categories:
 
 * Rule-based
-* Grounding
-* Retrieval, or search-based
+* Fuzzy retrieval
+* Knowledge-based and search-based
 * Generative
 
+When we started writing this book, various forms of rule-based assistants dominated the market; now as we're finishing in 2023, generative assistants leveraging retrieval-based generation have broken through quite spectacularly. 
+
 === Rule-based approach
+
 Rule-based approach was the first approach developers used to create chatbots.
 
 Despite being the oldest of chatbot architectures, rule-based approach still holds surprisingly well, and a lot of chatbots you would interact with nowadays still rely heavily on pre-defined rules.
 
-The most common type of rule-base chatbots use pattern matching.
-In chapter 1, we showed a simple pattern-based chatbot that used a regular expression to detect greetings.
+The most common type of rule-based chatbots uses pattern matching.
+In Chapter 1, we showed a simple pattern-based chatbot that used a regular expression to detect greetings.
 
 ELIZA, developed in the late 1970s, was surprisingly effective at this, convincing many users that "she" was capable of helping them with their psychological challenges.
 ELIZA was programmed with a limited set of words to look for in user statements.
 The algorithm would rank any of those words that it saw in order to find a single word that seemed like the most "important" word in a user's statement.
-That would then trigger selection of a canned response template associated with that word.
+That would then trigger a selection of a canned response template associated with that word.
 
 Here's an example of ELIZA's conversation with the user:
 
@@ -73,22 +142,19 @@ Perhaps the most important revelation was that listening well, or at least appea
 === AIML
 In 1995 Richard Wallace began building a general chatbot framework that used the pattern-matching approach.
 Between 1995 and 2002 his community of developers built the Artificial Intelligence Markup Language (AIML) to specify the patterns and responses of a chatbot.
-"A.L.I.C.E." footnote: https://github.com/drwallace/aiml-en-us-foundation-alice was the open source reference implementation of a chatbot that utilized this markup language to define its behavior.
+"A.L.I.C.E." footnote:[(https://github.com/drwallace/aiml-en-us-foundation-alice)] was the open source reference implementation of a chatbot that utilized this markup language to define its behavior.
 
 AIML is an open standard, meaning the language is documented and it doesn't have hidden proprietary features locked to any particular company.
 It is maintained by the nonprofit AIML Foundation footnote: http://www.aiml.foundation/, which has introduced the new version of the language, AIML 2.0 in 2014, and is now working on additional versions of the language.
 Among other things, the Foundation also offers "official" open-source interpreter frameworks for AIML in several computer languages, including a Python interpreter package called program-Y.
-//We're going to be using program-Y in our examples in this chapter.
-
-//TODO add a simple AIML example if necessary 
 
 === Dialog Graphs
 As we saw in the previous chapter, AIML allows some ability to plan the chatbot conversation.
-However, when you need to have a more complex conversation, you would soon find out that AIML's capability are pretty limited.
+However, when you need to have a more complex conversation, you would soon find out that AIML's capabilities are pretty limited.
 What would be a good way to provide a "map" for a chatbot to lead a more complex conversation?
 
 Most commercial platforms for rule-based chatbots available today, like Manychat or Botpress, offer you some capability to visually map your dialog in the form of a flowchart.
-In internet articles, you would frequently see this flowchart reference as dialog _tree_, alluding to the decision trees you have seen so many times.
+In internet articles, you would frequently see this flowchart referenced as a dialog _tree_, alluding to the decision trees you have seen so many times.
 From a strict computer science perspective, this term is inaccurate - in a tree, you're not allowed to jump between the tree's "branches", while in a chatbot dialog, you would frequently want to link between one dialog branch to another.
 
 [need illustration here for a simple dialog]
@@ -108,7 +174,7 @@ And important changes to user or bot state can also be stored and kept up to dat
 This allows multiple chatbots to run simultaneously and maintain their state independently, while also coordinating their actions, if necessary.
 
 But this brings up a scaling challenge.
-Updating and saving state in RAM (within your program stack memory) is virtually instantaneous, while writing to a disk-backed database can require a significant amount of time.
+Updating and saving state in RAM (within your program stack memory) is virtually instantaneous while writing to a disk-backed database can require a significant amount of time.
 In order to maintain scalability, you'll want to use a database with fast write throughput.
 You may have thousands or even millions of simultaneous users interacting with your chatbot.
 If you use a direct-to-disk database such as a self-hosted PostgreSQL or MariaDB database, you may need to implement RAM caching and write many records at once.
@@ -128,12 +194,12 @@ This is where fuzzy approach comes in. In essence, instead of 1 possible answer,
 By far the most common model for modern chatbots - those that power a lot of customer communications - is the intent recognition model.
 In this model, the chatbot is pre-programmed with a list of intents - the goals, or intention behind the user's free text phrase (usually called an _utterance_).
 For example, user's utterances like "Turn off the lights", "Alexa, lights out", "switch the lights off please" all have a common intent - the user clearly wants to turn off the lights.
-When receiving an input from the user, the chatbot will try to find the best match to one of the intents it "knows", and return the answer.
+When receiving input from the user, the chatbot will try to find the best match to one of the intents it "knows", and return the answer.
 
 You may say that this is very similar to pattern matching we saw in the previous approach - and indeed, it is!
 The intents that we pre-define for the chatbot are similar to the rules we define in pattern matching.
-The key difference, however, is that in this fuzzy approach you can leverage the power of machine learning models we discussed in the previous chapters.
-This would allow you not to prepare in advace for every possible variant of user's way to express a particular intent.
+The key difference, however, is that in this fuzzy approach, you can leverage the power of machine learning models we discussed in the previous chapters.
+This would allow you not to prepare in advance for every possible variant of the user's way to express a particular intent.
 For example, if you taught the machine learning model that expressions "Hi", "Hello", "Hey", "Howdy" all refer to intent "Greeting", you might not need to teach it explicitly to recognize "Heya" - the chatbot will figure it out by itself.
 
 What about the case when the user includes information in the utterance which affects the answer?
@@ -168,15 +234,41 @@ The approach above allows you to create much more sophisticated bots that can ma
 But it still has a major drawback of needing to pre-configure all the answers, which can be effort-intensive and needs constant maintenance.
 Fortunately, there is another approach we can take, based on search.
 
-// TODO: qary screenshot showing search combined with QA with BERT
-
-
 == Generative
+
+Generative chatbots are the most "unruly" type of chatbots, for better or for worse. 
+As their name implies, they generate their answers on the fly, rather than choosing from a pre-defined set of answers.
+On one hand, this is a boon as the chatbot can be much more flexible in its responses. 
+On the other, it's a curse for you as a developer as your chatbots' creativity may prove hard to control, or even predict. 
+
+Early generative chatbots were trained using sequence-to-sequence methods, that we briefly mentioned in Chapter 9. 
+In this approach, the chatbot is trained on a large corpus of human dialogue - such as movie scripts, or technial support conversations.
+Through these conversations, it learns to generate a response to a given input. 
+
+And as generative chatbots are usually based on deep learning models trained on data from humans, they are the ones most likely to exhibit biases and prejudices reflected in their training data. 
+In 2016, Microsoft's Tay chatbot was released on Twitter, and its feedback loop with Twitter users quickly turned its responses into a racist, sexist, and anti-Semitic tirade. footnote:[(https://www.theverge.com/2016/3/24/11297050/tay-microsoft-chatbot-racist)]
+More recently, ChatGPT, despite being explicitly engineered to evade toxic and unsafe responses and being continuously updated based on user inputs, still produces bigoted rhetoric when asked to act as a "bad person" or a historical figure.footnote:[(https://gizmodo.com/chatgpt-ai-openai-study-frees-chat-gpt-inner-racist-1850333646)]
+In the previous chapter, you saw other examples of dangerous output by LLM-based generative models. 
+
+
+
 
 == Bringing it all together
 // SUM: Modern chatbot engineers have converged on the hybrid chatbot architecture that we introduced in the first edition. Modern chatbots combine generative deep learning models with template, information retrieval, logic rules, template interpolation, and grammar parsers to create intelligent-sounding chatbots.
     
 All the previous chapters have been building up your skills and toolbox so you can assemble a chatbot from all the algorithms.
+
+Here are some of the NLP skills you've learned that chatbots leverage frequently:
+
+* Embedding words and sentences into semantic vectors (from Chapter 6) to recognize the user's intent
+* Deeper language representations such as LSTM thought vectors and BERT embeddings. (from Chapter 8)
+* Neural translation between languages (from Chapter 9)
+* Text generation (from Chapter 10) to generate responses without humans pre-defining them
+* Semantic search and retrieval-based generation (from Chapter 10)
+* Extracting relationships from text and co-reference resolution (from Chapter 11) to understand the context of the conversation
+* Storing and searching for information in graph knowledge bases (from Chapter 11)  
+
+
 Figure <<figure-chatbot-flow-diagram>> shows you how all these pieces fit together.
 
 [[figure-chatbot-flow-diagram]]
@@ -185,23 +277,23 @@ image::../images/ch12/chatbot-flow-diagram.drawio.png[Chatbot Techniques Used fo
 
 === Maintaining a chatbot
 
-You learned in Chapter 9 and 10 the importance of human feedback to help train your NLP models to get smarter and smarter over time.
-You can increase your chatbot's breadth of knowledge by add new branches in the dialog tree.
-And you can increase a chatbots ability to understand what your users are saying by finding and labeling utterances that your chatbot misunderstood.
+You learned many times in this book the importance of human feedback to help train your NLP models to get smarter and smarter over time.
+You can increase your chatbot's breadth of knowledge by adding new branches in the dialog tree.
+And you can increase a chatbot's ability to understand what your users are saying by finding and labeling utterances that your chatbot misunderstood.
 Figure <<figure-chatbot-convo-design>> shows how to enable your conversation designers to be "data driven."
 Rather than guessing what your users will find helpful, you want to analyze their interactions with your system and use that to identify the most popular user _pain points_ that you can address with better conversation design.
-A data driven organization pays attention to their users and builds what they need, rather than what they _think_ the users need.
+A data-driven organization pays attention to its users and builds what they need, rather than what they _think_ the users need.
 
-As a data-driven conversation designer you'll want to prioritize the most frequent messages from their users for labeling and conversation design.
+As a data-driven conversation designer, you'll want to prioritize the most frequent messages from their users for labeling and conversation design.
 One way to do that is to sort your users' utterances by the maximum predicted label confidence (probability from ``predict_probas()``).
 You can scan the lowest confident utterance label predictions to see if any can be labeled with one of your existing intents.
 Labeling utterances with existing intents is the fastest way to improve the user experience.
-There's nothing worse than having a chatbot that is always falling back to it's "I don't understand" response.
+There's nothing worse than having a chatbot that is always falling back to its "I don't understand" response.
 
 And you also want to look for _false positives_ where the bot has misunderstood in a more insidious way.
 If a chatbot thinks it understands your user and provides it with a reply that doesn't fit what the user expects, that's an even bigger problem for your users.
-Unfortunately those false positive intent labels are harder to find and correct. 
-But you're in luck if your chatbot is asking the user questions, such as with a quiz bot or socratic education chatbot similar to Rori.ai. 
+Unfortunately, those false positive intent labels are harder to find and correct. 
+But you're in luck if your chatbot is asking the user questions, such as with a quiz bot or Socratic education chatbot similar to Rori.ai. 
 You can look at all the answers to a particular question that the chatbot recognized as being incorrect answers to its question.
 If it looks like the chatbot made a _grading error_ by incorrectly understanding the student's answer, you can simply add the utterance to this list of possible correct answers.
 And you can label it with the appropriate intent in your labeled dataset to improve the NLU in the future.
@@ -218,11 +310,11 @@ image::../images/ch12/chatbot-convo-design.drawio.png["A block at the top shows 
 The block at the top of Figure <<figure-chatbot-convo-design>> shows the conversation design or content management system. 
 The next block down shows the utterance labeling system such as Label Studio. The labeled utterance dataset is passed to the machine learning models for training or reinforcement learning.
 And the conversation design is passed into the chatbot backend server for interaction with the user.
-The users interactions are then recorded in a message log and analyzed to help inform the conversation design and data labeling steps at the top of the diagram.
+The user's interactions are then recorded in a message log and analyzed to help inform the conversation design and data labeling steps at the top of the diagram.
 
 [TIP]
 ====
-In any organization building chatbots nearly everyone will have an opinion about what your chatbot should.
+In any organization building chatbots, nearly everyone will have an opinion about what features your chatbot should have.
 Sometimes you can get some good ideas for features to test with your users by just imagining what will help your users.
 This is especially useful if you know of some software or data or approach that you can use to quickly try the idea.
 To avoid debates about which features are more important you can be data driven.
@@ -235,28 +327,123 @@ So far, we have studied independently each of the approaches to build a chatbot.
 Using the tools described here, you can build a bot that can serve you (and maybe a few friends) if deployed on a server or in a cloud.
 However, if you want to build a chatbot that servers hundreds or thousands of users, you need a more robust, scalable system.
 Luckily, there are frameworks available that allow you to focus on building your bot while taking care of the challenges that come with the need to build a production-grade system.
-We will now discuss two popular open-source Python chatbot frameworks for building chatbots with configurable NLP capabilities: RASA and DeepPavlov.
+We will now discuss two popular open-source Python chatbot frameworks for building chatbots with configurable NLP capabilities: RASA 
 
 
 
 == Designing bots
-As the chatbot technology gained more and more popularity in the last 5 years, so did the field of conversation design - a branch of interactive design that deals specifically with designing engaging dialogs.
+As chatbot technology gained more and more popularity in the last 8 years, so did the field of conversation design - a branch of interactive design that deals specifically with designing engaging dialogs.
 Design isn't the subject of this book, so we'll keep this chapter brief.
 Our purpose is to give you the basics of approaching bot design, and there are a lot of excellent sources to broaden your knowledge in the field.
 
 === What makes a good conversation?
 
-=== The design process
+Conversing with each other is something that we humans do naturally. 
+But when we try to program a machine to be conversational, we actually need to ask ourselves what makes conversation a good one.
+Luckily, philosophers have been dabbling with this question long before it became applicable to shaping human-computer interaction.
+One of them was a British philosopher Paul Grice, who introduced the Cooperative Principle - the idea that meaningful dialog is characterized by collaboration between its participants.
+
+Grice broke down his cooperative principle into 4 maxims - specific rational principles that people follow when they aim to have meaningful communication: 
+
+* **Quantity** - be informative. Make your contribution as informative as required, but not more than required.
+* **Quality** - be truthful. Do not say what you believe to be false, and do not say that for which you lack adequate evidence. 
+* **Relation** - be relevant. Omit any information that is irrelevant to the current exchange. 
+* **Manner** - be clear, brief, and orderly. Avoid obscure or ambiguous speech, don't be too wordy, and provide information in the order that makes sense.
+
+While these principles were designed for humans, they are especially important in designing human-chatbot conversation. 
+There are a few reasons for that, the first one being that humans are more impatient and less forgiving with machines. 
+Some researchers even worry that prolonged interaction with chatbots can affect the way humans interact with each other.footnote:[Liraz Margalit, "The Psychology of Chatbots": (https://www.psychologytoday.com/us/blog/behind-online-behavior/201607/the-psychology-chatbots)]
+Another reason is that chatbots do not have the human intelligence to correct or clarify themselves when they violate one of these principles.
+
+We'll mention two other important qualities of a good conversation that weren't covered by Grice, but have deep roots in Human-Computer Interaction (HCI) design: 
+* **Turn-based** - good conversationalists take turns in speaking and don't allow themselves to dominate the conversation. That's important for chatbots, especially informational and educational ones. It can be tempting to pile a bunch of info on the user, but you will find it's much more effective to break it down into smaller chunks and provide them to the user in an interactive manner.
+* **Error tolerant** - this one is crucial for any automated system dealing with humans. An error-tolerant interface allows the user to easily recover from an error and reach their goal. 
+
+
+=== Making your chatbot a good listener - implicit and explicit confirmations
+
+Until now, we talked mostly about how your chatbot should communicate what it has to say. 
+However, even more crucial is the chatbot's capability to understand what the user is saying - and to verify that it understood them correctly. 
+Can you spot what's wrong with the following conversation?
+
+[QUOTE]
+----
+Human: When was George W. Bush born? 
+Bot: June 12, 1924 
+----
+
+If you know a little bit of American history, you might realize that the bot's answer is wrong.
+George W. Bush was actually born on July 6, 1946, and June 12, 1924, is the birthday of George H. W. Bush, his father.
+However, the bigger problem here is that there is no way for the user to realize the bot has misunderstood them. 
+
+The problem of misunderstanding each other is not unique to our conversations with chatbots.
+A lot of conflicts between people can be traced to not understanding each other correctly. 
+That's why humans came up with tools and techniques that are commonly known as "active listening". 
+One of the most important techniques in active listening is called "paraphrasing" - repeating in your own words what the other person said to you. 
+This technique is especially valuable during debates - in fact, a set of rules designed by the mathematician Anatol Rapoport and the philosopher Daniel Denett suggests to "try to re-express your target's position so clearly, vividly, and fairly that your target says, 'Thanks, I wish I'd thought of putting it that way.'"footnote:[Rational Wiki article on Rapoport's rules: (https://rationalwiki.org/wiki/Rapoport%27s_Rules)]
+
+As long your chatbot is not debating anyone, you don't need to abide by that stringent of a standard.
+But reflecting back to the user what the chatbot understood from their request is still vital, especially if your bot performs an action based on that request.
+Imagine your virtual assistant buying you a plane ticket to St. Petersburg, Florida, instead the Russia's second-largest city. 
+In conversation design lingo, this technique is called "confirmation", and there are two primary ways to implement it: implicit and explicit.
+
+You can see in Fig <<figure-explicit-implicity-confirmation>> examples of both implicit and explicit confirmations.
+
+[id=figure-explicit-implicity-confirmation, reftext={chapter}.{counter:figure}]
+.Examples of explicit and implicit confirmations 
+image::../images/ch10/qa_streamlit_app_v1.png["A diagram with 2 panes. In the pane on the left (explicit confirmation), the user says 'I'd like to book a flight to Albany tomorrow', and the bot replies 'I think you're looking for a flight to Albany, New York. Is that correct?'. In the right pane (implicit confirmation), the user says 'Bot, set an appointment with Dr. House tomorrow at 10.' and the bot replies 'OK, I've set your appointment for 10 am on Tuesday, July 16th", width=650, align="center", link="../images/ch10/explicit_implicit_confirmation.png"]
+
+
+
 
 == Evaluating your chatbot
 Finally, you have implemented your chatbot and it's interacting with users!
 First of all, congratulate yourself for getting here. This is a great achievement.
-The next question you need to ask yourself if "How do I know how good my chatbot is?"
-There are at least two aspects of your chatbot that you need to measure when tracking your chatbot performance: accuracy and engagement.
-The former deals with the performance of the NLP, while the latter measures the chatbot's interaction with the users and its ability to fulfill its purpose.
+The next question you need to ask yourself is "How do I know how good my chatbot is?"
+There are a lot of metrics that you can measure when tracking your chatbot, and they usually belong to one of the three buckets: 
 
-=== Measuring chatbot accuracy
+* **NLP Performance**-related - metrics that evaluate your chatbot's Natural Language Processing, such as intent recognition accuracy, percentage of unrecognized utterances, etc.
+* **User experience**-related - metrics that relate to the chatbot's interaction with the user 
+* **Impact**-related - metrics that deal with the chatbot's impact on the user and/or the organization
 
+Let's look at these families of metrics one at a time. 
+
+=== Measuring chatbot NLP performance
+
+So, how can we quantitavely measure our chatbot's ability to understand and, possibly, generate human language? 
+That would depend on the type of your chatbot, so let's look at performance metrics for each of the four types of chatbots we discussed at the beginning of this chapter. 
+
+There's obviously not a lot of NLP quality to measure when it comes to rule-based chatbots, so let's jump to intent-based bots, which, at the time of this writing, are still dominating the chatbot space. 
+
+As the intent-based chatbots are built on top of a prediction model, we can adopt some of the metrics you've met before in this book. 
+Remember the accuracy and F1 score we introduced in Chapter 4? 
+As a quick reminder, for a binary classifier, accuracy is the ratio of correct predictions out of all the predictions.
+And F1 score is a harmonic mean of _precision_ and _recall_, that measure the ratio of positive predictions that are correct and the ratio of positive instances that are correctly identified, respectively.footnote:[Wikipedia article on precision and recall: (https://en.wikipedia.org/wiki/Precision_and_recall)]
+
+Turns out, F1 score is actually one of the most common ways to measure the performance of intent classification in chatbots. 
+If your classifier is single-label (meaning it only gives one intent prediction per utterance), essentially performing multi-class classification, you can generalize the F1 score to the multiclass case.footnote:[See an example here: (https://towardsdatascience.com/multi-class-metrics-made-simple-part-ii-the-f1-score-ebe8b2c2ca1)]
+If your classifier is multi-label (meaning it can label an utterance with multiple intent labels), you can average the individual F1 scores for each intent.
+In both cases, it is useful to look at F1 score of each intent separately, to understand your chatbot's weak points. 
+
+
+=== Measuring the users' experience
+
+When it comes to measuring user experiencen (UX), things get less straightforward than mathematically calculating NLP performance. 
+Of course, you can measure superficial signals, such number of users that interacted with your chatbot, number of messages exchanged, etc.
+But does that mean that the users' experience with the chatbot was positive?
+
+Luckily, conversational designers were able to borrow a lot of UX metrics from UX designers for other interfaces, such as web and mobile apps. 
+As chatbot can be considered a type of web-based (or mobile-based) user interface, a lot of the metrics used to measure web apps appy to chatbots as well. 
+In the web world, the basic unit of measurement is an "event" - a user's action within the app, such as opening a page, clicking a button, entering information... basically, anything that can be tracked. 
+But among all the events we track, which are the right ones to measure and how? 
+
+
+
+In 2010, Google researchers came up with a UX measurement framework that was since widely adopted by designers of apps. 
+It is called HEART, which stands for Happiness, Engagement, Adoption, Retention, and Task Success.footnote:[Google Research publication on HEART framework: (https://research.google/pubs/pub36299/)]
+Let's look at those metrics in more "chronological" order, as they relate to the different phases of the user's journey with your chatbot. 
+
+_Adoption_ measures 
 
 
 
