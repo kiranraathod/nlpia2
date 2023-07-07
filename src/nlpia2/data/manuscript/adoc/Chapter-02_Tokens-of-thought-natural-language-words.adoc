@@ -463,7 +463,7 @@ Let's see how spaCy handles our collection of deep thinker quotes:
 [source,python]
 ----
 >>> import spacy  # <1>
->>> from nlpia2.spacy_language_model.load  # <2>
+>>> import nlpia2.spacy_language_model.load  # <2>
 >>> load = spacy_language_model.load
 >>> nlp = load('en_core_web_sm')  # <3>
 >>> doc = nlp(texts[-1])
