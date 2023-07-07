@@ -1,12 +1,15 @@
-# emmergent properties of LLMs
+# Emergent properties of LLMs are a myth
 
 #### LLM benchmarks
 
 - ["Measuring Massive Multitask Lanugage Understanding" by Dan Hendrycks et al.](https://arxiv.org/pdf/2009.03300.pdf)
+- [Google 50+ page paper](https://arxiv.org/pdf/2206.07682.pdf)
+- [Emergence myth](https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Femergent-abilities-in-ai-are-we-chasing-a-myth-fead754a1bf9)
 
-```asciidoc
+```asciidoctor
 - footnote:["Measuring Massive Multitask Lanugage Understanding" by Dan Hendrycks et al. (https://arxiv.org/pdf/2009.03300.pdf)]
 - footnote:["Emergent Abilities of Large Language Models" by Jason Wei et al (https://arxiv.org/abs/2206.07682)]
+- footnote:[Emergence myth" on TDS (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Femergent-abilities-in-ai-are-we-chasing-a-myth-fead754a1bf9)]
 ```
 
 FIXME: use pydoxtools to extract this table?

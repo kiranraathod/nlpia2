@@ -1,3 +1,8 @@
+""" Based on the make_outline.sh script -- create detailed outline book as a markdown file "outline.md"
+
+Only uses the chapter titles and headings
+"""
+
 from pathlib import Path
 import re
 import sys
@@ -19,7 +24,8 @@ SYM_CHAPTER_NUM = ':Chapter:'  # ":Chapter: 6"
 
 
 def make_path(p):
-    return Path(p).expand_user().resolve().absolute()
+    """ Should be `Path()`, perhaps or should monkey-patch the Path class """
+    return Path(p).expanduser().resolve().absolute()
 
 
 def open_path(filepath, *args, **kwargs):
@@ -98,3 +104,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         glob = sys.argv[2]
     chapter_outlines = list(generate_book_outline(adoc_path, glob=glob))
+    print(chapter_outlines)

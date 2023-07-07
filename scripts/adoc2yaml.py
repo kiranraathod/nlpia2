@@ -4,6 +4,7 @@ import re
 import subprocess
 import sys
 from collections.abc import Mapping
+from pathlib import Path
 
 import logging
 log = logging.getLogger(__name__)
@@ -76,21 +77,18 @@ def get_blocks(doc):
     return blocks
 
 
-if __name__ == '__main__':
-    try:
-        chapter_path = sys.argv[1]
-    except IndexError:
-        chapter_path = 'manuscript/adoc/Chapter 07 -- Getting Words in Order with Convolutional Neural Networks (CNNs).adoc'
-
-    if '--flatten' in sys.argv:
-        doflatten = True
-
-    yaml_path = f'{chapter_path}.yml'
+def adoc_to_yaml(chapter_path, yaml_path=None, doflatten=False):
+    chapter_path = Path(chapter_path)
+    if yaml_path:
+        yaml_path = Path(yaml_path)
+    else:
+        yaml_path = Path(f'{chapter_path}.yml')
     # scripts/adoc2yaml.rb contains:
     #    yaml_output = File.open(chapter_path + '.yml', "w")
     #    yaml_output.write((Asciidoctor.load_file chapter_path).to_yaml)
     command = ['ruby', 'scripts/adoc2yaml.rb', chapter_path]
     stdoutput = subprocess.check_output(command)
+    print(stdoutput)
 
     # re_reference = r'^\s*[-a-zA-Z0-9]+\:\ \*.*'
     # re_address = r'^-\ \&.*'
@@ -112,6 +110,30 @@ if __name__ == '__main__':
         cleaned_lines.append(cleaned)
     text = '\n'.join(cleaned_lines)
     doc = yaml.load(text, Loader=Loader)
-    yaml.dump(doc, open(yaml_path, 'w'))
-    # process the doc to extract/rearrange as you like
-    print(yaml.dump(doc))
+    yaml_text = yaml.dump(doc)
+    with chapter_path.open('w') as fout:
+        fout.write(yaml_text)
+    return doc
+
+
+
+if __name__ == '__main__':
+    if '--flatten' in sys.argv:
+        sys.argv.pop('--flatten')
+        doflatten = True
+
+    chapter_path = oc_path = 'manuscript/adoc/Chapter-11_Information-extraction-and-logic-semantic-parsing.adoc'
+    try:
+        chapter_path = sys.argv[1]
+    except IndexError:
+        pass
+
+    yaml_path = chapter_path + '.yml'
+    try:
+        yaml_path = sys.argv[2] 
+    except IndexError:
+        pass
+
+
+
+

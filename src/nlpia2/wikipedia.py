@@ -1,1 +1,0 @@
-from nlpia2_wikipedia.wikipedia import *  # noqa
