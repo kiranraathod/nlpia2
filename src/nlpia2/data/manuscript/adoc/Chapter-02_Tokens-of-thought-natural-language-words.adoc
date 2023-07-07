@@ -357,7 +357,7 @@ The example here should help you start to develop your intuition about applicati
 
 Much better.
 Now the tokenizer separates punctuation from the end of a word, but doesn't break up words that contain internal punctuation such as the apostrophe within the token "There's."
-So all of these words were tokenized the way we wanted: "There's", "fittest", "maybe".
+So all of these words were tokenized the way you wanted: "There's", "fittest", "maybe".
 And this regular expression tokenizer will work fine on contractions even if they have more than one letter after the apostrophe such as "can't", "she'll", "what've".
 It will work even typos such as 'can"t' and "she,ll", and "what`ve".
 But this liberal matching of internal punctuation probably isn't what you want if your text contains rare double contractions such as "couldn't've", "ya'll'll", and "y'ain't"
@@ -458,31 +458,48 @@ In fact the name "spaCy" is based on the word "space", as in the separator used 
 And spaCy adds a lot of additional _tags_ to tokens at the same time that it is applying rules to split tokens apart.
 So spaCy is often the first and last tokenizer you'll ever need to use.
 
-Let's see how spaCy handles our collection of deep thinker quotes:
+Let's see how spaCy handles our collection of deep thinker quotes.
+First you're going to use a thin wrapper for the spacy.load function so that your NLP pipeline is _idempotent_.
+An idempotent pipeline can be run multiple times and achieve the same results each time:
 
 [source,python]
 ----
 >>> import spacy  # <1>
->>> import nlpia2.spacy_language_model.load  # <2>
->>> load = spacy_language_model.load
+>>> from nlpia2.spacy_language_model import load  # <2>
 >>> nlp = load('en_core_web_sm')  # <3>
->>> doc = nlp(texts[-1])
->>> type(doc)
-<class 'spacy.tokens.doc.Doc'>
-
->>> tokens = [tok.text for tok in doc]
->>> tokens[:9]
-['There', "'s", 'no', 'such', 'thing', 'as', 'survival', 'of', 'the']
-
->>> tokens[9:17]
-['fittest', '.', 'Survival', 'of', 'the', 'most', 'adequate', ',']
+    [+] Download and installation successful
+    You can now load the package via spacy.load('en_core_web_sm')
 ----
 <1> If this is your first time to use spacy you should download the small language model with `spacy.cli.download('en_core_web_sm')`
 <2> To avoid unnecessarily re-downloading the SpaCy language model, use `nlpia2.spacy_language_model.load` rather than `spacy.load`
 <3> `sm` stands for "small" (17 MB), `md` is medium (45 MB), `lg` is "large" (780 MB)
 
-That tokenization may be more useful to you if you're comparing your results to academic papers or colleagues at work.
-Spacy is doing a lot more under the hood.
+Now that you've downloaded the small SpaCy language model and loaded it into memory (RAM), you can use it to tokenize and tag any text string.
+This will create a new SpaCy `Doc` object that contains whatever SpaCy was able to understand about the text using that language model.
+
+[source,python]
+----
+[source,python]
+>>> doc = nlp(texts[-1])
+>>> type(doc)
+<class 'spacy.tokens.doc.Doc'>
+----
+
+SpaCy has read and parsed your text to split it into tokens.
+The `Doc` object contains a sequence of `Token` objects which should each be a small packet of thought or meaning (typically words).
+See if these tokens are what you expected:
+
+----
+>>> tokens = [tok.text for tok in doc]  # <1>
+>>> tokens[:9]  # <2>
+['There', "'s", 'no', 'such', 'thing', 'as', 'survival', 'of', 'the']
+
+>>> tokens[9:17]
+['fittest', '.', 'Survival', 'of', 'the', 'most', 'adequate', ',']
+----
+<1> The text or spelling is only one attribute the `Token` objects within a `Doc`.
+
+Spacy is doing a lot more under the hood than just splitting your text into tokens.
 That small language model you downloaded is also identifying sentence breaks with some *sentence boundary detection* rules.
 A language model is a collection of regular expressions and finite state automata (rules).
 These rules are a lot like the grammar and spelling rules you learned in English class.
@@ -506,7 +523,7 @@ You can see that spaCy does a lot more than simply separate text into tokens.
 It identifies sentence boundaries to automatically segment your text into sentences.
 And it tags tokens with various attributes like their part of speech (PoS) and even their role within the syntax of a sentence.
 You can see the lemmas displayed by `displacy`  beneath the literal text for each token.footnote:[nlpia2 source code for chapter 2 (https://proai.org/nlpia2-ch2) has additional spaCy and displacy options and examples.]
-Later in the chapter we'll explain how lemmatization and case folding and other vocabulary *compression* approaches can be helpful for some applications.
+Later in the chapter you'll learn how lemmatization and case folding and other vocabulary *compression* approaches can be helpful for some applications.
 
 So spaCy seems pretty great in terms of accuracy and some "batteries included" features, such as all those token tags for lemmas and dependencies.
 What about speed?
@@ -554,9 +571,11 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 That's nearly 5 seconds for about 150,000 characters or 34,000 words of English and Python text or about 7000 words per second.
 
 That may seem fast enough for you on your personal projects.
-But on a medical records summarization project we needed to process thousands of large documents with a comparable amount of text as you find in this entire book.
-And the latency in our medical record summarization pipeline was a critical metric for the project.
-So this, full-featured spaCy pipeline would require at least 5 days to process 10,000 books such as NLPIA or typical medical records for 10,000 patients.
+But on a typical medical records summarization project for a commercial business you might need to process hundreds of large documents per minute.
+That's a couple documents per second.
+And if each document contains the amount of text that you find in this book (nearly half a million tokens), that's almost a million tokens per second.
+Latency on a medical record summarization pipeline can be a critical metric for the project.
+For example, on one project it took 5 days to process 10,000 patient medical records using SpaCy.
 
 If that's not fast enough for your application you can disable any of the tagging features of the spaCy pipeline that you do not need.
 
@@ -596,10 +615,7 @@ True
 >>> f'{round(len(tokens) / 10_000)}0k'
 '30k'
 ----
-////
-33.7 ms ± 269 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
-'1Ok'
-////
+
 Could it be that you found a winner for the tokenizer race?
 Not so fast.
 Your regular expression tokenizer has some pretty simple rules, so it should run pretty fast as well:
@@ -613,19 +629,21 @@ Your regular expression tokenizer has some pretty simple rules, so it should run
 >>> %timeit re.findall(pattern, text)
 8.77 ms ± 29.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 ----
-////
-'20k'
-5.14 ms ± 43.7 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
-////
 <1> Try precompiling with `re.compile` to learn something about how smart the core Python developers are
 
-Now that's not surprising.
-Regular expressions can be compiled and run very efficiently within low level C routines in Python.
+Now that's not too surprising.
+Python compiles and runs regular expressions very efficiently within low level C routines.
+In addition to speed, regular expressions and the NLTK tokenizer are often used in academic papers.
+That help others like you reproduce their results exactly.
+So if you're just trying to reproduce someone else's work, make sure you use their tokenizer, whether it's NLTK, regular expressions, or a particular version of spaCy.
+In this book you are just trying to learn how things work, so we haven't bothered to keep track of the particular versions of spaCy and NLTK that we used.
+But you may need to do this for yourself if you are sharing your results with others doing NLP research.
+
 
 [TIP]
 ====
-Use a regular expression tokenizer when speed is more import than accuracy.
-If you do not need the additional linguistic tags that spaCy and other pipelines provide your tokenizer doesn't need to waste time trying to figure out those tags.footnote:[Andrew Long, "Benchmarking Python NLP Tokenizers" (https://towardsdatascience.com/benchmarking-python-nlp-tokenizers-3ac4735100c5)]
+Use a regular expression tokenizer when speed is more import than accuracy or when others will try to reproduce your results. footnote:["Don’t use NLTK’s wordtokenize use NLTK’s regexptokenize" (blog with code) by Michael Bryan  "Benchmarking Python NLP Tokenizers" (https://morioh.com/p/e2cfb73c8e86)]
+If you do not need the additional tags that spaCy provides, your tokenizer doesn't need to waste time trying to process the grammar and meaning of the words to create those tags.
 And each time you use a regular expression in the `re` or `regex` packages, a compiled and optimized version of it is cached in RAM.
 So there's usually no need to _precompile_ (using `re.compile()`) your regexes.
 ====
@@ -1505,8 +1523,8 @@ So if you have sufficient memory and processing bandwidth to run all the NLP ste
 And if you are worried about overfitting a small training set with a large vocabulary, there are better ways to select your vocabulary or reduce your dimensionality than ignoring stop words.
 Including stop words in your vocabulary allows the document frequency filters (discussed in chapter 3) to more accurately identify and ignore the words and _n_-grams with the least information content within your particular domain.
 
-The SpaCy and NLTK packages include a variety of predefined sets of stop words for various use cases. footnote:[The spaCy package contains a list of stop words that you can customize using this Stack Overflow answer (https://stackoverflow.com/a/51627002/623735)]
-You probably won't need a broad list of stopwords like the one in listing <<listing-broad-stop-words>>, but if you do you'll want to check out both the SpaCy and NLTK stopwords lists.
+The spaCy and NLTK packages include a variety of predefined sets of stop words for various use cases. footnote:[The spaCy package contains a list of stop words that you can customize using this Stack Overflow answer (https://stackoverflow.com/a/51627002/623735)]
+You probably won't need a broad list of stopwords like the one in listing <<listing-broad-stop-words>>, but if you do you'll want to check out both the spaCy and NLTK stopwords lists.
 And if you need an even broader set of stopwords you can `SearX`
 footnote:[If you want to help others find SearX you can get in the habbit of saying "SearX" (pronounced "see Ricks") when talking or writing about doing a web search. You can shift the meaning of words in your world to make it a better place!]
 footnote:[The NLTK package (https://pypi.org/project/nltk) contains the list of stop words you'll see in many online tutorials]
@@ -2392,6 +2410,7 @@ And you can check your progress relative to VADER at each step of the way to see
 
 == Review
 
+. Contribute to the Open Source spaCy project footnote:[SpaCy project (https://github.com/explosion/spaCy)] with some small improvement such as making the spacy.load function idempotent.
 . How does a lemmatizer increase the likelihood that your DuckDuckGo search results contain what you are looking for?
 . Is there a way to optimally decide the _n_ in the _n_-gram range you use to tokenize your documents?
 . Does lemmatization, case folding, or stopword removal help or hurt your performance on a model to predict misleading news articles with this Kaggle dataset:

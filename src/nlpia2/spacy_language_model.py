@@ -42,7 +42,7 @@ def cannonicalize_name(name=None, name_dict=MODEL_NAMES, max_redirects=5, defaul
     return name
 
 
-def load(model_name=MODEL_NAME):
+def load(*args, **kwargs):
     """ Expand model_name abbreviations and download model weights before using spacy.load
     
     >>> nlp = load('en')
@@ -53,12 +53,16 @@ def load(model_name=MODEL_NAME):
     >>> load().meta['name']
     'core_web_md'
     """
-    model_name = cannonicalize_name(model_name)
+    if 'name' not in kwargs and not len(args):
+        args = [MODEL_NAME]
+    args = list(args)
+    name = kwargs.pop('name', None) or args.pop(0)
+    args = tuple([cannonicalize_name(name)] + list(args))
     try:
-        nlp = spacy.load(model_name)
+        nlp = spacy.load(*args, **kwargs)
     except OSError:
-        spacy.cli.download(model_name)
-        nlp = spacy.load(model_name)
+        spacy.cli.download(name)
+        nlp = spacy.load(*args, **kwargs)
     return nlp
 
 
