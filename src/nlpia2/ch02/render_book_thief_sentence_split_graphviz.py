@@ -20,7 +20,8 @@ for i in range(4):
 HOME_CODE_DIR = REPO_DIR.parent.parent
 print(f"HOME_CODE_DIR: {HOME_CODE_DIR}")
 assert HOME_CODE_DIR.name == 'code'
-MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
+from nlpia2.constants import MANUSCRIPT_DIR
+# MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'
 assert MANUSCRIPT_DIR.is_dir()
 IMAGE_DIR = MANUSCRIPT_DIR / 'images'
 assert IMAGE_DIR.is_dir()

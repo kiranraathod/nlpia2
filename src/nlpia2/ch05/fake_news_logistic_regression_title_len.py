@@ -17,7 +17,7 @@ plt.rcParams['figure.dpi'] = 120
 # THIS_DIR = Path(__file__).expanduser().resolve().absolute().parent
 # DATA_DIR = Path(THIS_DIR).parent.parent / '.nlpia2-data'
 DATA_DIR = Path('/home/hobs/code/prosocialai/nlpia2/.nlpia2-data')
-MANUSCRIPT_DIR = Path('/home/hobs/code/tangibleai/nlpia-manuscript')
+from nlpia2.constants import MANUSCRIPT_DIR
 CH05_IMAGES_DIR = MANUSCRIPT_DIR / 'manuscript' / 'images' / 'ch05'
 DATAFILE = DATA_DIR / 'fake_vs_real.csv.gz'  # 'all.csv.gz'
 assert CH05_IMAGES_DIR.is_dir()

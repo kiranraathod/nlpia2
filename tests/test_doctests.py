@@ -9,9 +9,10 @@ from nlpia2.text_processing.extractors import test_file
 
 from pathlib import Path
 
-ADOC_DIR = Path(__file__).parent.parent.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+# ADOC_DIR = Path(__file__).parent.parent.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+from nlpia2.constants import ADOC_DIR
 
-CH2_PATH = list(ADOC_DIR.glob('Chapter 02 -- *'))[0]
+CH2_PATH = Path(list(ADOC_DIR.glob('Chapter-02*'))[0])
 
 __author__ = "Hobson Lane"
 __copyright__ = "Hobson Lane"

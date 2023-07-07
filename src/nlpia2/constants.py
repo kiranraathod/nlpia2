@@ -45,6 +45,7 @@ except NameError:
     MODULE_DIR = Path.cwd()
 assert MODULE_DIR.is_dir()
 
+# nlpia2/src/nlpia2/data
 SRC_DATA_DIR = MODULE_DIR / SRC_DATA_DIR_NAME
 try:
     SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
@@ -62,13 +63,13 @@ try:
 except FileExistsError as e:
     log.warning(e)
 
-# FIXME: code to download manuscript from dropbox/Public and put it in nlpia2-data
-MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-# MANUSCRIPT_DEFAULT_FILENAME = 'Chapter 03 -- Math with Words (TF-IDF Vectors).adoc'
-# MANUSCRIPT_DEFAULT_FILEPATH = MANUSCRIPT_DIR / DEFAULT_FILENAME
-# DEFAULT_DOCTEST_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
+# FIXME: download manuscript from dropbox/Public and put it in ~/.nlpia2-data
+# MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
+print(SRC_DATA_DIR)
 MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
+print(MANUSCRIPT_DIR)
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
+print(ADOC_DIR)
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 
 DATA_INFO_FILE = SRC_DATA_DIR / 'data_info.csv'

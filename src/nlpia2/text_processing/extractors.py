@@ -412,6 +412,7 @@ def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_sectio
     if not destfile:
         destfile = filepath.parent.parent / 'py'
         destfile.mkdir(exist_ok=True)
+    destfile = Path(destfile)
     if destfile.is_dir():
         destfile = destfile / filepath.with_suffix('.adoc.py').name
     sections_lines = extract_tagged_code_lines(
