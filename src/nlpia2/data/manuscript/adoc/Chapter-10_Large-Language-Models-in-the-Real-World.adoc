@@ -1623,7 +1623,7 @@ HL: Done
 ////
 
 
-== Test yourself 
+== Test yourself
 * How is the generative model in this chapter different from the BERT model you've seen in the previous one?
 * We indexed the sentences of this book as the context for a Longformer-based reading comprehension question-answering model. Will it get better or worse if you use Wikipedia sections for the context? What about an entire Wikipedia article? 
 * What is the fastest indexing algorithm for vector search and semantic search? (hint, this is a trick question)

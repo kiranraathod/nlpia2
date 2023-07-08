@@ -467,8 +467,8 @@ An idempotent pipeline can be run multiple times and achieve the same results ea
 >>> import spacy  # <1>
 >>> from nlpia2.spacy_language_model import load  # <2>
 >>> nlp = load('en_core_web_sm')  # <3>
-    [+] Download and installation successful
-    You can now load the package via spacy.load('en_core_web_sm')
+>>> nlp
+<spacy.lang.en.English...>
 ----
 <1> If this is your first time to use spacy you should download the small language model with `spacy.cli.download('en_core_web_sm')`
 <2> To avoid unnecessarily re-downloading the SpaCy language model, use `nlpia2.spacy_language_model.load` rather than `spacy.load`
@@ -538,14 +538,11 @@ First download the AsciiDoc text file for this chapter:
 >>> import requests
 >>> text = requests.get('https://proai.org/nlpia2-ch2.adoc').text
 >>> f'{round(len(text) / 10_000)}0k'  # <1>
-'160k'
+'170k'
 ----
-////
-#// I got '60k' don't know if it's changed since you wrote this //
-////
-<1> I divided by 10,000 and rounded it, so that Doctests would continue to pass as I revise this text.
+<1> Divided by 10,000 and rounded, so that Doctests will pass as this text is revised.
 
-There were about 160 thousand ASCII characters in this AsciiDoc file where I wrote this sentence that you are reading right now.
+There were about 170 thousand unicode characters in this AsciiDoc text file where I wrote this sentence that you are reading right now.
 What does that mean in terms of words-per-second, the standard benchmark for tokenizer speed?
 
 [source,python]
@@ -555,12 +552,12 @@ What does that mean in terms of words-per-second, the standard benchmark for tok
 >>> %timeit nlp(text)  # <1>
 4.67 s ± 45.3 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 >>> f'{round(len(text) / 10_000)}0k'
-'160k'
+'170k'
 >>> doc = nlp(text)
 >>> f'{round(len(list(doc)) / 10_000)}0k'
-'30k'
+'40k'
 >>> f'{round(len(doc) / 1_000 / 4.67)}kWPS'  # <2>
-'7kWPS'
+'8kWPS'
 ----
 ////
 1.59 s ± 19.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
@@ -575,15 +572,17 @@ But on a typical medical records summarization project for a commercial business
 That's a couple documents per second.
 And if each document contains the amount of text that you find in this book (nearly half a million tokens), that's almost a million tokens per second.
 Latency on a medical record summarization pipeline can be a critical metric for the project.
-For example, on one project it took 5 days to process 10,000 patient medical records using SpaCy.
+For example, on one project it took 5 days to process 10,000 patient medical records using SpaCy as the tokenizer.
 
-If that's not fast enough for your application you can disable any of the tagging features of the spaCy pipeline that you do not need.
+If you need to speed up your tokenzer, one option is to disable the tagging features of the spaCy pipeline that you do not need for your application:
 
 [source,python]
 ----
 >>> nlp.pipe_names  # <1>
 ['tok2vec', 'tagger', 'parser', 'attribute_ruler', 'lemmatizer', 'ner']
->>> nlp = spacy.load('en_core_web_sm', disable=nlp.pipe_names)
+>>> nlp = load('en_core_web_sm', disable=['tok2vec', 'tagger', 'parser'])
+>>> nlp.pipe_names
+['attribute_ruler', 'lemmatizer', 'ner']
 >>> %timeit nlp(text)
 199 ms ± 6.63 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 ----
@@ -613,7 +612,7 @@ True
 156 ms ± 1.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 >>> tokens = word_tokenize(text)
 >>> f'{round(len(tokens) / 10_000)}0k'
-'30k'
+'40k'
 ----
 
 Could it be that you found a winner for the tokenizer race?
@@ -2408,13 +2407,12 @@ You would need to incorporate _n_-grams into your tokenizer to connect negation 
 We leave it to you to continue the NLP action by improving on this machine learning model.
 And you can check your progress relative to VADER at each step of the way to see if you think machine learning is a better approach than hard-coding algorithms for NLP.
 
-== Review
+== Test yourself
 
-. Contribute to the Open Source spaCy project footnote:[SpaCy project (https://github.com/explosion/spaCy)] with some small improvement such as making the spacy.load function idempotent.
-. How does a lemmatizer increase the likelihood that your DuckDuckGo search results contain what you are looking for?
-. Is there a way to optimally decide the _n_ in the _n_-gram range you use to tokenize your documents?
-. Does lemmatization, case folding, or stopword removal help or hurt your performance on a model to predict misleading news articles with this Kaggle dataset:
-. How could you find out the best sizes for the word pieces or sentence pieces for your tokenizer?
+. What is the difference between a lemmatizer and a stemmer? Which one is better (in most cases)?
+. How does a lemmatizer increase the likelihood that a search engine (such as You.com) returns search results that contain what you are looking for?
+. Will case folding, lemmatizing or stopword removal improve the accuracy of your typical NLP pipeline? What about for a problem like detecting misleading news article titles (clickbait)?footnote:[Hint: When in doubt do an experiment. This is called _hyperparameter tuning_. Here's a fake news dataset you can experiment with: (https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset/download)]
+. Are there statistics in your token counts that you can use to decide what `n` to use in NLP pipeline?
 . Is there a website where you can download the token frequencies for most of the words and n-grams ever published?footnote:[Hint: A company that aspired to "do no evil", but now does, created this massive NLP corpus.]
 . What are the risks and possible benefits of pair coding AI assistants built with NLP? What sort of organizations and algorithms do you trust with your mind and your code?
 

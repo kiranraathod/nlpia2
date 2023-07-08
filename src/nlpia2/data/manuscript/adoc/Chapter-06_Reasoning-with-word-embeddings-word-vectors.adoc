@@ -2231,7 +2231,7 @@ To get the most useful information about the relationship between ID numbers lik
 * Machines can easily pass the word analogies section of standardized tests with nothing more than pretrained word embeddings
 
 
-== Review
+== Test yourself
 
 1. Use pretrained word embeddings to compute the strength, agility, and intelligence of Dota 2 heroes based only on the natural language summary.footnote:[The `nessvec` and `nlpia2` packages contain FastText, GloVE and Word2vec loaders (https://gitlab.com/tangibleai/nessvec). nlpia2 contain `ch06_dota2_wiki_heroes.hist.py` (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/etl/ch06_dota2_wiki_heroes.hist.py) `dota2-heroes.csv` (https://gitlab.com/tangibleai/nlpia2/-/raw/main/.nlpia2-data/dota2-heroes.csv?inline=false)]
 2. Visualize the graph of connections between concepts in another chapter of this book (or any other text) that you'd like to understand better.

@@ -1939,7 +1939,7 @@ And if you are curious about the affect of the transpose operation on the embedd
 But you probably want to follow the experts if you want to get state-of-the-art results on hard problems.
 Don't believe everything you read on the Internet, especially when it comes to CNNs for NLP.
 
-== Review
+== Test yourself
 
 1. For a length 3 kernel and an input array of length 8 what is the length of the output?
 2. What is the kernel for detecting an "S O S" distress signal (**S**ave **O**ur **S**ouls, or **S**ave **O**ur **S**hip) within the secret message audio file used in this chapter?

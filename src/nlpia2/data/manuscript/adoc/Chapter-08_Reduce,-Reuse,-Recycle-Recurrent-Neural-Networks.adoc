@@ -1795,7 +1795,7 @@ You now know how to train a versatile NLP language model that you can use on wor
 And you can use these models to classify text or even generate modestly interesting new text.
 And you didn't have to go crazy on expensive GPUs and servers.
 
-== Review
+== Test yourself
 
 * What are some tricks to improve "retention" for reading long documents with an RNN?
 * What are some "unreasonably effective" applications for RNNs in the real world?

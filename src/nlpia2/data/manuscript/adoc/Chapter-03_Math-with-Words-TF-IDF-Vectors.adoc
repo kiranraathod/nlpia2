@@ -1619,7 +1619,7 @@ In the next chapter, you will compute topic vectors from your TF-IDF vectors.
 Topic vectors are an even better representation of the meaning of a document than these carefully normalized and smoothed TF-IDF vectors.
 And things only get better from there as we move on to Word2vec word vectors in chapter 6 and deep learning embeddings of the meaning of words and documents in later chapters.
 
-== Review
+== Test yourself
 
 . What makes a Counter vector (`CountVectorizer` output) different from a `collections.Counter` object?
 . Can you use `TFIDFVectorizer` on a large corpus (more than 1M documents) with a huge vocabulary (more than 1M tokens)? What problems do you expect to encounter?

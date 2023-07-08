@@ -1772,7 +1772,7 @@ In the next chapters, you'll learn how to fine tune this concept of topic vector
 To do this we first start learning about neural nets.
 This will improve your pipeline's ability to extract meaning from short texts or even solitary words.
 
-== Review
+== Test yourself
 * What preprocessing techniques would you use to prepare your text for more efficient topic modeling with LDiA? What about LSA?
 * Can you think of a dataset/problem where TF-IDF performs better than LSA? What about the opposite?
 * We mentioned filtering stopwords as a prep process for LDiA. When would this filtering be beneficial?

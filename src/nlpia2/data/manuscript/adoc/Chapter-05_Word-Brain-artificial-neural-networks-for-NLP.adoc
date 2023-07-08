@@ -1469,7 +1469,7 @@ See if you can add additional layers to the perceptron you created in this chapt
 See if the results you get improve as you increase the network complexity.
 Bigger is not always better, especially for small problems.
 
-== Review
+== Test yourself
 
 . What is the simple AI logic "problem" that Rosenblatt's artifical neurons couldn't?
 . What minor change to Rosenblatt's architecture "fixed" perceptrons and ended the first "AI Winter"?

@@ -1272,7 +1272,7 @@ This book is about using machine learning to build smart text-reading machines w
 Each chapter incrementally improves on the basic NLP pipeline for the chatbot introduced in this chapter.
 As you learn the tools of natural language processing, you will be building an NLP pipeline that can not only carry on a conversation but help you accomplish your goals in business and in life.
 
-== Review
+== Test yourself
 
 *Chapter 1 review questions*
 
