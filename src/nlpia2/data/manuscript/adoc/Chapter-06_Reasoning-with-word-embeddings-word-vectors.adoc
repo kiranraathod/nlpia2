@@ -2068,29 +2068,60 @@ from nessvec.files import load_glove
 
 ==== Extract natural language from the NLPiA manuscript
 
-The first step is to take this unstructured chapter text and turn it into structured data so that the natural language text can be separated from the code blocks and other "unnatural" text.
-You can use the Python package called `Asciidoc3` to convert any _AsciiDoc_ (.adoc) text file into HTML.
-With the HTML text file, we can use the _BeautifulSoup_ to extract the text.
+You can download any of the chapters of this book in `adoc` format from the `src/nlpia2/data/manuscript` directory in the `nlpia2` project (https://gitlab.com/tangibleai/nlpia2/).
+The examples here will use the `adoc` manuscript for chapter 6.
+If you ever write a book or software documentation yourself don't do this.
+The recursive loop of testing and editing code withing the text that you are processing with that code will break your brain.
+But you can now enjoy the fruits of all those headaches by processing the words your reading right now.
 
-.HTML Convert AsciiDoc files to HTML with Asciidoc3
+.Download the adoc text from the `nlpia2` repo
+[source,python]
+----
+>>> import requests
+>>> repo = 'https://gitlab.com/tangibleai/nlpia2/-/raw/main'
+>>> name = 'Chapter-06_Reasoning-with-word-embeddings-word-vectors.adoc'
+>>> url = f'{repo}/src/nlpia2/data/{name}'
+>>> adoc_text = requests.get(url)
+----
+
+Now you need to save that text to an `.adoc` file so that you can use a commandline tool to render it to html.
+
+.Write the adoc string to disk
+[source,python]
+----
+>>> from pathlib import Path
+>>> path = Path.cwd() / name
+>>> with path.open('w') as fout:
+...     fout.write(adoc_text)
+----
+
+Now you will want to render the `adoc` text into HTML to make it easier to separate out the natural language text from the formatting characters and other "unnatural" text.
+You can use the Python package called `Asciidoc3` to convert any _AsciiDoc_ (.adoc) text file into HTML.
+
+.Convert AsciiDoc file to HTML
 [source,python]
 ----
 >>> import subprocess
->>> import os
->>> from bs4 import BeautifulSoup
->>> chapt6_adoc = 'Chapter 06 -- Reasoning with Word Vectors (Word2Vec).adoc'
->>> chapt6_html = 'Chapter 06 -- Reasoning with Word Vectors (Word2Vec).html'
->>> subprocess.run(args=['asciidoc3', '-a', '-n', '-a', 'icons',
-[CA] chapt6_adoc])   <1>
+>>> subprocess.run(args=[   # <1>
+...     'asciidoc3', '-a', '-n', '-a', 'icons', path.name])
+----
+<1> The Asciidoc3 application can render html from an adoc file.
+
+Now that you have an HTML text file, you can use the _BeautifulSoup_ package to extract the text.
+
+[source,python]
+----
 >>> if os.path.exists(chapt6_html) and os.path.getsize(chapt6_html) > 0:
 ...     chapter6_html = open(chapt6_html, 'r').read()
 ...     bsoup = BeautifulSoup(chapter6_html, 'html.parser')
-...     text = bsoup.get_text()
+...     text = bsoup.get_text()  # <1>
 
 ----
-<1> The Asciidoc3 documentation on HTML has more detail: https://asciidoc3.org/userguide.html#_html_generation
+<1> BeautifulSoup.get_text() extracts the natural language text from HTML.
 
-Now that we have our text from this chapter, we will run the text through the English model from _spaCy_ to get our sentence embeddings. _spaCy_ will default to simply averaging the _token_ vectors. footnote:[spaCy's vector attribute for the Span object defaults to the average of the token vectors: https://spacy.io/api/span#vector] In addition to getting the sentence vectors, we also want to get the _noun phrases_ footnote:[See the Wiki page titled, 'Noun phrase': https://en.wikipedia.org/wiki/Noun_phrase] footnote:[spaCy's Span.noun_chunks: https://spacy.io/api/span#noun_chunks] from each sentence that will be the labels for our sentence vectors.
+Now that you have the text for this chapter, you can run the small English language  model from _spaCy_ to get the sentence embedding vectors.
+SpaCy will average the _token_ vectors within a `Doc` object.footnote:[spaCy's vector attribute for the Span object defaults to the average of the token vectors (https://spacy.io/api/span#vector)]
+In addition to getting the sentence vectors, you also want to retrieve the _noun phrases_ footnote:[See the Wiki page titled, 'Noun phrase': https://en.wikipedia.org/wiki/Noun_phrase] footnote:[spaCy's Span.noun_chunks: https://spacy.io/api/span#noun_chunks] from each sentence that will be the labels for our sentence vectors.
 
 .Getting Sentence Embeddings and Noun Phrases with spaCy
 [source,python]
@@ -2112,9 +2143,25 @@ Now that we have our text from this chapter, we will run the text through the En
 ...    sent_vecs.append(sent.vector)
 ----
 
-Now that we have sentence vectors and noun phrases, we are going to normalize (the 2-norm) footnote:[See the Wiki page title, 'Norm (mathematics) -- Euclidean norm': https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm] the sentence vectors. Normalizing the data in the 300-dimensional vector gets all the values on the same scale while still retaining what differentiates them. footnote:[See the web page titled, 'Why Data Normalization is necessary for Machine Learning models': http://mng.bz/aJ2z]
+Now that you have sentence vectors and noun phrases, you should normalize footnote:[See the Wiki page title, 'Norm (mathematics) -- Euclidean norm': https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm] the sentence vectors so that all your vectors have a length (or _2-norm_) of 1.
+The 2-norm is computed the same way you compute the length of the diagonal across a right triangle, you add up the square of the length of the dimensions and then you take the square root of the sum of those squares.
 
-.Normalizing the Sentence Vector Embeddings with NumPy
+
+[source,python]
+----
+>>> import numpy as np
+>>> vector = np.array([1, 2, 3, 4])  # <1>
+>>> np.sqrt(sum(vector**2)) 
+5.47...
+>>> np.linalg.norm(vector)  # <2>
+5.47...
+----
+<1> Imagine you had a vector with the values of 1, 2, 3 and 4 in each of 4 dimensions.
+<2> The numpy `linalg` module has a norm function that makes it a little easier to compute the 2-norm.
+
+Normalizing the data in the 300-dimensional vector gets all the values on the same scale while still retaining what differentiates them. footnote:[See the web page titled, 'Why Data Normalization is necessary for Machine Learning models': http://mng.bz/aJ2z]
+
+.Normalize the Sentence Vector Embeddings with NumPy
 [source,python]
 ----
 >>> import numpy as np
@@ -2122,18 +2169,36 @@ Now that we have sentence vectors and noun phrases, we are going to normalize (t
 ...     sent_vecs[i] = sent_vec / np.linalg.norm(sent_vec)
 ----
 
-With the sentence vectors normalized, we can get the _similarity matrix_ (also called an _affinity matrix_). footnote:[See this web page titled, 'Affinity Matrix': https://deepai.org/machine-learning-glossary-and-terms/affinity-matrix]
+With the sentence vectors normalized, you can get the similarity between all those vectors and each other.
+When you compute the pairwise similarity between all the possible pairs of objects in a list of object that creates a square matrix called a _similarity matrix_ or _affinity matrix_. footnote:[See this web page titled, 'Affinity Matrix': https://deepai.org/machine-learning-glossary-and-terms/affinity-matrix]
+If you use the dot product of each vector with all the others your are computing the cosine similarity that you are familiar with from previous chapters.
 
 .Getting the Similarity/Affinity Matrix
 [source,python]
 ----
 >>> np_array_sent_vecs_norm = np.array(sent_vecs)
 >>> similarity_matrix = np_array_sent_vecs_norm.dot(
-[CA]np_array_sent_vecs_norm.T)
+...     np_array_sent_vecs_norm.T)  # <1>
 ----
-The similarity matrix is calculated by taking the _dot product_ between the normalized matrix of sentence embeddings (n by 300 dimensions) with the transpose of itself. This gives an n by n (n = number of sentences in the document) dimensional matrix with the top triangle and the bottom triangle of the matrix being equal. The logic of this is that any vectors pointing in a similar direction will give a weighted sum of their values (dot product) that is close to 1 when they are similar, since the vectors are normalized and all have the same magnitude, but in different directions; think of a sphere in hyper space -- a hypersphere with n-dimensions (an _n-sphere_). footnote:[See the Wiki page titled, 'n-sphere': https://en.wikipedia.org/wiki/N-sphere] These weighted sums will be the value of the undirected edges in the graph, and the nodes are the indexes from the similarity matrix. For example: index_i is one node, and index_j is another node (where 'i' represents rows and 'j' represents columns in the matrix).
+<1> By computing the dot product on matrices you are _vectorizing_ the operation which is much faster than using a for loop.
 
-With the similarity matrix, we can now create an undirected graph with the data. The code below uses a library called `NetworkX` footnote:[See the NetworkX web page for more information: https://networkx.org/] to create the _undirected graph_ data structure. This data structure is a dictionary of dictionaries of dictionaries. footnote:[See the NetworkX documentation for more details: https://networkx.org/documentation/stable/reference/introduction.html#data-structure] So the graph is a multi-nested dictionary. The nested dictionaries allow for quick lookups with a sparse data storage.
+The similarity matrix is calculated by taking the _dot product_ between the normalized matrix of sentence embeddings (_N_ by 300 dimensions) with the transpose of itself.
+This gives a matrix with shape _N_ by _N_ matrix, one row and column for each sentence in this chapter.
+The upper diagonal half of the matrix has the exact same values as the lower diagonal half.
+This is because of the commutative property of multiplication.
+The similarity between one vecgtor and another is the same no matter which direction you do the multiplication or the similarity computation.
+
+////
+HL: hyperspace/sphere discussion?
+any vectors pointing in a similar direction will give a weighted sum of their values (dot product) that is close to 1 when they are similar, since the vectors are normalized and all have the same magnitude, but in different directions; think of a sphere in hyper space -- a hypersphere with n-dimensions (an _n-sphere_). footnote:[See the Wiki page titled, 'n-sphere': https://en.wikipedia.org/wiki/N-sphere] These weighted sums will be the value of the undirected edges in the graph, and the nodes are the indexes from the similarity matrix. For example: index_i is one node, and index_j is another node (where 'i' represents rows and 'j' represents columns in the matrix).
+////
+
+With the similarity matrix, you can now create an undirected graph using the similarities between sentence vectors to create graph edges between those sentences that are similar.
+The code below uses a library called `NetworkX` footnote:[See the NetworkX web page for more information: https://networkx.org/] to create the _undirected graph_ data structure.
+Internally the data is stored in an in nested dictionaries -- a dictionary of dictionaries of dictionaries... -- "[dictionaries] all the way down". footnote:[NetworkX docs have more detail (https://networkx.org/documentation/stable/reference/introduction.html#data-structure)]
+Like a linked list, the nested dictionaries allow for quick lookups of sparse data.
+You computed the similarity matrix as a dense matrix with the dot product, but you will need to make it sparse because you don't want every sentence to be connected to every other sentence in your graph.
+You are going to break the links between any sentence pairs that are far apart (have low similarity).
 
 .Creating the Undirected Graph
 [source,python]

@@ -65,11 +65,12 @@ except FileExistsError as e:
 
 # FIXME: download manuscript from dropbox/Public and put it in ~/.nlpia2-data
 # MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-print(SRC_DATA_DIR)
+log.debug(f'SRC_DATA_DIR: {SRC_DATA_DIR}')
 MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
-print(MANUSCRIPT_DIR)
+log.debug(f'MANUSCRIPT_DIR: {MANUSCRIPT_DIR}')
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
-print(ADOC_DIR)
+# nlpia2/src/nlpia2/data/manuscript/adoc
+log.debug(f'ADOC_DIR: {ADOC_DIR}')  
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 
 DATA_INFO_FILE = SRC_DATA_DIR / 'data_info.csv'
