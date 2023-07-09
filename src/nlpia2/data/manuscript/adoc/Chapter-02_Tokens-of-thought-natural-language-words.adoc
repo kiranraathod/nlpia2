@@ -436,6 +436,166 @@ Make sure you take a look at your vocabulary whenever it seems your pipeline isn
 You may need to revise your tokenizer to make sure it can "see" all the tokens it needs to do well for your NLP task.
 ====
 
+=== One-hot Vectors
+
+Now that you've successfully split your document into the kinds of words you want, you're ready to create vectors out of them.
+Vectors of numbers are what we need to do the math or processing of NL*P* on natural language text.
+
+[source,python]
+----
+>>> import pandas as pd
+>>> onehot_vectors = np.zeros(
+...     (len(tokens), vocab_size), int)  # <1>
+>>> for i, tok in enumerate(tokens):
+...     if tok not in vocab:
+...         continue
+...     onehot_vectors[i, vocab.index(tok)] = 1  # <2>
+>>> df_onehot = pd.DataFrame(onehot_vectors, columns=vocab)
+>>> df_onehot.shape
+(18, 15)
+>>> df_onehot.iloc[:,:8].replace(0, '')  # <3>
+    ,  .  Survival  There's  adequate  as  fittest  maybe
+0                       1
+1
+2
+3
+4                                   1
+5
+6
+7
+8                                           1
+9      1
+10              1
+11
+12
+13
+14                               1
+15  1
+16                                                1
+17     1
+----
+<1> The table is as wide as your count of unique vocabulary terms and as tall as the length of your document: 18 rows, 15 columns
+<2> For each token in the sentence, mark the column for it with a `1`.
+<3> For brevity we're only showing the first 8 columns of the DataFrame and replaced 0's with ''.
+
+In this representation of this two-sentence quote, each row is a vector representation of a single word from the text.
+The table has the 15 columns because this is the number of unique words in your vocabulary.
+The table has 18 rows, one for each word in the document.
+A "1" in a column indicates a vocabulary word that was present at that position in the document.
+
+You can "read" a one-hot encoded (vectorized) text from top to bottom.
+You can tell that the first word in the text was the word "There's", because the `1` on the first row is positioned under the column label "There's".
+The next three rows (row indexes 1, 2, and 3) are blank, because we've truncated the table on the right to help it fit on the page.
+The fifth row of the text, with the 0-offset index number of `4` shows us that the fifth word in the text was the word "adequate", because there's a `1` in that column.
+
+One-hot vectors are super-sparse, containing only one nonzero value in each row vector.
+For display, this code replaces the `0`'s with empty strings (`''`), to make it easier to read.
+But the code did not actually alter the `DataFrame` of data you are processing in your NLP pipeline.
+The Python code above was just to to make it easier to read, so you can see that it looks a bit like a player piano paper roll, or maybe a music box drum.
+
+The Pandas `DataFrame` made this output a little easier to read and interpret.
+The `DataFrame.columns` keep track of labels for each column.
+This allows you to label each column in your table with a string, such as the token or word it represents.
+A `DataFrame` can also keep track of labels for each row in an the `DataFrame.index`, for speedy lookup.
+
+[IMPORTANT]
+====
+Don't add strings to any `DataFrame` you intend to use in your machine learning pipeline.
+The purpose of a tokenizer and vectorizer, like this one-hot vectorizer, is to create a numerical array that your NLP pipeline can do math on.
+You can't do math on strings.
+====
+
+Each row of the table is a binary row vector, and you can see why it's also called a one-hot vector: all but one of the positions (columns) in a row are `0` or blank.
+Only one column, or position in the vector is "hot" ("1").
+A one (`1`) means on, or hot.
+A zero (`0`) mean off, or absent.
+
+One nice feature of this vector representation of words and tabular representation of documents is that no information is lost.
+The exact sequence of tokens is encoded in the order of the one-hot vectors in the table representing a document.
+As long as you keep track of which words are indicated by which column, you can reconstruct the original sequence of tokens from this table of one-hot vectors perfectly.
+And this reconstruction process is 100% accurate even though your tokenizer was only 90% accurate at generating the tokens you thought would be useful.
+As a result, one-hot word vectors like this are typically used in neural nets, sequence-to-sequence language models, and generative language models.
+They are a good choice for any model or NLP pipeline that needs to retain all the meaning inherent in the original text.
+
+[TIP]
+====
+The one-hot encoder (vectorizer) did not discard any information from the text, but our tokenizer did.
+Our regular expression tokenizer discarded the whitespace characters (`\s`) that sometimes occur between words.
+So you could not perfectly reconstruct the original text with a _detokenizer_.
+Tokenizers like spaCy, however, keep track of these whitespace characters and can in fact detokenize a sequence of tokens perfectly.
+SpaCy was named for this feature of accurately accounting for white-*space* efficiently and accurately.
+====
+
+This sequence of one-hot vectors is like a digital recording of the original text.
+If you squint hard enough you might be able to imagine that the matrix of ones and zeros above is a player piano roll.footnote:[See the "Player piano" article on Wikipedia (https://en.wikipedia.org/wiki/Player_piano).].
+Or maybe it's the bumps on the metal drum of a music box.footnote:[See the web page titled "Music box - Wikipedia" (https://en.wikipedia.org/wiki/Music_box).]
+The vocabulary key at the top tells the machine which "note" or word to play for each row in the sequence of words or piano music like in figure <<figure-player-piano-roll>>.
+
+[#figure-player-piano-roll, reftext={chapter}.{counter:figure}]
+.Player piano roll
+image::../images/ch02/piano_roll.jpg[Player piano music roll with parallel sequences of holes running vertically down the paper. The holes meander left and right to indicate the rising and falling of the tones in the melody of a song. Image licensed from Wikimedia CC BY-SA 3.0 (https://commons.wikimedia.org/wiki/File:Weltereproduktionsklavier.jpg),width=100%,align="center",link="https://commons.wikimedia.org/wiki/File:Weltereproduktionsklavier.jpg"]
+
+Unlike a player-piano or a music box, your mechanical word recorder and player is only allowed to use one "finger" at a time.
+It can only play one "note" or word at a time.
+It's one-hot.
+And there is no variation in the spacing of the words.
+
+The important thing is that you've turned a sentence of natural language words into a sequence of numbers, or vectors.
+Now you can have the computer read and do math on the vectors just like any other vector or list of numbers.
+This allows your vectors to be input into any natural language processing pipeline that requires this kind of vector.
+The Deep Learning pipelines of chapter 5 through 10 typically require this representation, because they can be designed to extract "features" of meaning from these raw representations of text.
+And Deep Learning pipelines can generate text from numerical representations of meaning.
+So the stream of words emanating from your NLG pipelines in later chapters will often be represented by streams of one-hot encoded vectors, just like a player piano might play a song for a less artificial audience in West World.footnote:[West World is a television series about particularly malevolent humans and human-like robots, including one that plays a piano in the main bar.]
+
+Now all you need to do is figure out how to build a "player piano" that can _understand_ and combine those word vectors in new ways.
+Ultimately, you'd like your chatbot or NLP pipeline to play us a song, or say something, you haven't heard before.
+You'll get to do that in chapters 9 and 10 when you learn about recurrent neural networks that are effective for sequences of one-hot encoded tokens like this.
+
+This representation of a sentence in one-hot word vectors retains all the detail, grammar, and order of the original sentence.
+And you have successfully turned words into numbers that a computer can "understand."
+They are also a particular kind of number that computers like a lot: binary numbers.
+But this is a big table for a short sentence.
+If you think about it, you have expanded the file size that would be required to store your document.
+For a long document this might not be practical.
+
+How big is this *lossless* numerical representation of your collection of documents?
+Your vocabulary size (the length of the vectors) would get huge.
+The English language contains at least 20,000 common words, millions if you include names and other proper nouns.
+And your one-hot vector representation requires a new table (matrix) for every document you want to process.
+This is almost like a raw "image" of your document.
+If you have done any image processing, you know that you need to do dimension reduction if you want to extract useful information from the data.
+
+Let's run through the math to give you an appreciation for just how big and unwieldy these "piano rolls" are.
+In most cases, the vocabulary of tokens you'll use in an NLP pipeline will be much more than 10,000 or 20,000 tokens.
+Sometimes it can be hundreds of thousands or even millions of tokens.
+Let's assume you have a million tokens in your NLP pipeline vocabulary.
+And let's say you have a meager 3000 books with 3500 sentences each and 15 words per sentence -- reasonable averages for short books.
+That's a whole lot of big tables (matrices), one for each book.
+That would use 157.5 terabytes.
+You probably couldn't even store that on disk.
+
+That is more than a million million bytes, even if you are super-efficient and use only one byte for each number in your matrix.
+At one byte per cell, you would need nearly 20 terabytes of storage for a small bookshelf of books processed this way.
+Fortunately you do not ever use this data structure for storing documents.
+You only use it temporarily, in RAM, while you are processing documents one word at a time.
+
+So storing all those zeros, and recording the order of the words in all your documents does not make much sense.
+It is not practical.
+And it's not very useful.
+Your data structure hasn't abstracted or generalized from the natural language text.
+An NLP pipeline like this doesn't yet do any real feature extraction or dimension reduction to help your machine learning work well in the real world.
+
+What you really want to do is compress the meaning of a document down to its essence.
+You would like to compress your document down to a single vector rather than a big table.
+And you are willing to give up perfect "recall."
+You just want to capture most of the meaning (information) in a document, not all of it.
+
+Your regular expression tokenizer and one-hot vectors are great for creating _reverse indexes_.
+Just like the index at the end of a textbook, your matrix of one-hot vectors can be used to quickly find all the strings or documents where a particular word was used at least once.
+So the tools you've learned so far can be used as a foundation for a personalized search engine.
+However, you saw that search and information retrieval was only one of many many applications of NLP.
+To solve the more advanced problems you will need a more advanced tokenizer and more sophisticated vector representations of text.
+The Python package `spaCy` is that state-of-the-art tokenizer you are looking for.
 
 === SpaCy
 
@@ -612,7 +772,7 @@ True
 156 ms ± 1.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 >>> tokens = word_tokenize(text)
 >>> f'{round(len(tokens) / 10_000)}0k'
-'40k'
+'30k'
 ----
 
 Could it be that you found a winner for the tokenizer race?
@@ -624,7 +784,7 @@ Your regular expression tokenizer has some pretty simple rules, so it should run
 >>> pattern = r'\w+(?:\'\w+)?|[^\w\s]'
 >>> tokens = re.findall(pattern, text)  # <1>
 >>> f'{round(len(tokens) / 10_000)}0k'
-'30k'
+'40k'
 >>> %timeit re.findall(pattern, text)
 8.77 ms ± 29.8 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 ----
@@ -780,20 +940,17 @@ Once the vectorizer knows what tokens it needs to be able to count, it can trans
 >>> df = df.T
 >>> df['total'] = df.T.sum()
 >>> df
-    Trust me...  There's ...  total
- t           31      14          45
- r            3       2           5
- u            1       0           1
- s            0       1           1
-              3       0           3
-..           ...     ...        ...
-at            1       0           1
-ma            2       1           3
-yb            1       0           1
-be            1       0           1
-e.            0       1           1
-<BLANKLINE>
-[149 rows x 3 columns]
+        Trust me...  There's ...  total
+    t            31           14     45
+    r             3            2      5
+    u             1            0      1
+    s             0            1      1
+                  3            0      3
+    ..          ...          ...    ...
+    at            1            0      1
+    ma            2            1      3
+    yb            1            0      1
+    ...
 ----
 
 The DataFrame contains a column for each sentence and a row for each character 2-gram.
@@ -804,30 +961,29 @@ And BPE will work on substitution cypher text like ROT13, a toy cypher that rota
 
 [source,python]
 ----
->>> df.sort_values('total').tail()
+>>> df.sort_values('total').tail(3)
         Trust me...  There's ...  total
-    en        10           3       13
-    an        14           5       19
-    uc        11           9       20
-    e         18           8       26
-    t         31          14       45
+    uc           11            9     20
+    e            18            8     26
+    t            31           14     45
 ----
 
 A BPE tokenizer then finds the most frequent 2-grams and adds them to the permanent vocabulary.
-Over time it deletes the less frequent character pairs as it gets less and less likely that they won't come up a lot more later in your text.
+Over time it deletes the less frequent character pairs, because the further it reads into your text, the less less likely that those rare character pairs will come up before the end of the text.
+For those familiar with statistics, it models your text with a Baysean model, continuously updating prior predictions of token frequencies.
 
 ----
 >>> df['n'] = [len(tok) for tok in vectorizer.vocabulary_]
 >>> df[df['n'] > 1].sort_values('total').tail()
-    Trust me...  There's ...      total  n
-ur           8          4            12  2
-en          10          3            13  2
-an          14          5            19  2
-uc          11          9            20  2
-e           18          8            26  2
+        Trust me...  There's ...  total  n
+     c            8            4     12  2
+    en           10            3     13  2
+    an           14            5     19  2
+    uc           11            9     20  2
+    e            18            8     26  2
 ----
 
-So the next round of preprocessing in the BPE tokenizer would retain the character 2-grams "en" and "an" and even " t" and "e ".
+So the next round of preprocessing in the BPE tokenizer would retain the character 2-grams "en" and "an" and even " c" and "e ".
 Then the BPE algorithm would make another pass through the text with this smaller character bigram vocabulary.
 It would look for frequent pairings of these character bigrams with each other and individual characters.
 This process would continue until the maximum number of tokens is reached and the longest possible character sequences have been incorporated into the vocabulary.
@@ -891,159 +1047,8 @@ In order to detect tokens efficiently you will want to use three new tricks:
 
 You'll first learn the most basic, direct, raw and lossless way to represent words as a matrix, one-hot encoding.
 
-=== One-hot Vectors
-
-Now that you've successfully split your document into the kinds of words you want, you're ready to create vectors out of them.
-Vectors of numbers are what we need to do the math or processing of NL*P* on natural language text.
-
-[source,python]
-----
->>> import pandas as pd
->>> onehot_vectors = np.zeros(
-...     (len(tokens), vocab_size), int)  # <1>
->>> for i, word in enumerate(tokens):
-...     onehot_vectors[i, vocab.index(word)] = 1  # <2>
->>> df_onehot = pd.DataFrame(onehot_vectors, columns=vocab)
->>> df_onehot.shape
-(18, 15)
->>> df_onehot.iloc[:,:8].replace(0, '')  # <3>
-    ,  .  Survival  There's  adequate  as  fittest  maybe
-0                       1
-1
-2
-3
-4                                   1
-5
-6
-7
-8                                           1
-9      1
-10              1
-11
-12
-13
-14                               1
-15  1
-16                                                1
-17     1
-----
-<1> The table is as wide as your count of unique vocabulary terms and as tall as the length of your document: 18 rows, 15 columns
-<2> For each token in the sentence, mark the column for it with a `1`.
-<3> For brevity we're only showing the first 8 columns of the DataFrame and replaced 0's with ''.
-
-In this representation of this two-sentence quote, each row is a vector representation of a single word from the text.
-The table has the 15 columns because this is the number of unique words in your vocabulary.
-The table has 18 rows, one for each word in the document.
-A "1" in a column indicates a vocabulary word that was present at that position in the document.
-
-You can "read" a one-hot encoded (vectorized) text from top to bottom.
-You can tell that the first word in the text was the word "There's", because the `1` on the first row is positioned under the column label "There's".
-The next three rows (row indexes 1, 2, and 3) are blank, because we've truncated the table on the right to help it fit on the page.
-The fifth row of the text, with the 0-offset index number of `4` shows us that the fifth word in the text was the word "adequate", because there's a `1` in that column.
-
-One-hot vectors are super-sparse, containing only one nonzero value in each row vector.
-For display, this code replaces the `0`'s with empty strings (`''`), to make it easier to read.
-But the code did not actually alter the `DataFrame` of data you are processing in your NLP pipeline.
-The Python code above was just to to make it easier to read, so you can see that it looks a bit like a player piano paper roll, or maybe a music box drum.
-
-The Pandas `DataFrame` made this output a little easier to read and interpret.
-The `DataFrame.columns` keep track of labels for each column.
-This allows you to label each column in your table with a string, such as the token or word it represents.
-A `DataFrame` can also keep track of labels for each row in an the `DataFrame.index`, for speedy lookup.
-
-[IMPORTANT]
-====
-Don't add strings to any `DataFrame` you intend to use in your machine learning pipeline.
-The purpose of a tokenizer and vectorizer, like this one-hot vectorizer, is to create a numerical array that your NLP pipeline can do math on.
-You can't do math on strings.
-====
-
-Each row of the table is a binary row vector, and you can see why it's also called a one-hot vector: all but one of the positions (columns) in a row are `0` or blank.
-Only one column, or position in the vector is "hot" ("1").
-A one (`1`) means on, or hot.
-A zero (`0`) mean off, or absent.
-
-One nice feature of this vector representation of words and tabular representation of documents is that no information is lost.
-The exact sequence of tokens is encoded in the order of the one-hot vectors in the table representing a document.
-As long as you keep track of which words are indicated by which column, you can reconstruct the original sequence of tokens from this table of one-hot vectors perfectly.
-And this reconstruction process is 100% accurate even though your tokenizer was only 90% accurate at generating the tokens you thought would be useful.
-As a result, one-hot word vectors like this are typically used in neural nets, sequence-to-sequence language models, and generative language models.
-They are a good choice for any model or NLP pipeline that needs to retain all the meaning inherent in the original text.
-
-[TIP]
-====
-The one-hot encoder (vectorizer) did not discard any information from the text, but our tokenizer did.
-Our regular expression tokenizer discarded the whitespace characters (`\s`) that sometimes occur between words.
-So you could not perfectly reconstruct the original text with a _detokenizer_.
-Tokenizers like spaCy, however, keep track of these whitespace characters and can in fact detokenize a sequence of tokens perfectly.
-SpaCy was named for this feature of accurately accounting for white-*space* efficiently and accurately.
-====
-
-This sequence of one-hot vectors is like a digital recording of the original text.
-If you squint hard enough you might be able to imagine that the matrix of ones and zeros above is a player piano roll.footnote:[See the "Player piano" article on Wikipedia (https://en.wikipedia.org/wiki/Player_piano).].
-Or maybe it's the bumps on the metal drum of a music box.footnote:[See the web page titled "Music box - Wikipedia" (https://en.wikipedia.org/wiki/Music_box).]
-The vocabulary key at the top tells the machine which "note" or word to play for each row in the sequence of words or piano music like in figure <<figure-player-piano-roll>>.
-
-[#figure-player-piano-roll, reftext={chapter}.{counter:figure}]
-.Player piano roll
-image::../images/ch02/piano_roll.jpg[Player piano music roll with parallel sequences of holes running vertically down the paper. The holes meander left and right to indicate the rising and falling of the tones in the melody of a song. Image licensed from Wikimedia CC BY-SA 3.0 (https://commons.wikimedia.org/wiki/File:Weltereproduktionsklavier.jpg),width=100%,align="center",link="https://commons.wikimedia.org/wiki/File:Weltereproduktionsklavier.jpg"]
-
-Unlike a player-piano or a music box, your mechanical word recorder and player is only allowed to use one "finger" at a time.
-It can only play one "note" or word at a time.
-It's one-hot.
-And there is no variation in the spacing of the words.
-
-The important thing is that you've turned a sentence of natural language words into a sequence of numbers, or vectors.
-Now you can have the computer read and do math on the vectors just like any other vector or list of numbers.
-This allows your vectors to be input into any natural language processing pipeline that requires this kind of vector.
-The Deep Learning pipelines of chapter 5 through 10 typically require this representation, because they can be designed to extract "features" of meaning from these raw representations of text.
-And Deep Learning pipelines can generate text from numerical representations of meaning.
-So the stream of words emanating from your NLG pipelines in later chapters will often be represented by streams of one-hot encoded vectors, just like a player piano might play a song for a less artificial audience in West World.footnote:[West World is a television series about particularly malevolent humans and human-like robots, including one that plays a piano in the main bar.]
-
-Now all you need to do is figure out how to build a "player piano" that can _understand_ and combine those word vectors in new ways.
-Ultimately, you'd like your chatbot or NLP pipeline to play us a song, or say something, you haven't heard before.
-You'll get to do that in chapters 9 and 10 when you learn about recurrent neural networks that are effective for sequences of one-hot encoded tokens like this.
-
-This representation of a sentence in one-hot word vectors retains all the detail, grammar, and order of the original sentence.
-And you have successfully turned words into numbers that a computer can "understand."
-They are also a particular kind of number that computers like a lot: binary numbers.
-But this is a big table for a short sentence.
-If you think about it, you have expanded the file size that would be required to store your document.
-For a long document this might not be practical.
-
-How big is this *lossless* numerical representation of your collection of documents?
-Your vocabulary size (the length of the vectors) would get huge.
-The English language contains at least 20,000 common words, millions if you include names and other proper nouns.
-And your one-hot vector representation requires a new table (matrix) for every document you want to process.
-This is almost like a raw "image" of your document.
-If you have done any image processing, you know that you need to do dimension reduction if you want to extract useful information from the data.
-
-Let's run through the math to give you an appreciation for just how big and unwieldy these "piano rolls" are.
-In most cases, the vocabulary of tokens you'll use in an NLP pipeline will be much more than 10,000 or 20,000 tokens.
-Sometimes it can be hundreds of thousands or even millions of tokens.
-Let's assume you have a million tokens in your NLP pipeline vocabulary.
-And let's say you have a meager 3000 books with 3500 sentences each and 15 words per sentence -- reasonable averages for short books.
-That's a whole lot of big tables (matrices), one for each book.
-That would use 157.5 terabytes.
-You probably couldn't even store that on disk.
-
-That is more than a million million bytes, even if you are super-efficient and use only one byte for each number in your matrix.
-At one byte per cell, you would need nearly 20 terabytes of storage for a small bookshelf of books processed this way.
-Fortunately you do not ever use this data structure for storing documents.
-You only use it temporarily, in RAM, while you are processing documents one word at a time.
-
-So storing all those zeros, and recording the order of the words in all your documents does not make much sense.
-It is not practical.
-And it's not very useful.
-Your data structure hasn't abstracted or generalized from the natural language text.
-An NLP pipeline like this doesn't yet do any real feature extraction or dimension reduction to help your machine learning work well in the real world.
-
-What you really want to do is compress the meaning of a document down to its essence.
-You would like to compress your document down to a single vector rather than a big table.
-And you are willing to give up perfect "recall."
-You just want to capture most of the meaning (information) in a document, not all of it.
-
 === BOW (Bag-of-Words) Vectors
+// HL: for the code examples in this section to work it should be placed after the one-hot vector section, before SpaCy and BPE tokenizer sections 
 
 Is there any way to squeeze all those _player piano music rolls_ into a single vector?
 Vectors are a great way to represent any object.
