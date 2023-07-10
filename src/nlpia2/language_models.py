@@ -19,7 +19,6 @@ LANG = LANGS_ABBREV['en']
 
 
 log = logging.getLogger('qary')
-nlp = None
 UNKNOWN_WORDVEC = np.array([])
 
 
@@ -135,9 +134,10 @@ class SpacyLM:
         return self.nlp(*args)
 
 
-nlp = load(LANG)
-
-
 def tokenize(s):
     global nlp
     return [tok.text for tok in nlp(s)]
+
+
+if __name__ = '__main__':
+    nlp = load(LANG)

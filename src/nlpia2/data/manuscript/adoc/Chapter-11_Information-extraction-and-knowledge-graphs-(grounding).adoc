@@ -178,7 +178,7 @@ So this will usually be the first algorithm in your pipeline, the SpaCy language
 [source,python]
 ----
 >>> tags = []
-... for tok in doc:
+>>> for tok in doc:
 ...     tags.append(dict(token=tok.text, pos=tok.pos_, dep=tok.dep_))
 ...     tags[-1].update({f'child{i}': c.text for (i, c) in enumerate(tok.children)})
 ...
