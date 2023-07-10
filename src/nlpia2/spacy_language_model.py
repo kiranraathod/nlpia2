@@ -1,22 +1,21 @@
 import spacy  # https://spacy.io
 
-MODEL_NAME = 'en_core_web_md'
+MODEL_NAME = 'en_core_web_sm'
 # dict of normalization "links" that must terminate in a cannonical name (leaf of the tree)
 MODEL_NAMES = {
     # None or empty strings can be used to redirect to a default value/name 
-    None: 'md',
-    '': 'md',
-    'default': 'md',
+    None: 'sm',
+    '': 'sm',
+    'default': 'sm',
     # links to noncanonical names will be followed to until they are not found as keys
-    'en': 'md',
-    'english': 'md',
-    'small': 'sm',
-    'medium': 'md',
-    
+    'en': 'sm',
+    'english': 'sm',
 
     'sm': 'en_core_web_sm',
-    'md': 'en_core_web_md',
+    'small': 'sm',
     
+    'md': 'en_core_web_md',
+    'medium': 'md',
     
     'lg': 'en_core_web_md',
     'large': 'en_core_web_md'

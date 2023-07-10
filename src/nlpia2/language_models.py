@@ -1,3 +1,8 @@
+""" DEPRECATED: Adds Hunspell pipe to spacy pipeline 
+
+HunSpell requires OS-specific binary apps/data to be installed
+"""
+
 import sys
 import logging
 

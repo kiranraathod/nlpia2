@@ -9,8 +9,6 @@
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
 :leveloffset: 1
-:xrefstyle: short
-// :imagesdir: .
 // :icons!:
 :stem: latexmath
 :toc:

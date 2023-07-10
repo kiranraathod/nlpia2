@@ -1,5 +1,10 @@
-""" Load a pretrained GEC (Grammar Error Corrector) for English based on Open NMT (Neural Machine Translation) model"""
-# from jordimas/gec-opennmt-english
+""" Load a pretrained GEC (Grammar Error Corrector) for English
+
+based on Open NMT (Neural Machine Translation) model
+References:
+- huggingface.co/models/jordimas/gec-opennmt-english
+"""
+
 from pathlib import Path
 import ctranslate2
 import pyonmttok
