@@ -3,7 +3,7 @@
 
 # Official Python 3.10 language image.
 test_py: 
-  image: python
+  image: python3-dev
   # image: python:3.9
   before_script:
     - apt-get update
