@@ -3,7 +3,7 @@
 
 # Official Python 3.9 language image.
 test_py39:
-  image: python-dev:3.9
+  image: python:3.9
   before_script:
     - apt-get install python3-*
     - pip install --upgrade pytest-cov wheel pip virtualenv build twine
