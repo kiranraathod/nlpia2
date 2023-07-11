@@ -38,24 +38,15 @@ SRC_DATA_DIR = PKG_DIR / SRC_DATA_DIR_NAME
 # nlpia2.config.py
 from pathlib import Path
 
-try:
-    MODULE_DIR = Path(__file__).resolve().absolute().parent
-except NameError:
-    log.warning('nlpia2.constants should not be run as a script, only as a module')
-    MODULE_DIR = Path.cwd()
-assert MODULE_DIR.is_dir()
-
 # nlpia2/src/nlpia2/data
-SRC_DATA_DIR = MODULE_DIR / SRC_DATA_DIR_NAME
+SRC_DATA_DIR = PKG_DIR / SRC_DATA_DIR_NAME
 try:
     SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
 except FileExistsError as e:
     log.warninge(e)
 
 
-BASE_DIR = MODULE_DIR.parent
-if BASE_DIR.name == 'src':
-    BASE_DIR = MODULE_DIR.parent
+BASE_DIR = PKG_DIR.parent.parent
 
 BIGDATA_DIR = HOME_DATA_DIR = HOME_DIR / BIGDATA_DIR_NAME
 try:
