@@ -3,8 +3,7 @@
 
 # Official Python 3.10 language image.
 test_py: 
-  image: python3
-  # image: python:3.9
+  image: python:3.9
   before_script:
     - apt-get update
     - apt-get install -y python3-dev gcc graphviz libgraphviz-dev
