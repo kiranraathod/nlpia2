@@ -9,7 +9,7 @@ import tempfile
 from types import MappingProxyType
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, REPO_DIR
+from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, BASE_DIR
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
@@ -517,7 +517,7 @@ def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suff
 
 def update_nlpia_lines(adoc_dir=None, dest=LINES_FILEPATH):
     if not adoc_dir:
-        adoc_dir = REPO_DIR.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+        adoc_dir = BASE_DIR.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
         if not adoc_dir.is_dir():
             adoc_dir = ADOC_DIR
     df = extract_big_line_df_from_files(adoc_dir)

@@ -11,14 +11,14 @@ for i in range(4):
     # print(f"NOT code dir: {CODE_DIR}")
     CODE_DIR = CODE_DIR.parent
 
-REPO_DIR = CODE_DIR.parent
+BASE_DIR = CODE_DIR.parent
 for i in range(4):
-    if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
+    if BASE_DIR.name in ['nlpia-manuscript', 'nlpia2']:
         break
-    # print(f"not repo dir: {REPO_DIR}")
-    REPO_DIR = REPO_DIR.parent
+    # print(f"not repo dir: {BASE_DIR}")
+    BASE_DIR = BASE_DIR.parent
 
-HOME_CODE_DIR = REPO_DIR.parent.parent
+HOME_CODE_DIR = BASE_DIR.parent.parent
 print(HOME_CODE_DIR)
 assert HOME_CODE_DIR.name == 'code'
 MANUSCRIPT_DIR = HOME_CODE_DIR / 'tangibleai' / 'nlpia-manuscript' / 'manuscript'

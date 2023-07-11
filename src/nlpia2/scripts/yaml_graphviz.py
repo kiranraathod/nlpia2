@@ -66,19 +66,19 @@ CODE_DIR = find_code_dir()
 
 
 def find_repo_dir(dirpath=CODE_DIR):
-    REPO_DIR = dirpath.parent
+    BASE_DIR = dirpath.parent
     for i in range(4):
-        if REPO_DIR.name in ['nlpia-manuscript', 'nlpia2']:
+        if BASE_DIR.name in ['nlpia-manuscript', 'nlpia2']:
             break
-        # print(f"not repo dir: {REPO_DIR}")
-        REPO_DIR = REPO_DIR.parent
-    return REPO_DIR
+        # print(f"not repo dir: {BASE_DIR}")
+        BASE_DIR = BASE_DIR.parent
+    return BASE_DIR
 
 
-REPO_DIR = find_repo_dir()
+BASE_DIR = find_repo_dir()
 
 
-def find_dest_dir(home_code_dir=REPO_DIR.parent.parent):
+def find_dest_dir(home_code_dir=BASE_DIR.parent.parent):
     print('find_dest')
     print(f'home_code_dir: {home_code_dir}')
     assert home_code_dir.name == 'code'

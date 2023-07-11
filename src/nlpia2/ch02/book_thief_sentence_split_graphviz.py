@@ -21,14 +21,14 @@ def find_manuscript_dirs(
         CODE_DIR = CODE_DIR.parent
     print(f'CODE_DIR: {CODE_DIR}')
 
-    REPO_DIR = CODE_DIR.parent
+    BASE_DIR = CODE_DIR.parent
     for i in range(4):
-        if REPO_DIR.name in REPO_NAMES:
+        if BASE_DIR.name in REPO_NAMES:
             break
-        REPO_DIR = REPO_DIR.parent
-    print(f'REPO_DIR: {REPO_DIR}')
+        BASE_DIR = BASE_DIR.parent
+    print(f'BASE_DIR: {BASE_DIR}')
 
-    HOME_CODE_DIR = REPO_DIR.parent.parent
+    HOME_CODE_DIR = BASE_DIR.parent.parent
     print(f'HOME_CODE_DIR: {HOME_CODE_DIR}')
     assert HOME_CODE_DIR.name in PACKAGE_NAMES
     from nlpia2.constants import MANUSCRIPT_DIR

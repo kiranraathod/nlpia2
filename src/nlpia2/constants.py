@@ -28,7 +28,7 @@ HTML_TAGS = '<HTML', '<A HREF=', '<P>', '<BOLD>', '<SCRIPT', '<DIV', '<TITLE', '
 PKG_DIR = Path(__file__).absolute().resolve().parent
 PKG_NAME = PKG_DIR.name
 SRC_DIR = PKG_DIR.parent
-REPO_DIR = SRC_DIR.parent
+BASE_DIR = SRC_DIR.parent
 
 BIGDATA_DIR_NAME = '.nlpia2-data'
 SRC_DATA_DIR_NAME = 'data'
@@ -44,9 +44,6 @@ try:
     SRC_DATA_DIR.mkdir(exist_ok=True, parents=True)
 except FileExistsError as e:
     log.warninge(e)
-
-
-BASE_DIR = PKG_DIR.parent.parent
 
 BIGDATA_DIR = HOME_DATA_DIR = HOME_DIR / BIGDATA_DIR_NAME
 try:
@@ -105,7 +102,7 @@ def get_version():
     return version
 
     # setup.cfg will not exist if package install in site-packages
-    with (REPO_DIR / 'setup.cfg').open() as fin:
+    with (BASE_DIR / 'setup.cfg').open() as fin:
         for line in fin:
             matched = re.match(r'\s*version\s*=\s*([.0-9abrc])\b', line)
             if matched:

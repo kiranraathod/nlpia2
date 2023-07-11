@@ -1,8 +1,8 @@
 import spacy
 from spacy import displacy
 
-REPO_DIR = Path(__file__).resolve().absolute().parent.parent.parent
-IMAGE_DIR = REPO_DIR / 'manuscript' / 'images'
+BASE_DIR = Path(__file__).resolve().absolute().parent.parent.parent
+IMAGE_DIR = BASE_DIR / 'manuscript' / 'images'
 
 """
 >>> text = ("Trust me, though, the words were on their way, and when "
