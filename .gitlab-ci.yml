@@ -2,10 +2,10 @@
 # https://docs.gitlab.com/ee/ci/yaml/
 
 # Official Python 3.9 language image.
-test_py39:
-  image: python:3.9
+test_py: python
   before_script:
-    - apt-get install python3-*
+    - apt-get update
+    - apt-get install python-dev gcc
     - pip install --upgrade pytest-cov wheel pip virtualenv build twine
     - pip install -e .
     - python -m spacy download en_core_web_sm
