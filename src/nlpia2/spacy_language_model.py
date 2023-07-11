@@ -1,24 +1,24 @@
 import spacy  # https://spacy.io
 
-MODEL_NAME = 'en_core_web_sm'
+DEFAULT_MODEL_NAME = 'en_core_web_sm'
 # dict of normalization "links" that must terminate in a cannonical name (leaf of the tree)
 MODEL_NAMES = {
     # None or empty strings can be used to redirect to a default value/name 
-    None: 'sm',
-    '': 'sm',
-    'default': 'sm',
+    None: DEFAULT_MODEL_NAME,
+    '': DEFAULT_MODEL_NAME,
+    'default': DEFAULT_MODEL_NAME,
     # links to noncanonical names will be followed to until they are not found as keys
-    'en': 'sm',
-    'english': 'sm',
+    'en': DEFAULT_MODEL_NAME,
+    'english': DEFAULT_MODEL_NAME,
 
+    'small': 'en_core_web_sm',
     'sm': 'en_core_web_sm',
-    'small': 'sm',
     
+    'medium': 'en_core_web_md',
     'md': 'en_core_web_md',
-    'medium': 'md',
     
-    'lg': 'en_core_web_md',
-    'large': 'en_core_web_md'
+    'large': 'en_core_web_lg',
+    'lg': 'en_core_web_lg',
     }
 
 
@@ -53,7 +53,7 @@ def load(*args, **kwargs):
     'core_web_md'
     """
     if 'name' not in kwargs and not len(args):
-        args = [MODEL_NAME]
+        args = [DEFAULT_MODEL_NAME]
     args = list(args)
     name = kwargs.pop('name', None) or args.pop(0)
     args = tuple([cannonicalize_name(name)] + list(args))

@@ -157,7 +157,116 @@ You only need to know how to combine the results of each of these steps to conne
 In this first example you will get to see the output at each stage of the process.
 This can help you see some of the mistakes that are common so you can think about how you might design a system to deal with these mistakes.
 
+To learn a little about a thought leader in AI Ethics you can download the Wikipedia article about Timnit Gebru.
+
+[source,python]
+----
+>>> from nlpia2 import wikipedia as wiki
+>>> page = wiki.page('Timnit Gebru')
+>>> text = page.content
+>>> text[:66]
+'Timnit Gebru (Amharic: ትምኒት ገብሩ; born 13 May 1983) is an Ethiopian'
+----
+
+Have you heard of Timnit Gebru before?
+She's famous among people in your area of interest and she's written several influential papers:
+
+[source,python]
+----
+>>> i1 = text.index('Stochastic')
+>>> text[i1:i1+51]
+'Stochastic Parrots: Can Language Models Be Too Big?'
+----
+
+That's a pretty interesting research paper title.
+It certainly seems like something her bosses would be interested in publishing.
+Now run the spacy language model on this article to see if it is able to recognize Timnit Gebru as a named entity.
+
+// FIXME: nlpia2.spacy_pipes
+[source,python]
+----
+>>> from nlpia2.spacy_pipes import nlp_df
+>>> nlpsm = load('en_core_web_sm')
+>>> df = nlp_df(text, nlp=nlpsm)
+         Token    POS Dependent Entity KB_ID
+0        Timnit  PROPN  compound    ORG      
+1         Gebru  PROPN     nsubj    ORG      
+2             (  PUNCT     punct             
+3       Amharic  PROPN     appos             
+4             :  PUNCT     punct             
+...         ...    ...       ...    ...   ...
+3271     Timnit  PROPN  compound    ORG      
+3272      Gebru  PROPN      pobj    ORG      
+3273         at    ADP      prep             
+3274  Wikimedia  PROPN  compound    ORG      
+3275    Commons  PROPN      pobj    ORG  
+----
+
+So it found Gebru and several other named entities.
+But it classified them incorrectly
+
+[source,python]
+----
+>>> from nlpia2.spacy_pipes import nlp_df
+>>> nlp = load('en_core_web_lg'
+>>> df = nlp_df(text, nlp=nlp)
+>>> df
+          Token    POS Dependent  Entity KB_ID
+0        Timnit  PROPN  compound  PERSON      
+1         Gebru  PROPN     nsubj  PERSON      
+2             (  PUNCT     punct              
+3       Amharic  PROPN     appos    NORP   # <1> 
+4             :  PUNCT     punct              
+...         ...    ...       ...     ...   ...
+3271     Timnit  PROPN  compound  PERSON      
+3272      Gebru  PROPN      pobj  PERSON      
+3273         at    ADP      prep              
+3274  Wikimedia  PROPN  compound     ORG      
+3275    Commons  PROPN      pobj     ORG
+----
+<1> What is NORP?
+
+Can you see the coreferences to "Timnit Gebru" in this sentence about that paper and her bosses:
+
+[source,python]
+----
+>>> i0 = text.index('Gebru had')
+>>> text[i0:i0+171]
+'Gebru had determined that publishing research papers
+ was more effective at bringing forth the ethical change 
+ she was focused on than pressing her superiors in the company.'
+----
+
+How does a SpaCy do with extracting named entities like Timnit Gebru?
+
+[source,python]
+----
+>>> import spacy, coreferee
+>>> nlptrf = spacy.load('en_coreference_web_trf')
+>>> gebru_she = text[i0:i1]
+>>> text_gebru = text[i0:i1]
+>>> doc_gebru = nlp(text_gebru)
+>>> doc_gebru
+Gebru had determined that publishing research papers was more effective at bringing forth the ethical change she was focused on than pressing her superiors in the company. She and five others coauthored a research paper, "On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?"
+>>> doc_gebru.spans
+{'coref_clusters_1': [Gebru had, she was, her superiors, She and]}
+
+----
+
 The first step in extracting knowledge about some__thing__ is to find the _things_ that you want to know about.
+The most import things in natural language text are the names of people, places, and things.
+In linguistics named things are called "named entities."
+SpaCy's knowledge extraction pipeline assumes that you want to work with named entites.
+The 'ents' attribute on a doc object contains a list of all those named entities.
+
+[source,python]
+----
+>>> doc = nlp(text)
+>>> doc.ents[:6]  # <1>
+(Timnit Gebru, Amharic, 13, May 1983, Ethiopian, Black in AI)
+----
+<1> Get the first 6 named entities in the Wikipedia article.
+
 The spaCy part of speech (POS) tagger tags tokens with their part of speech.
 In English grammar people, places and __things__ are labeled with the part of speech "noun."
 Another word for things or nouns in natural language processing is "entities."
@@ -166,14 +275,34 @@ These are the things you need for the nodes in your knowledge graph.
 And the part of speech tag for relations is a _verb_.
 The verb tokens will be used to connect the named entities to each other as the edges in your knowledge graph.
 
-So this will usually be the first algorithm in your pipeline, the SpaCy language model that tokenizes your text and tags each token with the linguistic features you need for knowledge extraction:
+So this will usually be the first algorithm in your pipeline, the SpaCy language model that tokenizes your text and tags each token with the linguistic features you need for knowledge extraction.
+And the most recent version of spaCy include several tools for knowledge extraction.
 
 [source,python]
 ----
->>> from nlpia2.spacy_language_model import nlp
->>> FIXME: see timnit-gebru-spacy-ents.hist.py
+>>> from nlpia2.spacy_pipes import nlp_df, load
 ----
 
+[source,python]
+----
+>>> df.loc['On':'?']
+              POS Dependent       Entity KB_ID
+Token                                         
+On            ADP      prep                   
+the           DET       det  WORK_OF_ART      
+Dangers      NOUN      pobj  WORK_OF_ART      
+of            ADP      prep  WORK_OF_ART      
+Stochastic  PROPN  compound  WORK_OF_ART      
+Parrots     PROPN      pobj  WORK_OF_ART      
+:           PUNCT     punct  WORK_OF_ART      
+Can           AUX       aux  WORK_OF_ART      
+Language     NOUN  compound  WORK_OF_ART      
+Models       NOUN     nsubj  WORK_OF_ART      
+Be            AUX     advcl  WORK_OF_ART      
+Too           ADV    advmod  WORK_OF_ART      
+Big           ADJ     acomp  WORK_OF_ART      
+?           PUNCT     punct  
+----
 
 [source,python]
 ----

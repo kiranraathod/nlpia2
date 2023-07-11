@@ -150,4 +150,4 @@
 >>> doc = nlp(text)
 >>> doc.spans
 {'coref_clusters_1': [Gebru had, she was, her superiors, She and]}
->>> hist -o -p -f src/nlpia2/ch11/gebru-she-coreference-resolution.hist.ipy
+# >>> hist -o -p -f src/nlpia2/ch11/gebru-she-coreference-resolution.hist.ipy

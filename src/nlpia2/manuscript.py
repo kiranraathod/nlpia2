@@ -6,18 +6,17 @@ import shutil
 from nlpia2.constants import BIGDATA_DIR, MANUSCRIPT_DIR
 
 
-def translate_matko(path):
+def translate_to_matko_path(path):
     toks = path.name.split()
     name = path.name
     if len(toks) > 2:
         name = toks[0] + '-' + toks[1] + '_' + '-'.join([t for t in toks[2:] if t.strip('-')])
         name = name.replace('(', '').replace(')', '')
     return name
-    #
 
 
 def git_rename_commands(glob='Chapter ?? --*.adoc',
-                        translater=translate_matko,
+                        translater=translate_to_matko_path,
                         ):
     commands = []
     for p in Path.cwd().glob(glob):

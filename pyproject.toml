@@ -14,13 +14,14 @@ repository = "https://gitlab.com/tangibleai/nlpia2"
 documentation = "https://gitlab.com/tangibleai/nlpia2"
 keywords = [ "NLP", "Natural Language Processing", "Virtual Assistant", "chatbot", "Text Processing", "Machine Learning", "Text Mining", "Deep Learning",]
 classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "Operating System :: OS Independent", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Text Processing :: Linguistic", "Topic :: Text Processing", "Topic :: Communications", "Topic :: Communications :: Chat", "Intended Audience :: Education",]
+
 [[tool.poetry.packages]]
 include = "nlpia2"
 from = "src"
 
 [tool.black]
 line-length = 80
-target-version = [ "py37",]
+target-version = [ "py39",]
 
 [tool.isort]
 py_version = 37
@@ -62,6 +63,8 @@ bleach = "*"
 boto3 = "*"
 botocore = "*"
 configargparse = "*"
+FIXME: release package and verify code in ch11 to import this and load it
+coreferee = "*"  # for spacy.load('en-coreference-web-trf')
 cython = "*"
 dataframe-image = "*"
 dateparser = "*"  # ch11
@@ -88,7 +91,7 @@ nessvec = "*"
 nlpia2_wikipedia = ">=1.5.6"
 nltk = "*"
 openai = "*"
-pandas = ">=1.5.3,<2.0.0"  # argilla requires pandas <2.0
+pandas = ">=1.5.3"  # ,<2.0.0"  # argilla requires pandas <2.0
 parsimonious = "*"
 pillow = "*"
 pip = "*"
@@ -100,23 +103,17 @@ pypdf2 = "*"
 python = ">=3.9.16"
 python-dotenv = "*"
 python-slugify = "*"
-# pyyaml = "==6.0"  # redundant
 rapidfuzz = ">=2.13.2,<2.14"
 recommonmark = "*"
 sacrebleu = "*"
-# scikit-learn = "==1.2.2"  # redundant
-# scipy = "==1.10.1"  # redundant
 streamlit = "*"
 seaborn = "*"
 sentence_transformers = "*"
-spacy = ">=3.4.0"
+spacy = ">=3.4"
 spacy-experimental = "*"
 sphinx = "*"
 textacy = "*"  # ch11
 toml = "*"
-torch = "*"
-# torch = "==2.0.0"  # redundant with transformers?
-# torchtext = "==0.15.1"  # redundant with transformers?
 tox = "*"
 tqdm = "*"
 unidecode = "*"
