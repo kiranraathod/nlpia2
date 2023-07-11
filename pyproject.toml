@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "nlpia2"
-version = "0.0.31"
+version = "0.0.32"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "AGPLv3"
 readme = "README.md"
@@ -35,7 +35,7 @@ extend_skip = [ "setup.py",]
 known_typing = "typing,types,typing_extensions,mypy,mypy_extensions"
 sections = "FUTURE,TYPING,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 include_trailing_comma = true
-line_length = 80
+line_length = 130
 indent = 4
 use_parentheses = true
 
@@ -63,7 +63,6 @@ bleach = "*"
 boto3 = "*"
 botocore = "*"
 configargparse = "*"
-FIXME: release package and verify code in ch11 to import this and load it
 coreferee = "*"  # for spacy.load('en-coreference-web-trf')
 cython = "*"
 dataframe-image = "*"
@@ -135,6 +134,3 @@ test = [ "pytest", "pytest-cov",]
 sound = [ "soundex",]
 pdf = [ "pymupdf", "tabula-py", "tabulate",]
 
-[tool.poetry.dev-dependencies.zipp]
-version = ">=3.4"
-python = ">=3.9.16"
