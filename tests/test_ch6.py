@@ -2,7 +2,7 @@ import pytest  # noqa
 import doctest
 import nlpia2
 import nlpia2.ch06
-import nlpia2.ch06.spell
+# import nlpia2.ch06.spell
 
 
 def test_spell():
