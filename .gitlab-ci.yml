@@ -1,15 +1,14 @@
 # .gitlab-ci.yml keyword reference
 # https://docs.gitlab.com/ee/ci/yaml/
 
-# Official Python 3.9 language image.
-test_py: python
+# Official Python 3.10 language image.
+test_py: python:3.10
   before_script:
     - apt-get update
-    - apt-get install python-dev gcc
+    - apt-get install -y python-dev gcc
     - pip install --upgrade pytest-cov wheel pip virtualenv build twine
     - pip install -e .
     - python -m spacy download en_core_web_sm
   script:
     - pytest --verbose
-#    - pytest --doctest-modules --doctest-glob='*.adoc' --doctest-glob='*.rst' --doctest-glob='*.py' --verbose
 
