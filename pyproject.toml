@@ -99,7 +99,7 @@ pronouncing = "*"
 psutil = "*"
 pygraphviz = "*"  # ch11
 pypdf2 = "*"
-python = ">=3.9.16"
+python = ">=3.9"
 python-dotenv = "*"
 python-slugify = "*"
 rapidfuzz = ">=2.13.2,<2.14"
