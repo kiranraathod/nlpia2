@@ -1621,12 +1621,12 @@ And things only get better from there as we move on to Word2vec word vectors in 
 
 == Test yourself
 
-. What makes a Counter vector (`CountVectorizer` output) different from a `collections.Counter` object?
-. Can you use `TFIDFVectorizer` on a large corpus (more than 1M documents) with a huge vocabulary (more than 1M tokens)? What problems do you expect to encounter?
-. Think of an example of corpus or task where term frequency (TF) will perform better than TF-IDF.
-. We mentioned that bag of character n-grams can be used for language recognition tasks. How would an algorithm that uses character n-grams to distinguish one language from another work?
-. What disadvantages of TF-IDF have you seen throughout the chapter? Can you come up with additional ones that weren't mentioned?
-. How would you use TF-IDF as a base to create a better search engine?
+. What makes a Count vector (`CountVectorizer.transform(tokens)` output for a single document) different from a `collections.Counter(tokens)` object?
+. How much RAM would you need, do you think, use a `TFIDFVectorizer` on  1M English documents with a vocabulary of 1M unique 2-grams, assuming each value requires 1 byte?
+. Think of an example corpus or task where term frequency (TF) or count vectors  might be more useful than TF-IDF vectors. Which approach is better for sentiment analysis, document classification, and document scoring/regression? What if the language in the documents is more predictable than natural languages such as English?
+. A character-based n-grams count vector or TF-IDF vector is often used for language recognition tasks -- for example, whether a string contains English or Spanish text. What statistics or algorithms would you use to distinguish the character TF-IDF vectors for one language from the vectors for another natural language?
+. What disadvantages of TF-IDF did you see in this chapter? Can you come up with additional ones that weren't mentioned?
+. How would you use TF-IDF as a foundation to create a better search engine? How would you compute a relevance score so you could display the 10 most relevant documents? Would lemmatization help if you did not lemmatize during indexing? What about preprocessing the query to add approximate synonyms to your query TF-IDF vector?
 
 == Summary
 
