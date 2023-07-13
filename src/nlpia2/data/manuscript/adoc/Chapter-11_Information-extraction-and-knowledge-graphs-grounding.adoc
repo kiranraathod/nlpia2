@@ -1,4 +1,4 @@
-= Information extraction and knowledge graphs (grounding)
+= Natural Language Processing in Action, Second Edition
 :chapter: 11
 :part: 3
 :sectnumoffset: 1
@@ -9,7 +9,7 @@
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
 :leveloffset: 1
-:stem: latexmath
+//:stem: latexmath
 // :icons!:
 :toc:
 :source-highlighter: coderay
@@ -17,76 +17,20 @@
 :bibliography-style: ieee
 :index::[]
 
+= Information extraction and knowledge graphs (grounding)
+
 This chapter covers
-
-//// 
-TODO:
-* [ ] Read TDS tutorial with code on knowledge extraction  - must have GPU on to use the large/accurate BLINK model - footnote:[(https://towardsdatascience.com/from-text-to-knowledge-the-information-extraction-pipeline-b65e7e30273e)] 
-* [ ] An NLP pipeline that can extract scientific knowledge from unstructured text (journal articles) and store it in a knowledge graph footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-- [ ] Notebook on info extraction with spacy. footnote:[SpaCy information extraction (https://github.com/tomasonjo/blogs/blob/master/ie_pipeline/SpaCy_informationextraction.ipynb)]
-* [ ] REBEL annotates text with entity and relation tags which can be parsed to create entity-relation triples.footnote:["REBEL: Relation Extraction By End-to-end Language generation" by Pere-Lluis Huguet Cabot, Roberto Navigli 2021, paper with code (https://paperswithcode.com/paper/rebel-relation-extraction-by-end-to-end)]
-
-* [ ] Build a knowledge graph from text with REBEL, BART and WikiText: footnote:[Medium article (https://medium.com/nlplanet/building-a-knowledge-base-from-texts-a-full-practical-example-8dbbffb912fa)]
-* "Rational" thinking (thinking slow) can sometime undermine our prosocial instinct (thinking fast) to cooperate with others in zero-sum one-shot games footnote:["Intuition, deliberation, and the evolution of cooperation" by Adam Beara, David G. Rand 2015 (https://www.pnas.org/doi/pdf/10.1073/pnas.1517780113)]
-* footnote:["KG-BART: Knowledge Graph-Augmented BART for Generative Commonsense Reasoning" by Ye Liu et al. (https://ojs.aaai.org/index.php/AAAI/article/view/16796/16603)]
-* footnote:[visualization of linked entities in the wikitext-2 dataset with entities from wikidata (https://rloganiv.github.io/linked-wikitext-2/#/explore)]
-
-## DONE
-* footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-* footnote:["Barack's Wife Hillary: Using Knowledge Graphs for Fact-Aware Language Modeling Robert L. Logan IV" (https://arxiv.org/pdf/1906.07241)]
-* footnote:["Entity Linking from Joint Encoding ..." code (https://github.com/nitishgupta/neural-el)]
-
-
-* footnote:[Admins, Mods, and Benevolent Dictators for Life: The Implicit Feudalism of Online Communities 2021 by Nathan Schneider (https://files.osf.io/v1/resources/sf432/providers/osfstorage/5ff89882e80d370172a5785a?action=download&direct&version=7)]
-
-* Build a knowledge graph from text with REBEL, BART and WikiText. footnote:[Medium article (https://medium.com/nlplanet/building-a-knowledge-base-from-texts-a-full-practical-example-8dbbffb912fa)]
-* footnote:[Stanford 2021 Knowlege Graph Course videos by Vinay (https://www.youtube.com/playlist?list=PLDhh0lALedc5paY4N3NRZ3j_ui9foL7Qc)]
-* footnote:[Stanford 2021 Knowlege Graph Course videos by Vinay (http://www.web.stanford.edu/~vinayc/kg/notes/How_Do_Users_Interact_With_a_Knowledge_Graph.html)]
-* footnote:[recent tutorial on Towards Data Science (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fnlp-with-python-knowledge-graph-12b93146a458)]
-* footnote:[Knowledge Representation Learning python library with state of the art performance on academic benchmarks - OpenKE Python package (https://github.com/thunlp/OpenKE)]
-* footnote:[Alfonso Farruggia blog on creating knowledge graph (https://12ft.io/proxy?&q=https%3A%2F%2Falfarruggia.medium.com%2Fhow-to-generate-a-knowledge-graph-from-plain-text-in-few-steps-42f3a639155f)]
-* ElasticSearch and OpenSearch now support embedding vector search with vector fields (vector store) footnote:[Augmenting elastic search with text embeddings for Stack Overflow article search (https://github.com/jtibshirani/text-embeddings)]
-* An NLP pipeline that can extract scientific knowledge from unstructured text (journal articles) and store it in a knowledge graph footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-* "Rational" thinking (thinking slow) can sometime undermine our prosocial instinct (thinking fast) to cooperate with others in zero-sum one-shot games footnote:["Intuition, deliberation, and the evolution of cooperation" by Adam Beara, David G. Rand 2015 (https://www.pnas.org/doi/pdf/10.1073/pnas.1517780113)]
-* footnote:["Generating Knowledge Graphs by Employing Natural Language Processing and Machine Learning Techniques within the Scholarly Domain" by Danilo Dess et al. 2020 (https://arxiv.org/pdf/2011.01103.pdf)]
-* footnote:["KG-BART: Knowledge Graph-Augmented BART for Generative Commonsense Reasoning" by Ye Liu et al. (https://ojs.aaai.org/index.php/AAAI/article/view/16796/16603)]
-* footnote:["Barack's Wife Hillary: Using Knowledge Graphs for Fact-Aware Language Modeling Robert L. Logan IV" (https://arxiv.org/pdf/1906.07241)]
-* footnote:["Entity Linking from Joint Encoding ..." code (https://github.com/nitishgupta/neural-el)]
-* footnote:[visualization of linked entities in the wikitext-2 dataset with entities from wikidata (https://rloganiv.github.io/linked-wikitext-2/#/explore)]
-* open source conversational LLM that runs on your laptop: footnote:[GPT4All git repo (https://github.com/nomic-ai/gpt4all)]
-* footnote:[Admins, Mods, and Benevolent Dictators for Life: The Implicit Feudalism of Online Communities 2021 by Nathan Schneider (https://files.osf.io/v1/resources/sf432/providers/osfstorage/5ff89882e80d370172a5785a?action=download&direct&version=7)]
-////
-
-////
-Dependency parsing and Constituency parsing
-    # Brief intro, and why did it come up
-    # Current benchmarks and baselines
-    # Why is it important and what are the practical applications (Relation extraction, semantic parsing)
-    # Rule based algorithms 
-    # Why neural networks are much better at it?
-    # Current state of the art methods and the available open source platforms 
-
-# Discourse parsing
-    # Sense making
-
-
-# Relation extraction
-
-# Discourse segmentation
-# Semantic parsing using AST and Discourse
-# Coreference resolution
-////
 
 * Extracting numerical and math expressions from text
 * Building a knowledge graph from text
 * Converting a dependency tree into a knowledge (fact)
 * Querying a knowledge graph for fact checking
 * Grounding generative language models with facts and beliefs
-* Fact checking text with knowledge graphs 
+* Fact checking text with knowledge graphs
 
 In the previous chapter (Chapter 10) you learned how to use transformers to generate smart _sounding_ words.
 But language models on their own are just faking it by predicting the next word that will _sound_ reasonable to you.
-Your AI can't reason about the real world until you give them access to facts and knowledge about the world. 
+Your AI can't reason about the real world until you give them access to facts and knowledge about the world.
 In Chapter 2 you learned how to do exactly this, but you didn't know it then.
 You were able to tag tokens with their part of speech and their logical role in the meaning of a sentence (dependency tree).
 This old-fashioned token tagging algorithm is all you need to give your generative language models (AI) a _knowledge graph_ with actual facts about the real world (knowledge).
@@ -101,7 +45,7 @@ Your AI can use knowledge graphs to fill the _common sense knowledge_ gap in lar
 
 You will need to store the facts you've extracted in a _knowledge base_ so you can make decisions based on those facts.
 A knowledge base is a database that stores knowledge as relationships between concepts.
-Though you can use relational database to store the relations and concepts, sometimes it is more efficient to use data structure called a _graph_.
+Though you can use a relational database to store the relations and concepts, sometimes it is more efficient to use data structure called a _graph_.
 This allows you to ask questions about the relationships between things using a query language such as GraphQL or Cypher or even SQL.
 And you can use a knowledge graph to programmatically generate text that makes sense because it is grounded in facts in your database.
 You can even infer new facts or _logical inferences_ about the world that aren't yet included in your knowledge base.
@@ -111,32 +55,32 @@ A deep learning language model uses statistics to estimate or guess the next wor
 And deep learning researchers hope that one day neural networks will be able to match the natural human ability to logically infer things and reason about the world.
 But this isn't possible, because words don't contain all the knowledge about the world that a machine would need to process to make factually correct inferences.
 So you're going to use a tried and true logical inference approach called "symbolic reasoning."
-If you're familiar with the concept of a compiler then you soon recognize that a knowledge graph 
-And you're going to use this reasoning approach to ground the statistical deep learning models so they no longer have to make statistical "guesses" .
+If you're familiar with the concept of a compiler then you may want to think of the dependency tree as a parse tree.
+And you're going to use this reasoning approach to ground the statistical deep learning models so they no longer have to make statistical "guesses".
 
 == Grounding
 
 Once you have a knowledge graph, your chatbots and AI agents will have a way to correctly reason about the world in an explainable way.
 And if you can extract facts from the text your deep learning model generates, you can check to see if that text agrees with the knowledge you've collected in your knowledge graph.
-This is called _grounding_  when you maintain a knowledge graph and then use it to double check the facts and reasoning in generated text.
+This is called _grounding_  when you maintain a knowledge graph and then use it to double-check the facts and reasoning in generated text.
 When you ground your language model you attach it to some ground truth facts about the world.
 
-Grounding can also benefit your NLP pipeline in other ways. 
+Grounding can also benefit your NLP pipeline in other ways.
 Using a knowledge graph for the reasoning part of your algorithm can free up your language model to do what it does best -- generate plausible, grammatical text.
 So you can fine tune your language model to have the tone that you want, without trying to build a chameleon that pretends to understand and reason about the world.
-And your knowledge graph can be designed to contain just the facts about a world that you want your AI to understand -- whether it is facts about the real world that you have in mind, or some fictional world that you are creating.
+And your knowledge graph can be designed to contain just the facts about a world that you want your AI to understand -- whether it is facts about the real world that you have in mind or some fictional world that you are creating.
 By separating the reasoning from the language you can create an NLP pipeline that both sounds correct and _is_ correct.
 
 There are a few other terms that are often used when referring to this grounding process.
 If you have taken a philosophy or AI course you may remember the concepts of _symbolic reasoning_ as opposed to the probabilistic reasoning of machine learning models.
 _First order logic_ is one system for symbolic reasoning.footnote:[Wikipedia article "Symbolic AI" (https://en.wikipedia.org/wiki/Symbolic_artificial_intelligence)]
-This was the preferred approach to building expert systems and theorem provers before the data and processing power was available for machine learning and deep learning. 
+This was the preferred approach to building expert systems and theorem provers before the data and processing power was available for machine learning and deep learning.
 It's also called Good Old Fashioned AI or GOFAI, pronounced "Go Fie".
 GOFAI is back in fashion as researchers attempt to build generally intelligent systems that we can rely on to make important decisions.
 
 Another advantage of grounding your NLP pipeline is that you can use the facts in your knowledge base to _explain_ its reasoning.
 If you ask an ungrounded LLM to explain why it said something unreasonable, it will just keep digging a hole for itself (and you) by making up more and more nonsense reasons.
-You saw this in the previous chapters, when LLMs confidently hallucinated (fabricated) nonexistent but plausible references and fictional people to explain where it got its nonsense from.
+You saw this in the previous chapters when LLMs confidently hallucinated (fabricated) nonexistent but plausible references and fictional people to explain where they got their nonsense from.
 The key to creating AI you can trust is to put a floor of reason underneath it using a knowledge graph.
 The first, and perhaps most important algorithm in this grounding process is _knowledge extraction_.
 
@@ -145,17 +89,17 @@ The first, and perhaps most important algorithm in this grounding process is _kn
 Knowledge extraction is the process you are going to use to extract concepts and relations from natural language text.
 You can construct a graph from scratch using your own common sense knowledge or the domain knowledge that you want your AI to know about.
 But if you can extract knowledge from text you can build much larger knowledge graphs much quicker.
-Plus, you will need this algorithm to double check any text generated by your language models.
+Plus, you will need this algorithm to double-check any text generated by your language models.
 
 Knowledge extraction requires four main steps:
 
 .Four stages of knowledge extraction
 image::../images/ch11/knowledge-graph-extraction.drawio.png["Knowledge extraction pipeline showing the entities -- 'Gebru' and the title of her paper about the dangers of large language models. extracted from the passage: Gebru had ... She and five others coauthored a research paper, "On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?'", width=85%, link="../images/ch11/knowledge-graph-extraction.drawio.png"]
 
-Fortunately the spaCy language models include the building blocks for knowledge extraction: named entity recognition, coreference resolution, and relation extraction.
+Fortunately, the spaCy language models include the building blocks for knowledge extraction: named entity recognition, coreference resolution, and relation extraction.
 You only need to know how to combine the results of each of these steps to connect the pieces together.
-In this first example you will get to see the output at each stage of the process.
-This can help you see some of the mistakes that are common so you can think about how you might design a system to deal with these mistakes.
+In this first example, you will get to see the output at each stage of the process.
+This can help you see some of the common mistakes so you can think about how you might design a system to deal with these mistakes.
 
 To learn a little about a thought leader in AI Ethics you can download the Wikipedia article about Timnit Gebru.
 
@@ -188,22 +132,22 @@ Now run the spacy language model on this article to see if it is able to recogni
 >>> from nlpia2.spacy_pipes import nlp_df
 >>> nlpsm = load('en_core_web_sm')
 >>> df = nlp_df(text, nlp=nlpsm)
-         Token    POS Dependent Entity KB_ID
-0        Timnit  PROPN  compound    ORG      
-1         Gebru  PROPN     nsubj    ORG      
-2             (  PUNCT     punct             
-3       Amharic  PROPN     appos             
-4             :  PUNCT     punct             
+          Token    POS Dependent Entity KB_ID
+0        Timnit  PROPN  compound    ORG
+1         Gebru  PROPN     nsubj    ORG
+2             (  PUNCT     punct
+3       Amharic  PROPN     appos
+4             :  PUNCT     punct
 ...         ...    ...       ...    ...   ...
-3271     Timnit  PROPN  compound    ORG      
-3272      Gebru  PROPN      pobj    ORG      
-3273         at    ADP      prep             
-3274  Wikimedia  PROPN  compound    ORG      
-3275    Commons  PROPN      pobj    ORG  
+3271     Timnit  PROPN  compound    ORG
+3272      Gebru  PROPN      pobj    ORG
+3273         at    ADP      prep
+3274  Wikimedia  PROPN  compound    ORG
+3275    Commons  PROPN      pobj    ORG
 ----
 
 So it found Gebru and several other named entities.
-But it classified them incorrectly
+But it classified them incorrectly.
 
 [source,python]
 ----
@@ -212,16 +156,16 @@ But it classified them incorrectly
 >>> df = nlp_df(text, nlp=nlp)
 >>> df
           Token    POS Dependent  Entity KB_ID
-0        Timnit  PROPN  compound  PERSON      
-1         Gebru  PROPN     nsubj  PERSON      
-2             (  PUNCT     punct              
-3       Amharic  PROPN     appos    NORP   # <1> 
-4             :  PUNCT     punct              
-...         ...    ...       ...     ...   ...
-3271     Timnit  PROPN  compound  PERSON      
-3272      Gebru  PROPN      pobj  PERSON      
-3273         at    ADP      prep              
-3274  Wikimedia  PROPN  compound     ORG      
+0        Timnit  PROPN  compound  PERSON
+1         Gebru  PROPN     nsubj  PERSON
+2             (  PUNCT     punct
+3       Amharic  PROPN     appos    NORP   # <1>
+4             :  PUNCT     punct
+...         ...    ...       ...     ...
+3271     Timnit  PROPN  compound  PERSON
+3272      Gebru  PROPN      pobj  PERSON
+3273         at    ADP      prep
+3274  Wikimedia  PROPN  compound     ORG
 3275    Commons  PROPN      pobj     ORG
 ----
 <1> What is NORP?
@@ -233,7 +177,7 @@ Can you see the coreferences to "Timnit Gebru" in this sentence about that paper
 >>> i0 = text.index('Gebru had')
 >>> text[i0:i0+171]
 'Gebru had determined that publishing research papers
- was more effective at bringing forth the ethical change 
+ was more effective at bringing forth the ethical change
  she was focused on than pressing her superiors in the company.'
 ----
 
@@ -253,10 +197,10 @@ Gebru had determined that publishing research papers was more effective at bring
 
 ----
 
-The first step in extracting knowledge about some__thing__ is to find the _things_ that you want to know about.
-The most import things in natural language text are the names of people, places, and things.
+The first step in extracting knowledge about some __thing__ is to find the _things_ that you want to know about.
+The most important things in natural language text are the names of people, places, and things.
 In linguistics named things are called "named entities."
-SpaCy's knowledge extraction pipeline assumes that you want to work with named entites.
+SpaCy's knowledge extraction pipeline assumes that you want to work with named entities.
 The 'ents' attribute on a doc object contains a list of all those named entities.
 
 [source,python]
@@ -287,21 +231,21 @@ And the most recent version of spaCy include several tools for knowledge extract
 ----
 >>> df.loc['On':'?']
               POS Dependent       Entity KB_ID
-Token                                         
-On            ADP      prep                   
-the           DET       det  WORK_OF_ART      
-Dangers      NOUN      pobj  WORK_OF_ART      
-of            ADP      prep  WORK_OF_ART      
-Stochastic  PROPN  compound  WORK_OF_ART      
-Parrots     PROPN      pobj  WORK_OF_ART      
-:           PUNCT     punct  WORK_OF_ART      
-Can           AUX       aux  WORK_OF_ART      
-Language     NOUN  compound  WORK_OF_ART      
-Models       NOUN     nsubj  WORK_OF_ART      
-Be            AUX     advcl  WORK_OF_ART      
-Too           ADV    advmod  WORK_OF_ART      
-Big           ADJ     acomp  WORK_OF_ART      
-?           PUNCT     punct  
+Token
+On            ADP      prep
+the           DET       det  WORK_OF_ART
+Dangers      NOUN      pobj  WORK_OF_ART
+of            ADP      prep  WORK_OF_ART
+Stochastic  PROPN  compound  WORK_OF_ART
+Parrots     PROPN      pobj  WORK_OF_ART
+:           PUNCT     punct  WORK_OF_ART
+Can           AUX       aux  WORK_OF_ART
+Language     NOUN  compound  WORK_OF_ART
+Models       NOUN     nsubj  WORK_OF_ART
+Be            AUX     advcl  WORK_OF_ART
+Too           ADV    advmod  WORK_OF_ART
+Big           ADJ     acomp  WORK_OF_ART
+?           PUNCT     punct
 ----
 
 [source,python]
@@ -314,33 +258,33 @@ Big           ADJ     acomp  WORK_OF_ART
 >>> df = pd.DataFrame(tags).set_index('token').fillna('')
 >>> df.head()
               pos       dep child0 child1 child2 child3 child4 child5 child6 child7
-token                                                                              
-Gebru       PROPN     nsubj                                                        
-had           AUX       aux                                                        
-determined   VERB      ROOT  Gebru    had    was      .                            
-that        SCONJ      mark                                                        
-publishing   VERB  compound                                                        
+token
+Gebru       PROPN     nsubj
+had           AUX       aux
+determined   VERB      ROOT  Gebru    had    was      .
+that        SCONJ      mark
+publishing   VERB  compound
 >>> df.tail(11)
               pos       dep      child0 child1 child2  child3 child4 child5 child6 child7
-token                                                                                    
-Stochastic  PROPN  compound                                                              
-Parrots     PROPN      pobj  Stochastic                                                  
-:           PUNCT     punct                                                              
-Can           AUX       aux                                                              
-Language     NOUN  compound                                                              
-Models       NOUN     nsubj    Language                                                  
+token
+Stochastic  PROPN  compound
+Parrots     PROPN      pobj  Stochastic
+:           PUNCT     punct
+Can           AUX       aux
+Language     NOUN  compound
+Models       NOUN     nsubj    Language
 Be            AUX     ccomp          On      :    Can  Models    Too    Big      ?      "
-Too           ADV    advmod                                                              
-Big           ADJ     acomp                                                              
-?           PUNCT     punct                                                              
-"           PUNCT     punct 
+Too           ADV    advmod
+Big           ADJ     acomp
+?           PUNCT     punct
+"           PUNCT     punct
 ----
 
 SpaCy keeps track of the named entities in the `ents` attribute of a Doc object.
-Unfortunately it only finds 3 names entities, and skips a word in Gebru's paper title.
+Unfortunately, it only finds 3 named entities, and skips a word in Gebru's paper title.
 
 [source,python]
-----                                                                   
+----
 >>> doc.ents
 (Gebru,
  five,
@@ -376,12 +320,13 @@ Gebru had determined that publishing research papers ...
 8       .  PUNCT     punct     NaN     NaN     NaN
 ----
 
-So you need to identify all the nouns in your 
-
 You'd like your machine to extract pieces of information and facts from text so it can know a little bit about what a user is saying.
 For example, imagine a user says "Remind me to read aiindex.org on Monday."
 You'd like that statement to trigger a calendar entry or alarm for the next Monday after the current date.
 Easier said than done.
+
+Once you understand how a named entity recognizer works, you can expand the kinds of nouns and noun phrases you recognize and including in yoru knowledge graph.
+This can help generalize your knowledge graph and help you create a more generally intelligent NLP pipeline.
 
 To trigger correct actions with natural language you need something like an NLU pipeline or parser that is a little less fuzzy than a transformer or large language model.
 You need to know that "me" represents a particular kind of _named entity_: a person.
@@ -390,7 +335,7 @@ Sound familiar?
 In English grammar, the _part of speech_ (POS) for a person, place or thing is "noun".
 So you'll see that the POS tag that SpaCy associates with the tokens for a named entity is "NOUN".
 And the SpaCy package knows how to recognize the relationships (dependencies) between words and phrases.
-Once you have a _dependency tree_ of the hierarchy of grammatical relationships between words you have a way to process the logical meaning of a sentence. 
+Once you have a _dependency tree_ of the hierarchy of grammatical relationships between words you have a way to process the logical meaning of a sentence.
 
 And the chatbot should know that it can expand or _resolve_ that word by replacing it with that person's username or other identifying information.
 You'd also need your chatbot to recognize that "aiindex.org" is an abbreviated URL, which is a named entity - a name of a specific instance of something, like a website or company.
@@ -505,12 +450,11 @@ The NLPiA2 Python package has several utilities for making the NELL knowledge gr
 Later in the chapter, you'll see the details about how these work so you can prettify whatever knowledge graph you are working with.
 
 // FIXME: graph_plots.__main__ goes here
-
 // 0. describe NELLs columns
 // 1. optionally show what NELL df looks like
 // 2. reduce columns to only first 3 or 4
 // 3. simplify_*()
-// 4. 
+
 [source,python]
 ----
 >>> import pandas as pd
@@ -546,7 +490,7 @@ To simplify things further, you can eliminate the namespacing hierarchy and focu
 2                limited_brands
 3                limited_brands
 4                calavo_growers
-                 ...           
+                 ...
 ----
 
 The `nlpia2.nell` module simplifies the names of things even further.
@@ -572,7 +516,7 @@ Only proper names are allowed to retain their spaces, to help distinguish betwee
 However, in NELL, just as in Word2vec token identifiers, proper names are joined with underscore ("\_") characters.
 
 Entity and relation names are like variable names in Python.
-You want to be able to query them like field names in a database, so they should not have ambiguous spellings. 
+You want to be able to query them like field names in a database, so they should not have ambiguous spellings.
 The original NELL dataset contains one row per triple (fact).
 Triples can be read like a terse, well-defined sentence.
 Knowledge triples describe a single isolated fact about the world.
@@ -585,7 +529,7 @@ A relation is usually a verb phrase that starts with or implies words like "is" 
 The third column, "value," contains an identifier for some quality of that relation.
 The "value" is the object of the relationship and is a named entity just as the subject ("entity") of the triple is.
 
-Because NELL crowdsources the curation of the knowledge base, you also have a probability or confidence value that you can use to make inferences on conflicting pieces of information. 
+Because NELL crowdsources the curation of the knowledge base, you also have a probability or confidence value that you can use to make inferences on conflicting pieces of information.
 And NELL has 9 more columns of information about the fact.
 It lists all the alternative phrases that were used to reference a particular entity, relation or value.
 NELL also identifies the iteration (loop through Twitter) that the fact was created during.
@@ -611,6 +555,7 @@ There's even a "latitudelongitude" relation that you could use to verify any fac
 
 == Extracting the structure of text
 // SUM: Dependency parsing to create a sentence diagram and extract relations about the world.
+
 In the previous section, you learned how to recognize and tag named entities in text.
 Now you'll learn how to find relationships between these entities.
 This can help your NLP pipeline "understand" more complex thoughts or ideas.
@@ -641,37 +586,38 @@ The open-ended neural network models like PalM and GPT-3 are only used when the 
 And the language models are trained with the objective of steering the conversation back to something that the bot knows about and has rules for.
 Jakub Konrád and his teammates at CTU Prague won the $1M SocialBot prize in 2021 with this approach.footnote:["Alquist 4.0: Towards Social Intelligence Using Generative Models and Dialogue Personalization" (https://arxiv.org/pdf/2109.07968.pdf)]
 
-// show example convo with Mitsuku
+// HL: show example convo with Mitsuku
 
-Dependency parsing, as the name suggests, relies on "dependencies" between the words in a sentence to extract information. 
-"Dependencies" between two words could refer to their grammatical, phrasal, or any custom relations. 
-But in the context of dependency parse trees, we refer to the grammatical relationships between word pairs of the sentence, one of them acting as the "head" and the other one the "dependent". 
+Dependency parsing, as the name suggests, relies on "dependencies" between the words in a sentence to extract information.
+"Dependencies" between two words could refer to their grammatical, phrasal, or any custom relations.
+But in the context of dependency parse trees, we refer to the grammatical relationships between word pairs of the sentence, one of them acting as the "head" and the other one the "dependent".
 There exists one word in the sentence which isn't dependent on any other word in the parse tree, and this word is called the ROOT.
 There are 37 "dependent" relations that a word could possibly have, and these relations are adapted from the *Universal Stanford Dependencies system*.
 
-// show dependency parse image
+// HL:show dependency parse image
 
-This technique can be really useful in rule-based information extraction, especially in chatbots. 
-Consider the example we used earlier in this chapter: "Remind me to read aiindex.org on Monday." 
-Running this sentence through a dependency parser reveals that the relationship between "read" and "aiindex.org" is "Direct Object" and that between "read" and "Monday" is "Prepositional Object". 
-How is this information useful to us? 
-Let us say the chatbot had to find out what exactly it needs to remind the user to read. 
-Examining the "Direct Object" would reveal that it is "aiindex.org" that it needs to remind the user to study. 
+This technique can be really useful in rule-based information extraction, especially in chatbots.
+Consider the example we used earlier in this chapter: "Remind me to read aiindex.org on Monday."
+Running this sentence through a dependency parser reveals that the relationship between "read" and "aiindex.org" is "Direct Object" and that between "read" and "Monday" is "Prepositional Object".
+How is this information useful to us?
+Let us say the chatbot had to find out what exactly it needs to remind the user to read.
+Examining the "Direct Object" would reveal that it is "aiindex.org" that it needs to remind the user to study.
 Similarly, it can also infer that it needs to do this on Monday.
 
-This way, all the chatbot needs to do to pinpoint the exact information it is looking for is to examine the dependencies between the words. 
+This way, all the chatbot needs to do to pinpoint the exact information it is looking for is to examine the dependencies between the words.
 This kind of a rule-based algorithm is surprisingly powerful for general tasks in chatbots and other word-processing apps.
 
 === Why is it important?
 
-Like in the example we discussed before, dependency parsing can play a really useful role in any application that tries to extract organized information from text. 
+Like in the example we discussed before, dependency parsing can play a really useful role in any application that tries to extract organized information from text.
 The dependency trees can also be used to identify "Subject-Verb-Object" triplets using the "nsubj" and "dobj" tags of the ROOT word, and this task is also called *Relation Extraction*.
-Sometimes, the dependency relations can be converted into semantic tags/labels between the words, and this task is called *Semantic Role labelling*.
+Sometimes, the dependency relations can be converted into semantic tags/labels between the words, and this task is called *Semantic Role Labeling*.
 
 === Why neural networks are much better at it?
+//TODO
 
-=== Current state of the art methods and the available open source platforms 
-Dependency parsing: spaCy and Huggingface transformers have been the most popular libraries for Dependency parsing, though Allen AI's parser is also catching up with their performance. 
+=== Current state-of-the-art methods and the available open-source platforms
+Dependency parsing: spaCy and Huggingface transformers have been the most popular libraries for Dependency parsing, though Allen AI's parser is also catching up with their performance.
 We will experiment with a few of them below:
 
 [source,python]
@@ -687,32 +633,33 @@ We will experiment with a few of them below:
 ...     print ("{:<15} | {:<8} | {:<15} | {:<30} | {:<20}"
 ...             .format(str(token.text), str(token.dep_), str(token.head.text), str([child for child in token.children]) , str(spacy.explain(token.dep_))[:17] ))
 
-Token           | Relation | Head            | Children                       | Meaning             
+Token           | Relation | Head            | Children                       | Meaning
 -------------------------------------------------------------------------------------------------
-We              | nsubj    | learning        | []                             | nominal subject     
-will            | aux      | learning        | []                             | auxiliary           
-be              | aux      | learning        | []                             | auxiliary           
-learning        | ROOT     | learning        | [We, will, be, NLP, today, !]  | root                
-NLP             | dobj     | learning        | []                             | direct object       
+We              | nsubj    | learning        | []                             | nominal subject
+will            | aux      | learning        | []                             | auxiliary
+be              | aux      | learning        | []                             | auxiliary
+learning        | ROOT     | learning        | [We, will, be, NLP, today, !]  | root
+NLP             | dobj     | learning        | []                             | direct object
 today           | npadvmod | learning        | []                             | noun phrase as ad
-!               | punct    | learning        | []                             | punctuation  
+!               | punct    | learning        | []                             | punctuation
 
 ----
 
-You can see above that every token's relation, syntactic head, syntactic children, and the meaning of the relation are printed out. 
-The token "learning" has been assigned the tag of "ROOT". 
-This is because in our sentence, the word "learning" happens to be the main verb when you organize it into a Subject-Verb-Object triple. 
-Such verbs are called the ROOT verb, and they are the only tokens which do not have a syntactic head. 
-You can use this library to extract clauses by separating the subtrees attached to the root by the relation of "advcl" or "relcl". 
+You can see above that every token's relation, syntactic head, syntactic children, and the meaning of the relation are printed out.
+The token "learning" has been assigned the tag of "ROOT".
+This is because in our sentence, the word "learning" happens to be the main verb when you organize it into a Subject-Verb-Object triple.
+Such verbs are called the ROOT verb, and they are the only tokens that do not have a syntactic head.
+You can use this library to extract clauses by separating the subtrees attached to the root by the relation of "advcl" or "relcl".
 You can also use it to extract relation triplets by identifying the tokens with "nsubj", "ROOT", and "dobj" dependencies.
 
 
-Constituency parsing: Berkeley Neural Parser and Stanza have been the go-to options for the extraction of constituency relations in text. 
+Constituency parsing: Berkeley Neural Parser and Stanza have been the go-to options for the extraction of constituency relations in text.
 Let us explore them below:
 
 1) Berkeley Neural Parser:
-This parser cannot be used on its own, and requires either spaCy or NLTK to load it along with their existing models. 
-We will discuss its usage with spaCy as that is the recommended way.
+This parser cannot be used on its own, and requires either spaCy or NLTK to load it along with their existing models.
+You want to use spaCy as your tokenizer and dependency tree parse because it is continually improving.
+
 .Download the necessary packages
 [source,python]
 ----
@@ -720,7 +667,7 @@ We will discuss its usage with spaCy as that is the recommended way.
 >>> benepar.download('benepar_en3')
 ----
 
-After downloading the packages, we can test it out with a sample sentence. 
+After downloading the packages, we can test it out with a sample sentence.
 But we will be adding benepar to spaCy's pipeline first.
 
 [source,python]
@@ -737,41 +684,41 @@ But we will be adding benepar to spaCy's pipeline first.
 (S (NP (NNP Johnson)) (VP (VBD was) (VP (VBN compelled) (S (VP (TO to) (VP (VB ask) (NP (DT the) (NNP EU)) (PP (IN for) (NP (NP (DT an) (NN extension)) (PP (IN of) (NP (NP (DT the) (NN deadline)) (, ,) (SBAR (WHNP (WDT which)) (S (VP (VBD was) (VP (VBN granted)))))))))))))))
 ----
 
-In the example above, we generated a parse string for the test sentence. The parse string includes various phrases and the POS tags of the tokens in the sentence. Some common tags you may notice in our parse string are NP ("Noun Phrase"), VP ("Verb Phrase"), S ("Sentence"), and PP ("Prepositional Phrase").
+In the example above, we generated a parsed string for the test sentence. The parse string includes various phrases and the POS tags of the tokens in the sentence. Some common tags you may notice in our parse string are NP ("Noun Phrase"), VP ("Verb Phrase"), S ("Sentence"), and PP ("Prepositional Phrase").
 You can use this module to identify all the phrases in the sentence and use them in sentence simplification and/or summarization.
 
 == Relation extraction
-Relation extraction is the process of identifying connections between named entities in any text. 
-Like Information extraction, it is classified into the categories closed and open.
-In Closed relation extraction, the model extracts relations only from a given list of relation types. 
-The advantages of this are that we can minimize the risk of getting untrue and bizarre relation labels between entities which makes us more confident about using them in real life. 
+Relation extraction is the process of identifying connections between named entities in any text.
+Like information extraction, it is classified into the categories closed and open.
+In closed relation extraction, the model extracts relations only from a given list of relation types.
+The advantages of this are that we can minimize the risk of getting untrue and bizarre relation labels between entities which makes us more confident about using them in real life.
 But the limitation is that it needs human labelers to come up with a list of relevant labels for every category of text, which as you can imagine, can get tedious and expensive.
-In Open relation extraction, the model tries to come up with its own set of probable labels for the named entities in the text. 
-This is suitable for processing large and generally unknown texts like Wikipedia articles and news entries. 
+In Open relation extraction, the model tries to come up with its own set of probable labels for the named entities in the text.
+This is suitable for processing large and generally unknown texts like Wikipedia articles and news entries.
 
 === Current datasets and benchmarks
 *1) TACRED*
 
-The TAC Relation Extraction Dataset is a large scale dataset built with newswire and web text corpus. 
-With over 100,000 examples, it covers 41 relation types which are organized into triplets. 
+The TAC Relation Extraction Dataset is a large scale dataset built with newswire and web text corpus.
+With over 100,000 examples, it covers 41 relation types which are organized into triplets.
 Over the past few years, efforts to address TACRED's limitations such as data quality and ambiguity in relation classes has given rise to datasets like Re-TACRED and DocRED.
 
 *2) DocRED*
 
-The Document Relation Extraction Dataset is the largest human-annotated dataset for document level relation extraction, where the model is required to go over multiple sentences in order to extract the relations between entities. 
+The Document Relation Extraction Dataset is the largest human-annotated dataset for document level relation extraction, where the model is required to go over multiple sentences in order to extract the relations between entities.
 Compiled using Wikidata and Wikipedia, this dataset is considered the de-facto benchmark for relation extraction methods along with TACRED due to its generalizability and size.
 
 *3) SemEval Task-8 dataset*
 
-The SemEval Task-8 dataset is a triplet extraction dataset with over 10,000 entries, each having one of 9 semantic relations between its entities. 
+The SemEval Task-8 dataset is a triplet extraction dataset with over 10,000 entries, each having one of 9 semantic relations between its entities.
 Though a much simpler dataset than TACRED and having only a few relation labels, this dataset is known for the quality of its sentence data and labels which is a big issue when it comes to TACRED, DocRED, and Re-TACRED.
 
 === Why is it important?
-Relation extraction finds widespread application in finance and military, due to its significance in Information Extraction and Knowledge graph completion. 
-Traditionally considered a triplet extraction task, relation extraction methods are now venturing beyond duplet and triplet relations and are finding extensive usage in medical industry in the form of drug combo extraction and hormone chain identification. 
+Relation extraction finds widespread application in finance and military, due to its significance in Information Extraction and Knowledge graph completion.
+Traditionally considered a triplet extraction task, relation extraction methods are now venturing beyond duplet and triplet relations and are finding extensive usage in medical industry in the form of drug combo extraction and hormone chain identification.
 
-=== Current state of the art methods and the available open source platforms 
-Over the past few years, experiments with Deep Neural Networks have given strong results on triplet extraction and subsequently most of the research on the topic now follow neural methods. 
+=== Current state of the art methods and the available open source platforms
+Over the past few years, experiments with Deep Neural Networks have given strong results on triplet extraction and subsequently most of the research on the topic now follow neural methods.
 In this section, we will be discussing two recent neural relation extraction methods which have reported state of the art results on TACRED and DocRED.
 
 *1) LUKE:*
@@ -780,8 +727,8 @@ TODO add description and code
 
 *2) Typed entity markers*
 
-The concept of Typed entity markers was developed as an improvement over LUKE and other neural relation extraction frameworks. 
-In this method, typed markers are inserted before and after the entities in the text and fed into a multi-class classification model. 
+The concept of Typed entity markers was developed as an improvement over LUKE and other neural relation extraction frameworks.
+In this method, typed markers are inserted before and after the entities in the text and fed into a multi-class classification model.
 Consider the example below:
 
 Sentence:"John Smith works at Tangible AI"
@@ -790,7 +737,7 @@ Entities and their tags: John Smith (PERSON), Tangible AI (ORGANIZATION)
 
 Sentence with typed entities: "^/PER/John Smith^ works at ^/ORG/Tangible AI^"
 
-Following the example above, the sentence with typed entities is fed into the classification model with relations as its labels. 
+Following the example above, the sentence with typed entities is fed into the classification model with relations as its labels.
 As you may have guessed, NER is a necessary step before this process, for which we will be using spaCy as shown below:
 
 [source,python]
@@ -808,36 +755,36 @@ As you may have guessed, NER is a necessary step before this process, for which 
 ----
 
 == Coreference resolution
-Imagine you're running NER on a text, and you obtain the list of entities that the model has recognized. 
-On closer inspection, you realize over half of them are duplicates because they're referring to the same terms! 
-This is where *Coreference resolution* comes in handy because it identifies all the mentions of a noun in a sentence, helping us keep a track of all the pronouns and avoid multiple metions.
+Imagine you're running NER on a text, and you obtain the list of entities that the model has recognized.
+On closer inspection, you realize over half of them are duplicates because they're referring to the same terms!
+This is where *Coreference resolution* comes in handy because it identifies all the mentions of a noun in a sentence, helping us keep track of all the pronouns and avoid multiple mentions.
 
-=== Current datasets and benchmarks 
+=== Current datasets and benchmarks
 
 *1) Ontonotes 5.0:*
-This dataset is a compilation of various corpora of text(news, conversational telephone speech, weblogs, usenet newsgroups, broadcast, talk shows) with annotations of the named entities and noun phrases and their mentions. 
+This dataset is a compilation of various corpora of text(news, conversational telephone speech, weblogs, usenet newsgroups, broadcast, talk shows) with annotations of the named entities and noun phrases and their mentions.
 Available in three languages(English, Chinese, and Arabic), this dataset is the de facto benchmark for identifying coreferences in the industry.
 
 
 *2) Winograd schema challenge:*
-Consider this sentence- "The city councilmen refused the demonstrators a permit because they feared violence". 
-Who does "they" in the sentence refer to? 
-Our common sense tells us that it refers to the "city councilmen" and the answer seems to be easy for us, but this task of identifying mentions using common sense is surprisingly difficult for deep learning models. 
+Consider this sentence- "The city councilmen refused the demonstrators a permit because they feared violence".
+Who does "they" in the sentence refer to?
+Our common sense tells us that it refers to the "city councilmen" and the answer seems to be easy for us, but this task of identifying mentions using common sense is surprisingly difficult for deep learning models.
 This task is called the Winograd schema challenge, also framed as "Commonsense reasoning" or "Commonsense inference" problem.
 
 === Why is it important?
-Duplicate mentions is a big problem not only in *NER*, but *Relation extraction*, *Information extraction*, *Semantic parsing*, and many other tasks. 
-Resolving all the pronouns saves the time and effort to extract the information associated with them. 
+Duplicate mentions are a big problem not only in *NER*, but *Relation extraction*, *Information extraction*, *Semantic parsing*, and many other tasks.
+Resolving all the pronouns saves the time and effort to extract the information associated with them.
 
-Moreover, it also helps us identify which entity or term is being talked about the most in a text, helping us assign importance to certain words over others. 
-This technique has been experimented in *Topic modelling* and in constructing *knowledge graphs*.
+Moreover, it also helps us identify which entity or term is being talked about the most in a text, helping us assign importance to certain words over others.
+This technique has been experimented with in topic modeling and in constructing _knowledge graphs_.
 
 
-=== Current state of the art methods and the available open source platforms 
+=== Current state-of-the-art methods and the available open source platforms
 1) spaCy and NeuralCoref
 
-NeuralCoref 4.0 is currently the fastest entity resolver available open-source. 
-It can be used as an extension to spaCy, as shown below: 
+NeuralCoref 4.0 is currently the fastest entity resolver available open-source.
+It can be used as an extension to spaCy, as shown below:
 
 [source,python]
 ----
@@ -853,13 +800,13 @@ It can be used as an extension to spaCy, as shown below:
 
 ----
 
-On running the code above, you'll get a list of indices in an array. 
+On running the code above, you'll get a list of indices in an array.
 These are the indices of the words which the model identifies to be mentionings of the same noun phrases.
 
 
 2) AllenNLP's Entity resolver
 
-AllenNLP also provides a highly effective open source pipeline for Coreference resolution, though it is known to be much slower compared to NeuralCoref has a high memory requirement. 
+AllenNLP also provides a highly effective open source pipeline for Coreference resolution, though it is known to be much slower compared to NeuralCoref has a high memory requirement.
 Let us see how it works:
 
 [source,python]
@@ -925,10 +872,10 @@ None
 None
 ----
 
-You can probably see how tedious programming a pattern matching algorithm this way would be.
+You can probably see how tedious programming a pattern-matching algorithm this way would be.
 And it's not even that good.
-It's quite brittle, relying on precise spellings and capitalization and position characters in a string.
-And it's tricky to specify all the "delimiters", such as punctuation, white space, or the beginnings and ends of strings (NULL characters) that are on either sides of words you're looking for.
+It's quite brittle, relying on precise spellings, capitalization and characters' position in a string.
+And it's tricky to specify all the "delimiters", such as punctuation, white space, or the beginnings and ends of strings (NULL characters) that are on either side of the words you're looking for.
 
 You could probably come up with a way to allow you to specify different words or strings you want to look for without hard-coding them into Python expressions like this.
 And you could even specify the delimiters in a separate function.
@@ -945,7 +892,7 @@ So let's use them to define your patterns instead of deeply nested Python `if` s
 
 === Regular expressions
 
-Regular expressions are a strings written in a special computer language that you can use to specify algorithms.
+Regular expressions are strings written in a special computer language that you can use to specify algorithms.
 Regular expressions are a lot more powerful, flexible, and concise than the equivalent Python you'd need to write to match patterns like this.
 So regular expressions are the pattern definition language of choice for many NLP problems involving pattern matching.
 This NLP application is an extension of their original use for compiling and interpreting formal languages (computer languages).
@@ -1187,7 +1134,7 @@ For your regex to work on more natural language dates, such as those found in Wi
 You don't need any special symbols to indicate words (characters that go together in sequence).
 You can just type them in the regex exactly as you'd like them to be spelled in the input, including capitalization.
 All you have to do is put an `OR` symbol (`|`) between them in the regular expression.
-And you need to make sure it can handle US month/day order as well as the European order.
+And you need to make sure it can handle US month/day order, as well as the European order.
 You'll add these two alternative date "spellings" to your regular expression with a "big" OR (`|`) between them as a fork in your tree of decisions in the regular expression.
 
 Let's use some named groups to help you recognize years such as "'84" as 1984 and "08" as 2008.
@@ -1298,7 +1245,7 @@ Your date extractor appears to work OK, at least for a few simple, unambiguous d
 Think about how packages such as `Python-dateutil` and `datefinder` are able to resolve ambiguities and deal with more "natural" language dates such as "today" and "next Monday."
 And if you think you can do it better than these packages, send them a pull request!
 
-If you just want a state of the art date extractor, statistical (machine learning) approaches will get you there faster.
+If you just want a state-of-the-art date extractor, statistical (machine learning) approaches will get you there faster.
 The Stanford Core NLP SUTime library (https://nlp.stanford.edu/software/sutime.html) and `dateutil.parser.parse` by Google are the state of the art.
 
 == Extracting relationships (relations)
@@ -1504,7 +1451,7 @@ A normalized representation for entities enables your knowledge base to connect 
 You'd do the same for other named entities.
 You'd correct the spelling of words and attempt to resolve ambiguities for names of objects, animals, people, places, and so on.
 Normalizing named entities and resolving ambiguities is often called "coreference resolution" or "anaphora resolution", especially for pronouns or other "names" relying on context.
-This is similar to lemmatization, which we discussed in chapter 2.
+This is similar to lemmatization, which you learned about in Chapter 2.
 Normalization of named entities ensures that spelling and naming variations don't pollute your vocabulary of entity names with confounding, redundant names.
 
 For example "Desoto" might be expressed in a particular document in at least five different ways:
@@ -1515,7 +1462,7 @@ For example "Desoto" might be expressed in a particular document in at least fiv
 * https://en.wikipedia.org/wiki/Hernando_de_Soto (a URI)
 * A numerical ID for a database of famous and historical people
 
-Similarly your normalization algorithm can choose any of these forms.
+Similarly, your normalization algorithm can choose any of these forms.
 A knowledge graph should normalize each kind of entity the same way, to prevent multiple distinct entities of the same type from sharing the same "name."
 You don't want multiple person names referring to the same physical person.
 Even more importantly, the normalization should be applied consistently -- both when you write new facts to the knowledge base or when you read or query the knowledge base.
@@ -1532,7 +1479,7 @@ What about _relations_ between entities -- do they need to be stored in some nor
 
 === Relation normalization and extraction
 
-Now you need to a way to normalize the relationships, to identify the kind of relationship between entities.
+Now you need a way to normalize the relationships, to identify the kind of relationship between entities.
 Doing so will allow you to find all birthday relationships between dates and people, or dates of occurrences of historical events, such as the encounter between "Hernando de Soto" and the "Pascagoula people."
 And you need to write an algorithm to choose the right label for your relationship.
 
@@ -1546,12 +1493,12 @@ Now you need a way to match patterns that can find these relationships.
 
 Word patterns are just like regular expressions, but for words instead of characters.
 Instead of character classes, you have word classes.
-For example, instead of matching a lowercase character you might have a word pattern decision to match all the singular nouns ("NN" POS tag).footnote:[spaCy uses the "OntoNotes 5" POS tags: https://spacy.io/api/annotation#pos-tagging]
+For example, instead of matching a lowercase character, you might have a word pattern decision to match all the singular nouns ("NN" POS tag).footnote:[spaCy uses the "OntoNotes 5" POS tags: https://spacy.io/api/annotation#pos-tagging]
 This is usually accomplished with machine learning.
 Some seed sentences are tagged with some correct relationships (facts) extracted from those sentences.
 A POS pattern can be used to find similar sentences where the subject and object words might change or even the relationship words.
 
-You can use the spaCy package two different ways to match these patterns in latexmath:[O(1)] (constant time) no matter how many patterns you want to match:
+You can use the spaCy package in two different ways to match these patterns in latexmath:[O(1)] (constant time) no matter how many patterns you want to match:
 
 * PhraseMatcher for any word/tag sequence patterns footnote:[See the web page titled "Code Examples : spaCy Usage Documentation" (https://spacy.io/usage/examples#phrase-matcher).]
 * Matcher for POS tag sequence patterns footnote:[See the web page titled "Matcher : spaCy API Documentation" (https://spacy.io/api/matcher).]
@@ -1559,7 +1506,7 @@ You can use the spaCy package two different ways to match these patterns in late
 To ensure that the new relations found in new sentences are truly analogous to the original seed (example) relationships, you often need to constrain the subject, relation, and object word meanings to be similar to those in the seed sentences.
 The best way to do this is with some vector representation of the meaning of words.
 Does this ring a bell?
-Word vectors, discussed in chapter 4, are one of the most widely used word meaning representations for this purpose.
+Word vectors, discussed in Chapter 4, are one of the most widely used word meaning representations for this purpose.
 They help minimize semantic drift.
 
 Using semantic vector representations for words and phrases has made automatic information extraction accurate enough to build large knowledge bases automatically.
@@ -1586,7 +1533,7 @@ Sentences are usually punctuated with one of a few symbols (".", "?", "!", or a 
 And grammatically correct English language sentences must contain a subject (noun) and a verb, which means they'll usually have at least one relation or fact worth extracting.
 And sentences are often self-contained packets of meaning that don't rely too much on preceding text to convey most of their information.
 
-Fortunately most languages, including English, have the concept of a sentence, a single statement with a subject and verb that says something about the world.
+Fortunately, most languages, including English, have the concept of a sentence, a single statement with a subject and verb that says something about the world.
 Sentences are just the right bite-sized chunk of text for your NLP knowledge extraction pipeline.
 For the chatbot pipeline, your goal is to segment documents into sentences, or statements.
 
@@ -1600,7 +1547,7 @@ It helps isolate facts from each other.
 Most sentences express a single coherent thought.
 And many of those thoughts are about real things in the real world.
 
-// TODO: find a more familiar example of  
+// TODO: find a more familiar example of
 // It helps isolate facts from each other so that you can associate the right price with the right thing in text like "A Babel Fish costs $42. It can help you find the answer to life, the universe and everything - 42."footnote:[Article about _The Hitchhiker's Guide to the Galaxy_ on Wikipedia (https://en.wikipedia.org/wiki/The_Hitchhiker%27s_Guide_to_the_Galaxy)]
 // And that string is a good example of why sentence segmentation is tough -- the dot in the middle could be interpreted as a decimal or a "full stop" period.
 
@@ -1612,14 +1559,14 @@ These statements contain the information you want to extract from text.
 Sentences often tell you the relationship between things and how the world works when they make statements of fact, so you can use sentences for knowledge extraction.
 And sentences often explain when, where, and how things happened in the past, tend to happen in general, or will happen in the future.
 So we should also be able to extract facts about dates, times, locations, people, and even sequences of events or tasks using sentences as our guide.
-And, most importantly, all natural languages have sentences or logically cohesive sections of text of some sort.
+And, most importantly, all the natural languages have sentences or logically cohesive sections of text of some sort.
 And all languages have a widely shared process for generating them (a set of grammar "rules" or habits).
 
-But segmenting text, identifying sentence boundaries is a bit trickier than you might think.
+But segmenting text and identifying sentence boundaries is a bit trickier than you might think.
 In English, for example, no single punctuation mark or sequence of characters always marks the end of a sentence.
 
 === Why won't `split('.!?')` work?
-// SUM: Why you need a sentence segmenter instead of naively spltting on EOS punctuation.
+// SUM: Why you need a sentence segmenter instead of naively splitting on EOS punctuation.
 
 Even a human reader might have trouble finding an appropriate sentence boundary within each of the following quotes.
 And if they did find multiple sentences from each, they would be wrong for four out of five of these difficult examples:
@@ -1641,7 +1588,7 @@ When we tried to find the sentence boundaries in this book, we had to manually c
 
 If only we wrote English like telegrams, with a "STOP" or unique punctuation mark at the end of each sentence.
 But since we don't, you'll need some more sophisticated NLP than just `split('.!?')`.
-Hopefully you're already imagining a solution in your head.
+Hopefully, you're already imagining a solution in your head.
 If so, it's probably based on one of the two approaches to NLP you've used throughout this book:
 
 * Manually programmed algorithms (regular expressions and pattern-matching)
@@ -1649,7 +1596,7 @@ If so, it's probably based on one of the two approaches to NLP you've used throu
 
 We use the sentence segmentation problem to revisit these two approaches by showing you how to use regular expressions as well as perceptrons to find sentence boundaries.
 And you'll use the text of this book as a training and test set to show you some of the challenges.
-Fortunately you haven't inserted any newlines within sentences, to manually "wrap" text like in newspaper column layouts.
+Fortunately, you haven't inserted any newlines within sentences, to manually "wrap" text like in newspaper column layouts.
 Otherwise, the problem would be even more difficult.
 In fact, much of the source text for this book, in ASCIIdoc format, has been written with "old-school" sentence separators (two spaces after the end of every sentence), or with each sentence on a separate line.
 This was so we could use this book as a training and test set for your segmenters.
@@ -1726,15 +1673,15 @@ DetectorMorse, by Kyle Gorman, is another good choice if you want state-of-the-a
 
 === AI ethics vs AI safety
 
-In previous chapter you've learned a lot about the harm that AI and natural language processing are causing.
-And hopefully you've come up with your own ideas for how to help mitigate those harms.
-Engineers who design, build and use autonomous algorithms are starting pay attention to the harm caused by these algorithms and how they are used.
+In the previous chapter you learned a lot about the harm that AI and large language models are causing.
+And hopefully, you've come up with your own ideas for how to help mitigate those harms.
+Engineers who design, build and use autonomous algorithms are starting to pay attention to the harm caused by these algorithms and how they are used.
 How to use algorithms ethically, by minimizing harm is called _AI ethics_.
 And algorithms that minimize or mitigate much of these harms are often referred to as ethical AI.
 
-And you may have also heard about the _AI control problem_ or _AI safety_ and may be confused about how it is different from AI ethics. 
+And you may have also heard about the _AI control problem_ or _AI safety_ and may be confused about how it is different from AI ethics.
 AI safety is about how we can avoid being exterminated, intentionally or unintentionally, by our future "robot overlords."
-People working on AI safety are trying to mitigate the long term existential risk posed by superintelligent generally intelligent machines.
+People working on AI safety are trying to mitigate the long-term existential risk posed by superintelligent generally intelligent machines.
 The CEOs of many of the largest AI companies have publicly announced their concern about this problem:
 
 [quote, Center for AI Safety]
@@ -1743,17 +1690,17 @@ Mitigating the risk of extinction from AI should be a global priority alongside 
 ____
 
 This single sentence is so important to AI companies' businesses that more than a 100 senior managers at AI companies signed this open letter.
-Nonetheless many of these same companies are not allocating significant resources or time or public outreach addressing this concern.
+Nonetheless, many of these same companies are not allocating significant resources or time or public outreach to address this concern.
 Many of the largest are not even willing to sign this vague noncommital statement.
 Open AI, Microsoft, and Anthropic signed this letter, but Apple, Tesla, Facebook, Alphabet (Google), Amazon and many other AI goliaths did not.
 
-And there's an ongoing public debate about the urgency and priority of _AI safety_ vs _AI ethics_. 
+And there's an ongoing public debate about the urgency and priority of _AI safety_ vs _AI ethics_.
 Some thought leaders such as Yuval Harari and Yoshua Bengio are focused entirely on AI safety -- restraining or controlling a hypothetical superintelligent AGI.
-Other, less well-known thought leaders are focusing their time and energy on the more immediate harm harm that algorithms and AI are causing now, in other words AI ethics.
+Other, less well-known thought leaders are focusing their time and energy on the more immediate harm that algorithms and AI are causing now - in other words, AI ethics.
 Disadvantaged people are especially vulnerable to the unethical use of AI.
 When companies monetize their users' data they extract power and wealth from those who can least afford the loss.
 When technology is used to create and maintain monopolies those monopolies extinguish competition from small businesses, government programs, nonprofits, and individuals supporting the disadvantaged.footnote:[from _Chokepoint Capitalism_ by Cory Efram Doctorow]
- 
+
 So which one of these pressing topics are you concerned with?
 Are there some overlapping things that you can work on to both reduce the harm to humans now and prevent our extinction in the long run?
 Perhaps _explainable AI_ should be at the top of your list of ways to help create "ethical and safe AI."
@@ -1799,7 +1746,7 @@ Information extraction can be used to extract things such as:
 
 Whether information is being parsed from a large corpus or from user input on the fly, being able to extract specific details and store them for later use is critical to the performance of a chatbot.
 First by identifying and isolating this information and then by tagging relationships between those pieces of information we have learned to "normalize" information programmatically.
-With that knowledge safely shelved in a search-able structure, your chatbot will be equipped with the tools to hold its own in a conversation in a given domain.
+With that knowledge safely shelved in a searchable structure, your chatbot will be equipped with the tools to hold its own in a conversation in a given domain.
 
 === Summary
 
