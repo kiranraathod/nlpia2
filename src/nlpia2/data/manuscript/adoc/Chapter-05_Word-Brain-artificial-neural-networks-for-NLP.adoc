@@ -415,9 +415,9 @@ spam     4
 
 [source,python]
 ----
->>> x = np.array([1, x1, x2, x3, x4])    <1>
->>> w = np.array([w0, w1, w2, w3, w4])    <2>
->>> y = np.sum(w * x)    <3>
+>>> x = np.array([1, x1, x2, x3, x4])  # <1>
+>>> w = np.array([w0, w1, w2, w3, w4])  # <2>
+>>> y = np.sum(w * x)  # <3>
 >>> y
 -0.76
 ----
@@ -526,8 +526,8 @@ The Python for the simplest possible single neuron looks like this:
 [source,python]
 ----
 >>> def neuron(x, w):
-...    z = sum(wi * xi for xi, wi in zip(x, w)) <1>
-...    return z > 0    <2>
+...    z = sum(wi * xi for xi, wi in zip(x, w))  # <1>
+...    return z > 0  # <2>
 ----
 <1> `x` and `w` must be vectors -- lists or tuples or arrays of numerical values
 <2> This complicated expression is the dot product of `w.dot(x)`

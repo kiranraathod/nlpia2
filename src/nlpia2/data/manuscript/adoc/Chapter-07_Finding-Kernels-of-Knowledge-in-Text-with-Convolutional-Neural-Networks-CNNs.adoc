@@ -964,12 +964,12 @@ Listing 7.12 centers, normalizes, and downsamples the audio data and extracts th
 ----
 >>> pd.options.display.max_rows = 7
 
->>> audio = audio[:sample_rate * 2]                   <1>
->>> audio = np.abs(audio - audio.max() / 2) - .5      <2>
->>> audio = audio / audio.max()                       <3>
->>> audio = audio[::sample_rate // 400]               <4>
+>>> audio = audio[:sample_rate * 2]  # <1>
+>>> audio = np.abs(audio - audio.max() / 2) - .5  # <2>
+>>> audio = audio / audio.max()  # <3>
+>>> audio = audio[::sample_rate // 400]  # <4>
 >>> audio = pd.Series(audio, name='audio')
->>> audio.index = 1000 * audio.index / sample_rate    <5>
+>>> audio.index = 1000 * audio.index / sample_rate  # <5>
 >>> audio.index.name = 'time (ms)'
 >>> print(f'audio:\n{audio}')
 ----
@@ -997,7 +997,7 @@ Lising 7.12 shows how to build dot-detecting kernel.
 .Dot detecting kernel
 [source,python]
 ----
->>> kernel = [-1] * 24 + [1] * 24 + [-1] * 24                        <1>
+>>> kernel = [-1] * 24 + [1] * 24 + [-1] * 24  # <1>
 >>> kernel = pd.Series(kernel, index=2.5 * np.arange(len(kernel)))
 >>> kernel.index.name = 'Time (ms)'
 >>> ax = kernel.plot(linewidth=3, ylabel='Kernel weight')
@@ -1015,11 +1015,10 @@ You also want your dot detecting convolution to return a low value (close to zer
 .Dot detector convolved with the secret message
 [source,python]
 ----
->>> kernel = np.array(kernel) / sum(np.abs(kernel))    <1>
->>> pad = [0] * (len(kernel) // 2)                     <2>
+>>> kernel = np.array(kernel) / sum(np.abs(kernel))  # <1>
+>>> pad = [0] * (len(kernel) // 2)  # <2>
 >>> isdot = convolve(audio.values, kernel)
->>> isdot =  np.array(pad[:-1] + list(isdot) + pad)    <3>
-
+>>> isdot =  np.array(pad[:-1] + list(isdot) + pad)  # <3>
 >>> df = pd.DataFrame()
 >>> df['audio'] = audio
 >>> df['isdot'] = isdot - isdot.min()
@@ -1405,18 +1404,19 @@ Here's a good function for displaying the parameters in each layer of your PyTor
 
 [source,python]
 ----
-def describe_model(model):    <1>
-    state = model.state_dict()
-    names = state.keys()
-    weights = state.values()
-    params = model.parameters()
-    df = pd.DataFrame([
-        dict(
-            name=name,
-            learned_params=int(p.requires_grad) * p.numel(),    <2>
-            all_params=p.numel(),    <3>
-            size=p.size(),
-        )
+>>> def describe_model(model):  # <1>
+...     state = model.state_dict()
+...     names = state.keys()
+...     weights = state.values()
+...     params = model.parameters()
+>>>     df = pd.DataFrame()
+>>>     df['name'] = list(state.keys())
+>>>     df['all'] = p.numel(),
+...     df['learned'] = [
+...         p.requires_grad  # <2>
+...         for p in params],  # <3>
+...     size=p.size(),
+...     )
         for name, w, p in zip(names, weights, params)
     ]
     )
@@ -1426,7 +1426,7 @@ def describe_model(model):    <1>
 describe_model(pipeline.model)    <4>
 ----
 <1> this will work on any model derived from `torch.nn.Module`
-<2> `requires_grad` means the parameters are learned during training
+<2> `requires_grad` is True for layers where the parameters are learned during training (backprop)
 <3> this total will include any constants that are not learned
 <4> `pipeline` contains the disaster tweet classifer you just trained
 
@@ -1434,7 +1434,7 @@ describe_model(pipeline.model)    <4>
 ----
                      learned_params  all_params        size
 name
-embedding.weight             128064      128064  (2001, 64)    <1>
+embedding.weight             128064      128064  (2001, 64)  # <1>
 linear_layer.weight            1856        1856   (1, 1856)
 linear_layer.bias                 1           1        (1,)
 ----

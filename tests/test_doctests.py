@@ -2,6 +2,8 @@ import pytest  # noqa
 import doctest
 import nlpia2
 import nlpia2.ch06
+import nlpia2.pycozo
+
 # import nlpia2.ch06.spell
 
 
@@ -12,4 +14,9 @@ import nlpia2.ch06
 
 def test_nlpia2_doctests():
     results = doctest.testmod(nlpia2, optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE))
+    assert results.failed == 0
+
+
+def test_nlpia2_pycozo_doctests():
+    results = doctest.testmod(nlpia2.pycozo, optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE))
     assert results.failed == 0

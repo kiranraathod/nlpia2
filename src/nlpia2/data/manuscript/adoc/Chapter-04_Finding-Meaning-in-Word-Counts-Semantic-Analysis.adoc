@@ -172,13 +172,13 @@ If you "trained" your topic model like this, without using a computer, just your
 
 >>> topic = {}
 >>> tfidf = dict(list(zip('cat dog apple lion NYC love'.split(),
-...     np.random.rand(6))))    <1>
+...     np.random.rand(6))))  # <1>
 >>> topic['petness'] = (.3 * tfidf['cat'] +\
 ...                     .3 * tfidf['dog'] +\
 ...                      0 * tfidf['apple'] +\
 ...                      0 * tfidf['lion'] -\
 ...                     .2 * tfidf['NYC'] +\
-...                     .2 * tfidf['love'])    <2>
+...                     .2 * tfidf['love'])  # <2>
 >>> topic['animalness']  = (.1 * tfidf['cat']  +\
 ...                         .1 * tfidf['dog'] -\
 ...                         .1 * tfidf['apple'] +\
@@ -436,9 +436,9 @@ Let's perform manually this approximation of LDA, and see how it does on our dat
 
 [source,python]
 ----
->>> mask = comments.toxic.astype(bool).values    <1>
->>> toxic_centroid = tfidf_docs[mask].mean(axis=0)   <2>
->>> nontoxic_centroid = tfidf_docs[~mask].mean(axis=0)   <3>
+>>> mask = comments.toxic.astype(bool).values  # <1>
+>>> toxic_centroid = tfidf_docs[mask].mean(axis=0)  # <2>
+>>> nontoxic_centroid = tfidf_docs[~mask].mean(axis=0)  # <3>
 
 ----
 <1> You can use this mask to select only the toxic comment rows from a `numpy.array` or `pandas.DataFrame`.
@@ -450,7 +450,7 @@ Now you can subtract one centroid from the other to get the line between them, a
 [source,python]
 ----
 >>> centroid_axis = toxic_centroid - nontoxic_centroid
->>> toxicity_score = tfidf_docs.dot(centroid_axis)    <1>
+>>> toxicity_score = tfidf_docs.dot(centroid_axis)  # <1>
 >>> toxicity_score.round(3)
 array([-0.008, -0.022, -0.014, ..., -0.025, -0.001, -0.022])
 ----
@@ -539,7 +539,7 @@ And you'll see how the classifier performs on the messages it wasn't trained on.
 >>> X_train, X_test, y_train, y_test = train_test_split(tfidf_docs,\
 ...     comments.toxic.values, test_size=0.5, random_state=271828)
 >>> lda_tfidf = LDA(n_components=1)
->>> lda = lda_tfidf.fit(X_train, y_train)    <1>
+>>> lda = lda_tfidf.fit(X_train, y_train)  # <1>
 >>> round(float(lda.score(X_train, y_train)), 3)
 0.999
 >>> round(float(lda.score(X_test, y_test)), 3)
@@ -720,7 +720,7 @@ In the following listing, you will use the PCA method of Scikit-Learn to take th
 [source,python]
 ----
 >>> import pandas as pd
->>> pd.set_option('display.max_columns', 6)    <1>
+>>> pd.set_option('display.max_columns', 6)  # <1>
 >>> from sklearn.decomposition import PCA
 >>> import seaborn
 >>> from matplotlib import pyplot as plt
@@ -729,7 +729,7 @@ In the following listing, you will use the PCA method of Scikit-Learn to take th
 ...             '-/raw/master/src/nlpia/data')
 
 >>> df = pd.read_csv(DATA_DIR + '/pointcloud.csv.gz', index_col=0)
->>> pca = PCA(n_components=2)    <3>
+>>> pca = PCA(n_components=2)  # <3>
 >>> df2d = pd.DataFrame(pca.fit_transform(df), columns=list('xy'))
 >>> df2d.plot(kind='scatter', x='x', y='y')
 >>> plt.show()
@@ -887,9 +887,9 @@ We will start with decreasing the number of dimensions from 9232 to 16 - we'll e
 ----
 >>> from sklearn.decomposition import TruncatedSVD
 >>>
->>> svd = TruncatedSVD(n_components=16, n_iter=100)    <1>
+>>> svd = TruncatedSVD(n_components=16, n_iter=100)  # <1>
 >>> columns = ['topic{}'.format(i) for i in range(svd.n_components)]
->>> svd_topic_vectors = svd.fit_transform(tfidf_docs)    <2>
+>>> svd_topic_vectors = svd.fit_transform(tfidf_docs)  # <2>
 >>> svd_topic_vectors = pd.DataFrame(svd_topic_vectors, columns=columns,\
 ...     index=index)
 >>> svd_topic_vectors.round(3).head(6)
@@ -945,18 +945,20 @@ Let's look at a few random terms from your vocabulary using the helpful Pandas m
 
 [source,python]
 ----
->>> topic_term_matrix = pd.DataFrame(svd.components_, columns=terms, \
-... index=['topic{}'.format(i) for i in range(16)])
+>>> topic_term_matrix = pd.DataFrame(
+...     svd.components_, columns=terms,
+...     index=['topic{}'.format(i) for i in range(16)])
 >>> pd.options.display.max_columns = 8
 >>> topic_term_matrix.sample(5, axis='columns',
-[CA] random_state=271828).head(4)   <1>
+...     random_state=271828).head(4)  # <1>
+...
         littered  unblock.(t•c  orchestra  flanking  civilised
 topic0  0.000268      0.000143   0.000630  0.000061   0.000119
 topic1  0.000297     -0.000211  -0.000830 -0.000088  -0.000168
 topic2 -0.000367      0.000157  -0.001457 -0.000150  -0.000133
 topic3  0.000147     -0.000458   0.000804  0.000127   0.000181
 ----
-<1> Using the `random_state` parameter again - you should get the same output!
+<1> Using the same `random_state` parameter to get the same output
 
 None of these words looks like "inherently toxic".
 Let's look at some words that we would intuitively expect to appear in "toxic" comments, and see how much weight those words have in different topics.
@@ -964,8 +966,10 @@ Let's look at some words that we would intuitively expect to appear in "toxic" c
 [source,python]
 ----
 >>> pd.options.display.max_columns = 8
->>> toxic_terms = topic_term_matrix['pathetic crazy stupid idiot lazy
-[CA] hate die kill'.split()].round(3) * 100   <1>
+>>> toxic_terms = topic_term_matrix[
+...     'pathetic crazy stupid idiot lazy hate die kill'.split()
+...     ].round(3) * 100  # <1>
+...
 >>> toxic_terms
          pathetic  crazy  stupid  idiot  lazy  hate  die  kill
 topic0        0.3    0.1     0.7    0.6   0.1   0.4  0.2   0.2
@@ -990,7 +994,7 @@ topic9    -0.1
 topic10   -6.6
 ...
 ----
-<1> Scaling the weights to get rid of the zeroes
+<1> Multiplying by 100 makes the weights easier to read and compare to each other
 
 Topics 2 and 4 appear to be more likely to contain toxic sentiment.
 And topic 10 seems to be an "anti-toxic" topic.
@@ -1035,9 +1039,9 @@ This time, the classification will go much faster:
 
 [source,python]
 ----
->>> X_train_16d, X_test_16d, y_train_16d, y_test_16d =
-[CA] train_test_split(svd_topic_vectors, \
-[CA] comments.toxic.values, test_size=0.5, random_state=271828)
+>>> X_train_16d, X_test_16d, y_train_16d, y_test_16d = train_test_split(
+...     svd_topic_vectors, comments.toxic.values, test_size=0.5,
+...     random_state=271828)
 >>> lda_lsa = LinearDiscriminantAnalysis(n_components=1)
 >>> lda_lsa = lda_lsa.fit(X_train_16d, y_train_16d)
 >>> round(float(lda_lsa.score(X_train_16d, y_train_16d)), 3)
@@ -1081,7 +1085,7 @@ First, recall the classification performance we got when we run an LDA classifie
 ...                      'test_recall': 0.12,
 ...                      'test_f1': 0.183}
 >>> hparam_table = hparam_table.append(
-...     tfidf_performance, ignore_index=True)   <1>
+...     tfidf_performance, ignore_index=True)  # <1>
 ----
 <1> Use `ignore_index` parameter to add records in a dictionary form to a Pandas DataFrame
 
@@ -1102,7 +1106,7 @@ Actually, because you're going to extract these scores for a few models, it migh
 >>> lsa_performance = hparam_rec(lda_lsa, X_train_16d, y_train_16d,
 ...        X_test_16d,y_test_16d, 'LDA', 'LSA (16 components)'))
 >>> hparam_table = hparam_table.append(lsa_performance)
->>> hparam_table.T   <1>
+>>> hparam_table.T  # <1>
                                        0          1
 classifier                           LDA        LDA
 features        tf-idf (spacy tokenizer)  LSA (16d)
@@ -1297,7 +1301,7 @@ We'll apply Latent Dirichlet Allocation to the count vector matrix in the same w
 >>> from sklearn.decomposition import LatentDirichletAllocation as LDiA
 
 >>> ldia = LDiA(n_components=16, learning_method='batch')
->>> ldia = ldia.fit(bow_docs)    <1>
+>>> ldia = ldia.fit(bow_docs)  # <1>
 >>> ldia.components_.shape
 (16, 19169)
 ----
@@ -1314,7 +1318,7 @@ So each time you run `sklearn.LatentDirichletAllocation` (or any LDiA algorithm)
 ----
 >>> pd.set_option('display.width', 75)
 >>> term_topic_matrix = pd.DataFrame(ldia.components_, index=terms,\ 
-...     columns=columns)    # <1>
+...     columns=columns)  # <1>
 >>> term_topic_matrix.round(2).head(3)
                           topic0  topic1  ...  topic14  topic15
 a                         21.853   0.063  ...    0.063  922.515

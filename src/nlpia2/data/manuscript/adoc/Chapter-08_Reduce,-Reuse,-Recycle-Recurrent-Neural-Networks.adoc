@@ -1588,9 +1588,9 @@ Because an LSTM cell contains more nonlinear activation functions and weights it
 
 [source,python]
 ----
-r = sigmoid(W_i2r.mm(x) + b_i2r +    W_h2r.mm(h) + b_h2r)    <1>
-z = sigmoid(W_i2z.mm(x) + b_i2z +    W_h2z.mm(h) + b_h2z)    <2>
-n =    tanh(W_i2n.mm(x) + b_i2n + r∗(W_h2n.mm(h) + b_h2n))    <3>
+r = sigmoid(W_i2r.mm(x) + b_i2r +    W_h2r.mm(h) + b_h2r)
+z = sigmoid(W_i2z.mm(x) + b_i2z +    W_h2z.mm(h) + b_h2z)
+n =    tanh(W_i2n.mm(x) + b_i2n + r∗(W_h2n.mm(h) + b_h2n))
 
 f = sigmoid(W_i2f.mm(x) + b_i2f + W_h2f.mm(h) + b_h2f)    <1>
 i = sigmoid(W_i2i.mm(x) + b_i2i + W_h2i.mm(h) + b_h2i)    <2>

@@ -60,7 +60,7 @@ def load(*args, **kwargs):
     try:
         nlp = spacy.load(*args, **kwargs)
     except OSError:
-        spacy.cli.download(name)
+        spacy.cli.download(args[0])
         nlp = spacy.load(*args, **kwargs)
     return nlp
 
