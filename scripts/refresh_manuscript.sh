@@ -14,6 +14,7 @@ DEST="src/nlpia2/data/manuscript/adoc"
 PREFIX='Chapter'
 git add $DEST
 git commit -am "$SCRIPT_NAME: git-commit -a before refresh of $DEST/$PREFIX*.adoc"
+rm -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc
 cp -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc $DEST
 # git commit -am 'hard link Chapter*'
 git add $DEST 
@@ -22,6 +23,7 @@ git commit -am "$SCRIPT_NAME: git-commit -a AFTER refresh of $DEST/$PREFIX*.adoc
 PREFIX='Appendix'
 git add $DEST
 git commit -am "$SCRIPT_NAME: git-commit -a before refresh of $DEST/$PREFIX*.adoc"
+rm -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc
 cp -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc $DEST
 # git commit -am 'hard link Chapter*'
 git add $DEST 
@@ -30,6 +32,7 @@ git commit -am "$SCRIPT_NAME: git-commit -a AFTER refresh of $DEST/$PREFIX*.adoc
 PREFIX='TOC'
 git add $DEST
 git commit -am "$SCRIPT_NAME: git-commit -a before refresh of $DEST/$PREFIX*.adoc"
+rm -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc
 cp -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc $DEST
 # git commit -am 'hard link Chapter*'
 git add $DEST 
@@ -38,6 +41,7 @@ git commit -am "$SCRIPT_NAME: git-commit -a AFTER refresh of $DEST/$PREFIX*.adoc
 PREFIX='outline'
 git add $DEST
 git commit -am "$SCRIPT_NAME: git-commit -a before refresh of $DEST/$PREFIX*.adoc"
+rm -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc
 cp -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc $DEST
 # git commit -am 'hard link Chapter*'
 git add $DEST 
@@ -46,8 +50,8 @@ git commit -am "$SCRIPT_NAME: git-commit -a AFTER refresh of $DEST/$PREFIX*.adoc
 PREFIX='Glossary'
 git add $DEST
 git commit -am "$SCRIPT_NAME: git-commit -a before refresh of $DEST/$PREFIX*.adoc"
+rm -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc
 cp -f "../nlpia-manuscript/manuscript/adoc/${PREFIX}"*.adoc $DEST
 # git commit -am 'hard link Chapter*'
 git add $DEST 
 git commit -am "$SCRIPT_NAME: git-commit -a AFTER refresh of $DEST/$PREFIX*.adoc"
-
