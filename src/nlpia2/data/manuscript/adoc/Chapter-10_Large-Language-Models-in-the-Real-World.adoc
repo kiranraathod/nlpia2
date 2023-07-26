@@ -1,19 +1,23 @@
 = Natural Language Processing in Action, Second Edition
 :chapter: 10
 :part: 3
+:sectnumoffset: 1
 :secnums:
 :imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
-:stem: latexmath
+:leveloffset: 1
+//:stem: latexmath
+// :icons!:
+:toc:
+:source-highlighter: coderay
+:bibliography-database: dl4nlp.bib
+:bibliography-style: ieee
+:index::[]
 
-= Chapter 10 -- Large Language Models in the Real World
-
-////
-KM: This is much better. Thank you for addressing all of my previous comments. I've removed all of those from this file since you've addressed them all.
-////
+= Large Language Models in the Real World
 
 This chapter covers
 
@@ -90,150 +94,36 @@ That's the problem.
 LLMs aren't logical, reasonable, intelligent or even intentional.
 But the human mind is easily fooled by a machine that has been trained on the entire Internet and can regurgitate patterns of words that look a lot like reasonable answers to your questions.
 
-It takes a pretty smart user to detect the quirks of poor reasoning that come out in your conversations with LLMs.
-Millions of people were enthralled in just two months.
-OpenAI bragged that they had signed up their 100 millionth ChatGPT user in January 2023, two months after launch.
-
-Conversational LLMs appear to be intelligent!
+In the next chapters, you'll see how LLMs struggle even with basic problems when it comes to math, and their ability to reason is very limited. 
+These problems became evident at the launch of ChatGPT by OpenAI in 2022. 
 You have probably been impressed with the conversational agility of ChatGPT and Bard.
 LLMs answer almost any question you can pose with confidence and seeming intelligence.
 But "seeming" is not always being.
-Keep that in the back of your mind, look at the brief history and explosive expansion of LLM size over the past three years in Figure <<figure-llm-survey>>.
-
-[id=figure-llm-survey, reftext={chapter}.{counter:figure}]
-.Large Language Model sizes
-image::../images/ch10/llm_survey.png[Scatterplot of the size vs release date for LLMs with red diamond markers for proprietary models such as GPT-4 with approx 1.5 trillion parameters and blue circles for open source models such as BLOOM with almost 200 billion parameters, width=90%, align="center", link="../images/ch10/llm_survey.png"]
-
-To put these model sizes into perspective, a model with a trillion trainable parameters has less than 1% of the number of connections between neurons than an average human brain has.
-This is why researchers and large organizations have been investing millions of dollars on the compute resources required to train the largest language models.
-
-Researchers and their corporate backers are hopeful that increased size will unlock human-like capabilities.
-And these BigTech researchers have been rewarded at each step of the way.
-100 B parameter models such as BLOOM and InstructGPT revealed the capacity for LLMs to understand and respond appropriately to complex instructions for creative writing tasks such as composing a love poem from a Klingon to a human.
-And then trillion parameter models such as GPT-4 can perform few-shot learning where the entire machine learning training set is contained within a single conversational prompt.
-
-
-=== Example LLM application - education
-
-But how deep does this in-context few-shot learning go?
-Can `GPT-3.5-turbo` pick up within the middle of a Rori.AI conversation with a student?
-
-[[listing-chatgpt-rori-experiment]]
-.ChatGPT can't count
-[source,python]
-----
->>> from nlpia2.chatgpt import send_prompt
->>> prompt = "teacher: 9,10,11?\n student: 12\n"
->>> prompt += "teacher: Perfect!\n teacher: 38,39,40?\n"
->>> prompt += "student: 42\n teacher: Oops. Not quite. Try again.\n"
->>> prompt += "student: 41\n teacher: Good work! 2,4,6?\n"
->>> prompt += "student: 8\n teacher: "
->>> print(send_prompt(
-...     model='gpt-3.5-turbo',  # <1>
-...     context_prompt='third_grade', # <2>
-...     prompt=prompt))
-Close, but not quite. Think about the pattern again.
-student: 10
-teacher: Fantastic! You're getting it. 25, 30, 35?
-student: 40
-teacher: Wonderful job! You are a great math student.
-----
-<1> You will need to put your API Keys in a .env file to be able to use this model.
-<2> More system or context prompt examples are in the source code: (https://gitlab.com/tangibleai/nlpia2/-/blob/main/src/nlpia2/chatgpt.py#L17)
-
-This ChatGPT response would definitely get the thumbs-down from the teacher.
-The student was able to correctly count by 2's by completing the sequence "2,4,6" and answering with "8".
-However, the simulated ChatGPT teacher replied that the student was incorrect.
-In this _in-context_ _few-shot learning_ example ChatGPT performed poorly.
-It did a good job of following the general pattern of the teacher's lesson.
-But elementary school math is evidently not ChatGPT's strong suit.
-
-Fortunately, ChatGPT will often respond differently if you send the same prompt multiple times, or if you increase the temperature.
-This is one best-practice approach to automatic curation, simply rank or score multiple generated responses based on the goals of your project or the conversation goals of your conversation manager.
-See the illustration on the inside cover of the first edition of NLPiA for a bit of foreshadowing about large language models and their need for grounding and curation within a rule-based conversation manager.
-
-.If at first you don't succeed try and try again
-[source,python]
-----
->>> print(send_prompt(
-...     model='gpt-3.5-turbo',
-...     context_prompt='third_grade', # <1>
-...     prompt=prompt))
-Great job! How about 11, 12, 13?
-
->>> print(send_prompt(
-...     model='gpt-3.5-turbo',
-...     context_prompt='third_grade',
-...     prompt=prompt))  # <2>
-Good job!
-----
-<1> See the `nlpia2.chatgpt` module for the full text
-<2> Sending a prompt again starts a fresh conversation in ChatGPT
-
-As you can see ChatGPT did much better on the second round of testing.
-And each time you send a prompt it may return a different response, even if you configure it the exact same way each time.
-And we ran these tests over several weeks and the responses got shorter and shorter, perhaps because we and others had instructed it to provide shorter responses.
-The answers you see here are from the second round of testing we did more than a week after the first round.
-It is not too surprising that it got better and better at pretending to be a third-grade teacher.
-After all this LLM uses reinforcement learning with human feedback to try to keep up with the changing needs of humans using LLMs in the real world.
+When asked to answer professional questions, ChatGPT would often generate nonsense that might look like a reasonable answer to a layperson, but contained errors that would be obvious to a professional.
+As time passed, the model actually got better at answering the same questions it struggled with at launch.
 
 For ChatGPT the human feedback is the like button and any explicit feedback users or trained employees of OpenAI provide.
 This means the overwhelming incentive or objective for OpenAI-hosted models will be to increase the number of like button clicks from users.
 This is the trick that other social media companies use to create hype, and unintentionally create a divided society partitioned into echo chambers where everyone hears what they want to hear.
 The objective function of an LLM is determined by the organization training it.
 And OpenAI has chosen to target "likability" (popularity) so that they can maximize the number of signups and hype surrounding their launch.
-And it accomplished this objective, reportedly attracting 100 million monthly users in only 2 months, the fastest-growing product launch ever.
+And it accomplished this objective - OpenAI bragged that they had signed up their 100 millionth ChatGPT user in January 2023, two months after launch.
 
-You probably will want to call an LLM many times using the exact same prompts to quantify the range of possible responses you can expect.
-And you should record all of your requests alongside the LLM responses so you can predict how well it is likely to work in your application.
-Otherwise, LLMs can easily catch you off guard.
-Bard's mistakes caught Google executives off guard costing them billions of dollars when they rushed the release of Bard without rigorous testing.
-When you use the nlpia2.chatgpt module you will see that your test results are recorded in both `jsonlines` and `CSV` files for later review.
+Let's look at the brief history and explosive expansion of LLM size over the past three years in Figure <<figure-llm-survey>>.
 
-In addition to the system or context prompt and the main instructional prompt, you can adjust two other parameters during your prompt engineering experiments: temperature and time.
-Most LLMs will allow you to increase or decrease the temperature or entropy of the decoder side of the transformer model.
-A higher temperature increases the randomness or entropy (surprise) of the responses the LLM will generate.
+[id=figure-llm-survey, reftext={chapter}.{counter:figure}]
+.Large Language Model sizes
+image::../images/ch10/llm_survey.png[Scatterplot of the size vs release date for LLMs with red diamond markers for proprietary models such as GPT-4 with approx 1.5 trillion parameters and blue circles for open source models such as BLOOM with almost 200 billion parameters, width=90%, align="center", link="../images/ch10/llm_survey.png"]
 
-Here are some more examples.
-ChatGPT quickly goes off the rails and starts suggesting questions from its training set that it knows how to ask and answer correctly.
-ChatGPT can only pull from text patterns it has seen before.
-So if you try to make it do something new, it will simply fall back to similar things it has done before.
+To put these model sizes into perspective, a model with a trillion trainable parameters has less than 1% of the number of connections between neurons than an average human brain has.
+This is why researchers and large organizations have been investing millions of dollars in the compute resources required to train the largest language models.
 
-[[listing-chatgpt-cant-count]]
-.ChatGPT doesn't have a conversation goal
-[source,python]
-----
->>> prompt = "\n teacher: 9,10,11? \n student: 12 \n"
->>> prompt +=" teacher: Perfect! \n teacher: 34,36,38? \n"
->>> prompt +=" student: 42 \n"
->>> prompt +=" teacher: Oops. Not quite right. Try again. \n"
->>> prompt +=" student: 42 \n teacher: Good work! 2,4,6? \n student: 8"
->>> print(send_prompt(prompt, context_prompt='assistant'))
-teacher: Excellent! You're really good at math.
-Let's try some more challenging problems.
+Researchers and their corporate backers are hopeful that increased size will unlock human-like capabilities.
+And these BigTech researchers have been rewarded at each step of the way.
+100 B parameter models such as BLOOM and InstructGPT revealed the capacity for LLMs to understand and respond appropriately to complex instructions for creative writing tasks such as composing a love poem from a Klingon to a human.
+And then trillion parameter models such as GPT-4 can perform few-shot learning where the entire machine learning training set is contained within a single conversational prompt.
 
-teacher: If a pizza has 8 slices and you eat 3 of them,
-how many slices do you have left?
-student: 5
-
-teacher: Great job! What about this one? If you have 12 marbles ...
-----
-
-
-[[listing-chatgpt-likes-word-problems]]
-.ChatGPT likes word problems
-[source,python]
-----
->>> prompt = "\n teacher: 9, 10, 11? \n student: 12 \n teacher: Perfect! \n teacher: 34, 35, 36? \n student: 38 \n teacher: Oops. Not quite right. Try again. \n student: 37 \n teacher: Good work! 101, 102, 103? \n student: 104"
->>> send_prompt(prompt)
-"teacher: Great job! You're a quick learner. Now, let's move on to some word problems. If Jane has 3 apples and she gives 1 to her friend, how many apples does Jane have left?"
-----
-
-So ChatGPT has read many word problem texts and can regurgitate word problem questions and recognize the correct answers to those questions.
-But this only works for word problems it is familiar with where the numbers are small.
-For word problems requiring significant reasoning and generalization, ChatGPT will often provide incorrect answers and explanations to students.
-
-Nonetheless, some of the most intelligent and skeptical experts are impressed by the ability of LLMs to do few-shot learning.
+Some of the most intelligent and skeptical experts are impressed by the ability of LLMs to do few-shot learning.
 This is something that they did not think would be possible simply by scaling up a GPT model.
 Each order of magnitude increase in model capacity (size) seems to unlock more surprising capabilities.
 In the GPT-4 Technical report the researchers who invested a lot of their time and money into this scaling effort publish papers talking about the surprising capabilities that emerged.footnote:["GPT-4 Technical Report" (https://arxiv.org/pdf/2303.08774.pdf)]
@@ -278,7 +168,7 @@ PaLM-62B             14
 <3> Alphabetize the tasks so the first and last rows are a semi-random sample
 <4> Only 130 of the capabilities tested were claimed to be emergent
 
-The code snippet gives you a alphabetical sampling of the 130 nonemergent capabilities cataloged by Google researchers.
+The code snippet gives you an alphabetical sampling of the 130 nonemergent capabilities cataloged by Google researchers.
 The "flat" labels mean that increasing the size of an LLM did not increase the accuracy of the LLM on these tasks any measurable or statistically significant amount.
 You can see that 35% (`45/130`) of the nonemergent capabilities were labeled as having "flat" scaling.
 "Sublinear scaling" means that increasing the dataset size and number of parameters only increased the accuracy of the LLM less and less, giving diminishing returns on your investment in LLM size.
@@ -474,7 +364,7 @@ Similarly, you can find 100s of open-source ChatGPT-like alternatives on Hugging
 H2O has even provided you with a UX within HuggingFace Spaces where you can compare all these chatbots to each other.
 Here are some alternatives to ChatGPT with more prosocial, magnanimous objective functions:
 
-* 3B: NLLB (https://huggingface.co/facebook/nllb-200-3.3B) -- Meta
+* 3B: NLLB ( https://huggingface.co/facebook/nllb-200-3.3B ) -- Meta
 * 11B: Flan-T5 (https://huggingface.co/google/flan-t5-xxl) -- Google
 * 12B: Pythia (https://github.com/EleutherAI/pythia) -- EleutherAI
 * 13B: Vicuna (https://vicuna.lmsys.org/) -- Berkeley+CMU+Stanford+UCSD
@@ -945,7 +835,6 @@ You have a search query, that you can embed using an LLM.
 And you have your text database, where every record is embedded using the same LLM into a vector.
 Among those vectors, you want to find the vector that is closest to your query vector - that is, its _cosine similarity_ (or dot product, assuming your vectors are normalized) is maximized.
 
-
 === Approximate Nearest Neighbor search
 
 There is only one way to find the _exact_ nearest neighbor for our query.
@@ -1224,9 +1113,9 @@ Now, it's time to set up our indexing models!
 The semantic search process includes two main steps - retrieving documents that might be relevant to the query (semantic search), and processing those documents to create an answer.
 So you will need an EmbeddingRetriever semantic vector index and a generative transformer model.
 
-In chapter 9 you met BERT and learn how to use it to create general purpose embeddings that represent the meaning of text.
+In chapter 9 you met BERT and learn how to use it to create general-purpose embeddings that represent the meaning of text.
 Now you'll learn how to use an embedding-based retriever to overcome the curse of dimensionality and find the embeddings for text most likely to answer a user's question.
-You can probably guess that you'll get better results if both your retriever and your reader are fine-tuned for question answering tasks.
+You can probably guess that you'll get better results if both your retriever and your reader are fine-tuned for question-answering tasks.
 Luckily there are a lot of BERT-based models that have been pretrained on question-answering datasets like SQuAD.
 
 [source,python]
@@ -1240,7 +1129,7 @@ Luckily there are a lot of BERT-based models that have been pretrained on questi
 >>> document_store.update_embeddings(retriever=retriever)
 >>> document_store.save('nlpia_index_faiss')  # <2>
 ----
-<1> roBERTa is robust and compact version of BERT
+<1> roBERTa is the robust and compact version of BERT
 <2> save the document store to disk
 
 Note that the Reader and the Retriever don't have to be based on the same model - because they don't perform the same job.

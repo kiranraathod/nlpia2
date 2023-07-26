@@ -83,7 +83,7 @@ You don't even have to speak or hear the word to trigger its pattern in your bra
 You just have to think it.
 And like kids running out to the playground, the electrons never flow along the same paths twice.
 Just as the meaning of a word evolves over time, your embedding of a word is constantly evolving.
-Your brain is a never ending language learner not too different from Cornell's Never Ending Language Learner system.footnote:["Never-Ending Language Learning" by T. Mitchell et al at Cornell (http://proai.org/NELL_aaai15.pdf)]
+Your brain is a never-ending language learner not too different from Cornell's Never Ending Language Learner system.footnote:["Never-Ending Language Learning" by T. Mitchell et al at Cornell (http://proai.org/NELL_aaai15.pdf)]
 
 Some people have gotten carried away with this idea, and they imagine that you can accomplish a form of mind control with words.
 When I was looking for information about NLP research on Reddit I got distracted by the `r/NLP` subreddit.
@@ -287,7 +287,7 @@ Engineers    0.363686
 So if you want to one day become a "Chief Engineer" it looks like "Scientist", "Architect", and "Deputy" might also be job titles you'll encounter along the way.
 
 What about that tip-of-your-tongue word finder application mentioned at the beginning of this chapter?
-Have you ever tried to recall a famous person's name but you only have a general impression of them, like maybe this:
+Have you ever tried to recall a famous person's name while only have a general impression of them, like maybe this:
 
 [quote]
 ____
@@ -408,7 +408,7 @@ NLP comes to the rescue with word embeddings.
 
 Word embeddings can be used to answer even these vague questions and analogy problems.
 Word embeddings can help you remember any word or name on the tip of your tongue, as long as the vector for the answer exists in your vocabulary.
-(For Google's pretrained Word2Vec model, your word is almost certainly within the 100B word news feed that Google trained it on, unless your word after 2013.)
+(For Google's pretrained Word2Vec model, your word is almost certainly within the 100B word news feed that Google trained it on, unless your word was created after 2013.)
 And embeddings work well even for questions that you cannot even pose in the form of a search query or analogy.
 
 You can learn about some of the math with embeddings in the "analogical reasoning" section later in this chapter.
@@ -416,7 +416,7 @@ You can learn about some of the math with embeddings in the "analogical reasonin
 === Word2Vec Innovation
 
 Words that are used near each other sort of pile up on top of each other in our minds and eventually define what those words mean within the connections of the neurons of our brains.
-As a toddler you hear people talking about things "soccer balls," "fire trucks," "computers," and "books," and you can gradually figure out what each of them are.
+As a toddler you hear people talking about things like "soccer balls," "fire trucks," "computers," and "books," and you can gradually figure out what each of them is.
 The surprising thing is that your machine does not need a body or brain to understand words as well as a toddler.
 
 A child can learn a word after pointing out objects in the real world or a picture book a few times.
@@ -428,7 +428,7 @@ All you need is a lot of text.
 
 In previous chapters, you could ignore the nearby context of a word.
 All you needed to do was count up the uses of a word within the same _document_.
-It turns out, if you make your documents very very short, these counts of co-occurrences becomes useful for representing the meaning of words themselves.
+It turns out, if you make your documents very very short, these counts of co-occurrences become useful for representing the meaning of words themselves.
 This was the key innovation of Tomas Mikolov and his Word2vec NLP algorithm.
 John Rubert Firth popularized the concept that "a word is characterized by the company it keeps."footnote:[See wikipedia article (https://en.wikipedia.org/wiki/John_Rupert_Firth)]
 But to make word embeddings useful required Tomas Mikolov's focus on a very small "company" of words and the computational power of 21st century computers as well as massive corpora machine-readable text.
@@ -436,34 +436,34 @@ You do not need a dictionary or thesaurus to train your word embeddings.
 You only need a large body of text.
 
 That is what you are going to do in this chapter.
-You are going to teach a machine to be sponge, like a toddler.
+You are going to teach a machine to be a sponge, like a toddler.
 You are going to help machines figure out what words mean, without ever explicitly labeling words with their dictionary definitions.
 All you need is a bunch of random sentences pulled from any random book or web page.
 Once you tokenize and segment those sentences, which you learned how to do in previous chapters, your NLP pipeline will get smarter and smarter each time it reads a new batch of sentences.
 
-In chapter 2 and 3 you isolated words from their neighbors and only worried about whether they were present or absent in each _document_.
+In Chapters 2 and 3 you isolated words from their neighbors and only worried about whether they were present or absent in each _document_.
 You ignored the effect the neighbors of a word have on its meaning and how those relationships affect the overall meaning of a statement.
 Our bag-of-words concept jumbled all the words from each document together into a statistical bag.
 In this chapter, you will create much smaller bags of words from a "neighborhood" of only a few words, typically fewer than ten tokens.
-You will also ensure that these neighborhoods have boundaries to prevent the meaning of words from spill over into adjacent sentences.
-This process will help focus your word embedding language model on the words that are most closely related to one another.
+You will also ensure that these neighborhoods have boundaries to prevent the meaning of words from spilling over into adjacent sentences.
+This process will help focus your word-embedding language model on the words that are most closely related to one another.
 
-Word embeddings are able to identify synonyms, antonyms, or words that just belong to the same category, such as people, animals, places, plants, names, or concepts.
-We could do that before, with semantic analysis in chapter 4, but your tighter limits on a word's neighborhood will be reflected in tighter accuracy on the word embeddings.
+Word embeddings can help you identify synonyms, antonyms, or words that just belong to the same category, such as people, animals, places, plants, names, or concepts.
+We could do that before, with semantic analysis in Chapter 4, but your tighter limits on a word's neighborhood will be reflected in tighter accuracy on the word embeddings.
 Latent semantic analysis (LSA) of words, _n_-grams, and documents did not capture all the literal meanings of a word, much less the implied or hidden meanings.
 Some of the connotations of a word are fuzzier for LSA's oversized bags of words.
 
 .Word embeddings
 [IMPORTANT, definition]
 ====
-Word embeddings (sometimes called _word vectors_) are high dimensional numerical vector representations of what a word means, including its literal and implied meaning.
+Word embeddings (sometimes called _word vectors_) are high-dimensional numerical vector representations of what a word means, including its literal and implied meaning.
 So word embeddings can capture the _connotation_ of words.
-Somewhere inside an embedding there is a score for  "peopleness," "animalness," "placeness," "thingness" and even "conceptness."
+Somewhere inside an embedding, there is a score for  "peopleness," "animalness," "placeness," "thingness" and even "conceptness."
 And a word embedding combines all those scores, and all the other _ness_ of words, into a dense vector (no zeros) of floating point values.
 ====
 
 The density and high (but not too high) dimensionality of word embeddings is a source of their power as well as their limitations.
-This is why dense, high dimensional embeddings are most valuable when you use them in your pipeline along side sparse hyper-dimensional TFIDF vectors or discrete bag-of-words vectors.
+This is why dense, high-dimensional embeddings are most valuable when you use them in your pipeline along side sparse hyper-dimensional TFIDF vectors or discrete bag-of-words vectors.
 
 == Artificial Intelligence Relies on Embeddings
 
@@ -484,7 +484,7 @@ The philosopher Douglas Hofstader pointed out a few things to look out for when 
 
 You'll soon see how word embeddings can enable these aspects of intelligence within your software.
 For example, word embeddings make it possible to respond with flexibility by giving words fuzziness and nuance that previous representations like TF-IDF vectors could not.
-In previous iterations of your chatbot you would have to enumerate all the possible ways to say "Hi" if you want your bot to be flexible in its response to common greetings.
+In previous iterations of your chatbot, you would have to enumerate all the possible ways to say "Hi" if you want your bot to be flexible in its response to common greetings.
 
 But with word embeddings you can recognize the *meaning* of the word "hi", "hello", and "yo" all with a single embedding vector.
 And you can create embeddings for all the concepts your bot is likely to encounter by just feeding it as much text as you can find.
@@ -492,9 +492,9 @@ There is no need to hand-craft your vocabularies anymore.
 
 [CAUTION]
 ====
-Like word embeddings, intelligence itself is a high dimensional concept.
+Like word embeddings, intelligence itself is a high-dimensional concept.
 This makes _Artificial General Intelligence_ (AGI) an elusive target.
-Be careful not to allow your users or your bosses to thinking that your chatbot is generally intelligent, even if it appears to achieve all of Hofstadter's "essential elements."
+Be careful not to allow your users or your bosses to think that your chatbot is generally intelligent, even if it appears to achieve all of Hofstadter's "essential elements."
 ====
 
 
@@ -504,7 +504,7 @@ In 2012, Tomas Mikolov, an intern at Microsoft, found a way to embed the meaning
 Word embeddings or word vectors typically have 100 to 500 dimensions, depending on the breadth of information in the corpus used to train them.
 Mikolov trained a neural network to predict word occurrences near each target word.
 Mikolov used a network with a single hidden layer, so almost any linear machine learning model will also work.
-Logistic regression, truncated SVD, linear discriminant analysis, or Naive Bayes would all work well and were used successfully by others to duplicates Mikolov's results.
+Logistic regression, truncated SVD, linear discriminant analysis, or Naive Bayes would all work well and were used successfully by others to duplicate Mikolov's results.
 In 2013, once at Google, Mikolov and his teammates released the software for creating these word vectors and called it "Word2Vec."footnote:["Efficient Estimation of Word Representations in Vector Space" Sep 2013, Mikolov, Chen, Corrado, and Dean (https://arxiv.org/pdf/1301.3781.pdf).]
 
 The Word2Vec language model learns the meaning of words merely by processing a large corpus of unlabeled text.
@@ -543,11 +543,11 @@ In unsupervised learning, the model finds patterns in the relationships between 
 An unsupervised model can get smarter (more accurate) just by throwing more data at it.
 ====
 
-Instead of trying to train a neural network to learn the target word meanings directly (on the basis of labels for that meaning) you teach the network to predict words near the target word in your sentences.
+Instead of trying to train a neural network to learn the target word meanings directly (on the basis of labels for that meaning) you can teach the network to predict words near the target word in your sentences.
 So in this sense, you do have labels: the nearby words you are trying to predict.
 But because the labels are coming from the dataset itself and require no hand-labeling, the Word2Vec training algorithm is definitely an unsupervised learning algorithm.
 
-Another domain where this unsupervised training technique is used is in time series modeling.
+Another domain where this unsupervised training technique is used in time series modeling.
 Time series models are often trained to predict the next value in a sequence based on a window of previous values.
 Time series problems are remarkably similar to natural language problems in a lot of ways because they deal with ordered sequences of values (words or numbers).
 
@@ -558,7 +558,7 @@ This representation will capture much more of the meaning of the target word (it
 
 [NOTE]
 ====
-Models that learn by trying to repredict the input using a lower-dimensional internal representation are called _autoencoders_.
+Models that learn by trying to re-predict the input using a lower-dimensional internal representation are called _autoencoders_.
 This may seem odd to you.
 It is like asking the machine to echo back what you just asked them, only they cannot write the question down as you are saying it.
 The machine has to compress your question into shorthand.
@@ -595,7 +595,7 @@ Each weight or score is associated with a specific dimension of meaning for that
 >>> from nessvec.examples.ch06.nessvectors import *  # <1>
 >>> nessvector('Marie_Curie').round(2)
 placeness     -0.46
-peopleness     0.35    <2>
+peopleness     0.35  # <2>
 animalness     0.17
 conceptness   -0.32
 femaleness     0.26
@@ -681,14 +681,14 @@ Nonetheless, the vector in your vocabulary that is closest to the resultant will
 The English word associated with that nearby vector is the natural language answer to your question about sports teams and cities.
 
 Word2Vec allows you to transform your natural language vectors of token occurrence counts and frequencies into the vector space of much lower-dimensional Word2Vec vectors.
-In this lower-dimensional space, you can do your math and then convert back to a natural language space.
-You can imagine how useful this capability is to a chatbot, search engine, question answering system, or information extraction algorithm.
+In this lower-dimensional space, you can do your math and then convert them back to a natural language space.
+You can imagine how useful this capability is to a chatbot, search engine, question-answering system, or information extraction algorithm.
 
 [NOTE]
 ====
 The initial paper in 2013 by Mikolov and his colleagues was able to achieve an answer accuracy of only 40%.
 But back in 2013, the approach outperformed any other semantic reasoning approach by a significant margin.
-Since the initial publication, the performance of Word2Vec has improved further.
+Since its initial publication, the performance of Word2Vec has improved further.
 This was accomplished by training it on extremely large corpora.
 The reference implementation was trained on the 100 billion words from the Google News Corpus.
 This is the pretrained model you'll see used in this book a lot.
@@ -708,7 +708,7 @@ image::../image/06/equations/equation_6_2.png[]
 //image::../images/ch06/stem2.png[]
 
 But their discovery didn't stop there.
-They also discovered that the distance relationships go far beyond simple singular versus plural relationships.
+They also discovered that distance relationships go far beyond simple singular versus plural relationships.
 Distances apply to other semantic relationships.
 The Word2Vec researchers soon discovered they could answer questions that involve geography, culture, and demographics, like this:
 
@@ -724,16 +724,16 @@ San Francisco - California + Colorado = Denver
 
 ==== More reasons to use word vectors
 
-Vector representations of words are useful not only for reasoning and analogy problems, but also for all the other things you use natural language vector space models for.
+Vector representations of words are useful not only for reasoning and analogy problems but also for all the other things you use natural language vector space models for.
 From pattern matching to modeling and visualization, your NLP pipeline's accuracy and usefulness will improve if you know how to use the word vectors from this chapter.
 
-For example, later in this chapter we show you how to visualize word vectors on 2D "semantic maps" like the one shown in figure 6.2.
+For example, later in this chapter, we show you how to visualize word vectors on 2D "semantic maps" like the one shown in figure 6.2.
 You can think of this like a cartoon map of a popular tourist destination or one of those impressionistic maps you see on bus stop posters.
 In these cartoon maps, things that are close to each other semantically as well as geographically get squished together.
 For cartoon maps, the artist adjusts the scale and position of icons for various locations to match the "feel" of the place.
 With word vectors, the machine too can have a feel for words and places and how far apart they should be.
 
-So your machine will be able generate impressionistic maps like the one in figure 6.3 using word vectors you are learning about in this chapter.footnote:[You can find the code for generating these interactive 2D word plots in http://mng.bz/M5G7.]
+So your machine will be able to generate impressionistic maps like the one in figure 6.3 using word vectors you are learning about in this chapter.footnote:[You can find the code for generating these interactive 2D word plots in http://mng.bz/M5G7.]
 
 [id=word_vectors_for_ten_us_cities_projected_onto_a_2d_map_figure, reftext={chapter}.{counter:figure}]
 .Word vectors for ten US cities projected onto a 2D map
@@ -1696,7 +1696,7 @@ the  0.09  0.02 -0.06  ...  0.16 -0.03 -0.03
 .    0.00  0.00 -0.02  ...  0.21  0.07 -0.05
 and -0.03  0.01 -0.02  ...  0.10  0.09  0.01
 of  -0.01 -0.03 -0.03  ...  0.12  0.01  0.02
->>> df.loc['prosocial']    <2>
+>>> df.loc['prosocial']  # <2>
 0      0.0004
 1     -0.0328
 2     -0.1185
@@ -1834,14 +1834,14 @@ Let's see how close this "Illini" vector is to the vector for "Illinois":
 [source,python]
 ----
 >>> import numpy as np
->>> np.linalg.norm(wv['Illinois'] - wv['Illini'])    <1>
+>>> np.linalg.norm(wv['Illinois'] - wv['Illini'])  # <1>
 3.3653798
 >>> cos_similarity = np.dot(wv['Illinois'], wv['Illini']) / (
 ...     np.linalg.norm(wv['Illinois']) *\
-...     np.linalg.norm(wv['Illini']))    <2>
+...     np.linalg.norm(wv['Illini']))  # <2>
 >>> cos_similarity
 0.5501352
->>> 1 - cos_similarity    <3>
+>>> 1 - cos_similarity # <3>
 0.4498648
 ----
 <1> Euclidean distance

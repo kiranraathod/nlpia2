@@ -328,22 +328,21 @@ To avoid debates about which features are more important you can be data-driven.
 If you can sort all of your team's ideas according to what your user's appear to need, based on message statistics, you can help lead your team to think about the right problems rather than getting lost in endless debates.
 ====
 
-== Generating a response
-Chatbots have exploded in popularity as the tools for building them have started to generate uncanny simulations of intelligent human conversation.
-Several companies and platforms have been formed to help conversation designers build conversational assistants.
-The trendiest of these is the generative language models of chapter 10.
-However, if you want to be able to maintain control over what your chatbot says you will need to use a more explainable algorithm for generating the content of what a chatbot says.
-For rule-based chatbots this leaves only three deterministic rule-based approaches.
 
-* Templates
-* Retrieval (search)
-* Programmatic
 
-Almost all of the early rule-based chatbots relied on templates.
-These templates are the same as the f-strings you're used to in Python and the prompt templates you saw in chapter 10.
-You'll first revisist some of these early templating systems for chatbots before learning how to use search engines and custom programs to tailor the chatbot responses to particular users' needs.
 
-=== Template-based approach
+== Choosing your approach
+As chatbot-building exploded in the recent 7 years, more and more different recipes and platforms appeared that allowed people to create their own conversational assistants.
+However, most of these can be classified into 4 categories:
+
+* Rule-based
+* Fuzzy retrieval
+* Knowledge-based and search-based
+* Generative
+
+When we started writing this book, various forms of rule-based assistants dominated the market; now as we're finishing in 2023, generative assistants leveraging retrieval-based generation have broken through quite spectacularly. 
+
+=== Rule-based approach
 
 Rule-based approach was the first approach developers used to create chatbots.
 
@@ -527,11 +526,10 @@ You do need to choose a relational database that allows you to store and efficie
 This will allow your chatbot's brain and memory to grow and meet the evolving needs of your users.
 And by using a relational database for your data you can rely on all the conventional data analytics, migration, backup and ETL tools you are probably already using for you project.footnote:[Hacker News discussion about using PostgreSQL to store graph data (https://news.ycombinator.com/item?id=10316872)] footnote:["Representing a graph using a relational database" on Stack Overflow (https://stackoverflow.com/a/2968931)]
 
+== Retrieval-based approach
 
-== Scaling up the content
-One of the limitations of a deterministic chatbot is that someone has to determine ahead of time everything that that bot will say.
-
-The key drawback is the brittleness and scale - if the rules do not cover the particular way your user phrases their expression or question, or are ambiguous, the bot will fail to answer.
+The chatbots described in the previous chapter share the determinstic quality - that is, given a particular utterance from the user, the chatbot's rules will return at most 1 appropriate answer.
+This approach has its benefits, but also its limitations. The key drawback is the brittleness - if the rules do not cover the particular way your user phrases their expression or question, or are ambiguous, the bot will fail to answer.
 This is where fuzzy approach comes in. In essence, instead of 1 possible answer, the fuzzy approach assigns a different _score_ to every possible answer, and chooses the most appropriate one out of the options available.
 
 
@@ -565,26 +563,19 @@ In 2016, Microsoft's Tay chatbot was released on Twitter, and its feedback loop 
 More recently, ChatGPT, despite being explicitly engineered to evade toxic and unsafe responses and being continuously updated based on user inputs, still produces bigoted rhetoric when asked to act as a "bad person" or a historical figure.footnote:[(https://gizmodo.com/chatgpt-ai-openai-study-frees-chat-gpt-inner-racist-1850333646)]
 In the previous chapter, you saw other examples of dangerous output by LLM-based generative models. 
 
-That's why it's not recommended to use generative chatbots alone, without any grounding or fine tuning.
-It's better to combine them with other techniques - for example, you can use intent recognition to flag any user messages that might trigger a toxic reply from an LLM.
-And you can use that same intent recognition model to evaluate the LLM's suggested responses.
-If they aren't up to your standards you can keep generating more and more, or even increasing the temperature, until you get something that achieves one or more intent or sentiment labels that you are looking for.
-And you can use a knowledge base mentioned in Chapter 11 to have the chatbot base its answers on facts in your knowledge base, rather than have it make up its own facts and references.
+That's why it's not recommended to use generative chatbots alone, without any grounding. 
+It's better to combine them with other techniques - for example, you can use intent recognition to understand if the user's question is not too sensitive enough to get a generative answer. 
+And you can use a knowledge base mentioned in the previous subsection to have the chatbot base its answers on relevant facts, rather than have it make up its own facts and references. 
 
-One of the most popular grounding approaches is called Retrieval Augmented Generative (RAG) models.
-As its name suggests you can use information retrieval algorithms (full text search or semantic search) to retrieve text likely to contain answers to your users' questions.
-This is especially useful if you want to incorporate private data into the LLM responses.
-For example you could include your journal entries, therapy notes, and even medical records in a self-hosted document store with semantic search, such as VexVault.footnote:[VexVault is an Open Source vector store that runs in your browser so it is automatically self-hosted and private (https://github.com/Xyntopia/vexvault)]
-That way you can ask private questions of your past self (and your past doctors).
-You would send a paragraph or two from your notes to a large language model as part of the template.
-Of course you don't want to do this with commercial LLM services.
-Most commercial services admit in the fine print of their (anti-) privacy policies that they will use your data however they like.
+
+== Bringing it all together
+// SUM: Modern chatbot engineers have converged on the hybrid chatbot architecture that we introduced in the first edition. Modern chatbots combine generative deep learning models with template, information retrieval, logic rules, template interpolation, and grammar parsers to create intelligent-sounding chatbots.
     
 
 == Real-world chatbot frameworks
 // SUM: You can chose one of three different approaches to building chatbots or combine them all together using open source Python chatbot frameworks and the qary.ai platform allows you to experiment with all three for free.
 
-In the previous chapters you've seen several tools you can use to build chatbots.
+In the previous chatpers you've seen each of the approaches to build a chatbot.
 Using the tools described here, you can build a bot that can serve you (and maybe a few friends, or even more people if you're lucky) if deployed on a server or in a cloud.
 However, if you want to build a chatbot that servers hundreds or thousands of users, you need a more robust, scalable system.
 Luckily, there are frameworks available that allow you to focus on building your bot while taking care of the challenges that come with the need to build a production-grade system.
@@ -851,11 +842,10 @@ Let's see if your bot remembers your name (or Maria's).
 > Entering new  chain...
 Prompt after formatting:
 This is a conversation between a human and a chatbot. 
-    The chatbot is friendly and provides answers based
-    on the previous conversation and the context."
-    Human says: What is my name?
-    Chatbot responds:
-
+                   The chatbot is friendly and provides answers based 
+                   on the previous conversation and the context." 
+                   Human says: What is my name?
+                   Chatbot responds:
 > Finished chain.
 'I am a human.'
 ----
@@ -970,7 +960,7 @@ You can use `dotenv.load_dotenv()` on your your .env or you can set the variable
 >>> os.environ["REPLICATE_API_TOKEN"] = '<your_API_key_here>'
 
 >>> llm = Replicate(
-...     model="a16z-infra/llama13b-v2-chat:" +
+...     model="a16z-infra/llama13b-v2-chat:"
 ...     "df7690",  # <1>
 ...     input={
 ...         "temperature": 0.5,
@@ -978,41 +968,22 @@ You can use `dotenv.load_dotenv()` on your your .env or you can set the variable
 ...         "top_p": 1,
 ...     })
 ----
-<1> df7690 is the first 6 characters of the git commit hash for Llama2-13B
+<1> You only need to specify the first 5 or 6 characters of the git commit hash for the model you want to load
 
-Now instead of HuggingFace Spaces, your model will use Replicate's API to run the model and predict responses.
-This way you can scale up to GPUs or TPUs if you have the budget and the need.
-You can use any of Huggingface's LLMs within Replicate as long as you can find their path and git commit hash.
-Here are some more Llamas to chose from.
-
-[source,python]
-----
-llama_family = {
-    "llama7B-v2-chat": "a16z-infra/llama7b-v2-chat:4f0a47",
-    "llama13B-v2-chat": "a16z-infra/llama13b-v2-chat:df7690",
-    "llama70B-v2-chat": "replicate/llama70b-v2-chat:e951f1",
-}
-----
-
-Now that you have a model you're almost ready to start chatting.
-First, you'll need to create a prompt so your model understands what kinds of chat responses you are looking for.
-This is not the same as the `system_prompt` you used in Chapter 11.
-Langchain's `PromptTemplate` will be the conversation template that will be presented to the language model each time you send it a chat message.
-A `PromptTemplate` class includes template variables, similar to Python f-string variables, so you can dynamically expand the prompt for multiple turns of conversation without manually assembling a new prompt each time.
+And that's it! Now, instead of HuggingFace, your model would query Replicate's API.
+First, let's set your prompt: 
 
 [source, python]
 ----
 >>> prompt = PromptTemplate(
-...     input_variables = ["history", "input"],
-...     template="""This is a conversation between a math teacher and
-...     a third-grade student. The teacher asks math questions of the
-...     student and evaluates the student's answer one at a time.
-...
-...     Complete the conversation with only one response at a time.
-...
-...     {history}
-...     student:{input}
-...     teacher:""")
+        input_variables = ["history", "input"],
+        template="""This is a conversation between math teacher and a third-grade student. The teacher asks math question of the student and evaluates the results.
+                Complete the conversation one response at a time. 
+                
+                {history}
+                student:{input} 
+                teacher:"""
+)
 ----
 
 Now, let's make it a bit easier for the model and give it a few examples of the conversation you want it to have.
@@ -1039,8 +1010,8 @@ It would allow it to do "few-shot learning" - a technique that allows the model 
 ...     {"input": "41"},
 ...     {"output": "Good work! 2,4,6?"})
 ----
-<1> Give your AI the same role name you used for in the system prompt ("teacher") to keep the conversation coherent
-<2> Give your user a role name such as "student" to improve LLM NLU accuracy and improve the readability of the message log
+<1> Give your AI the same role name you used for in the system prompt ('teacher') to keep the conversation coherent
+<2> Give your user a role name such as 'student' to improve LLM NLU accuracy and improve the readability of the message log for you
 
 
 As you can see, you have customized your memory a bit so that it would look like a student-teacher conversation.
@@ -1103,17 +1074,17 @@ Now that you've learned that the generative results can be unpredictable, let's 
 >>> prompt = PromptTemplate(
 ...    input_variables=["history", "input"],
 ...    template="""You are a math teacher that's teaching math 
-...    to a third-grade student.Prompt the student to complete number
-...    sequences from the following list and compare their answer
-...    with the last number in the following sequences:
-...      - 9,10,11,12
-...      - 38,39,40,41
-...      - 2,4,6,8
-...      - 1,5,9,13
-...
-...    {history}
-...    student:{input}
-...    teacher:"""
+      to a third-grade student.Prompt the student to complete number
+      sequences from the following list and compare their answer
+      with the last number in the sequence:
+                - 9,10,11,12
+                - 38,39,40,41
+                - 2,4,6,8
+                - 1,5,9,13
+
+                {history}
+                student:{input} 
+                teacher:"""
 )
 ----
 
@@ -1129,10 +1100,21 @@ Now that you've learned that the generative results can be unpredictable, let's 
 'teacher: Excellent! You got it right!\n'
 ----
 
+//TODO if we have time - history example.
+// You can see that even with grounding, our model can't evaluate the students' answers consistently. 
+// Maybe it can do better in some other domain?
+// Let's try history.
+
+// [source,python]
+
+
 Now you see that you need to apply caution when using the generative approach. 
 It can be very powerful tool in your toolkit.
 But should evaluate if the domain of the task is appropriate for the LLM you are using. 
 And you should carefully think how to _ground_ your model so that it would generate factually correct content, like we did in Chapter 10. 
+
+
+
 
 == Evaluating your chatbot
 Finally, you have implemented your chatbot and it's interacting with users!

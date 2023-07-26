@@ -354,7 +354,7 @@ And it turns out that dictionaries can be coerced into a `DataFrame` or `Series`
 Pandas will take care of all the bookkeeping so that each unique token or dictionary key has it's own column.
 And it will create NaNs whenever the `Counter` dictionary for a document is missing a particular key because the document doesn't contain that word.
 
-So lets add a few more documents to your corpus of sentences from the Algorithmic Bias article.
+So let's add a few more documents to your corpus of sentences from the Algorithmic Bias article.
 This will reveal the power of vector representations.
 
 [source,python]
@@ -374,7 +374,7 @@ This will reveal the power of vector representations.
 4           0    1         0           0  ...      0        0     0       0
 ----
 <1> Run the SpaCy tokenizer on each line and skip empty lines
-<2> Tokenize text with SpaCy before before lowercasing it, to improve sentence segmentation
+<2> Tokenize text with SpaCy before lowercasing it, to improve sentence segmentation
 <3> Replace NaNs with zeros and convert to integers to make it more readable
 
 And when the dimensions of your vectors are used to hold scores for tokens or strings, that's when you want to use a Pandas `DataFrame` or `Series` to store your vectors.
@@ -401,19 +401,19 @@ Now this Pandas `Series` is a _vector_.
 That's something you can do math on.
 And when you do that math, Pandas will keep track of which word is where so that "bias" and "justice" aren't accidentally added together.
 Your row vectors in this DataFrame have a "dimension" for each word in your vocabulary.
-In fact the `df.columns` attribute contains your vocabulary.
+In fact, the `df.columns` attribute contains your vocabulary.
 
 But wait, there are more than 30,000 words in a standard English dictionary.
 If you start processing a lot of Wikipedia articles instead of just a few paragraphs, that'll be a lot of dimensions to deal with.
-You are probably used to 2D and 3D vectors, because they are easy to visualize.
+You are probably used to 2D and 3D vectors because they are easy to visualize.
 But do concepts like distance and length even work with 30,000 dimensions?
 It turns out they do, and you'll learn how to improve on these high-dimensional vectors later in the book.
-For now just know that each element of a vector is used to represent the count, weight or importance of a word in the document you want the vector to represents.
+For now just know that each element of a vector is used to represent the count, weight or importance of a word in the document you want the vector to represent.
 
 You'll find every unique word in each document and then find all the unique words in all of your documents.
-In math this is the union of all the sets of words in each document.
+In math, this is the union of all the sets of words in each document.
 This master set of words for your documents is called the _vocabulary_ of your pipeline.
-And if you decide to keep track of additional linguistic information about each word, such as spelling variations or parts of speech, you might call it a _lexicon_ .
+And if you decide to keep track of additional linguistic information about each word, such as spelling variations or parts of speech, you might call it a _lexicon_.
 And you might find academics that use the term _corpus_ to describe a collection of documents will likely also use the word "lexicon," just because it is a more precise technical term than "vocabulary."
 
 So take a look at the vocabulary or lexicon for this corpus.
@@ -510,7 +510,7 @@ Now you'll make copies of that base vector, update the values of the vector for 
 ...         vec[key] = value / len(lexicon)
 ...     doc_vectors.append(vec)
 ----
-<1> `copy.copy()` creates an independent copy, a separate instance of your zero vector, rather than reusing a reference (pointer) to the original object's memory location. Otherwise you'd just be overwriting the same `zero_vector` with new values in each loop, and you wouldn't have a fresh zero on each pass of the loop.
+<1> `copy.copy()` creates an independent copy, a separate instance of your zero vector, rather than reusing a reference (pointer) to the original object's memory location. 
 
 === An easier way to vectorize text
 
@@ -539,14 +539,14 @@ It is a _model_ class with `.fit()` and `.transform()` methods that comply with 
  [1 0 1 0 0 1 1 0 1 1 0 0 1 0 0 0]
  [0 2 0 0 0 1 1 0 1 1 1 0 0 0 0 0]]
 ----
-<1> The `CounterVectorizer` model produces a sparse numpy matrix, since most documents use a small portion of the total words in the vocabulary.
-<2> The `.toarray()` method converts a sparse matrix back into a regular numpy array (filling in the gaps with zeros) for your viewing pleasure.
+<1> The `CounterVectorizer` model produces a sparse `numpy` matrix, since most documents use a small portion of the total words in the vocabulary.
+<2> The `.toarray()` method converts a sparse matrix back into a regular `numpy` array (filling in the gaps with zeros) for your viewing pleasure.
 
 
-Now you have a matrix (practically a list of lists in Python) that represents the three documents (the three rows of the matrix) and the count of each term, token, or word in your lexicon make up the columns of the matrix.
+Now you have a matrix (practically a list of lists in Python) that represents the three documents (the three rows of the matrix) and the count of each term, token, or word in your lexicon makes up the columns of the matrix.
 That was fast!
 With just 1 line of code, `vectorize.fit_transform(corpus)`, we have gotten to the same result as with dozens of lines you needed to manually tokenize, create a lexicon and count the terms.
-Note that these vectors have the length of 16, rather than 18 like the vectors you created manually.
+Note that these vectors have a length of 16, rather than 18 like the vectors you created manually.
 That's because Scikit-Learn tokenizes the sentences slightly differently (it only considers words of 2 letters or more as tokens) and drops the punctuation.
 
 So, you have three vectors, one for each document.
@@ -591,7 +591,7 @@ And it will compute what you're looking for in the fastest possible way, using c
 If you use vectorization to eleminate some of the `for` loops in your code, you can speed up your NLP pipeline by a 100x or more.
 This is 100x more models that you can try.
 The Berlin Social Science Center (WZB) has a great tutorial on vectorization.footnote:["Vectorization and Parallelization" by WZB.eu (https://datascience.blog.wzb.eu/2018/02/02/vectorization-and-parallelization-in-python-with-numpy-and-pandas/).].
-And if you poke around elsewhere on the site you'll find perhaps the only trustworthy source of statistics and data on the affect NLP and AI is having on society.footnote:["Knowledge and Society in Times of Upheaval" (https://wzb.eu/en/node/60041)]
+And if you poke around elsewhere on the site you'll find perhaps the only trustworthy source of statistics and data on the effect NLP and AI are having on society.footnote:["Knowledge and Society in Times of Upheaval" (https://wzb.eu/en/node/60041)]
 ====
 
 === Vector spaces
@@ -606,7 +606,7 @@ So a vector with two values would lie in a 2D vector space, a vector with three 
 A piece of graph paper, or a grid of pixels in an image, are both nice 2D vector spaces.
 You can see how the order of these coordinates matter.
 If you reverse the x and y coordinates for locations on your graph paper, without reversing all your vector calculations, all your answers for linear algebra problems would be flipped.
-Graph paper and images are examples of rectilinear, or Euclidean spaces, because the x and y coordinates are perpendicular to each other.
+Graph paper and images are examples of rectilinear, or Euclidean, spaces because the x and y coordinates are perpendicular to each other.
 The vectors you talk about in this chapter are all rectilinear, Euclidean spaces.
 
 What about latitude and longitude on a map or globe?
@@ -670,19 +670,19 @@ Cosine similarity is a popular among NLP engineers because:
 
 * Fast to compute even for high dimensional vectors
 * Sensitive to changes in a single dimension
-* Work well for high dimensional vectors
+* Work well for high-dimensional vectors
 * Has a value between -1 and 1
 
 You can use cosine similarity without bogging down your NLP pipeline because you only need to compute the dot product.
 And you may be surprised to learn that you do not need to compute the cosine function to get the cosine similarity.
-You can use the the linear algebra dot product, which does not require any trigonometric function evaluation.
+You can use the linear algebra dot product, which does not require any trigonometric function evaluation.
 This makes it very efficient (fast) to calculate.
-And cosine similarity considers each dimension independently and their affect on the direction of the vector adds up, even for high dimensional vectors.
+And cosine similarity considers each dimension independently and their effect on the direction of the vector adds up, even for high dimensional vectors.
 TF-IDF can have thousands or even millions of dimensions, so you need to use a metric that doesn't degrade in usefulness as the number of dimensions increases (called the curse of dimensionality).
 
 Another big advantage of cosine similarity is that it outputs a value between -1 and +1:
 
-* -1 means the vectors point in exactly oposite directions - this can only happen for vectors that have negative values (TF-IDF vectors do not) 
+* -1 means the vectors point in exactly opposite directions - this can only happen for vectors that have negative values (TF-IDF vectors do not) 
 * 0 means the vectors are perpendicular or orthogonal - this happens whenever your two TF-IDF vectors do not share any of the same words (dimensions)
 * +1 means the two vectors are perfectly aligned - this can happen whenever your two documents use the same words with the same relative frequency
 
@@ -851,7 +851,7 @@ To be sure, let's compute the cosine similarity between them:
 ----
 
 And now we can distinguish between the two sentences!
-It is worth noting that bag of _n_-grams approach has its own challenges.
+It is worth noting that bag-of-_n_-grams approach has its own challenges.
 With large texts and corpora, the amount of _n_-grams increases exponentially, causing "curse-of-dimensionality" issues we mentioned before.
 However, as you saw in this section, there might be cases where you will want to use it instead of single token counting.
 
@@ -861,7 +861,7 @@ Even though until now we only dealt with _n_-grams of word token, _n_-gram of ch
 For example, they can be used for language detection, or authorship attribution (deciding who among the set of authors wrote the document analyzed).
 Let's solve a puzzle using character _n_-grams and the `CountVectorizer` class you just learned how to use.
 
-We'll start by importing a small and interesting python package called `this`, and examining some of its constants:
+We'll start by importing a small and interesting Python package called `this`, and examining some of its constants:
 
 [source,python]
 ----
@@ -928,42 +928,54 @@ Let's choose some big document - for example, the Wikipedia article for Machine 
 ----
 
 Now that looks interesting!
-If you look closer at the two frequency histograms, you might notice the similarities in the order of their highs and lows.
-It's as if the character frequency pattern is similar, but shifted.
+If you look closely at the two frequency histograms, you might notice a pattern.
+The peaks and valleys of the histograms seem to be arranged in the same order.
+If you've worked with frequency spectra before, this may make sense.
+The pattern of character frequency peaks and valleys is similar, but shifted.
 
-To determine whether this is the real shift, let's use a technique often used in signal processing: computing the distance between the highest point of the signal, the "peak", and see if other peaks follow a similar distance.
-You'll use a couple of handy built-in python functions: `ord()` and `chr()`.
+To determine whether your eyes are seeing a real pattern, you need to check to see if the shift in the peaks and valleys is consistent.
+This signal processing approach is called _spectral analysis_.
+You can compute the relative position of the peaks by subtracting the positions of the highest points of each signal from each other.
+
+You can use a couple of built-in python functions, `ord()` and `chr()`, to convert back and forth between integers and characters.
+Fortunately these integers and character mappings are in alphabetical order "ABC...".
 
 [source,python]
 ----
->>> peak_distance = ord('r') - ord('e')
+>>> peak_distance = ord('R') - ord('E')
 >>> peak_distance
 13
->>> chr(ord('v') - peak_distance)
-'i'
->>> chr(ord('n') - peak_distance)
-'a'
+>>> chr(ord('v') - peak_distance)  # <1>
+'I'
+>>> chr(ord('n') - peak_distance)  # <2>
+'A'
 ----
+<1> The letter "I" is is 13 positions before the letter 'V' in the English alphabet
+<2> The letter "A" is is 13 before the letter 'N'
 
-So, we can see that the most frequent letters in both distributions are shifted by the same `peak_distance`.
-That distance is preserved between the least frequent letters, too:
+So if you want to decode the letter "R" in this secret message you should probably subtract 13 from its _ordinal_ (`ord`) value to get the letter "E" - the most frequently used letter in English.
+Likewise to decode the letter "V" you would replace it with "I" - the second most frequently use letter.
+The three most frequent letters have been shifted by the same `peak_distance` (13) to create the encoded message.
+And that distance is preserved between the least frequent letters, too:
 
 [source,python]
 ----
->>> chr(ord('w') - peak_distance)
-'j'
+>>> chr(ord('W') - peak_distance)
+'J'
 ----
 
-By this point, you have probably Googled our riddle and discovered that our message is actually encoded using `rot-13` cipher.
-This cipher substitutes every letter with  a letter with the 13th letter after it in the alphabet.
-Let's use python's `codecs` package to reveal what `this` is all about:
+By this point, you have probably MetaGered (searched the web) for information about this puzzle.footnote:[The nonprofit MetaGer search engine takes privacy, honesty, and ethics seriously unlike the top search engines you're already familiar with (https://metager.org/)]
+Maybe you discovered that this secret message is probably encoded using a ROT13 cipher (encoding).footnote:[Wikipedia ROT13 article (https://en.wikipedia.org/wiki/ROT13)]
+The ROT13 algorithm rotates each letter in a string 13 positions forward in the alphabet.
+To decode a supposedly secret message that has been encoded with ROT13 you would only need to apply the inverse algorithm and rotate your alphabet backwards 13 positions.
+You can probably create the encoder and decoder functions yourself in a single line of code.
+Or you can use python's builtin `codecs` package to reveal what `this` is all about:
 
 [source,python]
 ----
 >>> import codecs
 >>> print(codecs.decode(s, 'rot-13'))
 The Zen of Python, by Tim Peters
-----
 
 Beautiful is better than ugly.
 Explicit is better than implicit.
@@ -984,11 +996,12 @@ Although never is often better than *right* now.
 If the implementation is hard to explain, it's a bad idea.
 If the implementation is easy to explain, it may be a good idea.
 Namespaces are one honking great idea -- let's do more of those!
+----
 
-And you have revealed the Zen of Python!
-These words of wisdom were written by one of the Python tribe elders, Tim Peters, back in 1999 and since then have been placed in public domain, put to music,footnote:[Check out this youtube video: https://www.youtube.com/watch?v=i6G6dmVJy74] and even parodied.footnote:[Try importing `that` package from `pypi` to discover Python antipatterns - but as the package creators themselves warn you, ]
-This book's authors are trying to act according to these principles whenever they can - and you should, too!
-And thanks to character _n_-grams, you were able to "translate" them from `rot-13`-encrypted English into the regular ones.
+Now you know The Zen of Python!
+These words of wisdom were written by one of the Python tribe elders, Tim Peters, back in 1999 and since then have been placed in public domain, put to music,footnote:[Zbwedicon's YouTube video about the Zen of Python (https://www.youtube.com/watch?v=i6G6dmVJy74)] and even parodied.footnote:[You can install and import PyDanny's `that` package to have a laugh about Python antipatterns (https://pypi.org/project/that)]
+The Zen of Python has helped the authors of this book write more readable and reusable code for more than a decade.
+And thanks to a character-based `CountVectorizer`, you were able to decode these words of wisdom.
 
 == Zipf's Law
 
@@ -1093,7 +1106,7 @@ If you could suss out that information, you could start to describe documents wi
 Say you have a corpus of every book about artificial intelligence (AI) ever written.
 "Intelligence" would almost surely occur many times in every book (document) you counted, but that doesn't provide any new information, it doesn't help distinguish between those documents.
 Whereas something like "neural network" or "conversational engine" might not be so prevalent across the entire corpus, but for the documents where it frequently occurred, you would know more about their nature.
-For this you need another tool.
+For this, you need another tool.
 
 _Inverse document frequency_, or IDF, is your window through Zipf in topic analysis.
 Let's take your term frequency counter from earlier and expand on it.
@@ -1171,9 +1184,12 @@ Oh, wait.
 That's not helpful, huh?
 Just as in your first example, where the system seemed to think "the" was the most important word in the document about your fast friend Harry, in this example "and" is considered highly relevant. Even at first glance, you can tell this isn't revelatory.
 
-A good way to think of a term's inverse document frequency is this: How strange is it that this token is in this document?  If a term appears in one document a lot times, but occurs rarely in the rest of the corpus, one could assume it is important to that document specifically. Your first step toward topic analysis!
+A good way to think of a term's inverse document frequency is this: How strange is it that this token is in this document?  
+If a term appears in one document a lot of times, but occurs rarely in the rest of the corpus, one could assume it is important to that document specifically. 
+Your first step toward topic analysis!
 
-A term's IDF is merely the ratio of the total number of documents to the number of documents the term appears in. In the case of "and" and "bias" in your current example, the answer is the same for both:
+A term's IDF is merely the ratio of the total number of documents to the number of documents the term appears in. 
+In the case of "and" and "bias" in your current example, the answer is the same for both:
 
 [source,text]
 ----
@@ -1252,7 +1268,7 @@ Let's imagine you have 10 documents with the word "dog" in them. Your IDF for "d
 1,000,000 / 10 = 100,000
 
 That's a big difference.
-Your friend Zipf would say that's *too* big, because it's likely to happen a lot.
+Your friend Zipf would say that's *too* big because it's likely to happen a lot.
 Zipf's Law showed that when you compare the frequencies of two words, like "cat" and "dog", even if they occur a similar number of times the more frequent word will have an exponentially higher frequency than the less frequent one.
 So Zipf's Law suggests that you scale all your word frequencies (and document frequencies) with the `log()` function, the inverse of `exp()`.
 This ensures that words with similar counts, such as "cat" and "dog", aren't vastly different in frequency.
@@ -1365,16 +1381,16 @@ Back to your Harry example:
 ...     doc_tfidf_vectors.append(vec)
 ----
 <1> The `docs` variable is a list of SpaCy `Doc` objects - sentences from the Wikipedia article on bias.
-<2> Copy the `zero_vector` to create a new object to hold the tfidf vector for this document (sentence about bias)
+<2> Copy the `zero_vector` to create a new object to hold the TF-IDF vector for this document (sentence about bias)
 
 With this setup, you have K-dimensional vector representation of each document in the corpus.
 And now on to the hunt!
 Or search, in your case.
-From the previous section, you might rememember how we defined similarity between vectors.
+From the previous section, you might remember how we defined similarity between vectors.
 Two vectors are considered similar if their cosine similarity is high, so you can find two similar vectors near each other if they maximize the cosine similarity.
 
-Now you have all you need to do a basic TF-IDF based search.
-You can treat the search query itself as a document, and therefore get the a TF-IDF based vector representation of it.
+Now you have all you need to do a basic TF-IDF-based search.
+You can treat the search query itself as a document, and therefore get a TF-IDF-based vector representation of it.
 The last step is then to find the documents whose vectors have the highest cosine similarities to the query and return those as the search results.
 
 If you take your three documents about Harry, and make the query "How long does it take to get to the store?":
@@ -1407,7 +1423,7 @@ If you take your three documents about Harry, and make the query "How long does 
 <1> You didn't find that token in the lexicon, so go to the next key.
 
 You can safely say document 0 has the most relevance for your query!
-And with this you can find relevant documents amidst any corpus, be it articles in Wikipedia, books from Project Gutenberg, or tweets from the wild West that is Twitter.
+And with this, you can find relevant documents amidst any corpus, be it articles in Wikipedia, books from Project Gutenberg, or tweets from the wild West that is Twitter.
 Google look out!
 
 Actually, Google's search engine is safe from competition from us.
@@ -1427,7 +1443,7 @@ Now that was a lot of code for things that have long since been automated.
 The `sklearn` package you used at the beginning of this chapter has a tool for TF-IDF too.
 Just as `CountVectorizer` you saw previously, it does tokenization, omits punctuation, and computes the tf-idf scores all in one.
 
-Here's how you can use sklearn to build a TF-IDF matrix.
+Here's how you can use `sklearn` to build a TF-IDF matrix.
 The syntax is almost exactly the same as for `CountVectorizer`.
 
 [#listing-computing-tfidf-matrix, reftext={chapter}.{counter:listing}]
@@ -1605,7 +1621,7 @@ Now that you can convert natural language text to numbers, you can begin to mani
 Numbers firmly in hand, in the next chapter you'll refine those numbers to try to represent the *meaning* or *topic* of natural language text instead of just its words.
 In subsequent chapters, we show you how to implement a semantic search engine that finds documents that "mean" something similar to the words in your query rather than just documents that use those exact words from your query.
 Semantic search is much better than anything TF-IDF weighting and stemming and lemmatization can ever hope to achieve.
-State of the art search engines combine both TF-IDF vector and semantic embedding vectors to achieve both higher accuracy than conventional search.
+State-of-the-art search engines combine both TF-IDF vectors and semantic embedding vectors to achieve both higher accuracy than conventional search.
 
 The well-funded OpenSearch project, an ElasticSearch fork, is now leading the way in search innovation.footnote:["The ABCs of semantic search in OpenSearch" by Milind Shyani (https://opensearch.org/blog/semantic-science-benchmarks/)]
 ElasticSearch started walling off their technology garden in 2021.
@@ -1613,7 +1629,7 @@ The only reason Google and Bing and other web search engines don't use the seman
 Semantic word and topic vectors don't scale to billions of documents, but millions of documents are no problem.
 And some scrappy startups such as You.com are learning how to use open source to enable semantic search and conversational search (chat) on a web scale. 
 
-So you only need the most basic TF-IDF vectors to feed into your pipeline to get state-of-the-art performance for semantic search, document classification, dialog systems, and most of the other applications we mentioned in chapter 1.
+So you only need the most basic TF-IDF vectors to feed into your pipeline to get state-of-the-art performance for semantic search, document classification, dialog systems, and most of the other applications we mentioned in Chapter 1.
 TF-IDFs are just the first stage in your pipeline, a basic set of features you'll extract from text.
 In the next chapter, you will compute topic vectors from your TF-IDF vectors.
 Topic vectors are an even better representation of the meaning of a document than these carefully normalized and smoothed TF-IDF vectors.
@@ -1623,7 +1639,7 @@ And things only get better from there as we move on to Word2vec word vectors in 
 
 . What makes a Count vector (`CountVectorizer.transform(tokens)` output for a single document) different from a `collections.Counter(tokens)` object?
 . How much RAM would you need, do you think, use a `TFIDFVectorizer` on  1M English documents with a vocabulary of 1M unique 2-grams, assuming each value requires 1 byte?
-. Think of an example corpus or task where term frequency (TF) or count vectors  might be more useful than TF-IDF vectors. Which approach is better for sentiment analysis, document classification, and document scoring/regression? What if the language in the documents is more predictable than natural languages such as English?
+. Think of an example corpus or task where term frequency (TF) or count vectors might be more useful than TF-IDF vectors. Which approach is better for sentiment analysis, document classification, and document scoring/regression? What if the language in the documents is more predictable than natural languages such as English?
 . A character-based n-grams count vector or TF-IDF vector is often used for language recognition tasks -- for example, whether a string contains English or Spanish text. What statistics or algorithms would you use to distinguish the character TF-IDF vectors for one language from the vectors for another natural language?
 . What disadvantages of TF-IDF did you see in this chapter? Can you come up with additional ones that weren't mentioned?
 . How would you use TF-IDF as a foundation to create a better search engine? How would you compute a relevance score so you could display the 10 most relevant documents? Would lemmatization help if you did not lemmatize during indexing? What about preprocessing the query to add approximate synonyms to your query TF-IDF vector?
@@ -1634,6 +1650,6 @@ And things only get better from there as we move on to Word2vec word vectors in 
 * Zipf's law can help you predict the frequencies of all sorts of things including words, characters, and people.
 * Term frequencies must be weighted by their inverse document frequency to ensure the most important, most meaningful words are given the heft they deserve.
 * Bag-of-words / Bag-of-ngrams and TF-IDF are the most basic algorithms to represent natural language documents with a vector of real numbers.
-* Euclidean distance and similarity between pairs of high dimensional vectors doesn't adequately represent their similarity for most NLP applications.
-* Cosine distance, the amount of "overlap" between vectors, can be calculated efficiently just multiplying the elements of normalized vectors together and summing up those products.
+* Euclidean distance and similarity between pairs of high dimensional vectors don't adequately represent their similarity for most NLP applications.
+* Cosine distance, the amount of "overlap" between vectors, can be calculated efficiently just by multiplying the elements of normalized vectors together and summing up those products.
 * Cosine distance is the go-to similarity score for most natural language vector representations.

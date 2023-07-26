@@ -55,8 +55,11 @@ A deep learning language model uses statistics to estimate or guess the next wor
 And deep learning researchers hope that one day neural networks will be able to match the natural human ability to logically infer things and reason about the world.
 But this isn't possible, because words don't contain all the knowledge about the world that a machine would need to process to make factually correct inferences.
 So you're going to use a tried and true logical inference approach called "symbolic reasoning."
-If you're familiar with the concept of a compiler then you may want to think of the dependency tree as a parse tree.
-And you're going to use this reasoning approach to ground the statistical deep learning models so they no longer have to make statistical "guesses".
+
+If you're familiar with the concept of a compiler then you may want to think of the dependency tree as a parse tree or abstract syntax tree (AST).
+An AST defines the logic of a machine language expression or program.
+You're going to use the natural language dependency tree to extract the logical relations within natural language text.
+And this logic will help you _ground_ the statistical deep learning models so they can do more than merely make statistical "guesses" about the world as they did in previous chapters.
 
 == Grounding
 
@@ -181,7 +184,7 @@ Can you see the coreferences to "Timnit Gebru" in this sentence about that paper
  she was focused on than pressing her superiors in the company.'
 ----
 
-How does a SpaCy do with extracting named entities like Timnit Gebru?
+How does a spaCy do with extracting named entities like Timnit Gebru?
 
 [source,python]
 ----
@@ -219,7 +222,7 @@ These are the things you need for the nodes in your knowledge graph.
 And the part of speech tag for relations is a _verb_.
 The verb tokens will be used to connect the named entities to each other as the edges in your knowledge graph.
 
-So this will usually be the first algorithm in your pipeline, the SpaCy language model that tokenizes your text and tags each token with the linguistic features you need for knowledge extraction.
+So this will usually be the first algorithm in your pipeline, the spaCy language model that tokenizes your text and tags each token with the linguistic features you need for knowledge extraction.
 And the most recent version of spaCy include several tools for knowledge extraction.
 
 [source,python]
@@ -333,8 +336,8 @@ You need to know that "me" represents a particular kind of _named entity_: a per
 Named entities are natural language terms or n-grams that refer to a particular thing in the real world, such as a person, place or thing.
 Sound familiar?
 In English grammar, the _part of speech_ (POS) for a person, place or thing is "noun".
-So you'll see that the POS tag that SpaCy associates with the tokens for a named entity is "NOUN".
-And the SpaCy package knows how to recognize the relationships (dependencies) between words and phrases.
+So you'll see that the POS tag that spaCy associates with the tokens for a named entity is "NOUN".
+And the spaCy package knows how to recognize the relationships (dependencies) between words and phrases.
 Once you have a _dependency tree_ of the hierarchy of grammatical relationships between words you have a way to process the logical meaning of a sentence.
 
 And the chatbot should know that it can expand or _resolve_ that word by replacing it with that person's username or other identifying information.
@@ -613,12 +616,11 @@ Like in the example we discussed before, dependency parsing can play a really us
 The dependency trees can also be used to identify "Subject-Verb-Object" triplets using the "nsubj" and "dobj" tags of the ROOT word, and this task is also called *Relation Extraction*.
 Sometimes, the dependency relations can be converted into semantic tags/labels between the words, and this task is called *Semantic Role Labeling*.
 
-=== Why neural networks are much better at it?
-//TODO
+==== State-of-the-art dependency parsers
 
-=== Current state-of-the-art methods and the available open-source platforms
-Dependency parsing: spaCy and Huggingface transformers have been the most popular libraries for Dependency parsing, though Allen AI's parser is also catching up with their performance.
-We will experiment with a few of them below:
+SpaCy and Hugging Face transformers have been the most popular libraries for Dependency parsing.
+In version 3.0 spaCy incorporated Hugging Face transformers into its larger language model pipelines so it is now the leader.
+Allen AI's parser is catching up in terms of accuracy on benchmark datasets, but you'll want to stick with spaCy for most information extraction and dependency parsing tasks.
 
 [source,python]
 ----
@@ -645,12 +647,16 @@ today           | npadvmod | learning        | []                             | 
 
 ----
 
-You can see above that every token's relation, syntactic head, syntactic children, and the meaning of the relation are printed out.
-The token "learning" has been assigned the tag of "ROOT".
+SpaCy labels every token's relation, syntactic head, syntactic children, and the meaning of the relation.
+The token "learning" has been assigned the tag of `"ROOT"`.
 This is because in our sentence, the word "learning" happens to be the main verb when you organize it into a Subject-Verb-Object triple.
-Such verbs are called the ROOT verb, and they are the only tokens that do not have a syntactic head.
-You can use this library to extract clauses by separating the subtrees attached to the root by the relation of "advcl" or "relcl".
-You can also use it to extract relation triplets by identifying the tokens with "nsubj", "ROOT", and "dobj" dependencies.
+
+Such verbs are called the _root_ verb and have the `"ROOT"` label in spaCy.
+The root word in a sentence does do not have any additional words that they are building on.
+All other words in the sentence depend on the _root_ word in a sentence to clarify their the meaning.
+Linguists say that root words in a dependency tree have no ancestors or parents.
+You can use this library to extract clauses by separating the subtrees attached to the root by the relation of `"advcl"` or `"relcl"`.
+You can also use it to extract relation triplets by identifying the tokens with `"nsubj"`, `"ROOT"`, and `"dobj"` dependencies.
 
 
 Constituency parsing: Berkeley Neural Parser and Stanza have been the go-to options for the extraction of constituency relations in text.
@@ -670,6 +676,7 @@ You want to use spaCy as your tokenizer and dependency tree parse because it is 
 After downloading the packages, we can test it out with a sample sentence.
 But we will be adding benepar to spaCy's pipeline first.
 
+// FIXME: Can't find factory for 'benepar' ... component name that's not registered
 [source,python]
 ----
 >>> import spacy
@@ -688,9 +695,11 @@ In the example above, we generated a parsed string for the test sentence. The pa
 You can use this module to identify all the phrases in the sentence and use them in sentence simplification and/or summarization.
 
 == Relation extraction
+
 Relation extraction is the process of identifying connections between named entities in any text.
 Like information extraction, it is classified into the categories closed and open.
 In closed relation extraction, the model extracts relations only from a given list of relation types.
+
 The advantages of this are that we can minimize the risk of getting untrue and bizarre relation labels between entities which makes us more confident about using them in real life.
 But the limitation is that it needs human labelers to come up with a list of relevant labels for every category of text, which as you can imagine, can get tedious and expensive.
 In Open relation extraction, the model tries to come up with its own set of probable labels for the named entities in the text.
@@ -757,7 +766,8 @@ As you may have guessed, NER is a necessary step before this process, for which 
 == Coreference resolution
 Imagine you're running NER on a text, and you obtain the list of entities that the model has recognized.
 On closer inspection, you realize over half of them are duplicates because they're referring to the same terms!
-This is where *Coreference resolution* comes in handy because it identifies all the mentions of a noun in a sentence, helping us keep track of all the pronouns and avoid multiple mentions.
+This is where *Coreference resolution* comes in handy because it identifies all the mentions of a noun in a sentence.
+This will consolidate mentions of the same _things_ in your knowledge graph instead of creating redundant nodes and edges and potentially creating incorrect relations.
 
 === Current datasets and benchmarks
 
@@ -773,6 +783,7 @@ Our common sense tells us that it refers to the "city councilmen" and the answer
 This task is called the Winograd schema challenge, also framed as "Commonsense reasoning" or "Commonsense inference" problem.
 
 === Why is it important?
+
 Duplicate mentions are a big problem not only in *NER*, but *Relation extraction*, *Information extraction*, *Semantic parsing*, and many other tasks.
 Resolving all the pronouns saves the time and effort to extract the information associated with them.
 
@@ -780,11 +791,12 @@ Moreover, it also helps us identify which entity or term is being talked about t
 This technique has been experimented with in topic modeling and in constructing _knowledge graphs_.
 
 
-=== Current state-of-the-art methods and the available open source platforms
-1) spaCy and NeuralCoref
+=== State-of-the-art coreference resolution
 
-NeuralCoref 4.0 is currently the fastest entity resolver available open-source.
-It can be used as an extension to spaCy, as shown below:
+NeuralCoref 4.0 was the fastest and most accurate entity resolver available in the open source community.
+So spaCy incorporated it into its "Universe" collection of pipelines and models.
+In order to use it you will need to import the `coreferee` package.
+You cannot use the original neuralcoref package within the latest spaCy package (3.5 or greater) because neuralcoref is no longer activately maintained.
 
 [source,python]
 ----
@@ -1284,10 +1296,10 @@ You'll use spaCy here because it is faster and more accurate.
 [source,python]
 ----
 >>> import spacy
->>> en_model = spacy.load('en_core_web_md')
+>>> nlp = spacy.load('en_core_web_md')
 >>> sentence = ("In 1541 Desoto wrote in his journal that the Pascagoula people " +
 ...     "ranged as far north as the confluence of the Leaf and Chickasawhay rivers at 30.4, -88.5.")
->>> parsed_sent = en_model(sentence)
+>>> parsed_sent = nlp(sentence)
 >>> parsed_sent.ents
 (1541, Desoto, Pascagoula, Leaf, Chickasawhay, 30.4)  # <1>
 
@@ -1313,7 +1325,7 @@ This visualization can help you find ways to use the tree to create tag patterns
 ----
 >>> from spacy.displacy import render
 >>> sentence = "In 1541 Desoto wrote in his journal about the Pascagoula."
->>> parsed_sent = en_model(sentence)
+>>> parsed_sent = nlp(sentence)
 >>> with open('pascagoula.html', 'w') as f:
 ...     f.write(render(docs=parsed_sent, page=True, options=dict(compact=True)))
 ----
@@ -1340,7 +1352,7 @@ Here are some helper functions to make that easier:
 >>> def doc_dataframe(doc):
 ...     return pd.DataFrame([token_dict(tok) for tok in doc])
 
->>> doc_dataframe(en_model("In 1541 Desoto met the Pascagoula."))
+>>> doc_dataframe(nlp("In 1541 Desoto met the Pascagoula."))
          ORTH       LEMMA    POS  TAG    DEP
 0          In          in    ADP   IN   prep
 1        1541        1541    NUM   CD   pobj
@@ -1366,9 +1378,12 @@ In a spaCy pattern specification you use a dictionary to capture all the tags th
 [source,python]
 .Example spaCy POS pattern
 ----
->>> pattern = [{'TAG': 'NNP', 'OP': '+'}, {'IS_ALPHA': True, 'OP': '*'},
-...            {'LEMMA': 'meet'},
-...            {'IS_ALPHA': True, 'OP': '*'}, {'TAG': 'NNP', 'OP': '+'}]
+>>> pattern = [
+...     {'TAG': 'NN', 'OP': '+'},
+...     {'IS_ALPHA': True, 'OP': '*'},
+...     {'LEMMA': 'meet'},
+...     {'IS_ALPHA': True, 'OP': '*'},
+...     {'TAG': 'NN', 'OP': '+'}]
 ----
 
 You can then extract the tagged tokens you need from your parsed sentence.
@@ -1377,24 +1392,30 @@ You can then extract the tagged tokens you need from your parsed sentence.
 [source,python]
 ----
 >>> from spacy.matcher import Matcher
->>> doc = en_model("In 1541 Desoto met the Pascagoula.")
->>> matcher = Matcher(en_model.vocab)
->>> matcher.add('met', None, pattern)
->>> m = matcher(doc)
->>> m
-[(12280034159272152371, 2, 6)]
-
->>> doc[m[0][1]:m[0][2]]
+>>> doc = nlp("In 1541 Desoto met the Pascagoula.")
+>>> matcher = Matcher(nlp.vocab)
+>>> matcher.add(
+...     key='met',
+...     patterns=[pattern])
+>>> matches = matcher(doc)
+>>> matches
+[(12280034159272152371, 2, 6)]  # <1>
+>>> start = matches[0][1]
+>>> stop = matches[0][2]
+>>> doc[start:stop]  # <2>
 Desoto met the Pascagoula
 ----
+<1> list of 3-tuples with span ID, start token index, stop token index
+<2> SpaCy lets you slice a document object on token indices just as you would for a Python list
 
+A spacy matcher will list the pattern matches as 3-tuples containing match ID integers, plus the start and stop token indices (positions) for each match.
 So you extracted a match from the original sentence from which you created the pattern, but what about similar sentences from Wikipedia?
 
 .Using a POS pattern matcher
 [source,python]
 ----
->>> doc = en_model("October 24: Lewis and Clark met their" \
-...                "first Mandan Chief, Big White.")
+>>> doc = nlp("October 24: Lewis and Clark met their" \
+...     "first Mandan Chief, Big White.")
 >>> m = matcher(doc)[0]
 >>> m
 (12280034159272152371, 3, 11)
@@ -1402,7 +1423,7 @@ So you extracted a match from the original sentence from which you created the p
 >>> doc[m[1]:m[2]]
 Lewis and Clark met their first Mandan Chief
 
->>> doc = en_model("On 11 October 1986, Gorbachev and Reagan met at Höfði house")
+>>> doc = nlp("On 11 October 1986, Gorbachev and Reagan met at Höfði house")
 >>> matcher(doc)
 []  # <1>
 ----
@@ -1410,22 +1431,28 @@ Lewis and Clark met their first Mandan Chief
 
 You need to add a second pattern to allow for the verb to occur after the subject and object nouns.
 
-.Combining multiple patterns for a more robust pattern matcher
+.Combine patterns together to handle more variations
 [source,python]
 ----
->>> doc = en_model("On 11 October 1986, Gorbachev and Reagan met at Hofoi house")
->>> pattern = [{'TAG': 'NNP', 'OP': '+'}, {'LEMMA': 'and'},
-...            {'TAG': 'NNP', 'OP': '+'},
-...            {'IS_ALPHA': True, 'OP': '*'}, {'LEMMA': 'meet'}]
+>>> doc = nlp(
+...     "On 11 October 1986, Gorbachev and Reagan met at Hofoi house"
+...     )
+>>> pattern = [
+...     {'TAG': 'NN', 'OP': '+'},
+...     {'LEMMA': 'and'},
+...     {'TAG': 'NN', 'OP': '+'},
+...     {'IS_ALPHA': True, 'OP': '*'},
+...     {'LEMMA': 'meet'}
+...     ]
 >>> matcher.add('met', None, pattern)  # <1>
->>> m = matcher(doc)
->>> m
-[(14332210279624491740, 5, 9),
- (14332210279624491740, 5, 11),
- (14332210279624491740, 7, 11),
- (14332210279624491740, 5, 12)]  <2>
+>>> matches = matcher(doc)
+>>> pd.DataFrame(matches, columns=)
+[(1433..., 5, 9),
+ (1433..., 5, 11),
+ (1433..., 7, 11),
+ (1433..., 5, 12)]  # <2>
 
->>> doc[m[-1][1]:m[-1][2]]  <3>
+>>> doc[m[-1][1]:m[-1][2]]  # <3>
 Gorbachev and Reagan met at Hofoi house
 ----
 <1> This adds an additional pattern without removing the previous pattern.
@@ -1671,7 +1698,7 @@ DetectorMorse, by Kyle Gorman, is another good choice if you want state-of-the-a
 
 === Turning sentences into knowledge
 
-=== AI ethics vs AI safety
+==== AI ethics vs AI safety
 
 In the previous chapter you learned a lot about the harm that AI and large language models are causing.
 And hopefully, you've come up with your own ideas for how to help mitigate those harms.
