@@ -1112,7 +1112,7 @@ This book is about using machine learning to build smart text-reading machines w
 [.last-sentence]
 As you learn the tools of natural language processing, you will be building an NLP pipeline that can not only carry on a conversation but help you accomplish your goals in business and in life.
 
-== Review
+== Test yourself
 [.first-sentence]
 *Chapter 1 review questions*
 

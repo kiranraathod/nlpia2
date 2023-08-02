@@ -1715,4 +1715,4 @@ Word2Vec has even been used to glean information and relationships from unnatura
 To get the most useful information about the relationship between ID numbers like this, you'll need a variety of sentences that contain those ID numbers. And if the ID numbers often contain a structure where the position of a symbol has meaning, it can help to tokenize these ID numbers into their smallest semantic packet (such as words or syllables in natural languages).
 
 === Summary
-=== Review
+=== Test yourself

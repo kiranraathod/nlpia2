@@ -1236,5 +1236,5 @@ You now know how to train a versatile NLP language model that you can use on wor
 [.last-sentence]
 And you didn't have to go crazy on expensive GPUs and servers.
 
-=== Review
+=== Test yourself
 === Summary

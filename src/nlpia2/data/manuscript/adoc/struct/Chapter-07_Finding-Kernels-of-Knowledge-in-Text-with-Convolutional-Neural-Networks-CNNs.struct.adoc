@@ -1228,5 +1228,5 @@ The key to hyperparameter tuning is to conscientiously record each experiment an
 [.last-sentence]
 Don't believe everything you read on the Internet, especially when it comes to CNNs for NLP.
 
-== Review
+== Test yourself
 == Summary

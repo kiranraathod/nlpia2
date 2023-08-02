@@ -1092,5 +1092,5 @@ See if you can add additional layers to the perceptron you created in this chapt
 [.last-sentence]
 Bigger is not always better, especially for small problems.
 
-== Review
+== Test yourself
 == Summary

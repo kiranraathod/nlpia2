@@ -1040,5 +1040,5 @@ So you only need the most basic TF-IDF vectors to feed into your pipeline to get
 [.last-sentence]
 And things only get better from there as we move on to Word2vec word vectors in chapter 6 and deep learning embeddings of the meaning of words and documents in later chapters.
 
-=== Review
+=== Test yourself
 === Summary

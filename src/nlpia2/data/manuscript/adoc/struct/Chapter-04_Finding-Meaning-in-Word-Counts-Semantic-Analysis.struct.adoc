@@ -1431,5 +1431,5 @@ In the next chapters, you'll learn how to fine tune this concept of topic vector
 [.last-sentence]
 This will improve your pipeline's ability to extract meaning from short texts or even solitary words.
 
-=== Review
+=== Test yourself
 === Summary

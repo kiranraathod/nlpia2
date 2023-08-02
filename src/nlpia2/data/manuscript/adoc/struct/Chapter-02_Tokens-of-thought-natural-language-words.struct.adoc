@@ -1798,5 +1798,5 @@ We leave it to you to continue the NLP action by improving on this machine learn
 [.last-sentence]
 And you can check your progress relative to VADER at each step of the way to see if you think machine learning is a better approach than hard-coding algorithms for NLP.
 
-=== Review
+=== Test yourself
 === Summary
