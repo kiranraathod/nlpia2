@@ -15,7 +15,7 @@ documentation = "https://gitlab.com/tangibleai/nlpia2"
 keywords = [ "NLP", "Natural Language Processing", "Virtual Assistant", "chatbot", "Text Processing", "Machine Learning", "Text Mining", "Deep Learning",]
 classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "Operating System :: OS Independent", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Text Processing :: Linguistic", "Topic :: Text Processing", "Topic :: Communications", "Topic :: Communications :: Chat", "Intended Audience :: Education",]
 
-[[tool.poetry.packages]]
+[tool.poetry.packages]
 include = "nlpia2"
 from = "src"
 
@@ -42,7 +42,6 @@ environment = "*"
 evaluate = "*"
 farm-haystack = {version = "*", extras = ["faiss"]} 
 gitpython = "*"
-graphviz = "*"
 h5py = "*"
 html2text = "*"
 html5lib = "*"
@@ -66,7 +65,6 @@ pip = "*"
 poetry = "*"
 pronouncing = "*"
 psutil = "*"
-pygraphviz = "*"  # ch11
 pypdf2 = "*"
 python = ">=3.9"
 python-dotenv = "*"
@@ -85,7 +83,7 @@ toml = "*"
 tox = "*"
 tqdm = "*"
 unidecode = "*"
-wikipedia_api = "*"  # ch11
+nlpia2_wikipedia = "*"  # ch11
 xmltodict = "*"
 
 [tool.poetry.dev-dependencies]
@@ -102,3 +100,4 @@ pydocstyle = "*"
 test = [ "pytest", "pytest-cov",]
 sound = [ "soundex",]
 pdf = [ "pymupdf", "tabula-py", "tabulate",]
+graph = [ "graphviz", "pygraphviz" ]
