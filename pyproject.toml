@@ -14,6 +14,9 @@ repository = "https://gitlab.com/tangibleai/nlpia2"
 documentation = "https://gitlab.com/tangibleai/nlpia2"
 keywords = [ "NLP", "Natural Language Processing", "Virtual Assistant", "chatbot", "Text Processing", "Machine Learning", "Text Mining", "Deep Learning",]
 classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "Operating System :: OS Independent", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Text Processing :: Linguistic", "Topic :: Text Processing", "Topic :: Communications", "Topic :: Communications :: Chat", "Intended Audience :: Education",]
+packages = [
+    { include = "nlpia2", from = "src" },
+    ]
 
 [tool.poetry.scripts]
 cnn = "nlpia2.ch07.cnn:main"
