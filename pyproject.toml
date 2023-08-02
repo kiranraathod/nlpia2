@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "nlpia2"
-version = "0.0.33"
+version = "0.0.34"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "AGPLv3"
 readme = "README.md"
