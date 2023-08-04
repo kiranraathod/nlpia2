@@ -1,1 +1,157 @@
-import osimport osfrom nlpia.constants import DATA_PATHfrom nlpia.constants import DATA_PATHimport aiml_botimport aiml_botbot = aiml_bot.Bot(    learn=os.path.join(DATA_PATH, 'greeting_step1.aiml'))bot = aiml_bot.Bot(    learn=os.path.join(DATA_PATH, 'greeting_step1.aiml'))bot = aiml_bot.Bot(    learn=os.path.join(DATA_PATH, 'greeting_step1.aiml'))bot.respond("Hello Rosa,")bot.respond("Hello Rosa,")bot.respond("hello !!!troll!!!")bot.respond("hello !!!troll!!!")bot.respond("Helo Rosa")bot.respond("Helo Rosa")bot.respond("Hello Ro-sa")bot.respond("Hello Ro-sa")bot.learn(os.path.join(DATA_PATH, 'greeting_step2.aiml'))bot.learn(os.path.join(DATA_PATH, 'greeting_step2.aiml'))bot.respond("Hey Rosa")bot.respond("Hey Rosa")bot.respond("Hi Rosa")bot.respond("Hi Rosa")bot.respond("Helo Rosa")bot.respond("Helo Rosa")bot.respond("hello **troll** !!!")  # <1>bot.respond("hello **troll** !!!")  # <1>bot.learn(os.path.join(DATA_PATH, 'greeting_step3.aiml'))bot.learn(os.path.join(DATA_PATH, 'greeting_step3.aiml'))bot.respond("Hey Rosa")bot.respond("Hey Rosa")bot.respond("Hey Rosa")bot.respond("Hey Rosa")bot.respond("Hey Rosa")bot.respond("Hey Rosa")airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]airas_spec = [    ["Hi {name}","Hi {username} how are you?","ROOT","GREETING"],    ["What is your name?",     "Hi {username} how are you?","ROOT","GREETING"],    ]from nlpia.data.loaders import get_datafrom nlpia.data.loaders import get_datadf = get_data('ubuntu_dialog')df = get_data('ubuntu_dialog')df.head(4)df.head(4)import reimport redef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancedef split_turns(s, splitter=re.compile('__eot__')):   for utterance in splitter.split(s):       utterance = utterance.replace('__eou__', '\n')       utterance = utterance.replace('__eot__', '').strip()       if len(utterance):           yield utterancefor i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))for i, record in df.head(3).iterrows():    statement = list(split_turns(record.Context))[-1]    reply = list(split_turns(record.Utterance))[-1]    print('Statement: {}'.format(statement))    print()    print('Reply: {}'.format(reply))from tqdm import tqdmfrom tqdm import tqdmdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dfdef preprocess_ubuntu_corpus(df):    """    Split all strings in df.Context and df.Utterance on    __eot__ (turn) markers    """    statements = []    replies = []    for i, record in tqdm(df.iterrows()):        turns = list(split_turns(record.Context))        statement = turns[-1] if len(turns) else '\n'  # <1>        statements.append(statement)        turns = list(split_turns(record.Utterance))        reply = turns[-1] if len(turns) else '\n'        replies.append(reply)    df['statement'] = statements    df['reply'] = replies    return dffrom sklearn.feature_extraction.text import TfidfVectorizerfrom sklearn.feature_extraction.text import TfidfVectorizerdf = df = preprocess_ubuntu_corpus(df)df = df = preprocess_ubuntu_corpus(df)tfidf = TfidfVectorizer(min_df=8, max_df=.3, max_features=50000)tfidf = TfidfVectorizer(min_df=8, max_df=.3, max_features=50000)tfidf.fit(df.statement)  # <1>tfidf.fit(df.statement)  # <1>tfidftfidfX = tfidf.transform(df.statement)X = tfidf.transform(df.statement)X = pd.DataFrame(X.todense(), columns=tfidf.get_feature_names())X = pd.DataFrame(X.todense(), columns=tfidf.get_feature_names())x = tfidf.transform(['This is an example statement that\    we want to retrieve the best reply for.'])x = tfidf.transform(['This is an example statement that\    we want to retrieve the best reply for.'])x = tfidf.transform(['This is an example statement that\    we want to retrieve the best reply for.'])cosine_similarities = x.dot(X.T)cosine_similarities = x.dot(X.T)reply = df.loc[cosine_similarities.argmax()]reply = df.loc[cosine_similarities.argmax()]pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }pattern_response = {    r"[Hh]ello|[Hh]i[!]*":        r"Hello {user_nickname}, would you like to play a game?",    r"[Hh]ow[\s]*('s|are|'re)?[\s]*[Yy]ou([\s]*doin['g]?)?":        r"I'm {bot_mood}, how are you?",    }
+from langchain import HuggingFaceHub
+
+HUGGING_FACE_API_KEY=
+
+llm = HuggingFaceHub(
+    repo_id="google/flan-t5-large",
+    model_kwargs={
+        "temperature": 0.3,
+        "max_length":200},
+    huggingfacehub_api_token='<your_API_token>')
+
+from langchain.prompts import PromptTemplate
+
+from langchain.chains import LLMChain
+
+prompt = PromptTemplate(
+   input_variables=["message"],
+   template="{message}")
+
+chain = LLMChain(llm=llm, prompt=prompt)
+
+chain.predict(message="Hi Bot!")
+
+template = """
+    This is a conversation between a human and a
+    chatbot. The chatbot is friendly and provides
+    answers based on the previous conversation and
+    the context.
+
+    Human says: {message}
+    Chatbot responds:
+    """
+
+prompt = PromptTemplate(
+    input_variables = ["message"],  # <1>
+    template=template)       
+
+chain = LLMChain(
+    llm=llm, verbose=True, prompt=prompt  # <2>
+    )
+
+chain.predict(message="Hi Bot! My name is Maria.")
+
+chain.predict(message="What is my name?")
+
+template = """
+    This is a conversation between a human and a chatbot.
+    The chatbot is friendly and provides answers based
+    on the previous conversation and the context."
+
+    {chat_history}
+    Human says: {message}
+    Chatbot responds:"""
+
+memory = ConversationBufferMemory(
+    memory_key='chat_history')  # <1>
+
+chain = LLMChain(llm=llm, memory=memory, prompt=prompt)
+
+convo_chain = ConversationChain(
+    llm=llm,
+    memory = ConversationBufferMemory
+    )
+
+convo_chain.prompt.template
+
+chain.predict(message="Hi chatbot! My name is Maria")
+
+chain.predict(message="What is my name?")
+
+message = """
+    I have a brother Sergey.
+    He and his wife Olga live in Tel Aviv.
+    What's the name of my sister-in-law?"""
+
+chain.predict(message=message)
+
+from langchain.llms import Replicate
+
+os.environ["REPLICATE_API_TOKEN"] = '<your_API_key_here>'
+
+llm = Replicate(
+    model="a16z-infra/llama13b-v2-chat:" +
+    "df7690",  # <1>
+    input={
+        "temperature": 0.5,
+        "max_length": 350,
+        "top_p": 1,
+    })
+
+prompt = PromptTemplate(
+    input_variables = ["history", "input"],
+    template="""This is a conversation between a math teacher and
+    a third-grade student. The teacher asks math questions of the
+    student and evaluates the student's answer one at a time.
+
+    Complete the conversation with only one response at a time.
+
+    {history}
+    student:{input}
+    teacher:""")
+
+memory = ConversationBufferMemory(
+    memory_key='history',
+    ai_prefix='teacher',  # <1>
+    human_prefix='student',  # <2>
+    )
+
+memory.save_context(
+    {"input": "Ask me math questions!"},
+    {"output": "Sure, let's do it! 9,10,11?"})
+
+memory.save_context(
+    {"input": "12"},
+    {"output": "Perfect! 38,39,40?"})
+
+memory.save_context(
+    {"input": "42"},
+    {"output": "Oops. Not quite. Try again."})
+
+memory.save_context(
+    {"input": "41"},
+    {"output": "Good work! 2,4,6?"})
+
+math_convo = ConversationChain(llm=llm, memory=memory)
+
+math_convo.prompt = prompt
+
+math_convo.predict(input="9")
+
+math_convo = ConversationChain(
+    llm=llm, memory=memory)  # <1>
+
+math_convo.predict(input="9")
+
+prompt = PromptTemplate(
+   input_variables=["history", "input"],
+   template="""You are a math teacher that's teaching math 
+   to a third-grade student.Prompt the student to complete number
+   sequences from the following list and compare their answer
+   with the last number in the following sequences:
+     - 9,10,11,12
+     - 38,39,40,41
+     - 2,4,6,8
+     - 1,5,9,13
+
+   {history}
+   student:{input}
+   teacher:"""
+
+math_chatbot = MathChatbot(prompt)
+
+math_chatbot.answer("9")
+
+math_chatbot = MathChatbot(prompt)
+
+math_chatbot.answer("9")

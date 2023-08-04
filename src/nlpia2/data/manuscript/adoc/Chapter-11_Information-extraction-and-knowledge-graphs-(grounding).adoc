@@ -1476,9 +1476,9 @@ You need to add a second pattern to allow for the verb to occur after the subjec
 [(14332210279624491740, 5, 9),
  (14332210279624491740, 5, 11),
  (14332210279624491740, 7, 11),
- (14332210279624491740, 5, 12)]  <2>
+ (14332210279624491740, 5, 12)]  # <2>
 
->>> doc[m[-1][1]:m[-1][2]]  <3>
+>>> doc[m[-1][1]:m[-1][2]]  # <3>
 Gorbachev and Reagan met at Hofoi house
 ----
 <1> This adds an additional pattern without removing the previous pattern.

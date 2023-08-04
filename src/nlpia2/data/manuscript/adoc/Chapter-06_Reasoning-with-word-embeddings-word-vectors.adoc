@@ -188,8 +188,8 @@ This would be like an autocomplete search box that understands what words mean -
 
 [source,python]
 ----
->>> from nessvec.indexers import Index  <1>
->>> index = Index(num_vecs=100_000)  <2>
+>>> from nessvec.indexers import Index  # <1>
+>>> index = Index(num_vecs=100_000)  # <2>
 >>> index.get_nearest("Engineer").round(2)
 Engineer       0.00
 engineer       0.23
@@ -1195,17 +1195,17 @@ You can see that a Word2Vec neural network is almost identical to your single-la
 [source,python]
 ----
 from torch import nn
-EMBED_DIM = 100    <1>
+EMBED_DIM = 100  # <1>
 
 class Word2Vec(nn.Module):
     def __init__(self, vocab_size=len(vocab), embedding_size=EMBED_DIM):
         super().__init__()
-        self.embed = nn.Embedding(vocab_size, embedding_size)    <2>
+        self.embed = nn.Embedding(vocab_size, embedding_size)  # <2>
         self.expand = nn.Linear(embedding_size, vocab_size, bias=False)
 
     def forward(self, input):
-        hidden = self.embed(input)      <3>
-        logits = self.expand(hidden)    <4>
+        hidden = self.embed(input)  # <3>
+        logits = self.expand(hidden)  # <4>
         return logits
 ----
 <1> 100 is small but usable for many problems, 300 is more typical
@@ -1419,7 +1419,7 @@ Working with word vectors can be memory intensive. If your available memory is l
 ----
 >>> from gensim.models.keyedvectors import KeyedVectors
 >>> from nlpia.loaders import get_data
->>> word_vectors = get_data('w2v', limit=200000)    <1>
+>>> word_vectors = get_data('w2v', limit=200000)  # <1>
 ----
 <1> This limits the memory footprint by only loading 200k of the 2M Word2Vec vectors
 
@@ -1546,11 +1546,11 @@ The training requires a few setup details.
 .Parameters to control word2vec model training
 [source,python]
 ----
->>> num_features = 300    <1>
->>> min_word_count = 3    <2>
->>> num_workers = 2    <3>
->>> window_size = 6    <4>
->>> subsampling = 1e-3    <5>
+>>> num_features = 300  # <1>
+>>> min_word_count = 3  # <2>
+>>> num_workers = 2  # <3>
+>>> window_size = 6  # <4>
+>>> subsampling = 1e-3  # <5>
 ----
 <1> Number of vector elements (dimensions) to represent the word vector
 <2> Min number of word count to be considered in the `word2vec` model. If your corpus is small, reduce the min count. If you're training with a large corpus, increase the min count.
@@ -1688,7 +1688,7 @@ The memory-mapped file (`.hdf5`) keeps you from running out of memory (RAM) on y
 [source,python]
 ----
 >>> from nessvec.files import load_fasttext
->>> df = load_fasttext()    <1>
+>>> df = load_fasttext()  # <1>
 >>> df.head().round(2)
       0     1     2    ...   297   298   299
 ,    0.11  0.01  0.00  ...  0.00  0.12 -0.04
@@ -1776,7 +1776,7 @@ You'll use the `nlpia` package to keep things simple, so you can start playing w
 [source,python]
 ----
 >>> from nessvec.indexers import Index
->>> index = Index()    <1>
+>>> index = Index()  # <1>
 >>> vecs = index.vecs
 >>> vecs.shape
 (3000000, 300)
@@ -1985,9 +1985,9 @@ In the following code, you use PCA to project them onto a 2D plot.
 [source,python]
 ----
 >>> from sklearn.decomposition import PCA
->>> pca = PCA(n_components=2)    <1>
+>>> pca = PCA(n_components=2)  # <1>
 >>> us_300D = get_data('cities_us_wordvectors')
->>> us_2D = pca.fit_transform(us_300D.iloc[:, :300])    <2>
+>>> us_2D = pca.fit_transform(us_300D.iloc[:, :300])  # <2>
 ----
 <1> The 2D vectors producted by PCA are for visualization. We retain the original 300-D Word2Vec vectors for any vector reasoning you might want to do.
 <2> The last column of this DataFrame contains the city name, which is also stored in the DataFrame index.
@@ -2205,17 +2205,17 @@ You are going to break the links between any sentence pairs that are far apart (
 ----
 >>> import re
 >>> import networkx as nx
->>> similarity_matrix = np.triu(similarity_matrix, k=1)   <1>
+>>> similarity_matrix = np.triu(similarity_matrix, k=1)  # <1>
 >>> iterator = np.nditer(similarity_matrix, flags=['multi_index'],
     [CA]order='C')
 >>> node_labels = dict()
 >>> G = nx.Graph()
 >>> pattern = re.compile(
-    [CA]r'[\w\s]*[\'\"]?[\w\s]+\-?[\w\s]*[\'\"]?[\w\s]*')   <2>
+    [CA]r'[\w\s]*[\'\"]?[\w\s]+\-?[\w\s]*[\'\"]?[\w\s]*')  # <2>
 >>> for edge in iterator:
 ...     key = 0
 ...     value = ''
-...     if edge > 0.95:   <3>
+...     if edge > 0.95:  # <3>
 ...         key = iterator.multi_index[0]
 ...         value = str(noun_phrases[iterator.multi_index[0]])
 ...         if pattern.fullmatch(value)
@@ -2235,8 +2235,8 @@ With the shiny new graph (network) you've assembled, you can now use `matplotlib
 [source,python]
 ----
 >>> import matplotlib.pyplot as plt
->>> plt.subplot(1, 1, 1)   <1>
->>> pos = nx.spring_layout(G, k=0.15, seed=42)   <1>
+>>> plt.subplot(1, 1, 1)  # <1>
+>>> pos = nx.spring_layout(G, k=0.15, seed=42)  # <1>
 >>> nx.draw_networkx(G, pos=pos, with_labels=True, labels=node_labels,
     [CA]font_weight='bold')
 >>> plt.show()

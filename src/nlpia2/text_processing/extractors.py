@@ -7,6 +7,7 @@ import pandas as pd
 import re
 import tempfile
 from types import MappingProxyType
+import nbformat as nbf
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
 from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, BASE_DIR
@@ -82,7 +83,7 @@ def extract_code_sections(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, se
     return [[ex.source for ex in sect] for sect in sections]
 
 
-def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, section_break=None):
+def extract_doctest_examples(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, section_break=None):
     """ Extract lines of Python using DocTestParser, return list of strs """
     sections = extract_code_sections(
         filepath=filepath,
@@ -94,6 +95,91 @@ def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, secti
     for sect in sections:
         flat.extend(sect)
     return flat
+
+def extract_expressions(filepath=DEFAULT_ADOC_FILEPATH):
+    """ Use doctest.DocTestParser to find lines of Python code in doctest format """
+    text = Path(filepath).open('rt').read()
+    dtparser = DocTestParser()
+    return dtparser.get_examples(text)
+
+def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
+    """ Extract lines of Python using DocTestParser, return list of strs """
+    expressions = extract_expressions(filepath=filepath)
+    if with_metadata:
+        return [vars(ex) for ex in expressions]
+    return [ex.source for ex in expressions]
+
+
+def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
+    """ Extract the lines of code from code blocks in an adoc file """
+    filepath = Path(filepath or DEFAULT_ADOC_FILEPATH)
+    lines = extract_code_lines(filepath=filepath, with_metadata=False)
+    
+    if destfile is True:
+        destfile = filepath.with_suffix('.adoc.ipy')
+    if destfile:
+        destfile = Path(destfile)
+        if destfile.is_dir():
+            destfile = destfile / filepath.with_suffix('.adoc.py').name
+        with Path(destfile).open('wt') as fout:
+            fout.writelines(lines)
+    return '\n'.join(lines)
+
+
+def create_notebook(code_lines, destfile):
+    """ extract code from adoc files and export them to Jupyter Notebook files """
+    destfile = Path(destfile)
+    nb = nbf.v4.new_notebook()
+    nb['cells'] = []
+    text = code = ''
+    for line in code_lines:
+        if line.lstrip()[:2] == '# ':  # comments assumed to be markdown
+            text += line.lstrip()[2:].rstrip() + '\n'
+            if code:
+                nb['cells'].append(nbf.v4.new_code_cell(code))
+                code = ''
+        elif line.strip():  # blank lines separate code blocks
+            code += line.rstrip() + '\n'
+            if text:
+                nb['cells'].append(nbf.v4.new_markdown_cell(text))
+                text = ''
+
+    if text:
+        nb['cells'].append(nbf.v4.new_markdown_cell(text))
+    if code:
+        nb['cells'].append(nbf.v4.new_code_cell(code))
+
+    if nb.cells:
+        print(destfile)
+        with destfile.open('w') as f:
+            nbf.write(nb, f)
+    return nb
+
+
+def extract_notebooks(*args, **kwargs):
+    files = extract_code_files(*args, **kwargs)
+    for p in files:
+        code_lines = p.open().readlines()
+        if code_lines:
+            destfile = p.with_suffix(p.suffix + '.ipynb')
+            print(destfile)
+            create_notebook(
+                code_lines=code_lines,
+                destfile=destfile)
+
+
+def extract_doctest_examples_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
+    """ Extract the lines of code from code blocks in an adoc file """
+    filepath = Path(filepath)
+    if destfile is True:
+        destfile = filepath.with_suffix('.adoc.ipy')
+    if destfile.is_dir():
+        destfile = destfile / filepath.with_suffix('.adoc.py').name
+    lines = extract_doctest_examples(filepath=filepath, with_metadata=False)
+    if destfile:
+        with Path(destfile).open('wt') as fout:
+            fout.writelines(lines)
+    return '\n'.join(lines)
 
 
 def extract_image_paths(filepath=DEFAULT_ADOC_FILEPATH):
@@ -191,7 +277,7 @@ def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
 
 def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
                              extractor=extract_urls_from_text, with_meta=True):
-    """ Find all URLs in files at input_dir, return a list of dicts with urls """
+    """ Run specified extractor (default: extract_urls) on each file input_dir, return a list of dicts with urls """
     outputs = []
     for p in input_dir.glob(glob):
         df = extractor(filepath=p, with_meta=with_meta)
@@ -205,11 +291,7 @@ extract_lists = extract_lists_from_files
 def extract_url_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
                                  extractor=extract_urls_from_text, with_meta=True):
     """ Find all URLs in files at input_dir, return a list of dicts with urls """
-    outputs = []
-    for p in input_dir.glob(glob):
-        df = extractor(p, with_meta=with_meta)
-        outputs.append(df)
-    return outputs
+    return extract_lists(input_dir=input_dir, extractor=extract_urls_from_text, glob=glob, with_meta=with_meta)
 
 
 extact_url_lists = extract_url_lists_from_files
@@ -407,7 +489,7 @@ def test_file(filepath=DEFAULT_ADOC_FILEPATH, skip=0, adoc=True,
     return results
 
 
-def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_sections=False):
+def extract_doctest_files(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_sections=False):
     filepath = Path(filepath)
     if not destfile:
         destfile = filepath.parent.parent / 'py'
@@ -452,9 +534,20 @@ def extract_files(
         extractor=extract_code_file, suffix='.adoc.py'):
     """ Run an extractor on all the text (default=adoc) files in a directory returning the extracted file paths """
     output_paths = []
-    destdir = Path(destdir)
+    adocdir = Path(adocdir)
+    
+    assert adocdir.is_dir()
+    paths = list(adocdir.glob(glob))
+    if not len(paths) and (adocdir / 'adoc').is_dir():
+        adocdir = adocdir / 'adoc'
+        paths = list(adocdir.glob(glob))
+
+    destdir = Path(destdir or adocdir)
+    destdir.mkdir(exist_ok=True)
     assert destdir.is_dir()
-    for p in adocdir.glob(glob):
+    
+
+    for p in paths:
         destfile = (destdir / p.name).with_suffix(suffix)
         print(f"{p} => {destfile}")
         code = extractor(filepath=p)
@@ -462,6 +555,11 @@ def extract_files(
             fout.write(code)
         output_paths.append(destfile)
     return output_paths
+
+
+def extract_code_files(adocdir=ADOC_DIR, **kwargs):
+    kwargs['destdir'] = kwargs.get('destdir') or adocdir.parent / 'py'
+    return extract_files(extractor=extract_code_file, **kwargs)
 
 
 def extract_url_dfs_from_files(
@@ -501,19 +599,6 @@ def extract_dfs_from_files(
         df = extractor(filepath=p)
         outputs.append(df)
     return outputs
-
-
-def extract_code_files(adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc', suffix='.adoc.py'):
-    adocdir = Path(adocdir)
-    if destdir is None:
-        destdir = adocdir.parent / 'py'
-    destdir = Path(destdir)
-    destdir.mkdir(exist_ok=True)
-    destpaths = extract_files(extractor=extract_code_file,
-                              adocdir=adocdir, destdir=destdir,
-                              glob=glob, suffix=suffix)
-    return destpaths
-
 
 def update_nlpia_lines(adoc_dir=None, dest=LINES_FILEPATH):
     if not adoc_dir:

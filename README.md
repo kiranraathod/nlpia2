@@ -12,7 +12,13 @@ Official [code repository](https://gitlab.com/tangibleai/nlpia2/) for the book [
 
 ## Quickstart
 
-If you have install python packages from source before, you will probably be able to follow these steps to get going quickly:
+### Windows
+
+If you are using Windows you will have to first install `git-bash` so you can have the same environment used within more than 99% of all production NLP pipelines: [docs/README-windows-install.md](./docs/README-windows-install.md)
+
+### Within `bash`
+
+Launch your terminal (`git-bash` application on Windows) and then install the nlpia2 package from source:
 
 ```bash
 git clone git@gitlab.com:tangbileai/nlpia2

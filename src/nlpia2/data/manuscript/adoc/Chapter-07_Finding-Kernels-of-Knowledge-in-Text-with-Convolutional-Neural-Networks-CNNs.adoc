@@ -225,7 +225,7 @@ Here's how you can label the words in a portion of the quote with their parts of
 ----
 >>> import pandas as pd
 >>> import spacy
->>> nlp = spacy.load('en_core_web_md')    <1>
+>>> nlp = spacy.load('en_core_web_md')  # <1>
 
 >>> text = 'right ones in the right order you can nudge the world'
 >>> doc = nlp(text)
@@ -516,7 +516,7 @@ Listing 7.2 shows how to tag the quote with parts of speech tags using SpaCy and
 >>> quote = "The right word may be effective, but no word was ever" \
 ...    " as effective as a rightly timed pause."
 >>> tagged_words = {
-...    t.text: [t.pos_, int(t.pos_ == 'ADV')]    <1>
+...    t.text: [t.pos_, int(t.pos_ == 'ADV')]  # <1>
 ...    for t in nlp(quote)}
 >>>
 >>> df_quote = pd.DataFrame(tagged_words, index=['POS', 'ADV'])
@@ -553,12 +553,12 @@ Let's use our convolution filter to find where exactly.
 .Convolution in pure Python
 [source,python]
 ----
->>> kernel = [.5, .5]                          <1>
+>>> kernel = [.5, .5]  # <1>
 >>>
 >>> output = []
->>> for i in range(len(inpt) - 1):             <2>
+>>> for i in range(len(inpt) - 1):  # <2>
 ...    z = 0
-...    for k, weight in enumerate(kernel):    <3>
+...    for k, weight in enumerate(kernel):  # <3>
 ...        z = z + weight * inpt[i + k]
 ...    output.append(z)
 >>>
@@ -596,10 +596,10 @@ Listing 7.5 will create a line plot to help you visualize the convolution output
 ----
 >>> import pandas as pd
 >>> from matplotlib import pyplot as plt
->>> plt.rcParams['figure.dpi'] = 120   <1>
+>>> plt.rcParams['figure.dpi'] = 120  # <1>
 
 >>> import seaborn as sns
->>> sns.set_theme('paper')    <2>
+>>> sns.set_theme('paper')  # <2>
 
 >>> df = pd.DataFrame([inpt, output], index=['inpt', 'output']).T
 >>> ax = df.plot(style=['+-', 'o:'], linewidth=3)
@@ -631,12 +631,12 @@ This way you can reuse it in later examples.
 ----
 >>> def convolve(inpt, kernel):
 ...    output = []
-...    for i in range(len(inpt) - len(kernel) + 1):    <1>
+...    for i in range(len(inpt) - len(kernel) + 1):  # <1>
 ...        output.append(
 ...            sum(
 ...                [
 ...                    inpt[i + k] * kernel[k]
-...                    for k in range(len(kernel))     <2>
+...                    for k in range(len(kernel))  # <2>
 ...                ]
 ...            )
 ...        )
@@ -680,8 +680,8 @@ Refer back to Listing 7.2 if you need help creating a DataFrame containing the P
 ----
 >>> tags = 'ADV ADJ VERB NOUN'.split()
 >>> tagged_words = [
-...    [tok.text] + [int(tok.pos_ == tag) for tag in tags]    <1>
-...    for tok in nlp(quote)]                                        <2>
+...    [tok.text] + [int(tok.pos_ == tag) for tag in tags]  # <1>
+...    for tok in nlp(quote)]  # <2>
 >>>
 >>> df = pd.DataFrame(tagged_words, columns=['token'] + tags).T
 >>> print(df)
@@ -766,7 +766,7 @@ Since you only have the one quote you want to push forward through the convoluti
 [source,python]
 ----
 >>> kernel = torch.tensor(kernel.values, dtype=torch.float32)
->>> kernel = kernel.unsqueeze(0)                                <1>
+>>> kernel = kernel.unsqueeze(0)  # <1>
 >>> conv = torch.nn.Conv1d(in_channels=4,
 ...                     out_channels=1,
 ...                     kernel_size=3,
@@ -916,7 +916,7 @@ For now you probably just want to play the audio track so you can hear what Mors
 
 >>> url = 'https://upload.wikimedia.org/wikipedia/' \
       'commons/7/78/1210secretmorzecode.wav'
->>> filepath = maybe_download(url)   <1>
+>>> filepath = maybe_download(url)  # <1>
 >>> print(filepath)
 ----
 <1> `maybe_download` makes sure the data file is available in your `$HOME` directory.
@@ -1040,7 +1040,7 @@ It works faster and gives you more options for the `mode` of handling the paddin
 .Numpy convolve
 [source,python]
 ----
->>> isdot = np.convolve(audio.values, kernel, mode='same')    <1>
+>>> isdot = np.convolve(audio.values, kernel, mode='same')  # <1>
 >>> df['isdot'] = isdot - isdot.min()
 >>> ax = df.plot()
 ----
@@ -1188,7 +1188,7 @@ The dark patterns that permeate the Internet have nudged creative powerhouses in
 .Load news posts
 ----
 df = pd.read_csv(HOME_DATA_DIR / 'news.csv')
-df = df[['text', 'target']]    <1>
+df = df[['text', 'target']]  # <1>
 print(df)
 ----
 <1> you only need the text and binary newsworthiness label for your CNN training
@@ -1220,8 +1220,8 @@ from itertools import chain
 HOME_DATA_DIR = Path.home() / '.nlpia2-data'
 
 counts = Counter(chain(*[
-    re.findall(r'\w+', t.lower()) for t in df['text']]))       <1>
-vocab = [tok for tok, count in counts.most_common(4000)[3:]]   <2>
+    re.findall(r'\w+', t.lower()) for t in df['text']]))  # <1>
+vocab = [tok for tok, count in counts.most_common(4000)[3:]]  # <2>
 
 print(counts.most_common(10))
 ----
@@ -1299,8 +1299,8 @@ Optionally you can define the padding token index id number.
 from torch import nn
 
 embedding = nn.Embedding(
-    num_embeddings=2000,      <1>
-    embedding_dim=64,         <2>
+    num_embeddings=2000,  # <1>
+    embedding_dim=64,  # <2>
     padding_idx=0)
 ----
 <1> your vocab must be the same same as in your tokenizer
@@ -1318,13 +1318,13 @@ Those hours of work crafting a CNN will pay off with super-fast training time an
 .Learn your embeddings from scratch
 [source,python]
 ----
-from nlpia2.ch07.cnn.train79 import Pipeline    <1>
+from nlpia2.ch07.cnn.train79 import Pipeline  # <1>
 
 pipeline = Pipeline(
     vocab_size=2000,
     embeddings=(2000, 64),
     epochs=7,
-    torch_random_state=433994,    <2>
+    torch_random_state=433994,  # <2>
     split_random_state=1460940,
 )
 
@@ -1354,7 +1354,7 @@ What happens if you continue the training for a bit longer?
 .Continue training
 [source,python]
 ----
-pipeline.epochs = 13    <1>
+pipeline.epochs = 13  # <1>
 pipeline = pipeline.train()
 ----
 <1> 7 + 13 will give you 20 total epochs of training
@@ -1423,7 +1423,7 @@ Here's a good function for displaying the parameters in each layer of your PyTor
     df = df.set_index('name')
     return df
 
-describe_model(pipeline.model)    <4>
+describe_model(pipeline.model)  # <4>
 ----
 <1> this will work on any model derived from `torch.nn.Module`
 <2> `requires_grad` is True for layers where the parameters are learned during training (backprop)
@@ -1456,8 +1456,8 @@ You just need to size your embedding layer to make room for the size GloVe embed
 from torch import nn
 
 embedding = nn.Embedding(
-    num_embeddings=2000,      <1>
-    embedding_dim=50,         <2>
+    num_embeddings=2000,  # <1>
+    embedding_dim=50,  # <2>
     padding_idx=0)
 ----
 <1> you must use the same size here as you use in your tokenizer
@@ -1484,11 +1484,11 @@ from nessvec.files import load_vecs_df
 glove = load_vecs_df(HOME_DATA_DIR / 'glove.6B.50d.txt')
 zeroes = [0.] * 50
 embed = []
-for tok in vocab:                       <1>
+for tok in vocab:  # <1>
     if tok in glove.index:
         embed.append(glove.loc[tok])
     else:
-        embed.append(zeros)             <2>
+        embed.append(zeros)  # <2>
 embed = np.array(embed)
 
 print(f'embed.shape: {embed.shape}')
@@ -1520,9 +1520,9 @@ Now that you have a consistent way of identifying tokens with an integer, you ca
 .Initialize your embedding layer with GloVE vectors
 [source,python]
 ----
-embed = torch.Tensor(embed)                           <1>
+embed = torch.Tensor(embed)  # <1>
 print(f'embed.size(): {embed.size()}')
-embed = nn.Embedding.from_pretrained(embed, freeze=False)    <2>
+embed = nn.Embedding.from_pretrained(embed, freeze=False)  # <2>
 print(embed)
 ----
 <1> convert Pandas DataFrame to a torch.Tensor
@@ -1629,15 +1629,15 @@ class CNNTextClassifier(nn.Module):
     def __init__(self, embeddings):
         super().__init__()
 
-        self.seq_len = 40                                 <1>
-        self.vocab_size = 10000                           <2>
-        self.embedding_size = 50                          <3>
-        self.out_channels = 5                             <4>
-        self.kernel_lengths = [2, 3, 4, 5, 6]             <5>
-        self.stride = 1                                   <6>
-        self.dropout = nn.Dropout(0)                      <7>
-        self.pool_stride = self.stride                    <8>
-        self.conv_out_seq_len = calc_out_seq_len(         <9>
+        self.seq_len = 40  # <1>
+        self.vocab_size = 10000  # <2>
+        self.embedding_size = 50  # <3>
+        self.out_channels = 5  # <4>
+        self.kernel_lengths = [2, 3, 4, 5, 6]  # <5>
+        self.stride = 1  # <6>
+        self.dropout = nn.Dropout(0)  # <7>
+        self.pool_stride = self.stride  # <8>
+        self.conv_out_seq_len = calc_out_seq_len(  # <9>
             seq_len=self.seq_len,
             kernel_lengths=self.kernel_lengths,
             stride=self.stride,
@@ -1684,11 +1684,11 @@ You can load these embedding vectors from GloVe or any other pretrained embeddin
 [source,python]
 ----
 self.embed = nn.Embedding(
-    self.vocab_size,                              <1>
-    self.embedding_size,                          <2>
+    self.vocab_size,  # <1>
+    self.embedding_size,  # <2>
     padding_idx=0)
 state = self.embed.state_dict()
-state['weight'] = embeddings                      <3>
+state['weight'] = embeddings  # <3>
 self.embed.load_state_dict(state)
 ----
 <1> vocab_size includes a row vector for the padding token

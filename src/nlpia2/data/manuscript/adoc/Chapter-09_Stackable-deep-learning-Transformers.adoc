@@ -1880,7 +1880,7 @@ Let's run inference on your evaluation set and check the results.
 [source,python]
 ----
 >>> result, model_outputs, wrong_predictions = model.eval_model(eval_df,
-...     acc=roc_auc_score)   <1>
+...     acc=roc_auc_score)  # <1>
 >>> result
 {'LRAP': 0.9955934600588362,
  'acc': 0.9812396881786198,

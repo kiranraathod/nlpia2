@@ -656,8 +656,9 @@ As is common for this type of task, you use `torch.nn.CrossEntropyLoss` for the 
 ----
 >>> LEARNING_RATE = 0.0001
 >>> optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
->>> criterion = nn.CrossEntropyLoss(ignore_index=TRG_PAD_IDX)  <1>
-----
+>>> criterion = nn.CrossEntropyLoss(ignore_index=TRG_PAD_IDX)  # <1>
+
+...       ----
 <1> Ignore padding in the input gradient calculation
 
 Ben Trevett contributed much of the code for the Pytorch Transformer Beginner tutorial.

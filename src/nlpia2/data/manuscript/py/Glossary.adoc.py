@@ -1,6 +1,6 @@
-from pathlib import Path
 from nlpia.book_parser import write_glossary
-from nlpia.constants import DATA_PATH as DATA_DIR
-DATA_DIR = Path(DATA_DIR)
+
+from nlpia.constants import DATA_PATH
+
 print(write_glossary(
-    DATA_DIR / 'book'))  # <1>
+    os.path.join(DATA_PATH, 'book')))  # <1>
