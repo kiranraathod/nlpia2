@@ -454,10 +454,13 @@ Now you can subtract one centroid from the other to get the line between them, a
 >>> toxicity_score.round(3)
 array([-0.008, -0.022, -0.014, ..., -0.025, -0.001, -0.022])
 ----
+<1> `toxicity_score` is the embedding vector's shadow (projection) along the line from the nontoxic centroid to the toxic centroid.
 
-This raw `toxicity_score` is the distance along the line from the nontoxic centroid to the toxic centroid.
-You calculated that score by projecting each TF-IDF vector onto that line between the centroids using the dot product.
-And you did those 5,000 dot products all at once in a "vectorized" numpy operation.
+The toxicity score for a particular comment is the length of the shadow (projection) of that comment's vector along the line between the nontoxic and nontoxic comments.
+You compute these projections just as you did for the cosine distance.
+It is the normalized dot product of the comment's vector with the vector pointing from nontoxic comments towards toxic comments.
+You calculated the toxicity score by projecting each TF-IDF vector onto that line between the centroids using the dot product.
+And you did those 5,000 dot products all at once in a "vectorized" numpy operation using the `.dot()` method.
 This can speed things up 100 times compared to a Python `for` loop.
 
 You have just one step left in our classification.
@@ -734,11 +737,11 @@ In the following listing, you will use the PCA method of Scikit-Learn to take th
 >>> df2d.plot(kind='scatter', x='x', y='y')
 >>> plt.show()
 ----
-
-The result of running this code may look like a picture on the right or the left of figure 4.4, but it will never tip or twist to a new angle.
+<1> The result of running this code may look like a picture on the right or the left of figure 4.4, but it will never tip or twist to a new angle.
 That's because PCA always finds the two dimensions that will maximize the variance, and in the code we align these dimensions with x and y axes.
 However the _polarity_ (sign) of these axes is arbitrary because the optimization has two remaining degrees of freedom.
 The optimization is free to flip the polarity of the vectors (points) along the x or y axis, or both.
+//^^added <1>, not sure about formatting for the sentences after
 
 [id=head-to-head, reftext={chapter}.{counter:figure}]
 .Head-to-head horse point clouds upside down
@@ -1305,7 +1308,6 @@ We'll apply Latent Dirichlet Allocation to the count vector matrix in the same w
 >>> ldia.components_.shape
 (16, 19169)
 ----
-
 <1> LDiA takes a bit longer than PCA or SVD, especially for a large number of topics and a large number of words in your corpus.
 
 So your model has allocated your 19,169 words (terms) to 16 topics (components).

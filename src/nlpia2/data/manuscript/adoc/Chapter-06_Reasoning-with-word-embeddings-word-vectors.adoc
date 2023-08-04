@@ -2211,7 +2211,8 @@ You are going to break the links between any sentence pairs that are far apart (
 >>> node_labels = dict()
 >>> G = nx.Graph()
 >>> pattern = re.compile(
-    [CA]r'[\w\s]*[\'\"]?[\w\s]+\-?[\w\s]*[\'\"]?[\w\s]*')  # <2>
+...    r'[\w\s]*[\'\"]?[\w\s]+\-?[\w\s]*[\'\"]?[\w\s]*'
+...    )  # <2>
 >>> for edge in iterator:
 ...     key = 0
 ...     value = ''

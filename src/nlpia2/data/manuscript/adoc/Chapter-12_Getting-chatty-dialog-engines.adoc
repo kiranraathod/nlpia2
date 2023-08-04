@@ -111,7 +111,7 @@ One of them is that medical information is structured, making it feasible to "pa
 On the other hand, because of the complexity and variety of symptoms, conditions, and drugs, this information is difficult to query through traditional interfaces, but the chatbot's back-and-forth format makes it easier to pinpoint the patient's condition and provide the right information.
 
 Mental health chatbots ride on a different quality of chatbots - our tendency to personify things around us that resemble humans in some way (this psychological effect is called pareidolia. footnote:[Wikipedia article on Pareidolia: (https://en.wikipedia.org/wiki/Pareidolia)])
-Therapy chatbots, such as Woebot footnote:[(https://woebot.io/)] and Wysa,footnote:[http://wysa.io/] sound enough like a human therapist to make the user feel comfortable sharing their feelings - but also (relatively) private and confidential, allowing them to overcome the awkwardness of talking about sensitive, emotional issues with another human.
+Therapy chatbots, such as Woebot footnote:[(https://woebot.io/)] and Wysa,footnote:[(http://wysa.io/)] look enough like a human therapist to make the user feel comfortable sharing their feelings - but also (relatively) private and confidential, allowing them to overcome the awkwardness of talking about sensitive, emotional issues with another human.
 
 
 === Impact chatbots
@@ -246,7 +246,7 @@ You can see in Fig <<figure-explicit-implicity-confirmation>> examples of both i
 
 [id=figure-explicit-implicity-confirmation, reftext={chapter}.{counter:figure}]
 .Examples of explicit and implicit confirmations
-image::../images/ch10/qa_streamlit_app_v1.png["A diagram with 2 panes. In the pane on the left (explicit confirmation), the user says 'I'd like to book a flight to Albany tomorrow', and the bot replies 'I think you're looking for a flight to Albany, New York. Is that correct?'. In the right pane (implicit confirmation), the user says 'Bot, set an appointment with Dr. House tomorrow at 10.' and the bot replies 'OK, I've set your appointment for 10 am on Tuesday, July 16th", width=650, align="center", link="../images/ch10/explicit_implicit_confirmation.png"]
+image::../images/ch12/explicit_implicit_confirmation.png["A diagram with 2 panes. In the pane on the left (explicit confirmation), the user says 'I'd like to book a flight to Albany tomorrow', and the bot replies 'I think you're looking for a flight to Albany, New York. Is that correct?'. In the right pane (implicit confirmation), the user says 'Bot, set an appointment with Dr. House tomorrow at 10.' and the bot replies 'OK, I've set your appointment for 10 am on Tuesday, July 16th", width=650, align="center", link="../images/ch10/explicit_implicit_confirmation.png"]
 
 
 === Designing the key points in chatbot flow
@@ -275,7 +275,6 @@ For example, footnote:[More examples in Amazon Developer Blog: (https://develope
 If you interacted with web-based chatbots in the past, you probably noticed that natural language is not the only way to converse with them.
 You can use buttons, menus, galleries, and other GUI elements to help the user navigate the conversation.
 Some chatbot services even offer more advanced elements, such as the ability to schedule a conversation with the specialist through a date-picker within the chatbot or fill out a multi-question graphical form. 
-
 
 However, be careful not to overuse these elements. 
 Research from chatbot analytics company Dashbot shows that "people like to chat, not to click" - and that chatbots with more than 50% button interface experience less engagement than their counterparts that are more moderate in the use of GUI elements. footnote:[Dashbot blog post "To click or to chat - this is still the question":(https://blog.dashbot.io/2017/04/26/to-click-or-to-chatthat-is-still-the-question/)]
@@ -345,7 +344,8 @@ You'll first revisist some of these early templating systems for chatbots before
 
 === Template-based approach
 
-Rule-based approach was the first approach developers used to create chatbots.
+The template-based approach was the first approach developers used to generate messages for chatbots.
+The first templates were merely fixed strings determined by the hard coded logic of the software within the chatbot dialog engine
 
 Despite being the oldest of chatbot architectures, rule-based approach still holds surprisingly well, and a lot of chatbots you would interact with nowadays still rely heavily on pre-defined rules.
 
@@ -581,10 +581,30 @@ Of course you don't want to do this with commercial LLM services.
 Most commercial services admit in the fine print of their (anti-) privacy policies that they will use your data however they like.
     
 
-== Real-world chatbot frameworks
+== Chatbot frameworks
+// SUM: Modern chatbot engineers have converged on the hybrid chatbot architecture that we introduced in the first edition. Modern chatbots combine generative deep learning models with template, information retrieval, logic rules, template interpolation, and grammar parsers to create intelligent-sounding chatbots.
 // SUM: You can chose one of three different approaches to building chatbots or combine them all together using open source Python chatbot frameworks and the qary.ai platform allows you to experiment with all three for free.
 
-In the previous chapters you've seen several tools you can use to build chatbots.
+In each of the previous chapters you've learned a new technique for processing text to understand what the user is saying.
+And in this chapter you've learned four approaches to generating text for a chatbot to use in its response to the user.
+And you've already assembled a few chatbots from these NLU and NLG algoirthms to understand the advantages and disadvantages of each of these algorithms.
+Now you have the knowledge you need to use a _chatbot framework_ smartly.
+A chatbot framework is an application and a software library which abstracts away some of these detailed decisions you need to make when building a dialog engine for your chatbot.
+A framework gives you a way to specify your chatbot's behavior in _domain specific language_ that it can later inerpret and _run_ so that your chatbot replies the way you intended.
+
+Most chatbot frameworks use a declarative programming language to specify a bot's behavior and some even give you a graphical user interface to program your bot.
+There are nocode chatbot frameworks that abstract the declarative chatbot programming language with an interactive graphical representation of the dialog graph or flow diagram that you can modify with your mouse.
+And these nocode frameworks usually include a dialog engine that can execute your chatbot without you ever having to see or edit the underlying data. 
+Botpress is probably the most popular and mature open source nocode chatbot platform with this kind of end-to-end chatbot implementation capability.
+ManyChat and Landbot are two closed source nocode alternatives to Botpress.
+
+But if you've read this fary, you probably have ideas for more sophisticaed chatbots than what's possible in a nocode platform.
+So you will probably need a chatbot programming language to make your vision a reality.
+Of course you can specify your bot "stack" in Python by directly employing the skills you learned in this book.
+But if you want to build a scalable and maintainable chatbot you'll need a chatbot framework that uses a chatbot design language or data structure that you understand. 
+You want a language that makes sense to you so that you can quickly get the conversation design you have in your head embedded in a working chatbot.
+In this section you will learn of several different frameworks that can help you make your chatbot dreams come true.
+
 Using the tools described here, you can build a bot that can serve you (and maybe a few friends, or even more people if you're lucky) if deployed on a server or in a cloud.
 However, if you want to build a chatbot that servers hundreds or thousands of users, you need a more robust, scalable system.
 Luckily, there are frameworks available that allow you to focus on building your bot while taking care of the challenges that come with the need to build a production-grade system.
