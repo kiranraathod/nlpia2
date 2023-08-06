@@ -33,7 +33,7 @@ DEFAULT_ADOC_FILEPATH = ADOC_DIR / DEFAULT_ADOC_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
-def extract_blocks(
+def extract_blocks_with_grammar(
         filepath=Path('data/tests/test.adoc'),
         grammarpath=Path(SRC_DATA_DIR / 'grammars' / 'adoc_basic.ppeg')):
     filepath, grammarpath = Path(filepath), Path(grammarpath)
@@ -96,11 +96,13 @@ def extract_doctest_examples(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True,
         flat.extend(sect)
     return flat
 
+
 def extract_expressions(filepath=DEFAULT_ADOC_FILEPATH):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
     return dtparser.get_examples(text)
+
 
 def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
     """ Extract lines of Python using DocTestParser, return list of strs """
@@ -108,6 +110,25 @@ def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
     if with_metadata:
         return [vars(ex) for ex in expressions]
     return [ex.source for ex in expressions]
+
+
+# see nonworking duplicate `extract_code_sections_with_grammar`
+def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False):
+    meta = extract_code_lines(filepath=filepath, with_metadata=True)
+    df = pd.DataFrame(meta)
+    df['num_lines'] = df['source'].str.split('\n').str.len()
+    df['next_lineno'] = df['num_lines'] + df['lineno']
+    # df['stop_block'] = df['want'].str[:4].str.startswith('----')
+    df['stop_block'] = df['want'].str.strip().str.len() > 0
+
+    blocks = ['']
+    for line, stop_block, want in zip(df['source'], df['stop_block'], df['want']):
+        blocks[-1] += line + '\n'
+        if stop_block:
+            if with_output:
+                blocks[-1].append('\n'.join(['# ' + x for x in want.splitlines()]))
+            blocks.append('')
+    return blocks
 
 
 def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
@@ -132,6 +153,9 @@ def create_notebook(code_lines, destfile):
     nb = nbf.v4.new_notebook()
     nb['cells'] = []
     text = code = ''
+    if not isinstance(code_lines[0], str):  # must be dicts with meta from doctest
+        df = pd.DataFrame(code_lines)
+        code_lines = list(df['source'])
     for line in code_lines:
         if line.lstrip()[:2] == '# ':  # comments assumed to be markdown
             text += line.lstrip()[2:].rstrip() + '\n'
@@ -143,7 +167,7 @@ def create_notebook(code_lines, destfile):
             if text:
                 nb['cells'].append(nbf.v4.new_markdown_cell(text))
                 text = ''
-
+    # finish up with last line:
     if text:
         nb['cells'].append(nbf.v4.new_markdown_cell(text))
     if code:

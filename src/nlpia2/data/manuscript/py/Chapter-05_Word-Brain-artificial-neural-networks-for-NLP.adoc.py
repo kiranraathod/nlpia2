@@ -79,7 +79,7 @@ df.to_csv(  # <2>
 
 df = df.sample(10_000)  # <3>
 
-df
+df.shape
 
 df.groupby(['name', 'sex'])['count'].sum()[('Timothy',)]
 
@@ -93,8 +93,11 @@ counts
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-vectorizer = TfidfVectorizer(use_idf=False,  # <1>
-    analyzer='char', ngram_range=(1, 3))
+vectorizer = TfidfVectorizer(
+    use_idf=False,  # <1>
+    analyzer='char',
+    ngram_range=(1, 3)  # <2>
+    )
 
 vectorizer
 
@@ -278,6 +281,5 @@ def measure_binary_accuracy(y_pred, y):
 
 X = vectorizer.transform(
     ['John', 'Greg', 'Vishvesh',  # <1>
-     'Ruby', 'Carlana', 'Sarah'])  # <2>
 
 model(torch.Tensor(X.todense()))

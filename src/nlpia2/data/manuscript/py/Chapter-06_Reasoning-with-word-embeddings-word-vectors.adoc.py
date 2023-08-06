@@ -375,6 +375,8 @@ node_labels = dict()
 G = nx.Graph()
 
 pattern = re.compile(
+   r'[\w\s]*[\'\"]?[\w\s]+\-?[\w\s]*[\'\"]?[\w\s]*'
+   )  # <2>
 
 for edge in iterator:
     key = 0

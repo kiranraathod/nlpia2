@@ -1,3 +1,31 @@
+re.split(r'[!.?]+[ $]', "Hello World.... Are you there?!?! I'm going to Mars!")
+
+re.split(r'[!.?] ', "The author wrote \"'I don't think it's conscious.' Turing said.\"")
+
+re.split(r'[!.?] ', "The author wrote \"'I don't think it's conscious.' Turing said.\" But I stopped reading.")
+
+re.split(r'(?<!\d)\.|\.(?!\d)', "I went to GT.You?")
+
+import spacy
+
+nlpsm = spacy.load("en_core_web_sm")
+
+doc = nlpsm("This is a sentence. This is another sentence.")
+
+for sent in doc.sents:
+  print(sent.text)
+
+import spacy
+
+nlp_statistical = spacy.load("en_core_web_sm", exclude=["parser"])
+
+nlp_statistical.enable_pipe("senter")
+
+doc = nlp_statistical("This is a sentence. This is another sentence.")
+
+for sent in doc.sents:
+   print(sent.text)
+
 from nlpia2 import wikipedia as wiki
 
 page = wiki.page('Timnit Gebru')
@@ -10,45 +38,37 @@ i1 = text.index('Stochastic')
 
 text[i1:i1+51]
 
-from nlpia2.spacy_pipes import nlp_df
-
-nlpsm = load('en_core_web_sm')
-
-df = nlp_df(text, nlp=nlpsm)
-
-from nlpia2.spacy_pipes import nlp_df
-
-nlp = load('en_core_web_lg'
-
-df = nlp_df(text, nlp=nlp)
-
-df
-
-i0 = text.index('Gebru had')
-
-text[i0:i0+171]
-
-import spacy, coreferee
-
-nlptrf = spacy.load('en_coreference_web_trf')
-
-gebru_she = text[i0:i1]
-
-text_gebru = text[i0:i1]
-
-doc_gebru = nlp(text_gebru)
-
-doc_gebru
-
-doc_gebru.spans
-
-doc = nlp(text)
+doc = nlpsm(text)
 
 doc.ents[:6]  # <1>
 
-from nlpia2.spacy_pipes import nlp_df, load
+first_sentence = list(doc.sents)[0]
 
-df.loc['On':'?']
+' '.join(['{}_{}'.format(tok, tok.pos_) for tok in first_sentence])
+
+spacy.explain('CCONJ')
+
+' '.join(['{}_{}'.format(tok, tok.tag_) for tok in first_sentence])
+
+spacy.explain('VBZ')
+
+import pandas as pd
+
+from collections import OrderedDict
+
+def token_dict(token):
+   return OrderedDict( TOK=token.text,
+       POS=token.pos_, TAG=token.tag_, 
+       ENT_TYPE=token.ent_type_, DEP=token.dep_,)
+
+def doc_df(doc):
+   return pd.DataFrame([token_dict(tok) for tok in doc])
+
+doc_df(doc)
+
+from nlpia2.spacy_pipes import nlp_df
+
+nlp = load('en_core_web_lg')
 
 tags = []
 
@@ -59,8 +79,6 @@ for tok in doc:
 df = pd.DataFrame(tags).set_index('token').fillna('')
 
 df.head()
-
-df.tail(11)
 
 doc.ents
 
@@ -157,6 +175,22 @@ for ent in doc.ents:
     sent = sent.replace(ent.text, "^/" + ent.label_ + "/" + ent.text + "^")
 
 print(sent)
+
+i0 = text.index('Gebru had')
+
+text[i0:i0+171]
+
+import spacy, coreferee
+
+nlptrf = spacy.load('en_coreference_web_trf')
+
+text_gebru = text[i0:i1]
+
+doc_gebru = nlp(text_gebru)
+
+doc_gebru
+
+doc_gebru.spans
 
 import spacy
 
@@ -328,19 +362,6 @@ for g in groups:
 
 dates
 
-import spacy
-
-nlp = spacy.load('en_core_web_md')
-
-sentence = ("In 1541 Desoto wrote in his journal that the Pascagoula people " +
-    "ranged as far north as the confluence of the Leaf and Chickasawhay rivers at 30.4, -88.5.")
-
-parsed_sent = nlp(sentence)
-
-parsed_sent.ents
-
-' '.join(['{}_{}'.format(tok, tok.tag_) for tok in parsed_sent])
-
 from spacy.displacy import render
 
 sentence = "In 1541 Desoto wrote in his journal about the Pascagoula."
@@ -422,26 +443,3 @@ matches = matcher(doc)
 pd.DataFrame(matches, columns=)
 
 doc[m[-1][1]:m[-1][2]]  # <3>
-
-re.split(r'[!.?]+[ $]', "Hello World.... Are you there?!?! I'm going to Mars!")
-
-re.split(r'[!.?] ', "The author wrote \"'I don't think it's conscious.' Turing said.\"")
-
-re.split(r'[!.?] ', "The author wrote \"'I don't think it's conscious.' Turing said.\" But I stopped reading.")
-
-re.split(r'(?<!\d)\.|\.(?!\d)', "I went to GT.You?")
-
-from nlpia.data.loaders import get_data
-
-regex = re.compile(r'((?<!\d)\.|\.(?!\d))|([!.?]+)[ $]+')
-
-examples = get_data('sentences-tm-town')
-
-wrong = []
-
-for i, (challenge, text, sents) in enumerate(examples):
-    if tuple(regex.split(text)) != tuple(sents):
-        print('wrong {}: {}{}'.format(i, text[:50], '...' if len(text) > 50 else ''))
-        wrong += [i]
-
-len(wrong), len(examples)
