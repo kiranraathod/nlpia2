@@ -131,10 +131,10 @@ def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False):
     return blocks
 
 
-def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
+def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, with_output=True):
     """ Extract the lines of code from code blocks in an adoc file """
     filepath = Path(filepath or DEFAULT_ADOC_FILEPATH)
-    lines = extract_code_lines(filepath=filepath, with_metadata=False)
+    lines = extract_code_blocks(filepath=filepath, with_output=with_output)
     
     if destfile is True:
         destfile = filepath.with_suffix('.adoc.ipy')
@@ -162,7 +162,7 @@ def create_notebook(code_lines, destfile):
             if code:
                 nb['cells'].append(nbf.v4.new_code_cell(code))
                 code = ''
-        elif line.strip():  # blank lines separate code blocks
+        elif line.strip():  
             code += line.rstrip() + '\n'
             if text:
                 nb['cells'].append(nbf.v4.new_markdown_cell(text))
@@ -180,8 +180,13 @@ def create_notebook(code_lines, destfile):
     return nb
 
 
-def extract_notebooks(*args, **kwargs):
-    files = extract_code_files(*args, **kwargs)
+def extract_notebooks(input_dir=MANUSCRIPT_DIR, glob='*.adoc'):
+    """ Convert adoc file code blocks into cells within jupyter notebooks """
+    notebooks = []
+    for p in input_dir.glob(glob):
+        blocks = extract_code_blocks(filepath=p, with_meta=with_meta)
+        create_notebook
+    return outputs
     for p in files:
         code_lines = p.open().readlines()
         if code_lines:
