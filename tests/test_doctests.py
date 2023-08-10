@@ -2,7 +2,6 @@ import pytest  # noqa
 import doctest
 import nlpia2
 import nlpia2.ch06
-import nlpia2.pycozo
 
 # import nlpia2.ch06.spell
 
