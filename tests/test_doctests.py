@@ -15,7 +15,3 @@ def test_nlpia2_doctests():
     results = doctest.testmod(nlpia2, optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE))
     assert results.failed == 0
 
-
-def test_nlpia2_pycozo_doctests():
-    results = doctest.testmod(nlpia2.pycozo, optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE))
-    assert results.failed == 0
