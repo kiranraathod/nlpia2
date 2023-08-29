@@ -1,6 +1,7 @@
 import spacy
 import pandas as pd
 import numpy as np
+pd.options.display.max_columns = 2000
 
 # spacy.cli.download('en_core_web_md')
 df = pd.read_csv("../nlpia2/src/nlpia2/data/nlpia_lines.csv.gz")
@@ -22,7 +23,7 @@ plt.show()
 
 closeones = []
 for i1, text1 in enumerate(texts):
-    for i2, text2 in enumerate(texts[i1 + 1 :]):
+    for i2, text2 in enumerate(texts[i1 + 1:]):
         i3 = i2 + i1 + 1
         if heatmap[i1][i3] > 0.95:
             closeones.append(

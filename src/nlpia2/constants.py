@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Constants and discovered values, like path to current installation of nlpia2."""
 import re
 from pathlib import Path
 import logging
 import pkg_resources
 from os import linesep
-# -*- coding: utf-8 -*-
-"""Constants and discovered values, like path to current installation of pug-nlp."""
 
 import string
 import datetime
@@ -30,14 +30,9 @@ PKG_NAME = PKG_DIR.name
 SRC_DIR = PKG_DIR.parent
 BASE_DIR = SRC_DIR.parent
 
-BIGDATA_DIR_NAME = '.nlpia2-data'
-SRC_DATA_DIR_NAME = 'data'
 HOME_DIR = Path.home().resolve().absolute()
 
-SRC_DATA_DIR = PKG_DIR / SRC_DATA_DIR_NAME
-# nlpia2.config.py
-from pathlib import Path
-
+SRC_DATA_DIR_NAME = 'data'
 # nlpia2/src/nlpia2/data
 SRC_DATA_DIR = PKG_DIR / SRC_DATA_DIR_NAME
 try:
@@ -45,21 +40,22 @@ try:
 except FileExistsError as e:
     log.warninge(e)
 
+BIGDATA_DIR_NAME = '.nlpia2-data'
 BIGDATA_DIR = HOME_DATA_DIR = HOME_DIR / BIGDATA_DIR_NAME
 try:
     BIGDATA_DIR.mkdir(exist_ok=True, parents=True)
 except FileExistsError as e:
     log.warning(e)
 
-# FIXME: download manuscript from dropbox/Public and put it in ~/.nlpia2-data
-# MANUSCRIPT_DIR = Path.home() / 'code/tangibleai/nlpia-manuscript/manuscript/adoc'
-log.debug(f'SRC_DATA_DIR: {SRC_DATA_DIR}')
-MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
-log.debug(f'MANUSCRIPT_DIR: {MANUSCRIPT_DIR}')
-ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 # nlpia2/src/nlpia2/data/manuscript/adoc
-log.debug(f'ADOC_DIR: {ADOC_DIR}')  
+MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
+ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
+
+log.debug(f'SRC_DATA_DIR: {SRC_DATA_DIR}\n'
+          + f'MANUSCRIPT_DIR: {MANUSCRIPT_DIR}\n'
+          + f'ADOC_DIR: {ADOC_DIR}'
+          )
 
 DATA_INFO_FILE = SRC_DATA_DIR / 'data_info.csv'
 BIGDATA_INFO_FILE = SRC_DATA_DIR / 'bigdata_info.csv'
@@ -79,7 +75,8 @@ try:
 except (FileExistsError, FileNotFoundError) as e:
     log.warning(e)
 
-QUESTIONWORDS = set('who what when were why which how'.split() + ['how come', 'why does', 'can i', 'can you', 'which way'])
+QUESTIONWORDS = set('who what when were why which how'.split()
+                    + ['how come', 'why does', 'can i', 'can you', 'which way'])
 QUESTION_STOPWORDS = QUESTIONWORDS | set(STOPWORDS)
 
 SPECIAL_PUNC = {
@@ -87,8 +84,6 @@ SPECIAL_PUNC = {
     "’": "'", "‘": "'", "´": "'", "`": "'", '،': ',',
     '\u200b': ' ', '\xa0': ' ', '„': '', '…': ' ... ', '\ufeff': '',
 }
-
-
 
 
 def get_version():
@@ -125,6 +120,7 @@ def no_tqdm(it, total=1, **kwargs):
 # DATA_FILENAMES = dict(
 #     DATA_DIR
 # )
+
 
 # TZ constants
 DEFAULT_TZ = timezone('UTC')
@@ -255,5 +251,4 @@ FINANCIAL_MAPPING = (('k', '000'), ('M', '000000'))
 
 if __name__ == '__main__':
     assert MANUSCRIPT_DIR.is_dir()
-    assert ADOC_DIR.is_dir()#!/usr/bin/env python
-
+    assert ADOC_DIR.is_dir()  # !/usr/bin/env python
