@@ -860,8 +860,8 @@ Over the past few years, efforts to address TACRED's limitations such as data qu
 
 *2) DocRED*
 
-The Document Relation Extraction Dataset is the largest human-annotated dataset for document level relation extraction, where the model is required to go over multiple sentences in order to extract the relations between entities.
-Compiled using Wikidata and Wikipedia, this dataset is considered the de-facto benchmark for relation extraction methods along with TACRED due to its generalizability and size.
+The Document Relation Extraction Dataset is the largest human-annotated dataset for document level relation extraction, where the model is required to combine information from multiple sentences to extract each relations.
+Compiled using Wikidata and Wikipedia, this dataset is the de-facto benchmark for relation extraction methods along with TACRED due to its generalizability and size.
 
 *3) SemEval Task-8 dataset*
 
