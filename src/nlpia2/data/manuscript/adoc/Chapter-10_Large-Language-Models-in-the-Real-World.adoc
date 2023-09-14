@@ -177,8 +177,8 @@ So the paper that provided this data shows that the current transformer-based la
 
 As you might suspect, much of the talk about emergent capabilities is just marketing hype.
 When more objective researchers test LLMs they measure the size of an LLM by the number of floating point operations (FLOPs) required to train the model.footnote:[Scaling Laws for Neural Language Models by Jared Kaplan from Antrhopic.AI et al. (https://arxiv.org/abs/2001.08361)]
-This gives a fair estimate of both the dataset size and complexity of the LLM model.
-If you plot model accuracy against this measure of the size of the LLM model you find that there's nothing all that surprising or emergent in the results.
+This gives a fair estimate of both the dataset size and complexity of the LLM.
+If you plot model accuracy against this measure of the size of the LLM you find that there's nothing all that surprising or emergent in the results.
 The scaling relationship between capability and size is linear, sublinear or even flat for most state-of-the-art LLM benchmarks.
 Perhaps this is because researchers working in the open source world, have to put their code where their mouth is.
 Their results are peer reviewed and their open source code makes their results reproducible.
