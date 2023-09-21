@@ -9,21 +9,24 @@ import tempfile
 from types import MappingProxyType
 import nbformat as nbf
 
+from logging import getLogger
+
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, BASE_DIR
+from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, ADOC_DIR, HOBS_ADOC_DIR
+
+log = getLogger(__name__)
 
 RE_TEXT_LINE = r"^[A-Z_\*][-A-Za-z\ 0-9 :\";',!@#$%^&*()_+-={}<>?,.\/]+"
 RE_TITLE_LINE = r"^[=]+[A-Za-z0-9\ \-?!,]+"
 RE_MARKUP_LINE = r"^[\[][A-Za-z0-9,\ ]+[\]]"
 RE_CODE_OR_OUTPUT = r"^(>>>|\.\.\.|[a-z0-9\-\+]+|\(|[\ ]+).*"
-RE_CODE_COMMENT=r"^[<].*"
+RE_CODE_COMMENT = r"^[<].*"
 RE_METADATA = r"^[:].*"
 RE_EMPTY_LINE = r"^[ \t]*$"
-RE_FIGURE_NAME=r"^[\.].*"
-RE_SEPARATOR=r"^(\-\-\-\-|====)[\-=]*\s*"
-RE_COMMENT=r"^(\\\\|\/\/).*"
+RE_FIGURE_NAME = r"^[\.].*"
+RE_SEPARATOR = r"^(\-\-\-\-|====)[\-=]*\s*"
+RE_COMMENT = r"^(\\\\|\/\/).*"
 
-ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 LINES_FILENAME = 'nlpia_lines.csv'
 LINES_FILEPATH = SRC_DATA_DIR / LINES_FILENAME  # src/nlpia2/data/nlpia_lines.csv
 
@@ -42,6 +45,16 @@ def extract_blocks_with_grammar(
     return ast
 
 
+def chapter_num_title(filename):
+    match = re.match(r'Chapter-(\d\d)[-_]+([^\.]+)', filename)
+    d = {}
+    if match:
+        g = match.groups()
+        d['chapter'] = int(g[0])
+        d['title'] = g[1].replace('-', ' ')
+    return d
+
+
 def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
@@ -51,11 +64,15 @@ def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
 
     lines = []
     for i, line in enumerate(text.splitlines()):
-        lines.append(dict(
+        d = dict(
             line_text=line,
+            text=line,
             line_number=i,
             filename=filename,
             is_text=bool(re.match(RE_TEXT_LINE, line)),
+            is_heading=bool(re.match(r"^[=]{2,6}\ [- \w\d'\"\.].+", line)),
+            is_list=bool(re.match(r"^\.[ ]+[-\w\d'\"\.].", line)),
+            is_bullet=bool(re.match(r"^\*[ ]+[-\w\d'\"\.].", line)),
             is_empty=bool(re.match(RE_EMPTY_LINE, line)),
             is_code_or_output=bool(re.match(RE_CODE_OR_OUTPUT, line)),
             is_title=bool(re.match(RE_TITLE_LINE, line)),
@@ -65,8 +82,11 @@ def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
             is_figure_name=bool(re.match(RE_FIGURE_NAME, line)),
             is_separator=bool(re.match(RE_SEPARATOR, line)),
             is_comment=bool(re.match(RE_COMMENT, line))
-            )
         )
+        d.update(chapter_num_title(d['filename']))
+        d['is_body'] = d['is_text'] and not (d['is_title'] or d['is_list'] or d['is_bullet'])
+        d['num_sents'] = d['is_text'] and len(re.findall(r'[\w"\'\)][:.?!](\s|$)', line))
+        lines.append(d)
     return lines
 
 
@@ -79,7 +99,7 @@ def extract_code_sections(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, se
         sections = [sections]
 
     if with_metadata:
-        return [[vars(expr) for expr in sect] for sect in sections] 
+        return [[vars(expr) for expr in sect] for sect in sections]
     return [[ex.source for ex in sect] for sect in sections]
 
 
@@ -135,7 +155,7 @@ def extract_code_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, with_output
     """ Extract the lines of code from code blocks in an adoc file """
     filepath = Path(filepath or DEFAULT_ADOC_FILEPATH)
     lines = extract_code_blocks(filepath=filepath, with_output=with_output)
-    
+
     if destfile is True:
         destfile = filepath.with_suffix('.adoc.ipy')
     if destfile:
@@ -162,7 +182,7 @@ def create_notebook(code_lines, destfile):
             if code:
                 nb['cells'].append(nbf.v4.new_code_cell(code))
                 code = ''
-        elif line.strip():  
+        elif line.strip():
             code += line.rstrip() + '\n'
             if text:
                 nb['cells'].append(nbf.v4.new_markdown_cell(text))
@@ -236,7 +256,7 @@ def extract_tagged_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True
         print('WARNING: Must extract metadata for extract_tagged_code... with_metadata=True')
     if not isinstance(filepath, list) or isinstance(filepath, (str, Path)):
         doctests = extract_code_lines(filepath=filepath, with_metadata=True)
-    tagged_lines = [] 
+    tagged_lines = []
     for k, doc in enumerate(doctests):
         doc['docnum'] = k
         doc['source_lines'] = doc['source'].split('\n')
@@ -267,7 +287,7 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     if len(text) < 128 and Path(text).is_file():
         text = Path(text).open('rt').read()
     dtparser = DocTestParser()
-    
+
     if not section_break:
         return [dtparser.get_examples(text)]
 
@@ -280,7 +300,7 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
         else:
             text_sections[-1] = text_sections[-1] + line + '\n'
     return [dtparser.get_examples(text) for text in text_sections]
-    
+
 
 def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
@@ -344,6 +364,10 @@ def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
         f"{u['line_number']}-{u['url_number']}" for u in urls])
     df['filename'] = filepath.name
     df['filepath'] = str(filepath)
+    df = pd.concat([
+        df,
+        pd.DataFrame(list(df['filename'].apply(chapter_num_title)))
+    ], axis=1)
     return df
 
 
@@ -403,7 +427,7 @@ def extract_goodreads_quotes(text):
         unicode_quotes=[r'[“”]', r'"'],
         unicode_appostrophes=[r'[‘’]', r"'"],
         quote_text=[r'― ([^,]+),([-!?\w\d ]+)',
-            r'''
+                    r'''
   author: \1
   source: Good Reads
   book: \2
@@ -528,7 +552,7 @@ def extract_doctest_files(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_se
         destfile = destfile / filepath.with_suffix('.adoc.py').name
     sections_lines = extract_tagged_code_lines(
         filepath=filepath, with_metadata=False)
-    
+
     if destfile:
         destfile = Path(destfile)
     if not sections_lines:
@@ -564,7 +588,7 @@ def extract_files(
     """ Run an extractor on all the text (default=adoc) files in a directory returning the extracted file paths """
     output_paths = []
     adocdir = Path(adocdir)
-    
+
     assert adocdir.is_dir()
     paths = list(adocdir.glob(glob))
     if not len(paths) and (adocdir / 'adoc').is_dir():
@@ -574,7 +598,6 @@ def extract_files(
     destdir = Path(destdir or adocdir)
     destdir.mkdir(exist_ok=True)
     assert destdir.is_dir()
-    
 
     for p in paths:
         destfile = (destdir / p.name).with_suffix(suffix)
@@ -629,12 +652,17 @@ def extract_dfs_from_files(
         outputs.append(df)
     return outputs
 
+
 def update_nlpia_lines(adoc_dir=None, dest=LINES_FILEPATH):
+    """ Create DataFrame from all of the adoc files found in adoc_dir """
+
     if not adoc_dir:
-        adoc_dir = BASE_DIR.parent / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+        adoc_dir = HOBS_ADOC_DIR
         if not adoc_dir.is_dir():
             adoc_dir = ADOC_DIR
+    log.info(f"Looking for adoc files in {adoc_dir}")
     df = extract_big_line_df_from_files(adoc_dir)
+    log.warning(f"Overwriting CSV in {dest}")
     df.to_csv(dest)
     return df
 
@@ -675,7 +703,7 @@ def extract_code(adocs=None, output=None):
     args = dict(
         adocs=Path(adocs or MANUSCRIPT_DIR / 'adoc'),
         output=Path(output or MANUSCRIPT_DIR / 'py')
-        )
+    )
     args = parse_args(**args)
 
     if args['path']:
@@ -686,7 +714,7 @@ def extract_code(adocs=None, output=None):
             return extract_code_files(adocdir=args['adocs'])
         elif Path(args['adocs']).is_file():
             return extract_code_file(filepath=args['adocs'])
-    
+
     results = {}
     if input(f'Extract python from all adoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
         results['code_file_paths'] = extract_code_files()
@@ -695,10 +723,7 @@ def extract_code(adocs=None, output=None):
     return results
 
 
-
 if __name__ == '__main__':
     assert SRC_DATA_DIR.is_dir()
     assert MANUSCRIPT_DIR.is_dir()
     results = extract_code()
-
-
