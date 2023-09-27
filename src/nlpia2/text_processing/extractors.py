@@ -55,7 +55,22 @@ def chapter_num_title(filename):
     return d
 
 
-def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
+def split_sentences(text, pattern=r'[a-z"\'\)][:.?!](\s|$)', nlp=None):
+    if nlp:
+        return [d.text for d in nlp(text).sents]
+    sents = []
+    i0 = 0
+    for match in re.finditer(r'[a-z"\'\)][:.?!](\s|$)', text):
+        i1 = match.span()[1]
+        sents.append(text[i0:i1])
+    return sents
+
+
+def extract_lines(text=DEFAULT_ADOC_FILEPATH, chapter=None, with_meta=True, nlp=None):
+    if isinstance(text, int):
+        chapter = text
+    if chapter is not None:
+        text = next(iter(DEFAULT_ADOC_FILEPATH.parent.glob(f'Chapter-{chapter:02d}*')))
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
         filepath = Path(text)
@@ -81,12 +96,23 @@ def extract_lines(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
             is_markup=bool(re.match(RE_MARKUP_LINE, line)),
             is_figure_name=bool(re.match(RE_FIGURE_NAME, line)),
             is_separator=bool(re.match(RE_SEPARATOR, line)),
-            is_comment=bool(re.match(RE_COMMENT, line))
+            is_comment=bool(re.match(RE_COMMENT, line))  # this fails on comment blocks
         )
         d.update(chapter_num_title(d['filename']))
+        if nlp:
+            doc = nlp(line)
+            d['vector'] = doc.vector
+            d['sents_spacy'] = [s.text for s in doc.sents]
         d['is_body'] = d['is_text'] and not (d['is_title'] or d['is_list'] or d['is_bullet'])
-        d['num_sents'] = d['is_text'] and len(re.findall(r'[\w"\'\)][:.?!](\s|$)', line))
+        d['sents_regex'] = split_sentences(text=line)
+        d['num_sents_regex'] = len(d['sents_regex'])
+        # d['sents_spacy'] = split_sentences(text=line, nlp=nlp)
+
         lines.append(d)
+    if nlp:
+        for d in lines:
+            doc = nlp(d['text'])
+            d['sents_'] = [s.text for s in doc.sents]
     return lines
 
 
@@ -200,21 +226,21 @@ def create_notebook(code_lines, destfile):
     return nb
 
 
-def extract_notebooks(input_dir=MANUSCRIPT_DIR, glob='*.adoc'):
-    """ Convert adoc file code blocks into cells within jupyter notebooks """
-    notebooks = []
+def extract_notebooks(input_dir=MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+    """ NOTIMPLEMENTED: Convert adoc file code blocks into cells within jupyter notebooks """
+    blocks = []
     for p in input_dir.glob(glob):
         blocks = extract_code_blocks(filepath=p, with_meta=with_meta)
-        create_notebook
-    return outputs
-    for p in files:
-        code_lines = p.open().readlines()
+        # create_notebook
+    # return blocks
+    for code_lines in blocks:
         if code_lines:
             destfile = p.with_suffix(p.suffix + '.ipynb')
             print(destfile)
             create_notebook(
                 code_lines=code_lines,
                 destfile=destfile)
+    return blocks
 
 
 def extract_doctest_examples_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
@@ -371,8 +397,8 @@ def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
     return df
 
 
-def extract_lines_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
-    lines = extract_lines(text=filepath, with_meta=with_meta)
+def extract_lines_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True, nlp=None, **kwargs):
+    lines = extract_lines(text=filepath, with_meta=with_meta, nlp=nlp, **kwargs)
     df = pd.DataFrame(lines)
     return df
 
@@ -627,11 +653,11 @@ def extract_url_dfs_from_files(
 
 def extract_big_line_df_from_files(
         adocdir=MANUSCRIPT_DIR, destdir=None,
-        glob='*.adoc', suffix='.adoc.py'):
+        glob='*.adoc', suffix='.adoc.py', **kwargs):
     adocdir = Path(adocdir)
     output = []
     for p in adocdir.glob(glob):
-        lines = extract_lines(text=p)
+        lines = extract_lines(text=p, **kwargs)
         output.extend(lines)
     df = pd.DataFrame(output)
 
