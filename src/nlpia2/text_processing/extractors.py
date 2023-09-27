@@ -652,11 +652,12 @@ def extract_url_dfs_from_files(
 
 
 def extract_big_line_df_from_files(
-        adocdir=MANUSCRIPT_DIR, destdir=None,
-        glob='*.adoc', suffix='.adoc.py', **kwargs):
+        adocdir=MANUSCRIPT_DIR / 'adoc', destdir=None,
+        glob='*.adoc', **kwargs):
     adocdir = Path(adocdir)
     output = []
     for p in adocdir.glob(glob):
+        print(p)
         lines = extract_lines(text=p, **kwargs)
         output.extend(lines)
     df = pd.DataFrame(output)
