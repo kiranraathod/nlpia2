@@ -380,14 +380,21 @@ You can use the tags to filter out the lines that you don't want to process.
 
 [source,python]
 ----
->>> df9[['text', 'is_title', 'num_sents']]
-                                text  is_title  num_sents
-18441  = Stackable deep learning ...      True          0
-18442                    :chapter: 9     False          1
-...                              ...       ...        ...
-20514  * Despite being more than ...     False          1
-20515  * If you chose a pretraine...     False          0
-[2075 rows x 3 columns]
+>>> df9[['text', 'is_title', 'is_body', 'is_bullet']]
+                           text  is_title  is_body  is_bullet
+19057  = Stackable deep lear...      True    False      False
+19058               :chapter: 9     False    False      False
+19059                  :part: 3     False    False      False
+19060                 :secnums:     False    False      False
+19061             :imagesdir: .     False    False      False
+...                         ...       ...      ...        ...
+21124  * By keeping the inpu...     False    False       True
+21125  * Transformers combin...     False    False       True
+21126  * The GPT transformer...     False    False       True
+21127  * Despite being more ...     False    False       True
+21128  * If you chose a pret...     False    False       True
+
+[2072 rows x 4 columns]
 ----
 
 Now you can use the 'is_body' tag to process all the sentences within the body of the manuscript.
@@ -398,13 +405,13 @@ Now that you understand transformers such as BERT, you can use it to give you ev
 ----
 >>> texts = df9.text[df9.is_body]
 >>> texts.shape
-(689,)
+(687,)
 
 >>> from sentence_transformers import SentenceTransformer
 >>> minibert = SentenceTransformer('all-MiniLM-L12-v2')
 >>> vecs = minibert.encode(list(texts))
 >>> vecs.shape
-(689, 384)
+(687, 384)
 ----
 
 The MiniLM model is a multipurpose BERT transformer that has been obtimized and "distilled."
@@ -415,17 +422,31 @@ As you learned in Chapter 6, embedding vector semantic similarity is computed wi
 
 [source,python]
 ----
->>> import numpy as np
->>> dfe = pd.DataFrame([list(v / np.linalg.norm(v)) for v in vecs])
->>> similarity = dfe.values.dot(dfe.values.T)
->>> similarity.shape
-(689, 689)
+>>> from numpy.linalg import norm
+>>> dfe = pd.DataFrame([list(v / norm(v)) for v in vecs])
+>>> cos_sim = dfe.values.dot(dfe.values.T)
+>>> cos_sim.shape
+(687, 687)
 ----
 
 Now you have a square matrix, one row and column for each passage of text and its BERT embedding vector.
 And the value in each cell of the matrix contains the cosine similarity between that pair of embedding vectors.
 If you label the columns and rows with the first few characters of the text passages, that will make it easier to interpret all this data with a heatmap.
 
+>>> cos_sim = pd.DataFrame(cos_sim, columns=labels, index=labels)
+...
+>>> cos_sim
+                This chapter c  References:  ...
+This chapter c        1.000000     0.258608  ...
+_Transformers_        0.187846     0.188828  ...
+...                        ...          ...  ...
+So here's a qu        0.124551     0.196400  ...
+And even if yo        0.093767     0.079976  ...
+A personalized        0.073603     0.078423  ...
+KM: This is a         0.441010     0.160162  ...
+HL: rewrote th        0.421204     0.116293  ...
+
+[687 rows x 687 columns]
 
 
 

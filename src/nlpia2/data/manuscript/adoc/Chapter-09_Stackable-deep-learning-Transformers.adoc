@@ -21,18 +21,18 @@ This chapter covers
 * Estimating the information capacity of a transformer network required for a particular problem
 
 ////
-References:
-- https://www.ibm.com/blogs/watson/2020/12/how-bert-and-gpt-models-change-the-game-for-nlp/
-- https://towardsdatascience.com/transformers-explained-understand-the-model-behind-gpt-3-bert-and-t5-cdbf3fc8a40a
-- https://arxiv.org/pdf/2104.08691.pdf
-- scaling laws for neural language models: https://arxiv.org/pdf/2001.08361.pdf
-- training compute (FLOPs) for 100s of models: https://arxiv.org/pdf/2202.05924.pdf
-- parameters and compute trends:  [Compute and Energy Consumption Trends in Deep Learning Inference](https://arxiv.org/pdf/2109.05472.pdf)
+// References:
+// - https://www.ibm.com/blogs/watson/2020/12/how-bert-and-gpt-models-change-the-game-for-nlp/
+// - https://towardsdatascience.com/transformers-explained-understand-the-model-behind-gpt-3-bert-and-t5-cdbf3fc8a40a
+// - https://arxiv.org/pdf/2104.08691.pdf
+// - scaling laws for neural language models: https://arxiv.org/pdf/2001.08361.pdf
+// - training compute (FLOPs) for 100s of models: https://arxiv.org/pdf/2202.05924.pdf
+// - parameters and compute trends:  [Compute and Energy Consumption Trends in Deep Learning Inference](https://arxiv.org/pdf/2109.05472.pdf)
 ////
 
 ////
-KM: Great chapter and very timely too! Please see my comments below.
-HL: Thank you. 
+// KM: Great chapter and very timely too! Please see my comments below.
+// HL: Thank you.
 ////
 
 _Transformers_ are changing the world.
@@ -2061,8 +2061,8 @@ A personalized grammar checker may be your personal killer app that helps you de
 == Summary
 
 ////
-KM: This is a very long chapter, so I would expect there to be A LOT more chapter summary bullets here. 
-HL: rewrote the summary and deleted some content from this chapter, moving most LLM content to chapter 10
+// KM: This is a very long chapter, so I would expect there to be A LOT more chapter summary bullets here.
+// HL: rewrote the summary and deleted some content from this chapter, moving most LLM content to chapter 10
 ////
 
 * By keeping the inputs and outputs of each layer consistent, transformers gained their key superpower -- infinite stackabilty
