@@ -9,8 +9,7 @@
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
 :leveloffset: 0
-//:stem: latexmath
-// :icons!:
+:stem: latexmath
 :toc:
 :source-highlighter: coderay
 :bibliography-database: dl4nlp.bib
@@ -246,39 +245,195 @@ You can use the spaCy sentence segmenter (built into the parser) for most of you
 spaCy has few dependencies and compares well with the others on accuracy and speed.
 And actually, it does the sentence segmentation automatically as part of its default pipeline. 
 
-Here's the simplest way to segment your text into sentences using spaCy: 
+Here's the simplest way to segment your text into sentences with spaCy:
 
 [source,python]
 ----
 >>> import spacy
 
->>> nlpsm = spacy.load("en_core_web_sm")
->>> doc = nlpsm("This is a sentence. This is another sentence.")
->>> for sent in doc.sents:
-...   print(sent.text)
+>>> doc = nlp("Are you an M.D. Dr. Gebru? she forgot to spaCy this.")
+>>> [s.text for s in doc.sents]
+['Are you an M.D. Dr. Gebru?', 'she forgot to spaCy this.']
 ----
 
-spaCy's default parser is based on dependency extraction which we will cover later in this chapter. 
-That means it actually looks at the structure of the sentences when trying to split the given text. 
-This is why it can be a bit slower for large texts.
-If you want to use spaCy's statistical parser, embedded in a pipeline component called `senter`, which is about 5x faster, you need to disable the default parser when making the import. 
+SpaCy's default parser is based on dependency extraction which we will cover later in this chapter.
+A dependency parser identifies how each word depends on the other words in a sentence diagram, like the one you learned about in grammar school (elementary school).
+The structure and meaning of the tokens within a sentence help the spacy sentence segmenter deal with ambiguous punctuation and capitalization accurately, but that takes time.
+Speed is not important when you are only processing a few sentences, but what if you wanted to parse the AsciiDoc manuscript for Chapter 9 of this book?
 
 [source,python]
 ----
->>> import spacy
+>>> from nlpia2.text_processing.extractors import extract_lines
+>>> t0 = time.time(); lines = extract_lines(
+...     9, nlp=nlp); t1=time.time()  # <1>
+>>> t1 - t0
+15.98...
+>>> t0 = time.time(); lines = extract_lines(9, nlp=None); t1=time.time()
+>>> t1 - t0
+0.022...
+----
+<1> The first argument can be a path to an `adoc` file or a chapter number.
 
->>> nlp_statistical = spacy.load("en_core_web_sm", exclude=["parser"])
->>> nlp_statistical.enable_pipe("senter")
->>> doc = nlp_statistical("This is a sentence. This is another sentence.")
->>> for sent in doc.sents:
-...    print(sent.text)
+Wow, that _is_ slow!
+SpaCy is about 700 times slower than a regular expression.
+If you have millions of documents instead of just this one chapter of text, then you will probably need to do something different.
+For example, on a medical records parsing project we needed to switch to a regular expression tokenizer and sentence segmenter.
+The regex parser reduced our processing time from weeks to days, but it also reduced the accuracy of the rest of our NLP pipeline.
+
+SpaCy eventually caught up with our need for customization.
+SpaCy now allows you to enable or disable any piece of the pipeline you like.
+And it has a statistical sentence segmenter that doesn't rely on the other elements of the spaCy pipeline such as the word embeddings and named entity recognizer.
+When you want to speed up your spaCy NLP pipeline you can remove all the elements you don't need and add back just the pipeline elements that you need.
+First, check out the pipeline attribute of a spacy NLP pipeline, and use it to disable everything.
+
+[source,python]
+----
+>>> nlp.pipeline
+[('tok2vec', <spacy.pipeline.tok2vec.Tok2Vec at 0x...>),
+ ('tagger', <spacy.pipeline.tagger.Tagger at 0x7...>),
+ ('parser', <spacy.pipeline.dep_parser.DependencyParser at 0x...>),
+ ('attribute_ruler',
+  <spacy.pipeline.attributeruler.AttributeRuler at 0x...>),
+ ('lemmatizer',
+  <spacy.lang.en.lemmatizer.EnglishLemmatizer at 0x...>),
+ ('ner', <spacy.pipeline.ner.EntityRecognizer at 0x...>)]
+>>> nlp = spacy.load("en_core_web_md", exclude=[
+...    'tok2vec', 'parser', 'lemmatizer',  # <1>
+...    'ner', 'tagger', 'attribute_ruler'])
+>>> nlp.pipeline  # <2>
+[]
+----
+<1> The 'tok2vec', 'ner', and 'lemmatizer' algorithms are probably the slowest elements.
+<2> You should see an empty list if you have successfully removed everything.
+
+Now that you've cleaned your pipes, you can add back the important pieces that you need.
+You will need the `senter` pipeline element for sentence segmentation for this speed read through Chapter 9.
+
+[source,python]
+----
+>>> nlp.enable_pipe('senter')
+>>> nlp.pipeline
+[('senter', <spacy.pipeline.senter.SentenceRecognizer at 0x...>)]
+>>> t0 = time.time(); lines2 = extract_lines(nlp=nlp); t1=time.time()
+>>> t1 - t0
+2.3...
 ----
 
-Now that you have your text segmented, you're ready to start the process of information/knowledge extraction and putting it into a knowledge graph. 
+That is a significant time saver -- 2.3 vs 11.5 seconds on an 8-core i7 laptop.
+The statistical sentence segmenter is about 5x faster than the full spaCy pipeline.
+The regular expression approach will still be much faster, but the statistical sentence segmenter will be more accurate.
+You can estimate the accuracy of these two algorithms by comparing the lists of sentences to see if they produced the same lists of sentences.
+This will not tell you which of the two approaches is correctly segmenting a particular text line, but at least you will see when the two algorithms agree.
+
+[source,python]
+----
+>>> df_md = pd.DataFrame(lines)  # <1>
+>>> df_fast = pd.DataFrame(lines2)
+>>> (df_md['sents_spacy'][df_md.is_body]
+...  == df_fast['sents_spacy'][df_fast.is_body]
+...  ).sum() / df_md.is_body.sum()
+0.93
+----
+
+So it appears that about 93% of the sentences of this book were segmented the same way with the slow and fast pipelines.
+Look at some example segmentations to see which one might be better for your use cases.
+
+[source,python]
+----
+>>> df_md['sents_spacy'][df_md.is_body]
+37               [_Transformers_ are changing the world.]
+                              ...
+2049    [A personalized grammar checker may be your pe...
+Name: sents_spacy, Length: 687, dtype: object
+
+>>> df_fast['sents_spacy'][df_fast.is_body]
+37             [_, Transformers_ are changing the world.]
+                              ...
+2049    [A personalized grammar checker may be your pe...
+Name: sents_spacy, Length: 687, dtype: object
+----
+
+It looks like that opening sentence with the leading underscore character (\_) is bit more difficult for the faster statistical segmenter.
+So you probably want to use the full spacy model whenever you are parsing Markdown or AsciiDoc text files.
+The formatting characters will confuse a statistic segmenter if it has not been trained on similar text.
+
+=== Sentence semantics
+
+Now that you have your text segmented into sentences containing discrete facts, you are ready to start extracting those facts and give them structure in a knowledge graph.
+To get started, create a heatmap of the BERT embeddings of all the sentences of chapter 9.
+
+[source,python]
+----
+>>> import pandas as pd
+>>> url = 'https://gitlab.com/tangibleai/nlpia2/-/raw/main/'
+>>> url += 'src/nlpia2/data/nlpia_lines.csv'  # <1>
+>>> df = pd.read_csv(url, index_col=0)
+>>> df9 = df[df.chapter == 9].copy()
+>>> df9.shape
+(2075, 23)
+----
+<1> This data file contains the lines of AsciiDoc text from a draft of this book.
+
+Take a look at this DataFrame.
+It has columns that contain tags for each line of text.
+You can use the tags to filter out the lines that you don't want to process.
+
+[source,python]
+----
+>>> df9[['text', 'is_title', 'num_sents']]
+                                text  is_title  num_sents
+18441  = Stackable deep learning ...      True          0
+18442                    :chapter: 9     False          1
+...                              ...       ...        ...
+20514  * Despite being more than ...     False          1
+20515  * If you chose a pretraine...     False          0
+[2075 rows x 3 columns]
+----
+
+Now you can use the 'is_body' tag to process all the sentences within the body of the manuscript.
+These lines should contain mostly complete sentences so that you can compare them semantically to each other to see a heatmap of how often we say similar things.
+Now that you understand transformers such as BERT, you can use it to give you even more meaningful representations of this text than what SpaCy creates.
+
+[source,python]
+----
+>>> texts = df9.text[df9.is_body]
+>>> texts.shape
+(689,)
+
+>>> from sentence_transformers import SentenceTransformer
+>>> minibert = SentenceTransformer('all-MiniLM-L12-v2')
+>>> vecs = minibert.encode(list(texts))
+>>> vecs.shape
+(689, 384)
+----
+
+The MiniLM model is a multipurpose BERT transformer that has been obtimized and "distilled."
+It provides high accuracy and speed and should not take long to download from Hugging Face.
+Now you have 689 passages of text (mostly individual sentences).
+The MiniLM language model has embedded them into a 384 dimensional vector space.
+As you learned in Chapter 6, embedding vector semantic similarity is computed with the normalized dot product.
+
+[source,python]
+----
+>>> import numpy as np
+>>> dfe = pd.DataFrame([list(v / np.linalg.norm(v)) for v in vecs])
+>>> similarity = dfe.values.dot(dfe.values.T)
+>>> similarity.shape
+(689, 689)
+----
+
+Now you have a square matrix, one row and column for each passage of text and its BERT embedding vector.
+And the value in each cell of the matrix contains the cosine similarity between that pair of embedding vectors.
+If you label the columns and rows with the first few characters of the text passages, that will make it easier to interpret all this data with a heatmap.
+
+
+
+
+
 
 == A knowledge extraction pipeline
 
-Finally, we can start extracting concepts and relations from natural language text.
+Once you have your sentences organized you can start extracting concepts and relations from natural language text.
 For example, imagine a user says "Remind me to read aiindex.org on Monday."
 You'd like that statement to trigger a calendar entry or alarm for the next Monday after the current date.
 Easier said than done.

@@ -415,20 +415,12 @@ Therefore, the user's replies are the edges of the graph.
 === Store your graph in a relational database
 
 You might think that a graph database would be the ideal place to store your dialog or conversation graph.
-As the structure of the bot becomes more and more complex, you want to organize the graph in a format that will facilitate faster retrieval of the next node in the graph, the next thing you need to say.
+As the structure of the bot becomes more and more complex, you want to organize the graph in a format that will facilitate faster retrieval of the next thing you need to say.
 However, your chatbot rarely needs to plan more than a single conversation turn in advance.
 You only need to retrieve the next thing to say, the next node in the graph.
 And your conversation graph contains only a single relation or connection between nodes -- the user utterance or intent.
 
-Graph databases are designed to help you deal with recursive joins or hops between rows of a table.
-And they can dynamically handle a large number of different types of edges or relations.
-You don't have to anticipate the data schema for a graph database because they are inherently schemaless.
-But if you are able to anticipate the data schema, then a schemaless database creates unnecessary complexity and inefficiency in your software.
-You have to be careful to document all the different kinds of data and relations in your database in order to be able to query it in the future.
-If you don't know where things are stored in your database you often can't find what you're looking for.
-The additional flexibility of a graph database comes at a cost.
-
-And it's possible to have the best of both worlds, to create a conversation graph schema within a relational database.
+So it's possible to have the best of both worlds, to create a conversation graph schema within a relational database.
 You can create a `BotState` or `BotAction` table to hold the nodes in your conversation graph.
 And a `Trigger` or `UserIntent` table can hold the edge list to connect your bot states to each other based on what user messages trigger the state transitions and messages for your bot.
 
@@ -461,16 +453,6 @@ If your bot is moving too slow, your students can become bored and distracted an
 It's important that your chatbot system allows for new facts or scores in your context field.
 This makes a JSON string an ideal data format for the message context field.
 Whenever your learning engineers discover something else that they want to record or measure you can simply add another key-value pair to the nested dictionary of the context field.
-
-[TIP]
-====
-To build a stateless REST API for your chatbot, you will need to echo the context data back and forth between the server and the client with every message.
-This is a way for the chatbot backend to send a "message in a bottle" to itself.
-The frontend doesn't typically need to process this context or session data.
-It's merely a way for the backend to distinguish between all the users it is having simultaneously having conversations with.
-You can maintain context this way without having to use a websocket or webhook or other persistent connection protocol.
-Chatbots are much more efficient at context-switching than humans.
-====
 
 A conversation graph is a natural way to store the conversation design for any rule-based chatbot.
 And this data structure can be stored in a conventional relational database without any need for fancy NoSQL key-value stores or graph databases.
@@ -792,7 +774,9 @@ An LLM can confidently and convincingly chat with your users on virtually any to
 The key is to harness this power smartly so that it doesn't mislead your users, or worse.
 
 Let's build a bot with one of the popular tools for creating generative chatbots - LangChain.footnote:[Langchain Home Page: (https://langchain.com/)]
-While being more limited and geared towards using commercial Large Language Models (LLMs) than the other frameworks we discussed, it will give you a peek at one approach to building generative chatbots. 
+Langchain is not quite a chatbot framework as are Rasa or Rapidpro. Rather, it's a library that abstracts away the particular API of the LLM you want to use, allowing you to quickly experiment with different models and different approaches to using them.
+It also uses 
+As there is currently no leading open-source framework leveraging LLMs, we hope the following section will give you a peek at one approach to building generative chatbots. 
 
 LangChain heavily relies on APIs to function and even has a Javascript/Typescript SDK that makes it easier to use in web interfaces. 
 This makes a lot of sense, as the large language models it uses are too compute-intensive and memory-intensive to run on a personal computer, or even closed-source. 
@@ -802,7 +786,6 @@ Luckily, due to the power of the open-source community, you don't need to pay fo
 Several large companies that are committed to open-source have released the weights of their models to the public, and companies like HuggingFace host these models and provide an API to use them. 
 
 For the bot we'll be building in this chapter, let's take the latest open-source LLM, LLama 2, that you met in Chapter 10.
-
 To use Llama 2 from your machine, you need a strong enough processor, and a lot of RAM.
 Serving up large language models can be complicated and expensive.
 One free service that makes this a little easier is called Replicate.
@@ -812,7 +795,7 @@ You can use any of Huggingface's LLMs within Replicate as long as you can find t
 For the below code to run properly, you will need to create a GitHub account (unfortunately) and then use it to sign into Replicate.
 You can then create or renew your API token under your user profile on Replicate (https://replicate.com/account/api-tokens).
 Replicate requires you to use environment variables to store your API token.
-You can use `dotenv.load_dotenv()` on your .env or you can set the variable directly using `os.environ`, like you see here:
+You can use `dotenv.load_dotenv()` on your .env or you can set the variable directly using `os.environ`, as you see here:
 
 [source,python]
 ----
@@ -831,8 +814,9 @@ You can use `dotenv.load_dotenv()` on your .env or you can set the variable dire
 <1> df7690 is the first 6 characters of the git commit hash for Llama2-13B
 
 Now that you've initialized our LLM, you can make use of it in a Chain, a term `langchain` uses to signify a callable interface that implements a series of calls to components, that can include other Chains.footnote:[More about Chains in the langchain documentation: (https://python.langchain.com/docs/modules/chains/)]
+The reason for the name is that you can connect multiple C
 
-The foundational thing any Chain needs is a prompt - basically, the tokens that will be used to help the model start generating content. 
+The foundational thing any LLM-facing Chain needs is a prompt - basically, the tokens that will be used to help the model start generating content. 
 Let's create your first prompt and initialize your Chain: 
 
 [source,python]
@@ -871,7 +855,7 @@ Now you only need to run the `.predict()` method to predict a bot response to a 
 OK, that's a start!
 Your bot definitely was able to generate a reasonable response that could be said by a math chatbot. 
 Unfortunately, it also generated a response for the student. 
-We'll need to tweak our prompt to make sure that doesn't happen. 
+You'll need to tweak our prompt to make sure that doesn't happen. 
 But the more important question is - will the bot remember what was said previously in the conversation? 
 Let's try and see:
 
@@ -894,7 +878,7 @@ If you want your chatbot to remember what has been said before, you need to reco
 Langchain can store whatever you like in a `Memory` object.
 And there's a special memory object just for storing the conversation message log.
 
-First, let's update our prompt a little bit to make the bot recreate the onboarding conversation we implemented before.
+First, let's update your prompt a little bit to make the bot recreate the onboarding conversation you implemented before.
 
 [source,python]
 ----
@@ -921,7 +905,7 @@ First, let's update our prompt a little bit to make the bot recreate the onboard
 
 We will also initialize our memory object to store the conversation history.
 For now, we'll be using the simplest type of memory, `ConversationBufferMemory`.
-All it does is to format the conversation history into a string and store it in a variable that you can use in your template.
+All it does is format the conversation history into a string and store it in a variable that you can use in your template.
 
 [source, python]
 ----
@@ -930,8 +914,8 @@ All it does is to format the conversation history into a string and store it in 
 ----
 <1> `memory_key` specifies the name of the variable to use in your template
 
-As your chatbot gets more sophisticated, you can try other types of memory, such as `ConversationKGMemory` that turns the conversation history into a knowledge graph. 
-Another useful type of memory is `ConversationSummaryMemory`, that uses another LLM to summarize the message history. 
+As your chatbot gets more sophisticated, you can try other types of memory, such as `ConversationKGMemory` which turns the conversation history into a knowledge graph. 
+Another useful type of memory is `ConversationSummaryMemory`, which uses another LLM to summarize the message history. 
 This becomes very useful as the conversation gets longer and starts to approach the context length limit of the LLM - usually a few thousand tokens.  
 
 To help the bot leverage that memory object, you can use the `ConversationChain` class, which is a subclass of `LLMChain` that automatically stores the conversation history in a memory object.
@@ -1084,7 +1068,7 @@ answer them to the best of your ability. Don't worry
 ----
 
 This LLM response would definitely get the thumbs-down from the teacher.
-The student was incorrect by completing the sequence "2,4,6,8" and answering with "12".
+The student was incorrect in completing the sequence "2,4,6,8" and answering with "12".
 However, the simulated teacher gladly approved the incorrect result - even though it "knew" the correct answer!
 
 In this _in-context_ _few-shot learning_ example ChatGPT performed poorly.
@@ -1109,15 +1093,14 @@ And you should record all of your requests alongside the LLM responses so you ca
 Now you see that you need to apply caution when using the generative approach. 
 It can be a very powerful tool in your toolkit.
 But should evaluate if the domain of the task is appropriate for the LLM you are using. 
-And you should carefully think how to _ground_ your model so that it would generate factually correct content, like we did in Chapter 10. 
 
 In most chatbots that we have, the majority of the content would be template-based or programmatic. 
-When we use LLMs, we usually combine them with semantic or knowledge-graph based search, such as we did in Chapter 10.
-Rarely, Large Language Models can be trusted to lead a short conversation with the user - and in this case, the are heavily tested and the LLM's responses are carefully curated. 
+When we use LLMs, we usually combine them with semantic or knowledge-graph-based search, such as we did in Chapter 10.
+In specific occasions, Large Language Models can be trusted to lead a short conversation with the user - and in this case, they are heavily tested and the LLM's responses are carefully curated. 
 
 == Maintaining your chatbot's design
 
-Now that you've learned a few approaches to build your chatbot, it's time to address the next stage. 
+Now that you've learned a few approaches to building your chatbot, it's time to address the next stage. 
 What happens when your chatbot is live and you start recording user conversations and receive user feedback?
 
 You learned many times in this book the importance of human feedback to help train your NLP models to get smarter and smarter over time.
@@ -1258,12 +1241,13 @@ It is called HEART, and includes 5 families of metrics that form the acronym: Ha
 Let's look at those metrics in more "chronological" order, as they relate to the different phases of the user's journey with your chatbot. 
 
 _Adoption_ metrics measure how many users use your chatbot for the first time. 
-"Using" might mean differen things - for example, you might decide that you're not interested in users that just subscribe to the bot, but only those who exchange at least a few messages with it.
+"Using" might mean different things - for example, you might decide that you're not interested in users that just subscribe to the bot, but only those who exchange at least a few messages with it.
 You can also look at particular _feature adoption_ - such as, how many users use your bot's question answering functionality.
-With a tutor chatbot such as Rori, we are not only interested in the total number of users, but also in users that make it through the onboarding to the math section, and in users that have returned for a second session.
+With a math tutor chatbot, you will be interested not just in the total number of users, but also in the number of users that make it through the onboarding to the math section.
 
 _Engagement_ metrics deal with the depth and intensity of chatbot usage. 
 They can measure things like how often the users interact with your chatbot, how many questions they ask, how long they stay in the chat, and so forth. 
+For a math tutor chatbot, you might want to see which lessons the users visit, how many lessons they do per session, and how many sessions the different groups of users have. 
 
 _Task Success_ metrics relate to the task that your chatbot should help the user accomplish. 
 For example, if your chatbot is educational, you can measure what percentage of active users completed a lesson, how long it took them to complete one, and how far they got if they didn't complete it. 
@@ -1280,18 +1264,10 @@ Some common measures of happiness include the Net Promoter Score (NPS), which is
 Finally, _retention_ addresses the question of how many users come back to your chatbot after their first interaction.
 It's common to measure retention over time, such as daily, weekly and monthly retention. 
 While retention is not relevant for all chatbots (you wouldn't want your customer service chatbot user to return daily, would you?), it is a very important metric for chatbots that are meant to be used repeatedly, such as educational chatbots.
+If you intend your users to use your tutor bot for a prolonged time, you might want to measure how many users return to the bot after a week, a month, and so forth.
 
 While these five families highlight the different aspects of user experience, that doesn't mean you have to use them all or prioritize them similarly. 
 You can choose which ones to pay attention to based on your chatbot's goals. 
-
-=== Measuring your chatbot's impact
-Finally, we reached the last family of metrics, and the most tricky one to measure. 
-Impact metrics measure quantitatively the answer to the key questions - what is your chatbot's impact on the user?
-Does it help your users - and your team - to reach their goals?
-
-For some bots, measuring impact can be pretty straightforward.
-For example, for a customer service chatbot, asking the user if their issue was resolved can provide a good proxy for the usefulness of the chatbot. 
-For most applications, however, measuring the chatbot's impact can be much trickier. 
 
 === What's next?
 
@@ -1421,7 +1397,7 @@ HL: Done
 == Summary
 
 * To contribute to a cooperative conversation a chatbot must maintain state, understand user intent, and be able to generate text that helps the user achieve their goals for the conversation.
-* Despite excitement for LLMs, rule-based chatbots are still the most developed approach for building chatbots that can be relied on to cooperate with your users.
+* Despite the excitement for LLMs, rule-based chatbots are still the most developed approach for building chatbots that can be relied on to cooperate with your users.
 * LLMs are not explainable nor controllable and are thus cannot be the sole chatbot technology employed within any organization attempting to develop safe and ethical AI chatbots.
 * To design effective conversation you must tap into your innate ability to have cooperative conversation.
 * Conversation design requires much more than merely strong writing skill. You must also have deep empathy and understanding for your users in order to understand what they are likely to want to chat about.
