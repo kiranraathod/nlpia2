@@ -993,7 +993,7 @@ Let's see what token has a maximum probability for the input sequence "NLP is a"
 .Finding the token with maximum probability
 [source,python]
 ----
->>> encoded_prompt = tokenizer('NLP is a', return_tensors="pt") #<1>
+>>> encoded_prompt = tokenizer('NLP is a', return_tensors="pt")  # <1>
 >>> encoded_prompt = encoded_prompt["input_ids"]
 >>> encoded_prompt = encoded_prompt.to(DEVICE)
 >>> output = vanilla_gpt2(input_ids=encoded_prompt)
@@ -1996,7 +1996,7 @@ Your document store, unfortunately, can be neither cached nor hashed (very confu
 [source,python]
 ----
 >>> @st.cache_resource
->>> def load_retriever(_document_store):    #<1>
+>>> def load_retriever(_document_store):  # <1>
 ...    return EmbeddingRetriever(
 ...     document_store=_document_store,
 ...     embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1"

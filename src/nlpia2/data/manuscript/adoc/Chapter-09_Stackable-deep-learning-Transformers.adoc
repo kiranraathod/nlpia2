@@ -20,21 +20,6 @@ This chapter covers
 * Generating grammatically correct and interesting text with transformers
 * Estimating the information capacity of a transformer network required for a particular problem
 
-////
-// References:
-// - https://www.ibm.com/blogs/watson/2020/12/how-bert-and-gpt-models-change-the-game-for-nlp/
-// - https://towardsdatascience.com/transformers-explained-understand-the-model-behind-gpt-3-bert-and-t5-cdbf3fc8a40a
-// - https://arxiv.org/pdf/2104.08691.pdf
-// - scaling laws for neural language models: https://arxiv.org/pdf/2001.08361.pdf
-// - training compute (FLOPs) for 100s of models: https://arxiv.org/pdf/2202.05924.pdf
-// - parameters and compute trends:  [Compute and Energy Consumption Trends in Deep Learning Inference](https://arxiv.org/pdf/2109.05472.pdf)
-////
-
-////
-// KM: Great chapter and very timely too! Please see my comments below.
-// HL: Thank you.
-////
-
 _Transformers_ are changing the world.
 The increased intelligence that transformers bring to AI is transforming culture, society, and the economy.
 For the first time, transformers are making us question the long-term economic value of human intelligence and creativity.
@@ -111,11 +96,6 @@ Let's looks at these ideas in detail.
 
 === Attention is NOT all you need
 // SUM: Attention, BPE, positional encoding, stackability and scalability all combine to create the power of a transformer, but the attention mechanism created a powerful synergy between these algorithms.
-
-////
-KM: We can't use bold. Please change the terms below that are bolded to be italicized.
-HL: Done
-////
 
 * _Byte pair encoding (BPE)_:: Tokenizing words based on character sequence statistics rather than spaces and punctuation
 * _Attention_:: Connecting important word patterns together across long stretches of text using a connection matrix (attention)
@@ -196,11 +176,6 @@ Transformer layers are designed to have inputs and outputs with the same size an
 The transformer innovation that catches most researchers' attention is the _attention mechanism_.
 Start there if you want to understand what makes transformers so exciting to NLP and AI researchers.
 Unlike other deep learning NLP architectures that use recurrence or convolution, the transformer architecture uses stacked blocks of attention layers which are essentially fully-connected feedforward layers with the same.
-
-////
-KM: In the paragraph below, you reference chapter 9 for RNNs, but this is now chapter 9. Please check which chapter you mean now. 
-HL: Fixed!
-////
 
 In Chapter 8, you used RNNs to build encoders and decoders to transform text sequences.
 In encoder-decoder (_transcoder_ or _transduction_) networks,footnote:["Gentle Introduction to Transduction in Machine Learning" blog post on _Machine Learning Mastery_ by Jason Brownlee 2017 (https://machinelearningmastery.com/transduction-in-machine-learning/)] the encoder processes each element in the input sequence to distill the sentence into a fixed-length thought vector (or _context vector_).
@@ -307,10 +282,6 @@ And this is why it was so important for you to understand the basics of linear a
 == Filling the attention gaps
 // SUM: A little more detail about positional encoding and a quick look at BERT and bidirectional transformers.
 
-////
-KM: You don't need to define what RNNs stand for in parantheses below since you've already defined this term in a previous chapter. 
-HL: Done.
-////
 
 The attention mechanism compensates for some problems with RNNs and CNNs of previous chapters but creates some additional challenges.
 Encoder-decoders based on RNNs don't work very well for longer passages of text where related word patterns are far apart.
@@ -416,12 +387,8 @@ But transformer attention matrices have access to the entire sequence all at onc
 .Connections between encoder and decoder layers
 image::../images/ch09/encoder_decoder.drawio.png[alt="The last top layer of the encoder stack is connected to each decoder layer directly and the output of each decoder layer passes on to the next decoder as well", width=100%, align="center", link="../images/ch09/encoder_decoder.drawio.png"]
 
-=== Transformer Language Translation Example
-
-////
-KM: Interesting example/scenario here!
-HL: Thanks!
-////
+=== Transformer Translation Example
+// SUM: Translate between German and English by building a transformer from scratch.
 
 Transformers are suited for many tasks.
 The "Attention Is All You Need" paper showed off a transformer that achieved better translation accuracy than any preceding approach.
@@ -531,11 +498,6 @@ They do not need to be unique because your decoder will always "know" when it is
 The padding token is used to fill in the sequence at the end for examples shorter than the maximum sequence length.
 The mask token is used to intentionally hide a known token for training task-independent encoders such as BERT.
 This is similar to what you did in Chapter 6 for training word embeddings using skip grams.
-
-////
-KM: Introduce this next step of code with a few sentences. What is it going to do for you?
-HL: Done
-////
 
 You can choose any tokens for these marker (special) tokens, but you want to make sure that they are not words used within the vocabulary of your dataset.
 So if you are writing a book about natural language processing and you don't want your tokenizer to trip up on the example SOS and EOS tokens, you may need to get a little more creative to generate tokens not found in your text.
@@ -765,7 +727,6 @@ nn.Transformer.forward(
 <5> Define individual embedding layers for the input and target sequences
 <6> PositionalEncoding for the source and target sequences
 <7> Final linear layer for target word probabilities
-
 
 Note the import of `rearrange` from the `einops` footnote:[einops:https://github.com/arogozhnikov/einops] package.
 Mathematicians like it for tensor reshaping and shuffling because it uses a syntax common in graduate level applied math courses.
@@ -2059,11 +2020,6 @@ A personalized grammar checker may be your personal killer app that helps you de
 6. How do you measure the accuracy or loss of a summarizer or translator where there can be more than one right answer?
 
 == Summary
-
-////
-// KM: This is a very long chapter, so I would expect there to be A LOT more chapter summary bullets here.
-// HL: rewrote the summary and deleted some content from this chapter, moving most LLM content to chapter 10
-////
 
 * By keeping the inputs and outputs of each layer consistent, transformers gained their key superpower -- infinite stackabilty
 * Transformers combine three key innovations to achieve world-changing NLP power: BPE tokenization, multi-head attention, and positional encoding.

@@ -48,7 +48,6 @@ You can see an example of a knowledge graph in Figure <<figure-knowledge-graph>>
 .An example of a knowledge graph
 image::../images/ch11/kg_150_biotech_company.graphviz.png[A network diagram of the first 150 entities in the NELL knowledge graph. The dataset starts with a biotech company named , width=85%, link="../images/ch11/kg_150_biotech_company.graphviz.png"]
 
-
 Each fact you extract will create a new connection between the nodes of the graph - or possibly, create new nodes. 
 This allows you to ask questions about the relationships between things using a query language such as GraphQL or Cypher or even SQL.
 
@@ -433,25 +432,19 @@ Now you have a square matrix, one row and column for each passage of text and it
 And the value in each cell of the matrix contains the cosine similarity between that pair of embedding vectors.
 If you label the columns and rows with the first few characters of the text passages, that will make it easier to interpret all this data with a heatmap.
 
+[source,python]
+----
 >>> cos_sim = pd.DataFrame(cos_sim, columns=labels, index=labels)
-...
 >>> cos_sim
                 This chapter c  References:  ...
 This chapter c        1.000000     0.258608  ...
 _Transformers_        0.187846     0.188828  ...
 ...                        ...          ...  ...
-So here's a qu        0.124551     0.196400  ...
 And even if yo        0.093767     0.079976  ...
 A personalized        0.073603     0.078423  ...
-KM: This is a         0.441010     0.160162  ...
-HL: rewrote th        0.421204     0.116293  ...
+----
 
-[687 rows x 687 columns]
-
-
-
-
-
+// FIXME: finish with diagram
 == A knowledge extraction pipeline
 
 Once you have your sentences organized you can start extracting concepts and relations from natural language text.
@@ -663,16 +656,16 @@ Let's bring all the information about your tokens together in one table.
 >>>
 >>> doc_df(doc)
             TOK    POS    TAG ENT_TYPE       DEP
-0        Timnit  PROPN    NNP           compound #<1>
+0        Timnit  PROPN    NNP           compound  # <1>
 1         Gebru  PROPN    NNP              nsubj
 2             (  PUNCT  -LRB-              punct
 3       Amharic  PROPN    NNP              appos
 4             :  PUNCT      :              punct
          ...    ...    ...      ...       ...
-3277     Timnit  PROPN    NNP      ORG  compound #<2>
+3277     Timnit  PROPN    NNP      ORG  compound  # <2>
 3278      Gebru  PROPN    NNP      ORG      pobj
 3279         at    ADP     IN               prep
-3280  Wikimedia  PROPN    NNP      FAC  compound #<3>
+3280  Wikimedia  PROPN    NNP      FAC  compound  # <3>
 3281    Commons  PROPN    NNP      FAC      pobj
 ----
 <1> "Timnit Gebru" is not recognized as an entity
@@ -954,7 +947,6 @@ How will it help you in your quest for an intelligent chatbot?
 We've come to the crucial stage of helping our bot learn from what it reads.
 Take this sentence from Wikipedia:
 
-// todo replace by Timnit Gebru.
 _In 1983, Stanislav Petrov, a lieutenant colonel of the Soviet Air Defense Forces, saved the world from nuclear war._
 
 If you were to take notes in a history class after reading or hearing something like that, you'd probably paraphrase things and create connections in your brain between concepts or words.
@@ -1223,12 +1215,6 @@ To give you a more concrete mental model of the concept of knowledge graphs you 
 The NLPiA2 Python package has several utilities for making the NELL knowledge graph a bit easier to wrap your head around.
 Later in the chapter, you'll see the details about how these work so you can prettify whatever knowledge graph you are working with.
 
-// FIXME: graph_plots.__main__ goes here
-// 0. describe NELLs columns
-// 1. optionally show what NELL df looks like
-// 2. reduce columns to only first 3 or 4
-// 3. simplify_*()
-
 [source,python]
 ----
 >>> import pandas as pd
@@ -1349,15 +1335,15 @@ You can easily retrieve the Q-id of any Wikipedia article by using Wikidata's RE
 [source,python]
 ----
 >>> def get_wikidata_qid(wikiarticle, wikisite="enwiki"):
-...    WIKIDATA_URL='https://www.wikidata.org/w/api.php'
-...    resp = requests.get(WIKIDATA_URL, timeout=5, params={
-...        'action': 'wbgetentities',
-...        'titles': wikiarticle,
-...        'sites': wikisite,
-...        'props': '',
-...        'format': 'json'
-...    }).json()
-...    return list(resp['entities'])[0]
+...     WIKIDATA_URL='https://www.wikidata.org/w/api.php'
+...     resp = requests.get(WIKIDATA_URL, timeout=5, params={
+...         'action': 'wbgetentities',
+...         'titles': wikiarticle,
+...         'sites': wikisite,
+...         'props': '',
+...         'format': 'json'
+...     }).json()
+...     return list(resp['entities'])[0]
 
 >>> tg_qid = get_wikidata_qid('Timnit Gebru')
 >>> tg_qid
@@ -1375,23 +1361,33 @@ For this, you'll need a couple of property and entity IDs - for simplicity, we j
 
 [source,python]
 ----
->>> NOTABLE_WORK_PID = 'P800'     #<1>
->>> INSTANCE_OF_PID = 'P31'       #<2>
->>> SCH_ARTICLE_QID= 'Q13442814'  #<3>
+>>> NOTABLE_WORK_PID = 'P800'     # <1>
+>>> INSTANCE_OF_PID = 'P31'       # <2>
+>>> SCH_ARTICLE_QID= 'Q13442814'  # <3>
 >>> query = f"""
-...   SELECT ?article WHERE {{           #<4>
-...      wd:{tg_qid} wdt:{NOTABLE_WORK_PID} ?article.
-...      ?article wdt:{INSTANCE_OF_PID} wd:Q13442814.
+...     SELECT ?article WHERE {{
+...         wd:{tg_qid} wdt:{NOTABLE_WORK_PID} ?article.
+...         ?article wdt:{INSTANCE_OF_PID} wd:Q13442814.
 ...
-...      SERVICE wikibase:label {{ bd:serviceParam     #<4>
+...         SERVICE wikibase:label {{ bd:serviceParam
 ...                            wikibase:language "en". }}
-...      }}
-...         """
+...         }}
+... """
 ----
 <1> "notable work" property id
 <2> "instance of" property id
 <3> "scholarly article" entity id
-<4> Don't forget to double escape the curly bracers in f-strings!
+
+[IMPORTANT]
+====
+Don't forget to double escape the curly braces in f-strings!
+And you cannot use a backslash as an escape character in f-strings.
+_WRONG_: f"\{"
+Instead you must double the curly braces.
+_RIGHT_: f"{{"
+
+And if you are familiar with the `jinja2` package, be careful mixing using Python f-strings to populate jinja2 templates, you would need four curly braces to create a literal double curly brace.
+====
 
 Cryptic at the first sight, what this query means is "Find an entity A such that Timnit Gebru has A as notable work, and also A is an instance of an academic article".
 You can see how each relational condition is codified in SPARQL, with operand `wd:` preceding entity Q-ids and the operand `wdt:` preceding property P-ids. 
@@ -1407,7 +1403,7 @@ First, let's set up our wrapper:
 >>>
 >>> endpoint_url = "https://query.wikidata.org/sparql"
 >>> sparql = SPARQLWrapper(endpoint_url)
->>> sparql.setReturnFormat(JSON) #<1>
+>>> sparql.setReturnFormat(JSON)  # <1>
 ----
 <1> Return query results as JSON string
 
@@ -1452,29 +1448,31 @@ Now that you got the Q-id of the article - you can retrieve its authors by using
 ----
 
 And here you have the answer to your question! 
-[NOTE]
-====
+
 Instead of doing two queries, we could have achieved the same result by nesting our queries, within each other, like this: 
 
 [source,python]
 ----
-query = """
-            SELECT ?author ?authorLabel WHERE {
-                  {
-                  SELECT ?article WHERE {
-                        wd:Q59753117 wdt:P800 ?article.
-                        ?article wdt:P31 wd:Q13442814.
-                        }
-                  }
-                  ?article wdt:P50 ?author.
-                  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-            }
-        """
+>>> query = """
+... SELECT ?author ?authorLabel WHERE {
+...     {
+...     SELECT ?article WHERE {
+...         wd:Q59753117 wdt:P800 ?article.
+...         ?article wdt:P31 wd:Q13442814.
+...         }
+...     }
+...     ?article wdt:P50 ?author.
+...     SERVICE wikibase:label {
+...         bd:serviceParam wikibase:language "en".
+...         }
+... }
+... """
 ----
 
-SPARQL is a developed language whose functionality includes much more than just simple queries. 
-Wikidata itself has a pretty good manual on SPARQL footnote:[Wikidata SPARQL tutorial: (https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial)]- feel free to explore this powerful language!
-====
+SPARQL is a well-developed language whose functionality includes much more than just simple queries.
+Wikidata itself has a pretty good manual on SPARQL.footnote:[Wikidata SPARQL tutorial: (https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial)]
+The deeper you dig into Wikidata using SPARQL the more uses you will find for it in your NLP applications.
+It is one of the only ways you can automatically evaluate the quality and correctness of the facts that your NLP pipeline asserts to your users.
 
 === From questions to queries 
 
@@ -1484,18 +1482,20 @@ That would have been pretty much impossible to do if your database was relationa
 However, looking for the answer took us quite a lot of work and two SPARQL queries. 
 How do you transform a natural-language question into a query in a structured language like SPARQL?
 
-You already did this kind of transformation before in this back -- in Chapter 9. 
-Translating human language into machine language is a big harder than translation between human languages, but it's still the same problem. 
-And we already now that that transformers are good the task to transform (pun intended) one language into another. 
+You already did this kind of transformation before, back in Chapter 9.
+Translating human language into machine language is a bit harder than translation between human languages, but it's still the same basic problem to a machine.
+And now you know that transformers are good at transforming (pun intended) one language into another.
 LLMs, being huge transformers, are especially good at it.
-Sachin Charma created a great example of constructing a knowledge graph using another graph database, ArangoDB, and using OpenAI's models to enable natural language questions answering on the database he created.footnote[How to Build Knowledge Graph Enhanced Chatbot with ChatGPT and ArangoDB: (https://medium.datadriveninvestor.com/how-to-build-a-knowledge-graph-enhanced-chatbot-with-chatgpt-and-arangodb-f609be6073d5)]
+Sachin Charma created a great example of constructing a knowledge graph using another graph database, ArangoDB.
+She used OpenAI's models to enable natural language question answering on the database he created.footnote[How to Build Knowledge Graph Enhanced Chatbot with ChatGPT and ArangoDB: (https://medium.datadriveninvestor.com/how-to-build-a-knowledge-graph-enhanced-chatbot-with-chatgpt-and-arangodb-f609be6073d5)]
+// TODO MD: medium article links are paywalled (enshittified)
 
-
-// FIXME: Add "Test yourself" questions
 == Test yourself
-* Give an example of a question that's easy to answer with a graph database but not with a relational database. 
-* Create a Spacy Pattern Matcher that can help you extract all of Timnit Gebru's places of work out of the Wikipedia articles about her. How many of them did you manage to retrieve? 
-
+* Give an example of a question that's easier to answer with a graph database than with a relational database.
+* Convert a networkx directed graph to an edge list in a Pandas DataFrame with two columns `source_node` and `target_node`. How long does it take to retrieve all the target_node IDs for a single source node? What about all the target_nodes for those new source nodes? How would you speed up the Pandas graph query with an index?
+* Create a Spacy Matcher that can more of Timnit Gebru's places of work out of the Wikipedia articles about her. How many could you retrieve?
+* Is there anything a graph database can do that a relational database cannot? Can a relational database do anything that a graph database cannot?
+* Use a Large Language Model to generate a SPARQL wikidata query from natural language. Did it work correctly without you editing the code? Will it work for a query that requires five relationship (edge) traversals in your knowledge graph?
 
 == Summary
 

@@ -1549,8 +1549,8 @@ You'll use the Scikit-Learn TfidfVectorizer class you've seen in the previous se
 ----
 >>> vectorizer = TfidfVectorizer()
 >>> vectorizer.fit(df['question'])
->>> tfidfvectors_sparse = vectorizer.transform(df['question']) #<1>
->>> tfidfvectors = tfidfvectors_sparse.todense() #<2>
+>>> tfidfvectors_sparse = vectorizer.transform(df['question'])  # <1>
+>>> tfidfvectors = tfidfvectors_sparse.todense()  # <2>
 ----
 <1> Vectorizing all the questions in our dataset
 <2> Making the vectors dense so that we can do cosine similarity
