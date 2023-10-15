@@ -4,8 +4,7 @@ import re
 from pathlib import Path
 import logging
 import pkg_resources
-from os import linesep
-
+from os import linesep, environ
 import string
 import datetime
 from pytz import timezone
@@ -13,6 +12,7 @@ from collections.abc import Mapping
 
 import pandas as pd
 import numpy as np
+from dotenv import load_dotenv
 
 from decimal import Decimal
 
@@ -21,6 +21,9 @@ from .constants_stopwords import NLTK_STOPWORDS_ENGLISH, STOPWORDS, STOPWORDS_DI
 from .constants_uri_schemes import URI_SCHEMES, uri_schemes_iana  # noqa
 
 log = logging.getLogger(__name__)
+
+load_dotenv()
+ENV = dict(environ)
 
 EOL = LINESEP = linesep
 HTML_TAGS = '<HTML', '<A HREF=', '<P>', '<BOLD>', '<SCRIPT', '<DIV', '<TITLE', '<BODY', '<HEADER'
