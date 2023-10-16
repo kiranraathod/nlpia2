@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nlpia2"
-version = "0.0.38"
+version = "0.0.39"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "AGPLv3"
 readme = "README.md"
