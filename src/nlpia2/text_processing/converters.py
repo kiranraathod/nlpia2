@@ -191,9 +191,9 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None):
     try:
         text = Path(filepath).open().read()
     except (TypeError, OSError, IOError, FileNotFoundError) as e:
-        log.error(e)
+        log.error(f'Invalid filepath: {filepath}\n  ERROR: {e}')
 
-    dest_filepath = dest_filepath if not dest_filepath else Path(dest_filepath)
+    dest_filepath = None if not dest_filepath else Path(dest_filepath)
     blocks = get_code_blocks(text)
 
     nb = new_notebook()
@@ -204,11 +204,14 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None):
     if filepath:
         cells.append(new_markdown_cell(f"#### _`{title}`_"))
 
+    print(len(blocks), filepath)
+    print(dest_filepath)
     for block in blocks:
         # need to run the doctest parser on a lot of text to get attr names right
         if len(block['header'].splitlines()) == 3:
             cells.append(new_markdown_cell('#### ' + block['header'].splitlines()[0]))
-        new_code_cell(block['code'])
+
+        cells.append(new_code_cell(block['code']))
 
     nb['cells'] = cells
     if dest_filepath:
@@ -217,14 +220,17 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None):
     return nb
 
 
-def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='*.adoc'):
+def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
     """ Convert a directory of adoc files into jupyter notebooks """
     notebooks = []
-    for p in tqdm(list(adoc_dir.glob(glob))):
-        dest_filepath = dest_dir
-        if dest_filepath:
-            dest_filepath /= p.with_suffix('.adoc.ipynb').name
-        notebooks.append(adoc2ipynb(text=p.open().read(), dest_filepath=dest_filepath))
+    adoc_dir = Path(adoc_dir)
+    if not dest_dir:
+        dest_dir = adoc_dir.parent / 'notebooks'
+    dest_dir = Path(dest_dir)
+    dest_dir.mkdir(exist_ok=True, parents=True)
+    for adoc_filepath in tqdm(list(adoc_dir.glob(glob))):
+        dest_filepath = dest_dir / adoc_filepath.with_suffix('.ipynb').name
+        notebooks.append(adoc2ipynb(filepath=adoc_filepath, dest_filepath=dest_filepath))
     return notebooks
 
 
