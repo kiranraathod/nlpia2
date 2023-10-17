@@ -22,11 +22,10 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
 from tqdm import tqdm
+import joblib
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-# plt.switch_backend('agg')
-import matplotlib.ticker as ticker
+import seaborn as sns  # noqa
 
 from nlpia2.netutils import download_if_necessary
 from nlpia2.constants import SRC_DATA_DIR as DATA_DIR
@@ -34,9 +33,13 @@ from nlpia2.constants import SRC_DATA_DIR as DATA_DIR
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # if reverse=True then English is LANG2 else English is LANG1
-LANG1, LANG2 = 'eng', 'spa'
+LANG1, LANG2 = 'eng', 'ukr'
 SOS_token = 0
 EOS_token = 1
+
+HIDDEN_SIZE = 128
+NUM_EPOCHS = 80
+BATCH_SIZE = 32
 
 
 class Lang:
@@ -75,14 +78,23 @@ def to_ascii(s):
 # Lowercase, trim, and remove non-letter characters
 
 
-def normalize_str(s):
-    s = to_ascii(s.lower().strip())
-    s = re.sub(r"([.!?])", r" \1", s)
-    s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
+def normalize_str(s, ascii_only=False, lower=True, ignore=r"'", punctuation=r"[:;,.!?]"):
+    """ convert unicode characters to their ascii equivalent, such as direcitonal apostrophes """
+    # FIXME: even with normalize_unicode off, need to deal with ?, ', " and their unicode equivalent (see qary)
+    s = s.strip()
+    if lower:
+        s = s.lower()
+    if ascii_only:
+        s = to_ascii(s)
+    s = re.sub(f"({punctuation})", r" \1", s)  # spaces before punctuation
+    if ignore:
+        s = re.sub(ignore, r" ", s)
+    if ascii_only:
+        s = re.sub(r"[^a-zA-Z!?.]+", r" ", s)  # removes sentence-terminating period
     return s.strip()
 
 
-def readLangs(lang1=LANG1, lang2=LANG2, reverse=False):
+def read_langs(lang1=LANG1, lang2=LANG2, reverse=False):
     url = f'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/{lang2}.txt?inline=false'
     dest_path = (DATA_DIR / lang2).with_suffix('.txt')
     print(url, dest_path)
@@ -110,29 +122,44 @@ def readLangs(lang1=LANG1, lang2=LANG2, reverse=False):
     return input_lang, output_lang, pairs
 
 
-MAX_LENGTH = 12
+MAX_LENGTH = 16
 
-eng_prefixes = (
-    "i am ", "i m ", "he is", "he s ", "she is", "she s ",
-    "you are", "you re ", "we are", "we re ", "they are", "they re "
+CONTRACTIONS = {
+    "don't": "do not", "isn't": "is not", "can't": "cannot",
+    "we're": "we are", "i'm": "i am", "how'd": "how did", "how're": "how are",
+    "what's": "what is", "he's": "he is", "she's": "she is", "where's": "where is",
+    "they're": "they are", "how's": "how is", "who's": "who is", "who're": "who are",
+}
+
+ENG_PREFIXES = (
+    "are ", "is ", "am ", "do ", "does ", "can ", "may ",
+    "i ", "you ", "my ", "he ", "she ", "they ", "it ", "we ",
+    "how ", "who ", "what ", "when ", "where ", "why ",
+
+    "how are ", "how re ", "how is ", "how s", "how do", "how d ",
+    "i am ", "i m ", "he is", "he s ", "she is ", "she s ",
+    "you are ", "you re ", "we are ", "we re ", "they are ", "they re "
 )
 
 
-def filterPair(p, reverse=False):
-    return len(p[0].split(' ')) < MAX_LENGTH and \
-        len(p[1].split(' ')) < MAX_LENGTH and \
-        p[int(reverse)].startswith(eng_prefixes)
+def filter_pair(p, reverse=False, eng_prefixes=ENG_PREFIXES):
+    # FIXME: use SpaCy language model to tokenize everything and skip `normalize_str`
+    return (
+        len(p[0].split(' ')) < MAX_LENGTH
+        and len(p[1].split(' ')) < MAX_LENGTH
+        and (not eng_prefixes or p[int(reverse)].startswith(eng_prefixes))
+    )
 
 
-def filterPairs(pairs, reverse=False):
-    return [pair for pair in pairs if filterPair(pair, reverse=reverse)]
+def filter_pairs(pairs, reverse=False):
+    return [pair for pair in pairs if filter_pair(pair, reverse=reverse)]
 
 
-def prepareData(lang1=LANG1, lang2=LANG2, reverse=False):
-    input_lang, output_lang, pairs = readLangs(lang1, lang2, reverse=reverse)
+def prepare_data(lang1=LANG1, lang2=LANG2, reverse=False):
+    input_lang, output_lang, pairs = read_langs(lang1, lang2, reverse=reverse)
     print(input_lang.name, output_lang.name, random.choice(pairs))
     print("Read %s sentence pairs" % len(pairs))
-    pairs = filterPairs(pairs, reverse=reverse)
+    pairs = filter_pairs(pairs, reverse=reverse)
     print("Trimmed to %s sentence pairs" % len(pairs))
     print(input_lang.name, output_lang.name, random.choice(pairs))
     print("Counting words...")
@@ -143,12 +170,6 @@ def prepareData(lang1=LANG1, lang2=LANG2, reverse=False):
     print(input_lang.name, input_lang.n_words)
     print(output_lang.name, output_lang.n_words)
     return input_lang, output_lang, pairs
-
-
-# input_lang, output_lang, pairs = prepareData(LANG1, LANG2, reverse=False)
-# print(random.choice(pairs))
-# print(random.choice(pairs))
-# print(random.choice(pairs))
 
 
 class EncoderRNN(nn.Module):
@@ -286,8 +307,8 @@ def tensorsFromPair(pair):
     return (input_tensor, target_tensor)
 
 
-def get_dataloader(batch_size):
-    input_lang, output_lang, pairs = prepareData()
+def get_dataloader(lang1=LANG1, lang2=LANG2, batch_size=BATCH_SIZE):
+    input_lang, output_lang, pairs = prepare_data(lang1=LANG1, lang2=LANG2, )
 
     n = len(pairs)
     input_ids = np.zeros((n, MAX_LENGTH), dtype=np.int32)
@@ -342,7 +363,7 @@ def asMinutes(s):
     return '%dm %ds' % (m, s)
 
 
-def timeSince(since, percent):
+def time_since(since, percent):
     now = time.time()
     s = now - since
     es = s / (percent)
@@ -350,21 +371,16 @@ def timeSince(since, percent):
     return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
 
 
-def showPlot(points):
-    plt.figure()
-    fig, ax = plt.subplots()
-    # this locator puts ticks at regular intervals
-    loc = ticker.MultipleLocator(base=0.2)
-    ax.yaxis.set_major_locator(loc)
-    plt.plot(points)
+def plot(training_log):
+    df = pd.DataFrame(training_log)
+    df.plot(df['epoch'], df['loss'], logy=True)
 
 
 def train(train_dataloader, encoder, decoder, n_epochs, learning_rate=0.001,
-          print_every=100, plot_every=100):
+          learning_rate_alpha=.9999, print_every=100):
     start = time.time()
-    plot_losses = []
-    print_loss_total = 0  # Reset every print_every
-    plot_loss_total = 0  # Reset every plot_every
+    training_log = []
+    print_loss_total = 0
 
     encoder_optimizer = optim.Adam(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.Adam(decoder.parameters(), lr=learning_rate)
@@ -374,20 +390,19 @@ def train(train_dataloader, encoder, decoder, n_epochs, learning_rate=0.001,
     for epoch in tqdm(range(1, n_epochs + 1)):
         loss = train_epoch(train_dataloader, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion)
         print_loss_total += loss
-        plot_loss_total += loss
 
         if epoch % print_every == 0:
             print_loss_avg = print_loss_total / print_every
             print_loss_total = 0
-            print('%s (%d %d%%) %.4f' % (timeSince(start, epoch / n_epochs),
+            print('%s (%d %d%%) %.4f' % (time_since(start, epoch / n_epochs),
                                          epoch, epoch / n_epochs * 100, print_loss_avg))
 
-        if epoch % plot_every == 0:
-            plot_loss_avg = plot_loss_total / plot_every
-            plot_losses.append(plot_loss_avg)
-            plot_loss_total = 0
+        training_log.append(
+            dict(loss=loss, epoch=epoch, learning_rate=learning_rate,
+                 time=time.time() - start))
+        learning_rate *= learning_rate_alpha
 
-    return dict(encoder=encoder, decoder=decoder, losses=plot_losses)
+    return dict(encoder=encoder, decoder=decoder, training_log=training_log)
 
 
 def evaluate(encoder, decoder, sentence, input_lang, output_lang):
@@ -409,7 +424,7 @@ def evaluate(encoder, decoder, sentence, input_lang, output_lang):
     return decoded_words, decoder_attn
 
 
-def evaluateRandomly(encoder, decoder, pairs, n=10):
+def evaluate_randomly(encoder, decoder, pairs, n=10):
     for i in range(n):
         pair = random.choice(pairs)
         print('>', pair[0])
@@ -421,13 +436,27 @@ def evaluateRandomly(encoder, decoder, pairs, n=10):
 
 
 if __name__ == '__main__':
-    hidden_size = 128
-    batch_size = 32
+    hidden_size = HIDDEN_SIZE
+    batch_size = BATCH_SIZE
+    num_epochs = NUM_EPOCHS
+    lang1 = LANG1
+    lang2 = LANG2
 
-    input_lang, output_lang, train_dataloader = get_dataloader(batch_size)
+    # FIXME: argsdict = argparse.parseargs()
+
+    input_lang, output_lang, train_dataloader = get_dataloader(
+        lang1=lang1, lang2=lang2, batch_size=batch_size)
 
     encoder = EncoderRNN(input_lang.n_words, hidden_size).to(device)
     decoder = AttnDecoderRNN(hidden_size, output_lang.n_words).to(device)
 
-    results = train(train_dataloader, encoder, decoder, 80, print_every=5, plot_every=5)
-    showPlot(results['losses'])
+    results = train(train_dataloader, encoder, decoder,
+                    num_epochs, print_every=5)
+    i = 0
+    path = DATA_DIR / f'{lang1}-{lang2}.{i}.joblib'
+    while path.is_file():
+        i += 1
+        path = DATA_DIR / f'{lang1}-{lang2}.{i}.joblib'
+    joblib.dump(results, path)
+    df = pd.DataFrame(results['training_log']).set_index('epoch')
+    df.plot(df['epoch'], df['loss'], logy=True)
