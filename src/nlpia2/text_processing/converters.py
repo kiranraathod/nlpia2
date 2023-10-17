@@ -100,7 +100,7 @@ def re_matches(patterns, lines, newline='\n', match_objects=True):
     if isinstance(patterns, str):
         it = re.finditer(patterns, newline.join(lines))
         try:
-            return next(it).group().splitlines()
+            return next(it).group().splitlines()  # footers can't return a list of match objects
         except StopIteration:
             return []
     matches = []
@@ -179,24 +179,26 @@ def get_code_blocks(text,
         if not re.match(header_patterns[-1], header_matches[-1].group()):
             i += 1
             continue
-        block = []
         # TODO: include docutils examples(parsed code and output examples)
-        while i < len(lines) - min_footer_len and len(block) < max_block_lines:
-            block.append(lines[i])
+        source_lines = []
+        block = {}
+        while i < len(lines) - min_footer_len and len(source_lines) < max_block_lines:
+            source_lines.append(lines[i])
             i += 1
             footer_matches = re_matches(footer_patterns, lines[i:])
-            # if len(footer_matches) >= len(footer_patterns):
-            #     i += len(footer_matches)
-            #     break
-        block = dict(
+            footer_matches = [getattr(m, 'group', str(m).__str__)() for m in footer_matches]
+            if len(footer_matches) >= 1:
+                i += len(footer_matches)
+                break
+            block['footer'] = footer_matches
+        block.update(dict(
             preceding_text=lines[line_number - 1],
             preceding_blank_line=lines[line_number],
             line_number=line_number,
-            header='\n'.join([m.group() for m in header_matches]),
-            prompted_source='\n'.join([s.rstrip('\n') for s in block]),
-            footer='\n'.join([m.group() for m in footer_matches]),
+            header='\n'.join([getattr(m, 'group', str(m).__str__)() for m in header_matches]),
+            prompted_source='\n'.join([s.rstrip('\n') for s in source_lines]),
             following_blank_line=lines[i],
-        )
+        ))
         if i + 1 < len(lines):
             block['following_text'] = lines[i + 1]
         examples = get_examples(block['prompted_source'], join_consecutive=True)
