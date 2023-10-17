@@ -14,6 +14,8 @@ import re
 import random
 import time
 import math
+import logging
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -26,9 +28,17 @@ import joblib
 import pandas as pd
 import numpy as np
 import seaborn as sns  # noqa
+from urllib.request import urlretrieve  # , urljoin
 
-from nlpia2.netutils import download_if_necessary
-from nlpia2.constants import SRC_DATA_DIR as DATA_DIR
+# from nlpia2.netutils import download_if_necessary
+# from nlpia2.init import maybe_download
+# from nlpia2.constants import SRC_DATA_DIR as DATA_DIR
+log = logging.getLogger(__name__)
+
+try:
+    DATA_DIR = Path(__file__).resolve().parent.parent / 'data'
+except Exception:
+    DATA_DIR = Path.cwd()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -40,6 +50,29 @@ EOS_token = 1
 HIDDEN_SIZE = 128
 NUM_EPOCHS = 80
 BATCH_SIZE = 32
+
+
+def download_if_not_exists(
+        url,
+        dest_filepath,
+        force=False,
+        data_dir=DATA_DIR):
+    """ Download a file only if it has not yet been cached locally in ~/.qary-data/ HOME_DATA_DIR
+    """
+    dest_filepath = Path(dest_filepath)
+    if dest_filepath.is_file():
+        return dest_filepath
+    if len(dest_filepath.parts) == 1:
+        dest_filepath = DATA_DIR / dest_filepath
+
+    if not dest_filepath.parent.is_dir():
+        dest_filepath.parent.mkdir(parents=True, exist_ok=True)  # FIXME add , reporthook=DownloadProgressBar())
+
+    if force or not dest_filepath.is_file():
+        log.warning(f"Downloading: {url} to {dest_filepath}")
+        dest_filepath, _ = urlretrieve(str(url), str(dest_filepath))
+        log.warning(f"Finished downloading '{dest_filepath}'")
+        return dest_filepath
 
 
 class Lang:
@@ -117,7 +150,7 @@ def read_langs(lang1=LANG1, lang2=LANG2, reverse=False):
     url = f'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/{lang2}.tsv?inline=false'
     dest_path = (DATA_DIR / lang2).with_suffix('.tsv')
     print(url, dest_path)
-    download_if_necessary(url, dest_path=dest_path)
+    download_if_not_exists(url, dest_filepath=dest_path)
     df = pd.read_csv(url, sep='\t')
     df.columns = f'{lang1} {lang2} license'.split()
 
@@ -144,6 +177,7 @@ def read_langs(lang1=LANG1, lang2=LANG2, reverse=False):
 
 MAX_LENGTH = 16
 
+# unused
 CONTRACTIONS = {
     "don't": "do not", "isn't": "is not", "can't": "cannot",
     "we're": "we are", "i'm": "i am", "how'd": "how did", "how're": "how are",
@@ -151,6 +185,7 @@ CONTRACTIONS = {
     "they're": "they are", "how's": "how is", "who's": "who is", "who're": "who are",
 }
 
+# fewer prefixes will reduce training data and time and increase overfitting
 ENG_PREFIXES = (
     "are ", "is ", "am ", "do ", "does ", "can ", "may ",
     "i ", "you ", "my ", "he ", "she ", "they ", "it ", "we ",
@@ -163,7 +198,9 @@ ENG_PREFIXES = (
 
 
 def filter_pair(p, reverse=False, eng_prefixes=ENG_PREFIXES):
-    # FIXME: use SpaCy language model to tokenize everything and skip `normalize_str`
+    """ Add spaces to punctuation and tokenize all pairs with str.split()
+    FIXME: use SpaCy language model to tokenize everything and skip `normalize_str`
+    """
     return (
         len(p[0].split(' ')) < MAX_LENGTH
         and len(p[1].split(' ')) < MAX_LENGTH
