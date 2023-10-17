@@ -123,9 +123,10 @@ def read_langs(lang1=LANG1, lang2=LANG2, reverse=False):
 
     desc = df.describe(include='all')
     print(desc)
-    pairs = [[normalize_str(s1), normalize_str(s2)]
-             for s1, s2 in zip(list(df[lang1]), list(df[lang2]))
-             ]
+    pairs = [
+        [normalize_str(s1), normalize_str(s2)]
+        for s1, s2 in zip(list(df[lang1]), list(df[lang2]))
+    ]
     df = pd.DataFrame(pairs)
     desc = df.describe(include='all')
     print(desc)
