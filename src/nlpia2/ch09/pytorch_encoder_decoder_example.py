@@ -95,8 +95,27 @@ def normalize_str(s, ascii_only=False, lower=True, ignore=r"'", punctuation=r"[:
 
 
 def read_langs(lang1=LANG1, lang2=LANG2, reverse=False):
-    url = f'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/{lang2}.txt?inline=false'
-    dest_path = (DATA_DIR / lang2).with_suffix('.txt')
+    """ Read pairs of translation str from Anki-style tsv files to create list of 2-lists
+
+    Only the eng-ukr and eng-spa Anki files have been downloaded to the nlpia2 DATA_DIR
+    For other languages you must manually download, unzip, and rename the Anki source files:
+    * https://www.manythings.org/anki/
+
+    Anki stores translation pairs in a 3-column tab-separated file at {DATA_DIR}/{lang2}.tsv.
+    The third column is an unused column containing "LICENSE" and attribution info.
+
+    Args:
+      lang1 (str): 3-letter ISO language code of the source text (first column)
+      lang2 (str): 3-letter ISO language code of the target language (second column)
+      reverse (bool): Whether to swap the source and target text strs
+
+    Returns:
+      input_lang (str): 3-letter ISO language code of the source text (first column)
+      output_lang (str): 3-letter ISO language code of the target language (second column)
+      pairs (list([str, str])): 2-D array of strings, column 1 = source text, column 2 = target text
+    """
+    url = f'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/{lang2}.tsv?inline=false'
+    dest_path = (DATA_DIR / lang2).with_suffix('.tsv')
     print(url, dest_path)
     download_if_necessary(url, dest_path=dest_path)
     df = pd.read_csv(url, sep='\t')
