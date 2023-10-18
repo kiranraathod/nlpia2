@@ -130,6 +130,7 @@ def get_examples(text, join_consecutive=True):
         msg = f'Error processing doctests in {text[:40]}...{text[-40:]}'
         log.error(msg)
         raise
+    print(len(examples), text)
     examples = [vars(obj) for obj in examples]
     if not join_consecutive:
         return examples
@@ -185,9 +186,12 @@ def get_code_blocks(text,
         while i < len(lines) - min_footer_len and len(source_lines) < max_block_lines:
             source_lines.append(lines[i])
             i += 1
-            footer_matches = re_matches(footer_patterns, lines[i:])
+            print(f'i={i}: {source_lines}')
+
+            footer_matches = re_matches(footer_patterns, lines[i:min(i + max_block_lines, len(lines) - 2)])
+            print(footer_matches)
             footer_matches = [getattr(m, 'group', str(m).__str__)() for m in footer_matches]
-            if len(footer_matches) >= 1:
+            if len(footer_matches) >= min_footer_len:
                 i += len(footer_matches)
                 break
             block['footer'] = footer_matches
@@ -205,9 +209,10 @@ def get_code_blocks(text,
         if i + 1 < len(lines):
             block['following_text'] = lines[i + 1]
         examples = get_examples(block['prompted_source'], join_consecutive=True)
-        if len(examples) > 1:
-            print(len(examples), 0, examples[0])
+
         if examples:
+            print(len(examples), 0, examples[0])
+            print(len(examples), 1, examples[-1])
             for example in examples:
                 newblock = block.copy()
                 # FIXME: also update line_number from examples
