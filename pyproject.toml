@@ -91,15 +91,17 @@ httpretty = "*"
 flatdict = "*"
 pydocstyle = "*"
 
-[tool.poetry.extras]
-test = [ "pytest", "pytest-cov",]
-sound = [ "soundex",]
-pdf = [ "pymupdf", "tabula-py", "tabulate",]
-graph = [ "graphviz",]
+# # Neither of these blocks creates working extras packages e.g. pip install -e ".[test]" fails
+# [tool.poetry.extras]
+# test = [ "pytest", "pytest-cov",]
+# sound = [ "soundex",]
+# pdf = [ "pymupdf", "tabula-py", "tabulate",]
+# graph = [ "graphviz",]
 
-[tool.poetry.dependencies.farm-haystack]
-version = "*"
-extras = [ "faiss",]
+# # This block forces farm-haystack to be installed as a dependency of nlpia2
+# [tool.poetry.dependencies.farm-haystack]
+# version = "*"
+# extras = [ "faiss",]
 
 [build-system]
 requires = [ "poetry-core>=1.0.0",]

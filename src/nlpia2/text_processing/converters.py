@@ -115,7 +115,14 @@ def re_matches(patterns, lines, newline='\n', match_objects=True):
 
 
 def get_examples(text, join_consecutive=True):
-    """ Extract all doctest code and output examples from asciidoc (adoc) text """
+    r""" Extract all doctest code and output examples from asciidoc (adoc) text
+
+    >>> text = ">>> import hello\n>>> hello.world()\n'hi'\n"
+    >>> get_examples(text)[0]['source']
+    'import hello\nhello.world()'
+    >>> get_examples(text)[0]['want']
+    "'hi'\n"
+    """
     dtparser = DocTestParser()
     try:
         examples = dtparser.get_examples(text)
@@ -123,27 +130,20 @@ def get_examples(text, join_consecutive=True):
         msg = f'Error processing doctests in {text[:40]}...{text[-40:]}'
         log.error(msg)
         raise
+    examples = [vars(obj) for obj in examples]
     if not join_consecutive:
         return examples
 
-    enum, bnum = 0, 0
-    blocks = [[]]
-    while enum < len(examples):
-        ex = vars(examples[enum])
-        blocks[bnum].append(ex)
-        if ex['want']:
-            blocks.append([])
-            bnum += 1
-        enum += 1
-    examples = []
-    for lines in blocks:
-        if not lines:
-            continue
-        ex = lines[0].copy()
-        ex['source'] = '\n'.join([rstrip_one_newline(line['source']) for line in lines])
-        ex['want'] = lines[-1]['want']
-        examples.append(ex)
-    return examples
+    blocks = [{}]
+    for ex in examples:
+        if not blocks[-1]:
+            blocks[-1] = ex.copy()
+        else:
+            blocks[-1]['source'] += ex['source']
+            blocks[-1]['want'] += ex['want']
+        if blocks[-1]['want'].strip():
+            blocks.append({})
+    return [d for d in blocks if len(d)]
 
 
 def rstrip_one_newline(text, newlines='\r\n'):
@@ -195,13 +195,18 @@ def get_code_blocks(text,
             preceding_text=lines[line_number - 1],
             preceding_blank_line=lines[line_number],
             line_number=line_number,
-            header='\n'.join([getattr(m, 'group', str(m).__str__)() for m in header_matches]),
-            prompted_source='\n'.join([s.rstrip('\n') for s in source_lines]),
+            header='\n'.join([
+                getattr(m, 'group', str(m).__str__)().rstrip()
+                for m in header_matches]),
+            prompted_source='\n'.join([
+                s.rstrip() for s in source_lines]) + '\n',
             following_blank_line=lines[i],
         ))
         if i + 1 < len(lines):
             block['following_text'] = lines[i + 1]
         examples = get_examples(block['prompted_source'], join_consecutive=True)
+        if len(examples) > 1:
+            print(len(examples), 0, examples[0])
         if examples:
             for example in examples:
                 newblock = block.copy()
