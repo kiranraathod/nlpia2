@@ -130,21 +130,27 @@ def get_examples(text, join_consecutive=True):
         msg = f'Error processing doctests in {text[:40]}...{text[-40:]}'
         log.error(msg)
         raise
-    print(len(examples), text)
-    examples = [vars(obj) for obj in examples]
     if not join_consecutive:
         return examples
 
-    blocks = [{}]
-    for ex in examples:
-        if not blocks[-1]:
-            blocks[-1] = ex.copy()
-        else:
-            blocks[-1]['source'] += ex['source']
-            blocks[-1]['want'] += ex['want']
-        if blocks[-1]['want'].strip():
-            blocks.append({})
-    return [d for d in blocks if len(d)]
+    enum, bnum = 0, 0
+    blocks = [[]]
+    while enum < len(examples):
+        ex = vars(examples[enum])
+        blocks[bnum].append(ex)
+        if ex['want']:
+            blocks.append([])
+            bnum += 1
+        enum += 1
+    examples = []
+    for lines in blocks:
+        if not lines:
+            continue
+        ex = lines[0].copy()
+        ex['source'] = '\n'.join([rstrip_one_newline(line['source']) for line in lines])
+        ex['want'] = lines[-1]['want']
+        examples.append(ex)
+    return examples
 
 
 def rstrip_one_newline(text, newlines='\r\n'):
@@ -157,7 +163,7 @@ def rstrip_one_newline(text, newlines='\r\n'):
 
 def get_code_blocks(text,
                     header_patterns=CODEHEADER,
-                    footer_patterns=CODEFOOTER,
+                    footer_patterns=None,  # CODEFOOTER,
                     min_header_len=2,
                     min_footer_len=2,
                     max_block_lines=64):
@@ -180,39 +186,28 @@ def get_code_blocks(text,
         if not re.match(header_patterns[-1], header_matches[-1].group()):
             i += 1
             continue
+        block = []
         # TODO: include docutils examples(parsed code and output examples)
-        source_lines = []
-        block = {}
-        while i < len(lines) - min_footer_len and len(source_lines) < max_block_lines:
-            source_lines.append(lines[i])
+        while i < len(lines) - min_footer_len and len(block) < max_block_lines:
+            block.append(lines[i])
             i += 1
-            print(f'i={i}: {source_lines}')
-
-            footer_matches = re_matches(footer_patterns, lines[i:min(i + max_block_lines, len(lines) - 2)])
-            print(footer_matches)
-            footer_matches = [getattr(m, 'group', str(m).__str__)() for m in footer_matches]
-            if len(footer_matches) >= min_footer_len:
-                i += len(footer_matches)
-                break
-            block['footer'] = footer_matches
-        block.update(dict(
+            footer_matches = re_matches(footer_patterns, lines[i:])
+            # if len(footer_matches) >= len(footer_patterns):
+            #     i += len(footer_matches)
+            #     break
+        block = dict(
             preceding_text=lines[line_number - 1],
             preceding_blank_line=lines[line_number],
             line_number=line_number,
-            header='\n'.join([
-                getattr(m, 'group', str(m).__str__)().rstrip()
-                for m in header_matches]),
-            prompted_source='\n'.join([
-                s.rstrip() for s in source_lines]) + '\n',
+            header='\n'.join([m.group() for m in header_matches]),
+            prompted_source='\n'.join([s.rstrip('\n') for s in block]),
+            footer='\n'.join([m.group() for m in footer_matches]),
             following_blank_line=lines[i],
-        ))
+        )
         if i + 1 < len(lines):
             block['following_text'] = lines[i + 1]
         examples = get_examples(block['prompted_source'], join_consecutive=True)
-
         if examples:
-            print(len(examples), 0, examples[0])
-            print(len(examples), 1, examples[-1])
             for example in examples:
                 newblock = block.copy()
                 # FIXME: also update line_number from examples
