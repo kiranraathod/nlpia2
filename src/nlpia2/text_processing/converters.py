@@ -24,12 +24,15 @@ from doctest import DocTestParser
 import logging
 from pathlib import Path
 import re
+import sys
+
 import nbformat as nbf
 from tqdm import tqdm
 
+from nlpia2.constants import OFFICIAL_ADOC_DIR, ADOC_DIR
 from nlpia2.text_processing.extractors import parse_args
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell, new_output
-import sys
+
 
 log = logging.getLogger(__name__)
 HEADER_TEXT = f"""\
@@ -70,10 +73,11 @@ TEST_BLOCKS = [
 
 # use newlines and groups instead of list of patterns
 CODEHEADER = [
-    r'^([.][-\w\s\(\)\[\]\|\*\'"!@#{}&^%$+=<,>.?/]+\s*)?\s*$',  # '.Problem setup'
-    r'^\[source,\s*python\]\s*$',
-    r'^----[-]*\s*$',
+    r'^([.][- \w\t\(\)\[\]\|\*\'"!@#{}&^%$+=<,>.?/]+[ \t]*)?[ \t]*$',  # '.Problem setup'
+    r'^\[source,[ \t]*python\][ \t]*$',
+    r'^----[-]*[ \t]*$',
 ]
+MULTILINE_CODEHEADER = '\n'.join([ln.rstrip('$') for ln in CODEHEADER])
 
 # Need multiline pattern to capture multiple annotations and blank line after annotations
 CODEFOOTER = r'\n(----[-]*\s*\n(<\d+>\s?[^\n]+\n)*)'
@@ -259,6 +263,7 @@ def find_title(text, pattern=r'^\s*[=#]\s?(.+)$'):
 
 
 def adoc2ipynb(filepath=None, dest_filepath=None, text=None, prompt=False, output=False):
+    """ Extract code blocks and their captions from an adoc file and save to an *.ipynb file"""
     try:
         text = Path(filepath).open().read()
     except (TypeError, OSError, IOError, FileNotFoundError) as e:
@@ -296,9 +301,24 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None, prompt=False, outpu
 
 
 def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
-    """ Convert a directory of adoc files into jupyter notebooks """
+    """ Convert a directory of adoc files into jupyter notebooks
+
+    Inputs:
+      adoc_dir: Path or str to directory *.adoc files containing code blocks
+      dest_dir: Path or str to directory where *.ipynb should be saved
+      glob: glob pattern to match adoc filenames, default='Chapter-*.adoc'
+
+    Returns:
+      list of dicts: [{
+        text: json text string,
+        nb: v4 Notebook object (nbformat.notebooknode.NotebookNode)
+        filepath: Path object containing location where notebook saved in dest_dir
+        }, ...]
+    """
+    adoc_dir = Path(adoc_dir or OFFICIAL_ADOC_DIR)
+    if not adoc_dir.is_dir() or len(list(adoc_dir.glob(glob))) < 12:
+        adoc_dir = Path('.')
     notebooks = []
-    adoc_dir = Path(adoc_dir)
     if not dest_dir:
         dest_dir = adoc_dir.parent / 'notebooks'
     dest_dir = Path(dest_dir)
@@ -310,7 +330,8 @@ def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
 
 
 def convert(format='ipynb', **kwargs):
-    filepath = kwargs.pop('adocs')
+    """ Convert files in adocs to dictionary of notebook json (text), notebook object (nb), and filepath """
+    filepath = kwargs.pop('adocs', kwargs.pop('adoc', kwargs.pop('filepath')))
     if filepath:
         print(filepath)
         text = Path(filepath).open().read()
