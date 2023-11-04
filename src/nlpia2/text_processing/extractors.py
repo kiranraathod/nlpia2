@@ -12,7 +12,8 @@ import nbformat as nbf
 from logging import getLogger
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR, MANUSCRIPT_DIR, ADOC_DIR, HOBS_ADOC_DIR
+from nlpia2.constants import SRC_DATA_DIR, ADOC_DIR, MANUSCRIPT_DIR
+from nlpia2.constants import OFFICIAL_ADOC_DIR, OFFICIAL_MANUSCRIPT_DIR
 
 log = getLogger(__name__)
 
@@ -32,7 +33,7 @@ LINES_FILEPATH = SRC_DATA_DIR / LINES_FILENAME  # src/nlpia2/data/nlpia_lines.cs
 
 # ch10 haystack section: 'https://gitlab.com/tangibleai/nlpia2/-/raw/main/src/nlpia2/data/nlpia_lines.csv'
 DEFAULT_ADOC_FILENAME = 'Chapter-09_Stackable-deep-learning-Transformers.adoc'
-DEFAULT_ADOC_FILEPATH = ADOC_DIR / DEFAULT_ADOC_FILENAME
+DEFAULT_ADOC_FILEPATH = OFFICIAL_ADOC_DIR / DEFAULT_ADOC_FILENAME
 DEFAULT_OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
 
 
@@ -226,7 +227,7 @@ def create_notebook(code_lines, destfile):
     return nb
 
 
-def extract_notebooks(input_dir=MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+def extract_notebooks(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
     """ NOTIMPLEMENTED: Convert adoc file code blocks into cells within jupyter notebooks """
     blocks = []
     for p in input_dir.glob(glob):
@@ -350,7 +351,7 @@ def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
     return urls
 
 
-def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+def extract_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
                              extractor=extract_urls_from_text, with_meta=True):
     """ Run specified extractor (default: extract_urls) on each file input_dir, return a list of dicts with urls """
     outputs = []
@@ -363,7 +364,7 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 extract_lists = extract_lists_from_files
 
 
-def extract_url_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+def extract_url_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
                                  extractor=extract_urls_from_text, with_meta=True):
     """ Find all URLs in files at input_dir, return a list of dicts with urls """
     return extract_lists(input_dir=input_dir, extractor=extract_urls_from_text, glob=glob, with_meta=with_meta)
@@ -372,7 +373,7 @@ def extract_url_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 extact_url_lists = extract_url_lists_from_files
 
 
-def extract_urls(texts=MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+def extract_urls(texts=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
     if (isinstance(texts, Path) or len(texts) < 1024):
         if Path(texts).is_file():
             return extract_urls_from_text(text=texts, with_meta=with_meta)
@@ -599,7 +600,7 @@ def extract_doctest_files(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_se
     return ''.join(all_lines)
 
 
-def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
+def extract_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
                              extractor=extract_urls_from_text, with_meta=True):
     outputs = []
     for p in input_dir.glob(glob):
@@ -609,7 +610,7 @@ def extract_lists_from_files(input_dir=MANUSCRIPT_DIR, glob='*.adoc',
 
 
 def extract_files(
-        adocdir=MANUSCRIPT_DIR, destdir=None, glob='*.adoc',
+        adocdir=OFFICIAL_MANUSCRIPT_DIR, destdir=None, glob='*.adoc',
         extractor=extract_code_file, suffix='.adoc.py'):
     """ Run an extractor on all the text (default=adoc) files in a directory returning the extracted file paths """
     output_paths = []
@@ -635,13 +636,13 @@ def extract_files(
     return output_paths
 
 
-def extract_code_files(adocdir=ADOC_DIR, **kwargs):
+def extract_code_files(adocdir=OFFICIAL_ADOC_DIR, **kwargs):
     kwargs['destdir'] = kwargs.get('destdir') or adocdir.parent / 'py'
     return extract_files(extractor=extract_code_file, **kwargs)
 
 
 def extract_url_dfs_from_files(
-        adocdir=MANUSCRIPT_DIR, destdir=None,
+        adocdir=OFFICIAL_MANUSCRIPT_DIR, destdir=None,
         glob='*.adoc', suffix='.adoc.py'):
     adocdir = Path(adocdir)
     dfs = extract_dfs_from_files(
@@ -652,7 +653,7 @@ def extract_url_dfs_from_files(
 
 
 def extract_big_line_df_from_files(
-        adocdir=MANUSCRIPT_DIR / 'adoc', destdir=None,
+        adocdir=OFFICIAL_MANUSCRIPT_DIR / 'adoc', destdir=None,
         glob='*.adoc', **kwargs):
     adocdir = Path(adocdir)
     output = []
@@ -671,7 +672,7 @@ def extract_big_line_df_from_files(
 
 
 def extract_dfs_from_files(
-        adocdir=MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
+        adocdir=OFFICIAL_MANUSCRIPT_DIR, output_dir=None, glob='*.adoc',
         extractor=extract_urls_df, suffix='.adoc.py'):
     outputs = []
     for p in adocdir.glob(glob):
@@ -684,7 +685,7 @@ def update_nlpia_lines(adoc_dir=None, dest=LINES_FILEPATH):
     """ Create DataFrame from all of the adoc files found in adoc_dir """
 
     if not adoc_dir:
-        adoc_dir = HOBS_ADOC_DIR
+        adoc_dir = OFFICIAL_ADOC_DIR
         if not adoc_dir.is_dir():
             adoc_dir = ADOC_DIR
     log.info(f"Looking for adoc files in {adoc_dir}")
@@ -728,13 +729,16 @@ DEFAULT_ARGS = MappingProxyType(dict(adocs='manuscript/adoc', output='manuscript
 
 def extract_code(adocs=None, output=None):
     args = dict(
-        adocs=Path(adocs or MANUSCRIPT_DIR / 'adoc'),
-        output=Path(output or MANUSCRIPT_DIR / 'py')
+        adocs=Path(adocs or OFFICIAL_MANUSCRIPT_DIR / 'adoc'),
+        output=Path(output or OFFICIAL_MANUSCRIPT_DIR / 'py')
     )
     args = parse_args(**args)
 
     if args['path']:
         args['adocs'] = args['path']
+
+    assert args['output'].is_dir()
+    assert args['adocs'].is_dir()
 
     if args['adocs']:
         if Path(args['adocs']).is_dir():
@@ -742,15 +746,13 @@ def extract_code(adocs=None, output=None):
         elif Path(args['adocs']).is_file():
             return extract_code_file(filepath=args['adocs'])
 
-    results = {}
-    if input(f'Extract python from all adoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
-        results['code_file_paths'] = extract_code_files()
-    if input(f'Extract urls from all addoc files in {MANUSCRIPT_DIR}? ').lower().strip()[0] == 'y':
-        results['urls'] = extract_urls()
-    return results
+        # results = {}
+        # if input(f'Extract python from all adoc files in {adocs["adocs_dir"]}? ').lower().strip()[0] == 'y':
+        #     results['code_file_paths'] = extract_code_files(adocs["adocs_dir"])
+        # if input(f'Extract urls from all adoc files in {adocs["adocs_dir"]}? ').lower().strip()[0] == 'y':
+        #     results['urls'] = extract_urls(adocs["adocs_dir"])
+        # return results
 
 
 if __name__ == '__main__':
-    assert SRC_DATA_DIR.is_dir()
-    assert MANUSCRIPT_DIR.is_dir()
-    results = extract_code()
+    results = extract_code(OFFICIAL_MANUSCRIPT_DIR, output=SRC_DATA_DIR)
