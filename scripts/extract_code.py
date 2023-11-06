@@ -16,12 +16,13 @@ if __name__ == '__main__':
     print(adoc_dir, '->', dest_dir)
     nbs = adocs2notebooks(adoc_dir, dest_dir=dest_dir)
     dest_dir = OFFICIAL_ADOC_DIR.parent.parent / 'code' / 'notebooks'
-    for d in nbs:
-        print(d.keys())
-        src = d['filepath']
-        dest = dest_dir / src.name
-        print(src, '->', dest)
-        # Path(dest).open('w').write(Path(src).open().read())
+    # for d in nbs:
+    #     print(d.keys())
+    #     # src = d['filepath']
+    #     dest = dest_dir / src.name
+    #     print(adoc_dir, '->', dest_dir)
+
+    # Path(dest).open('w').write(Path(src).open().read())
     print('Extracting .py file from .adoc using ')
     print('  nlpia2.text_processing.extractors.extract_code():')
     print('  ' + str(extract_code()).replace('\n', '\n  '))
