@@ -12,7 +12,7 @@ import nbformat as nbf
 from logging import getLogger
 
 from nlpia2.text_processing.re_patterns import RE_URL_WITH_SCHEME, RE_URL_SIMPLE  # noqa
-from nlpia2.constants import SRC_DATA_DIR, ADOC_DIR, MANUSCRIPT_DIR
+from nlpia2.constants import SRC_DATA_DIR, ADOC_DIR  # , MANUSCRIPT_DIR
 from nlpia2.constants import OFFICIAL_ADOC_DIR, OFFICIAL_MANUSCRIPT_DIR
 
 log = getLogger(__name__)
@@ -163,8 +163,10 @@ def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
 def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False):
     meta = extract_code_lines(filepath=filepath, with_metadata=True)
     df = pd.DataFrame(meta)
+    if 'source' not in df.columns:
+        df['source'] = ''
     df['num_lines'] = df['source'].str.split('\n').str.len()
-    df['next_lineno'] = df['num_lines'] + df['lineno']
+    df['next_lineno'] = df['num_lines'] + df['doc_lineno']
     # df['stop_block'] = df['want'].str[:4].str.startswith('----')
     df['stop_block'] = df['want'].str.strip().str.len() > 0
 
@@ -173,7 +175,7 @@ def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False):
         blocks[-1] += line + '\n'
         if stop_block:
             if with_output:
-                blocks[-1].append('\n'.join(['# ' + x for x in want.splitlines()]))
+                blocks[-1] += '\n'.join(['# ' + x for x in want.splitlines()])
             blocks.append('')
     return blocks
 
@@ -742,7 +744,7 @@ def extract_code(adocs=None, output=None):
 
     if args['adocs']:
         if Path(args['adocs']).is_dir():
-            return extract_code_files(adocdir=args['adocs'])
+            return extract_code_files(adocdir=args['adocs'], glob='Chapter-*.adoc')
         elif Path(args['adocs']).is_file():
             return extract_code_file(filepath=args['adocs'])
 

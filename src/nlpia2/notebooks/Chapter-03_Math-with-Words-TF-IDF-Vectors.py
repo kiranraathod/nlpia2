@@ -5,11 +5,10 @@
 
 # #### 
 
-# In[1]:
+# In[ ]:
 
 
 import spacy
-spacy.cli.download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 sentence = ('It has also arisen in criminal justice, healthcare, and '
     'hiring, compounding existing racial, economic, and gender biases.')
@@ -20,7 +19,7 @@ tokens
 
 # #### 
 
-# In[2]:
+# In[ ]:
 
 
 from collections import Counter
@@ -30,15 +29,7 @@ bag_of_words
 
 # #### 
 
-# In[3]:
-
-
-bag_of_words.most_common(3)  # <1>
-
-
-# #### 
-
-# In[4]:
+# In[ ]:
 
 
 import pandas as pd
@@ -49,7 +40,7 @@ counts
 
 # #### 
 
-# In[5]:
+# In[ ]:
 
 
 len(counts)  # <1>
@@ -57,7 +48,7 @@ len(counts)  # <1>
 
 # #### 
 
-# In[6]:
+# In[ ]:
 
 
 counts.sum()
@@ -65,7 +56,7 @@ counts.sum()
 
 # #### 
 
-# In[7]:
+# In[ ]:
 
 
 len(tokens)  # <2>
@@ -73,7 +64,7 @@ len(tokens)  # <2>
 
 # #### 
 
-# In[8]:
+# In[ ]:
 
 
 counts / counts.sum()  # <3>
@@ -81,7 +72,7 @@ counts / counts.sum()  # <3>
 
 # #### 
 
-# In[9]:
+# In[ ]:
 
 
 counts['justice']
@@ -89,7 +80,7 @@ counts['justice']
 
 # #### 
 
-# In[10]:
+# In[ ]:
 
 
 counts['justice'] / counts.sum()
@@ -97,7 +88,7 @@ counts['justice'] / counts.sum()
 
 # #### 
 
-# In[11]:
+# In[ ]:
 
 
 sentence = "Algorithmic bias has been cited in cases ranging from " \
@@ -109,7 +100,17 @@ dict(counts)
 
 # #### 
 
-# In[12]:
+# In[ ]:
+
+
+from nlpia2 import wikipedia as wiki
+page = wiki.page('Algorithmic Bias')  # <1>
+page.content[:70]
+
+
+# #### 
+
+# In[ ]:
 
 
 import requests
@@ -121,7 +122,7 @@ response
 
 # #### 
 
-# In[13]:
+# In[ ]:
 
 
 bias_intro_bytes = response.content  # <1>
@@ -132,7 +133,7 @@ bias_intro[:70]
 
 # #### 
 
-# In[14]:
+# In[ ]:
 
 
 tokens = [tok.text for tok in nlp(bias_intro)]
@@ -142,7 +143,7 @@ counts
 
 # #### 
 
-# In[15]:
+# In[ ]:
 
 
 counts.most_common(5)
@@ -150,7 +151,7 @@ counts.most_common(5)
 
 # #### 
 
-# In[16]:
+# In[ ]:
 
 
 counts.most_common()[-4:]
@@ -158,7 +159,7 @@ counts.most_common()[-4:]
 
 # #### 
 
-# In[17]:
+# In[ ]:
 
 
 docs = [nlp(s) for s in bias_intro.split('\n')
@@ -174,7 +175,7 @@ len(df)
 
 # #### 
 
-# In[18]:
+# In[ ]:
 
 
 df.head()
@@ -182,7 +183,7 @@ df.head()
 
 # #### 
 
-# In[19]:
+# In[ ]:
 
 
 df.iloc[10]  # <1>
@@ -190,7 +191,7 @@ df.iloc[10]  # <1>
 
 # #### 
 
-# In[20]:
+# In[ ]:
 
 
 docs_tokens = []
@@ -202,7 +203,7 @@ len(docs_tokens[0])
 
 # #### 
 
-# In[21]:
+# In[ ]:
 
 
 all_doc_tokens = []
@@ -213,25 +214,7 @@ len(all_doc_tokens)
 
 # #### 
 
-# In[22]:
-
-
-vocab = sorted(  # <1>
-    set(all_doc_tokens))  # <2>
-len(vocab)
-
-
-# #### 
-
-# In[23]:
-
-
-len(all_doc_tokens) / len(vocab)  # <3>
-
-
-# #### 
-
-# In[24]:
+# In[ ]:
 
 
 vocab  # <1>
@@ -239,15 +222,15 @@ vocab  # <1>
 
 # #### 
 
-# In[27]:
+# In[ ]:
 
 
 count_vectors = []
 for tokens in docs_tokens:
     count_vectors.append(Counter(tokens))
 tf = pd.DataFrame(count_vectors)  # <1>
-tf.T.sort
-tf.fillna('')
+tf = tf.T.sort_index().T
+tf.fillna(0).astype(int)
 
 
 # #### 
@@ -255,11 +238,46 @@ tf.fillna('')
 # In[ ]:
 
 
-from sklearn.feature_extraction.text import CountVectorizer
-corpus = [doc.text for doc in docs]
-vectorizer = CountVectorizer()
-count_vectors = vectorizer.fit_transform(corpus)  # <1>
-print(count_vectors.toarray()) # <2>
+v1 = np.array(list(range(5)))
+v2 = pd.Series(reversed(range(5)))
+slow_answer = sum([4.2 * (x1 * x2) for x1, x2 in zip(v1, v2)])
+slow_answer
+
+
+# #### 
+
+# In[ ]:
+
+
+faster_answer = sum(4.2 * v1 * v2)  # <1>
+faster_answer
+
+
+# #### 
+
+# In[ ]:
+
+
+fastest_answer = 4.2 * v1.dot(v2)  # <2>
+fastest_answer
+
+
+# #### 
+
+# In[ ]:
+
+
+A.dot(B) == (np.linalg.norm(A) * np.linalg.norm(B)) * \
+    np.cos(angle_between_A_and_B)
+
+
+# #### 
+
+# In[ ]:
+
+
+cos_similarity_between_A_and_B = np.cos(angle_between_A_and_B) \
+   = A.dot(B) / (np.linalg.norm(A) * np.linalg.norm(B))
 
 
 # #### 
@@ -298,9 +316,10 @@ cosine_similarity(vec1, vec2)
 # In[ ]:
 
 
-new_sentence = "What is algorithmic bias?"
+import copy
+question = "What is algorithmic bias?"
 ngram_docs = copy.copy(docs)
-ngram_docs.append(new_sentence)
+ngram_docs.append(question)
 
 
 # #### .Cosine similarity
@@ -308,8 +327,8 @@ ngram_docs.append(new_sentence)
 # In[ ]:
 
 
-new_sentence_vector = vectorizer.transform([new_sentence])
-print(new_sentence_vector.toarray())
+question_vec = vectorizer.transform([new_sentence])
+question_vec
 
 
 # #### .Cosine similarity
@@ -317,25 +336,54 @@ print(new_sentence_vector.toarray())
 # In[ ]:
 
 
-cosine_similarity(count_vectors[1,:], new_sentence)
+question_vec.to_array()
 
 
 # #### .Cosine similarity
+
+# In[ ]:
+
+
+vocab = list(zip(*sorted((i, tok) for tok, i in
+    vectorizer.vocabulary_.items())))[1]
+pd.Series(question_vec.to_array()[0], index=vocab).head(8)
+
+
+# #### 
+
+# In[ ]:
+
+
+cosine_similarity(count_vectors, question_vector)
+
+
+# #### 
+
+# In[ ]:
+
+
+docs[3]
+
+
+# #### 
 
 # In[ ]:
 
 
 ngram_vectorizer = CountVectorizer(ngram_range=(1, 2))
 ngram_vectors = ngram_vectorizer.fit_transform(corpus)
-print(ngram_vectors.toarray())
+ngram_vectors
 
 
-# #### .Cosine similarity
+# #### 
 
 # In[ ]:
 
 
-cosine_similarity(ngram_vectors[1,:], ngram_vectors[2,:])
+vocab = list(zip(*sorted((i, tok) for tok, i in
+    ngram_vectorizer.vocabulary_.items())))[1]
+pd.DataFrame(ngram_vectors.toarray(),
+    columns=vocab)['algorithmic bias']
 
 
 # #### 
@@ -344,7 +392,7 @@ cosine_similarity(ngram_vectors[1,:], ngram_vectors[2,:])
 
 
 from this import s
-print (s)
+print(s)
 
 
 # #### 
@@ -370,31 +418,6 @@ url = DATA_DIR + '/machine_learning_full_article.txt'
 ml_text = requests.get(url).content.decode()
 ml_char_frequencies = char_vectorizer.fit_transform(ml_text)
 generate_histogram(s_char_frequencies, s_char_vectorizer)
-
-
-# #### 
-
-# In[ ]:
-
-
-peak_distance = ord('R') - ord('E')
-peak_distance
-
-
-# #### 
-
-# In[ ]:
-
-
-chr(ord('v') - peak_distance)  # <1>
-
-
-# #### 
-
-# In[ ]:
-
-
-chr(ord('n') - peak_distance)  # <2>
 
 
 # #### 
@@ -660,13 +683,7 @@ print(vectors.todense().round(2))  # <4>
 
 
 DS_FAQ_URL = ('https://gitlab.com/tangibleai/qary/-/raw/main/'
-
-
-# #### 
-
-# In[ ]:
-
-
+    'src/qary/data/faq/faq-python-data-science-cleaned.csv')
 qa_dataset = pd.read_csv(DS_FAQ_URL)
 
 

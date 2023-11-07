@@ -29,7 +29,7 @@ import sys
 import nbformat as nbf
 from tqdm import tqdm
 
-from nlpia2.constants import OFFICIAL_ADOC_DIR, ADOC_DIR
+from nlpia2.constants import OFFICIAL_ADOC_DIR  # , ADOC_DIR
 from nlpia2.text_processing.extractors import parse_args
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell, new_output
 
@@ -213,6 +213,8 @@ def get_code_blocks(text,
         examples = get_examples(block['prompted_source'], join_consecutive=True)
         if examples:
             for example in examples:
+                if 'source' not in example:
+                    continue
                 newblock = block.copy()
                 # FIXME: also update line_number from examples
                 newblock.update(dict(source=example['source'], want=example['want']))
@@ -284,6 +286,8 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None, prompt=False, outpu
     print(dest_filepath)
     for block in blocks:
         # need to run the doctest parser on a lot of text to get attr names right
+        if 'source' not in block:
+            continue
         if len(block['header'].splitlines()) == 3:
             cells.append(new_markdown_cell('#### ' + block['header'].splitlines()[0]))
         if prompt:

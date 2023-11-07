@@ -14,7 +14,7 @@ if __name__ == '__main__':
         adoc_dir = Path(sys.argv[1])
     dest_dir = BASE_DIR / 'notebooks'
     print(adoc_dir, '->', dest_dir)
-    nbs = adocs2notebooks(adoc_dir, dest_dir=dest_dir)
+    nbs = adocs2notebooks(adoc_dir, dest_dir=dest_dir, glob='Chapter-*.ipynb')
     dest_dir = OFFICIAL_ADOC_DIR.parent.parent / 'code' / 'notebooks'
     # for d in nbs:
     #     print(d.keys())
@@ -23,6 +23,8 @@ if __name__ == '__main__':
     #     print(adoc_dir, '->', dest_dir)
 
     # Path(dest).open('w').write(Path(src).open().read())
-    print('Extracting .py file from .adoc using ')
-    print('  nlpia2.text_processing.extractors.extract_code():')
-    print('  ' + str(extract_code()).replace('\n', '\n  '))
+
+    # FIXME: extract_code() is broke for adoc files without any code blocks
+    # print('Extracting .py file from .adoc using ')
+    # print('  nlpia2.text_processing.extractors.extract_code():')
+    # print('  ' + str(extract_code()).replace('\n', '\n  '))
