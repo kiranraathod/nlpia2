@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from nlpia2.text_processing.extractors import extract_code
+# from nlpia2.text_processing.extractors import extract_code
 from nlpia2.text_processing.converters import adocs2notebooks
 # from pathlib import Path
 
