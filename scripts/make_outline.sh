@@ -1,4 +1,25 @@
-egrep -i -h '^([=]+ |:Chapter: [0-9]+)' manuscript/adoc/Chapter*.adoc > docs/headings.adoc
+filepath=./manuscript/adoc/TOC.automatic.adoc
+mdpath="docs/outline.md"
+echo << EOF > $filepath
+= contents
+Hobson Lane, Maria Dyshel
+Lane / Natural Language Processing in Action 2nd Edition
+:doctype: book
+
+:unnumbered:
+
+[[chapter_id_0]]
+[role="available free"]
+== Acknowledgments
+
+[[part_id_1]]
+= Part 1: Wordy Machines (Vector Models of Natural Language)
+EOF
+
+egrep -i -h '^([=]+[ ][a-zA-Z0-9] |:Chapter: [0-9]+)' manuscript/adoc/Chapter*.adoc > $filepath
+egrep -i -h '^([=]+[ ][a-zA-Z0-9] |:Chapter: [0-9]+)' manuscript/adoc/Appendix*.adoc >> $filepath
+egrep -i -h '^([=]+[ ][a-zA-Z0-9] |:Chapter: [0-9]+)' manuscript/adoc/Resource*.adoc >> $filepath
+egrep -i -h '^([=]+[ ][a-zA-Z0-9] |:Chapter: [0-9]+)' manuscript/adoc/Glossary*.adoc >> $filepath
 # python -c '\
 #   with open("docs/headings.adoc") as fin: \
 #     lines = fin.readlines()
@@ -15,11 +36,11 @@ egrep -i -h '^([=]+ |:Chapter: [0-9]+)' manuscript/adoc/Chapter*.adoc > docs/hea
 newline=$'\n'
 
 
-sed 's/=/#/g' docs/headings.adoc > docs/headings.md
-sed 's/==== /      * /g' docs/headings.adoc > docs/outline.md
-sed -i 's/=== /    * /g' docs/outline.md
-sed -i 's/== /  * /g' docs/outline.md
-sed -i 's/= /'"\\${newline}"'* /g' docs/outline.md
+sed 's/=/#/g' $filepath > $mdpath
+sed 's/==== /      * /g' docs/headings.adoc > $mdpath
+sed -i 's/=== /    * /g' $mdpath
+sed -i 's/== /  * /g' $mdpath
+sed -i 's/= /'"\\${newline}"'* /g' $mdpath
 
 # rm -f headings.adoc
 

@@ -10,10 +10,14 @@ FIXME: Duplicate forms of regular expressions from master and develop branch nee
 >>> re.findall(RE_URL_SIMPLE, 'Google github totalgood [github.com/totalgood]!')[0][0]
 'github.com/totalgood'
 """
-from ..constants import logging, SRC_DATA_DIR
 import re
 import regex
 import copy
+
+from ..constants import logging, SRC_DATA_DIR
+from .re_patterns import sentence_sep as RE_SENTENCE_SEP
+from .re_patterns import word_sep_except_external_appostrophe as RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE
+
 
 REGEX_DATA_DIR = SRC_DATA_DIR
 log = logging.getLogger(__name__)
@@ -38,7 +42,7 @@ RE_ITALIC_CHAR_START = r'(?:(?<!_)__(?=[a-zA-Z0-9]))'  # start delimiter for sin
 RE_ITALIC_CHAR_END = r'(?:(?=[a-zA-Z0-9])__(?!_))'  # end delimiter for single character italicized
 
 RE_WORD_CHARCLASS = r'[-a-zA-Z0-9]'  # like \w but for English, not code, so "-" allowed but not "_"
-RE_OPTIONAL_WORD = '(?:' + RE_WORD_CHARCLASS + '{0,16})'  # like \w but for English, not code, so "-" allowed but not "_"
+RE_OPTIONAL_WORD = '(?:' + RE_WORD_CHARCLASS + '{0,16})'
 RE_ENGLISH_WORD = '(?:' + RE_WORD_CHARCLASS + '{1,16})'
 
 RE_STYLE_START = '(?:' + '|'.join(
@@ -47,12 +51,10 @@ RE_STYLE_START = '(?:' + '|'.join(
 RE_STYLE_END = '(?:' + '|'.join(
     [RE_BOLD_END, RE_BOLD_CHAR_END, RE_ITALIC_END, RE_ITALIC_CHAR_END]
 ) + ')'
-from .re_patterns import sentence_sep as RE_SENTENCE_SEP
-CRE_SENTENCE_SEP = re.compile(RE_SENTENCE_SEP)
+CRE_SENTENCE_SEP = re.compile(RE_SENTENCE_SEP)  # RE_SENTENCE_SEP = re_patterns.sentence_sep
 
-from .re_patterns import word_sep_except_external_appostrophe as RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE
+# RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE = re_patterns.word_sep_except_external_appostrophe
 CRE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE = re.compile(RE_WORD_SEP_EXCEPT_EXTERNAL_APOSTROPHE)
-
 
 PATTERNS = {
     'word': RE_ENGLISH_WORD, 'word0': RE_OPTIONAL_WORD,
@@ -85,8 +87,16 @@ RE_ACRONYM2 = r'((\w)[\w0-9]{2,16}[ ](\w)[\w0-9]{2,16})[ ]\((\2\3)\)'
 RE_ACRONYM3 = r'((\w)[\w0-9]{2,16}[ ](\w)[\w0-9]{2,16}[ ](\w)[\w0-9]{2,16})[ ]\((\6\7\8)\)'
 CRE_ACRONYM = re.compile(RE_ACRONYM2 + '|' + RE_ACRONYM3, re.IGNORECASE)
 
-RE_URL_SIMPLE = r'(?P<url>(?P<scheme>(?P<scheme_type>http|ftp|https)://)?([^/:(\["\'`)\]\s]+' \
-    r'[.])(com|org|edu|gov|net|mil|uk|ca|de|jp|fr|au|us|ru|ch|it|nl|se|no|es|io|me)([^"\'`)\]\s]*))'
+# schme: protocol (http or ftp)
+# fqdn: fully qualified domain name
+# tldn: top level domain name
+# path: file path and GET parameters
+RE_URL_SIMPLE = r'(?P<url>' \
+    r'(?P<scheme>(?P<scheme_type>http|ftp|https)://)?' \
+    r'(?P<fqdn>([^/:(\["\'`)\]\s]{2,64}[.]){1,5})' \
+    r'(?P<tldn>com|org|edu|gov|net|mil|uk|ca|de|jp|fr|au|us|ru|ch|it|nl|se|no|es|io|me)' \
+    r'(?P<path>[^"\'`)\]\s]*)' \
+    r')'
 CRE_URL_SIMPLE = re.compile(RE_URL_SIMPLE)
 RE_URL_WITH_SCHEME = RE_URL_SIMPLE.replace('://)', '://)?')  # require scheme
 CRE_URL_WITH_SCHEME = re.compile(RE_URL_WITH_SCHEME)
