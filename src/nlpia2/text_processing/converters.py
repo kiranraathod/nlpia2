@@ -118,6 +118,36 @@ def re_matches(patterns, lines, newline='\n', match_objects=True):
     return matches
 
 
+def re_matches_multiline(patterns, lines, newline='\n', match_objects=True):
+    r""" Match multiple regular expressions to consecutive lines of text
+
+    >>> patterns = '^([.][\\w\\s]+)?\\s*$\n^\[source\]$\n^[-]+$'.split('\n')
+    >>> lines = '----\n.hello\n\n[source]\n----\nworld\n----'.split('\n')
+    >>> re_matches(patterns, lines)
+    []
+    >>> re_matches(patterns, lines[2:])
+    [<re.Match object; span=(0, 0), match=''>,
+     <re.Match object; span=(0, 8), match='[source]'>,
+     <re.Match object; span=(0, 4), match='----'>]
+    >>> patterns = r'\n(----[-]*\s*\n((<\d+>\s?[^\n]+)?\n)+)'
+    >>> lines = '\n----\n.hello\n\n[source]\n----\nworld\n----\n<1> annot.\n\n'
+    >>> re_matches(patterns, lines)
+
+    """
+    if isinstance(lines, str):
+        lines = lines.splitlines()
+    lines = newline.join([ln.rstrip() for ln in lines])
+    matches = []
+    for pat, text in zip(patterns, lines):
+        match = re.match(pat, text)
+        if not match:
+            return matches
+        matches.append(match)
+    if not match_objects:
+        return [m.group() for m in matches]
+    return matches
+
+
 def get_examples(text, join_consecutive=True):
     r""" Extract all doctest code and output examples from asciidoc (adoc) text
 
