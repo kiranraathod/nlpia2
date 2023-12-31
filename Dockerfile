@@ -12,7 +12,6 @@ ENV PYTHONUNBUFFERED 1
 # WORKDIR "${HOME}/nlpia2"
 WORKDIR /nlpia2
 
-ADD environment.yml .
 ADD requirements.txt .
 
 # Add a "USER root" statement followed by RUN statements to install system packages using apt-get,
@@ -55,7 +54,6 @@ RUN python -c 'from sentence_transformers import SentenceTransformer; sbert = Se
 
 ADD . .
 
-RUN pip install python-lsp-server
 # WARNING: `EXPOSE` does nothing, it's basically a reminder to `run --publish 8888:8888` 
 EXPOSE 8888
 
