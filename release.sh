@@ -3,14 +3,18 @@
 USAGE="./release.sh [MESSAGE [| VERSION]]"
 DEPENDENCIES=(twine wheel setuptools pip keyring rfc3986)
 # set -e
+PKG_NAME=nlpia2
+PKG_NAME=$( (echo $PWD | rev | cut -d'/' -f1 | rev) || ls src/ | head -n1)
+echo "Building and pushing a new minor version of package named $PKG_NAME..."
+
+USAGE="./release.sh [VERSION | [VERSION MESSAGE]]"
+DEPENDENCIES=(twine wheel setuptools pip keyring rfc3986)
 
 if [ -z "$1" ] ; then
     echo $USAGE
     exit 1
 fi
 
-PKG_NAME=$( (echo $PWD | rev | cut -d'/' -f1 | rev) || ls src/ | head -n1)
-echo "Building and pushing a new minor version of package named $PKG_NAME..."
 
 ORIGIN="origin"
 MAIN="main"

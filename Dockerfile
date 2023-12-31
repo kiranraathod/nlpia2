@@ -1,21 +1,19 @@
 FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime
 # FROM jupyter/base-notebook
-
-# condaforge/miniforge3
+# FROM condaforge/miniforge3
 
 ENV TRANSFORMERS_CACHE=/tmp/.cache
 ENV TOKENIZERS_PARALLELISM=true
 ENV PYTHONUNBUFFERED 1
 
 # USER $NB_USER
-USER ${NB_UID}
+# USER ${NB_UID}
 
-WORKDIR "${HOME}/nlpia2"
+# WORKDIR "${HOME}/nlpia2"
+WORKDIR /nlpia2
 
-COPY environment.yml .
-COPY requirements.txt .
-
-# Add RUN statements to install packages as the $NB_USER defined in the base images.
+ADD environment.yml .
+ADD requirements.txt .
 
 # Add a "USER root" statement followed by RUN statements to install system packages using apt-get,
 # change file permissions, etc.
@@ -47,24 +45,19 @@ RUN python3 -m pip install --no-cache-dir --upgrade pip && \
 #     sentencepiece \
 #     seqeval
 
-# RUN python3 -m spacy download en_core_web_sm
+RUN python -m spacy download en_core_web_sm
 
-# RUN python3 -m spacy download en_core_web_md
+RUN python -m spacy download en_core_web_md
 
-# RUN python3 -m spacy download en_core_web_lg
+RUN python -m spacy download en_core_web_lg
 
+RUN python -c 'from sentence_transformers import SentenceTransformer; sbert = SentenceTransformer("paraphrase-MiniLM-L6-v2")'
 
-# COPY requirements.txt .
+ADD . .
 
-# RUN pip install --upgrade pip --root-user-action=ignore && \
-#     pip install -r requirements.txt --root-user-action=ignore --no-cache
-
-# RUN python -m spacy download en_core_web_md && \
-#     python -c 'from sentence_transformers import SentenceTransformer; sbert = SentenceTransformer("paraphrase-MiniLM-L6-v2"); print(sbert)'
-
-
-# CMD ["${HOME}/nlpia2/scripts/entrypoint.sh"]
+RUN pip install python-lsp-server
+# WARNING: `EXPOSE` does nothing, it's basically a reminder to `run --publish 8888:8888` 
+EXPOSE 8888
 
 
-
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]
+CMD ["./scripts/entrypoint.sh"]
