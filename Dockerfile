@@ -1,4 +1,6 @@
 FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-runtime
+# FIXME: apt cannot install `git` which is required by `pip freeze`
+
 # FROM jupyter/base-notebook
 # FROM condaforge/miniforge3
 

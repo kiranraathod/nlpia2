@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nlpia2"
-version = "0.0.41"
+version = "0.0.42"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
 license = "AGPLv3"
 readme = "README.md"
@@ -26,7 +26,8 @@ bleach = "^6.0.0"
 boto3 = "^1.34.6"
 botocore = "^1.31.27"
 configargparse = "^1.7"
-coreferee = "*"
+# coreferee = "*"
+#    spacy==3.5.4  # coreferre requires spacy<3.6
 cython = "^3.0"
 # dataframe-image = "^0.1.12"
 dateparser = "^1.1.8"
@@ -46,23 +47,22 @@ jupyterlab = "^4.0.10"
 jupyter-console = "^6.6.3"
 langchain = "^0.0.265"
 lxml = "^4.9.3"
-matplotlib = "==3.7.2"
-matplotlib-inline = "^0.1.6"
-meilisearch = "^0.28.2"
-mistune = "^3.0.1"
-# nessvec = "^0.0.12"
-# nlpia2-wikipedia = ">=1.5.6"
+# matplotlib = "==3.7.2"
+matplotlib-inline = "*"
+meilisearch = "*"
+# mistune = "^3.0.1"
+nessvec = "^0.1.14" FIXME: pandas version
+nlpia2-wikipedia = ">=1.5.14"
 nltk = "^3.8.1"
 notebook = "^7.0.6"
 openai = "^0.27.8"
 pandas = "^2.1.4"
-pandas-gbq = "*"  # pandas oauthlib requests google-auth requests-oathlib proto-plus urllib3 pyarrow pytz python-dateutil
+# pandas-gbq = "*"  # pandas oauthlib requests google-auth requests-oathlib proto-plus urllib3 pyarrow pytz python-dateutil
 pynndescent = "^0.5.10"
 parsimonious = "^0.10.0"
 pip = "*"
 poetry = "*"
 pronouncing = "^0.2.0"
-# protobuf = "==4.24.0"
 psutil = "^5.9.5"
 pypdf2 = "^3.0.1"
 python = ">=3.9"
@@ -70,16 +70,29 @@ python-dotenv = "^1.0.0"
 python-lsp-server = "*"
 python-slugify = "^8.0.1"
 pyvis = ">=0.3.2"
-# rapidfuzz = ">=2.13.2,<2.14"
 recommonmark = "^0.7.1"
 sacrebleu = "^2.3.1"
 streamlit = "^1.25.0"
 seaborn = "^0.13.0"  # pandas fonttools matplotlib numpy contourpy cycler pillow packaging python-dateutil pytz tzdata six
 sentence_transformers = "2.2.2"
-spacy = "==3.5.4"  # coreferre requires spacy<3.6 and textacy requires > 3.5
+#    huggingface-hub
+#    joblib==1.3.2
+#    scikit-learn==1.3.2
+#        scipy==1.11.4
+#        joblib
+#        numpy
+#        threadpoolctl
+#    sentencepiece==0.1.99
+#    tokenizers==0.15.0
+#    torchvision
+#        pillow
+#    transformers
+#        regex==2023.10.3
+spacy = "3.7.2"  # coreferre requires spacy<3.6 and textacy requires > 3.5
 spacy-experimental = "*"
 sphinx = "^7.1.2"
-textacy = "*"
+textacy = "0.13.0"
+#     spacy>=3.5
 toml = "^0.10.2"
 tox = "^4.8.0"
 tqdm = "^4.66.1"
