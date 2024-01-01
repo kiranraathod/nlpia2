@@ -51,7 +51,7 @@ lxml = "^4.9.3"
 matplotlib-inline = "*"
 meilisearch = "*"
 # mistune = "^3.0.1"
-nessvec = "^0.1.14" FIXME: pandas version
+nessvec = "^0.1.14"
 nlpia2-wikipedia = ">=1.5.14"
 nltk = "^3.8.1"
 notebook = "^7.0.6"
