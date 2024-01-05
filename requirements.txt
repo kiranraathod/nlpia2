@@ -1,3 +1,4 @@
+# TODO: move requirements from pyproject.toml here
 boto3~=1.34.6
 fastapi~=0.105.0
 jupyterlab==4.0.10
