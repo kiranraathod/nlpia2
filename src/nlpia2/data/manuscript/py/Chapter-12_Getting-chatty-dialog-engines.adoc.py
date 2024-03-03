@@ -1,12 +1,12 @@
 from langchain import HuggingFaceHub
 
-HUGGING_FACE_API_KEY=
+HUGGING_FACE_API_KEY =
 
 llm = HuggingFaceHub(
     repo_id="google/flan-t5-large",
     model_kwargs={
         "temperature": 0.3,
-        "max_length":200},
+        "max_length": 200},
     huggingfacehub_api_token='<your_API_token>')
 
 from langchain.prompts import PromptTemplate
@@ -32,8 +32,8 @@ template = """
     """
 
 prompt = PromptTemplate(
-    input_variables = ["message"],  # <1>
-    template=template)       
+    input_variables=["message"],  # <1>
+    template=template)
 
 chain = LLMChain(
     llm=llm, verbose=True, prompt=prompt  # <2>
@@ -59,7 +59,7 @@ chain = LLMChain(llm=llm, memory=memory, prompt=prompt)
 
 convo_chain = ConversationChain(
     llm=llm,
-    memory = ConversationBufferMemory
+    memory=ConversationBufferMemory
     )
 
 convo_chain.prompt.template
@@ -77,7 +77,7 @@ chain.predict(message=message)
 
 from langchain.llms import Replicate
 
-os.environ["REPLICATE_API_TOKEN"] = '<your_API_key_here>'
+os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN = os.environ["REPLICATE_API_TOKEN"]
 
 llm = Replicate(
     model="a16z-infra/llama13b-v2-chat:" +
@@ -89,7 +89,7 @@ llm = Replicate(
     })
 
 prompt = PromptTemplate(
-    input_variables = ["history", "input"],
+    input_variables=["history", "input"],
     template="""This is a conversation between a math teacher and
     a third-grade student. The teacher asks math questions of the
     student and evaluates the student's answer one at a time.
@@ -135,7 +135,7 @@ math_convo.predict(input="9")
 
 prompt = PromptTemplate(
    input_variables=["history", "input"],
-   template="""You are a math teacher that's teaching math 
+   template="""You are a math teacher that's teaching math
    to a third-grade student.Prompt the student to complete number
    sequences from the following list and compare their answer
    with the last number in the following sequences:
@@ -148,10 +148,10 @@ prompt = PromptTemplate(
    student:{input}
    teacher:"""
 
-math_chatbot = MathChatbot(prompt)
+math_chatbot=MathChatbot(prompt)
 
 math_chatbot.answer("9")
 
-math_chatbot = MathChatbot(prompt)
+math_chatbot=MathChatbot(prompt)
 
 math_chatbot.answer("9")
