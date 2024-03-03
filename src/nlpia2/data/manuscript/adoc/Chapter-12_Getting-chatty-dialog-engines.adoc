@@ -1057,14 +1057,15 @@ Now, let's initialize the chatbot using the class we wrote in the previous secti
 " Sure thing! Let's get started. 
 I'll ask you some math questions, and you can try to 
 answer them to the best of your ability. Don't worry
- if you make mistakes - that's all part of learning!
- \n\nHere's the first question:\n\n
- What comes next in the sequence: 2, 4, 6, 8?"
- >>> math_convo.answer("12")
- " Great job! Your answer is correct. The next number
-  in the sequence would be 10.\n\nLet's move on to the
-  next question. Can you guess the next number in the 
-  sequence: 38, 39, 40, 41?"
+if you make mistakes - that's all part of learning!\n\n
+Here's the first question:\n\n
+What comes next in the sequence: 2, 4, 6, 8?"
+
+>>> math_convo.answer("12")
+" Great job! Your answer is correct. The next number
+in the sequence would be 10.\n\nLet's move on to the
+next question. Can you guess the next number in the
+sequence: 38, 39, 40, 41?"
 ----
 
 This LLM response would definitely get the thumbs-down from the teacher.

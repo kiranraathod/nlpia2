@@ -8,6 +8,7 @@ import re
 import tempfile
 from types import MappingProxyType
 import nbformat as nbf
+import pdb
 
 from logging import getLogger
 
@@ -67,7 +68,7 @@ def split_sentences(text, pattern=r'[a-z"\'\)][:.?!](\s|$)', nlp=None):
     return sents
 
 
-def extract_lines(text=DEFAULT_ADOC_FILEPATH, chapter=None, with_meta=True, nlp=None):
+def extract_lines(text=DEFAULT_ADOC_FILEPATH, chapter=None, with_metadata=True, nlp=None):
     if isinstance(text, int):
         chapter = text
     if chapter is not None:
@@ -146,9 +147,18 @@ def extract_doctest_examples(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True,
 
 def extract_expressions(filepath=DEFAULT_ADOC_FILEPATH):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
-    text = Path(filepath).open('rt').read()
-    dtparser = DocTestParser()
-    return dtparser.get_examples(text)
+    try:
+        text = Path(filepath).open('rt').read()
+        dtparser = DocTestParser()
+        expressions = dtparser.get_examples(text)
+    except Exception as e:
+        print(type(e), e.args, e)
+        print()
+        print(type(text))
+        print(text)
+        print()
+        pdb.set_trace()
+    return expressions
 
 
 def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
@@ -160,17 +170,27 @@ def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
 
 
 # see nonworking duplicate `extract_code_sections_with_grammar`
-def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False):
-    meta = extract_code_lines(filepath=filepath, with_metadata=True)
-    df = pd.DataFrame(meta)
-    if 'source' not in df.columns:
-        df['source'] = ''
-    df['num_lines'] = df['source'].str.split('\n').str.len()
-    df['next_lineno'] = df['num_lines'] + df['doc_lineno']
-    # df['stop_block'] = df['want'].str[:4].str.startswith('----')
-    df['stop_block'] = df['want'].str.strip().str.len() > 0
-
+def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False, with_metadata=True):
+    meta = extract_code_lines(filepath=filepath, with_metadata=with_metadata)
     blocks = ['']
+    df = pd.DataFrame(meta)
+    try:
+        if not len(df) or not any([any([v for v in dct.values()]) for dct in meta]):
+            return blocks
+        if 'source' not in df.columns:
+            df['source'] = ''
+        df['num_lines'] = df['source'].str.split('\n').str.len()
+        print(df.iloc[100:102].T)
+        print(df.columns)
+        df['next_lineno'] = df['num_lines'] + df['lineno']
+        # df['stop_block'] = df['want'].str[:4].str.startswith('----')
+        df['stop_block'] = df['want'].str.strip().str.len() > 0
+    except Exception as e:
+        print()
+        print(e, type(e), e.args)
+        print()
+        pdb.set_trace()
+
     for line, stop_block, want in zip(df['source'], df['stop_block'], df['want']):
         blocks[-1] += line + '\n'
         if stop_block:
@@ -229,11 +249,11 @@ def create_notebook(code_lines, destfile):
     return nb
 
 
-def extract_notebooks(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+def extract_notebooks(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_metadata=True):
     """ NOTIMPLEMENTED: Convert adoc file code blocks into cells within jupyter notebooks """
     blocks = []
     for p in input_dir.glob(glob):
-        blocks = extract_code_blocks(filepath=p, with_meta=with_meta)
+        blocks = extract_code_blocks(filepath=p, with_metadata=with_metadata)
         # create_notebook
     # return blocks
     for code_lines in blocks:
@@ -331,7 +351,7 @@ def extract_expression_sections(text, section_break='// SECTIONBREAK'):
     return [dtparser.get_examples(text) for text in text_sections]
 
 
-def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
+def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_metadata=True):
     """ Find all URLs in the file at filepath, return a list of dicts with urls """
     filepath, filename = '', ''
     if (isinstance(text, Path) or len(text) < 1024) and Path(text).is_file():
@@ -354,11 +374,11 @@ def extract_urls_from_text(text=DEFAULT_ADOC_FILEPATH, with_meta=True):
 
 
 def extract_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
-                             extractor=extract_urls_from_text, with_meta=True):
+                             extractor=extract_urls_from_text, with_metadata=True):
     """ Run specified extractor (default: extract_urls) on each file input_dir, return a list of dicts with urls """
     outputs = []
     for p in input_dir.glob(glob):
-        df = extractor(filepath=p, with_meta=with_meta)
+        df = extractor(filepath=p, with_metadata=with_metadata)
         outputs.append(df)
     return outputs
 
@@ -367,28 +387,28 @@ extract_lists = extract_lists_from_files
 
 
 def extract_url_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
-                                 extractor=extract_urls_from_text, with_meta=True):
+                                 extractor=extract_urls_from_text, with_metadata=True):
     """ Find all URLs in files at input_dir, return a list of dicts with urls """
-    return extract_lists(input_dir=input_dir, extractor=extract_urls_from_text, glob=glob, with_meta=with_meta)
+    return extract_lists(input_dir=input_dir, extractor=extract_urls_from_text, glob=glob, with_metadata=with_metadata)
 
 
 extact_url_lists = extract_url_lists_from_files
 
 
-def extract_urls(texts=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_meta=True):
+def extract_urls(texts=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_metadata=True):
     if (isinstance(texts, Path) or len(texts) < 1024):
         if Path(texts).is_file():
-            return extract_urls_from_text(text=texts, with_meta=with_meta)
+            return extract_urls_from_text(text=texts, with_metadata=with_metadata)
         elif Path(texts).is_dir():
             glob = glob or '*'
             return extract_url_lists_from_files(
-                input_dir=texts, glob='*.adoc', with_meta=with_meta)
-    return extract_urls_from_text(text=texts, with_meta=with_meta)
+                input_dir=texts, glob='*.adoc', with_metadata=with_metadata)
+    return extract_urls_from_text(text=texts, with_metadata=with_metadata)
 
 
-def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
+def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
     """ Use regex to extract URLs from text file, return DataFrame with url column """
-    urls = extract_urls_from_text(filepath=filepath, with_meta=with_meta)
+    urls = extract_urls_from_text(filepath=filepath, with_metadata=with_metadata)
     df = pd.DataFrame(urls, index=[
         f"{u['line_number']}-{u['url_number']}" for u in urls])
     df['filename'] = filepath.name
@@ -400,8 +420,8 @@ def extract_urls_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True):
     return df
 
 
-def extract_lines_df(filepath=DEFAULT_ADOC_FILEPATH, with_meta=True, nlp=None, **kwargs):
-    lines = extract_lines(text=filepath, with_meta=with_meta, nlp=nlp, **kwargs)
+def extract_lines_df(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True, nlp=None, **kwargs):
+    lines = extract_lines(text=filepath, with_metadata=with_metadata, nlp=nlp, **kwargs)
     df = pd.DataFrame(lines)
     return df
 
@@ -603,10 +623,10 @@ def extract_doctest_files(filepath=DEFAULT_ADOC_FILEPATH, destfile=None, save_se
 
 
 def extract_lists_from_files(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc',
-                             extractor=extract_urls_from_text, with_meta=True):
+                             extractor=extract_urls_from_text, with_metadata=True):
     outputs = []
     for p in input_dir.glob(glob):
-        df = extractor(filepath=p, with_meta=with_meta)
+        df = extractor(filepath=p, with_metadata=with_metadata)
         outputs.append(df)
     return outputs
 
