@@ -31,7 +31,8 @@ import csv
 import logging
 import warnings
 from traceback import print_exc
-from collections import OrderedDict, Mapping, Counter
+from collections import OrderedDict, Counter
+from collections.abc import Mapping
 from itertools import islice
 from decimal import Decimal, InvalidOperation, InvalidContext
 import math
@@ -68,11 +69,13 @@ import numpy as np
 ###################################################################
 # deprecated __future__ and past imports
 
+
 def viewitems(d):
     return dict(d).items()
 
 # deprecated __future__ and past imports
 #####################################################################
+
 
 logger = logging.getLogger(__name__)
 

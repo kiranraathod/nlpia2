@@ -149,8 +149,7 @@ def extract_expressions(filepath=DEFAULT_ADOC_FILEPATH):
     """ Use doctest.DocTestParser to find lines of Python code in doctest format """
     text = Path(filepath).open('rt').read()
     dtparser = DocTestParser()
-    expressions = dtparser.get_examples(text)
-    return expressions
+    return dtparser.get_examples(text)
 
 
 def extract_code_lines(filepath=DEFAULT_ADOC_FILEPATH, with_metadata=True):
@@ -166,14 +165,22 @@ def extract_code_blocks(filepath=DEFAULT_ADOC_FILEPATH, with_output=False, with_
     meta = extract_code_lines(filepath=filepath, with_metadata=with_metadata)
     blocks = ['']
     df = pd.DataFrame(meta)
-    if not len(df) or not any([any([v for v in dct.values()]) for dct in meta]):
-        return blocks
-    if 'source' not in df.columns:
-        df['source'] = ''
-    df['num_lines'] = df['source'].str.split('\n').str.len()
-    df['next_lineno'] = df['num_lines'] + df['lineno']
-    # df['stop_block'] = df['want'].str[:4].str.startswith('----')
-    df['stop_block'] = df['want'].str.strip().str.len() > 0
+    try:
+        if not len(df) or not any([any([v for v in dct.values()]) for dct in meta]):
+            return blocks
+        if 'source' not in df.columns:
+            df['source'] = ''
+        df['num_lines'] = df['source'].str.split('\n').str.len()
+        print(df.iloc[100:102].T)
+        print(df.columns)
+        df['next_lineno'] = df['num_lines'] + df['lineno']
+        # df['stop_block'] = df['want'].str[:4].str.startswith('----')
+        df['stop_block'] = df['want'].str.strip().str.len() > 0
+    except Exception as e:
+        print()
+        print(e, type(e), e.args)
+        print()
+        pdb.set_trace()
 
     for line, stop_block, want in zip(df['source'], df['stop_block'], df['want']):
         blocks[-1] += line + '\n'

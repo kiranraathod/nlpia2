@@ -324,7 +324,7 @@ Instead, all you have to do is create a variable to store the hidden state separ
 And you need to have a separate matrix of weights to use for computing that hidden tensor.
 <<listing-recurrence-pytorch>> implements a minimal RNN from scratch, without using PyTorch's `RNNBase` class.
 
-[id=listing-recurrence-pytorch, reftext={chapter}.{counter:listing}]
+[#listing-recurrence-pytorch, reftext={chapter}.{counter:listing}]
 .Recurrence in PyTorch
 [source,python]
 ----

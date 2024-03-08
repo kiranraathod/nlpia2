@@ -294,8 +294,8 @@ def find_title(text, pattern=r'^\s*[=#]\s?(.+)$'):
             return line
 
 
-def adoc2ipynb(filepath=None, dest_filepath=None, text=None, prompt=False, output=False):
-    """ Extract code blocks and their captions from an adoc file and save to an *.ipynb file"""
+def adoc2ipynb_file(filepath=None, dest_filepath=None, text=None, prompt=False, output=False):
+    """ Extract code blocks and their captions from a SINGLE adoc file and save to an *.ipynb file"""
     try:
         text = Path(filepath).open().read()
     except (TypeError, OSError, IOError, FileNotFoundError) as e:
@@ -335,7 +335,7 @@ def adoc2ipynb(filepath=None, dest_filepath=None, text=None, prompt=False, outpu
 
 
 def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
-    """ Convert a directory of adoc files into jupyter notebooks
+    """ Convert a directory containing MANY adoc files into jupyter notebooks
 
     Inputs:
       adoc_dir: Path or str to directory *.adoc files containing code blocks
@@ -359,7 +359,7 @@ def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
     dest_dir.mkdir(exist_ok=True, parents=True)
     for adoc_filepath in tqdm(list(adoc_dir.glob(glob))):
         dest_filepath = dest_dir / adoc_filepath.with_suffix('.ipynb').name
-        notebooks.append(adoc2ipynb(filepath=adoc_filepath, dest_filepath=dest_filepath))
+        notebooks.append(adoc2ipynb_file(filepath=adoc_filepath, dest_filepath=dest_filepath))
     return notebooks
 
 
@@ -373,7 +373,7 @@ def convert(format='ipynb', **kwargs):
     else:
         text = TEST_TEXT
     text = HEADER_TEXT + '\n\n' + text
-    return dict(nb=adoc2ipynb(text=text), text=text, filepath=filepath)
+    return dict(nb=adoc2ipynb_file(text=text), text=text, filepath=filepath)
 
 
 if __name__ == '__main__':

@@ -62,7 +62,25 @@ for i in range(4):
     if (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR / 'adoc').is_dir():
         break
 OFFICIAL_MANUSCRIPT_DIR = (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR).resolve()
-OFFICIAL_ADOC_DIR = (OFFICIAL_MANUSCRIPT_DIR / 'adoc').resolve()
+if not (OFFICIAL_MANUSCRIPT_DIR / 'adoc').is_dir():
+    OFFICIAL_MANUSCRIPT_DIR = next(OFFICIAL_MANUSCRIPT_DIR.parent.parent.glob('**/manuscript/adoc')).parent
+
+try:
+    assert OFFICIAL_MANUSCRIPT_DIR.name == 'manuscript'
+    assert OFFICIAL_MANUSCRIPT_DIR.parent == 'nlpia-manuscript'
+    OFFICIAL_IMAGES_DIR = OFFICIAL_MANUSCRIPT_DIR / 'images'
+    assert OFFICIAL_IMAGES_DIR.name == 'images'
+except AssertionError:
+    OFFICIAL_MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
+OFFICIAL_ADOC_DIR = OFFICIAL_MANUSCRIPT_DIR / 'adoc'
+
+# TODO: shutil.copytree(from_path, to_path)
+
+
+assert OFFICIAL_MANUSCRIPT_DIR.name == 'manuscript'
+assert OFFICIAL_MANUSCRIPT_DIR.parent.name in 'nlpia-manuscript data'.split()
+assert OFFICIAL_ADOC_DIR.name == 'adoc'
+assert OFFICIAL_ADOC_DIR.parent.name == 'manuscript'
 
 
 log.debug(f'SRC_DATA_DIR: {SRC_DATA_DIR}\n'
@@ -204,8 +222,10 @@ INT_DTYPES = tuple(set(np.dtype(typ) for typ in INT_TYPES))
 NUMERIC_TYPES = tuple(set(list(FLOAT_TYPES) + list(INT_TYPES)))
 NUMERIC_DTYPES = tuple(set(np.dtype(typ) for typ in NUMERIC_TYPES))
 
-DATETIME_TYPES = tuple([t for t in set(np.sctypeDict.values()) if t.__name__.startswith('datetime')] +
-                       [datetime.datetime, pd.DatetimeTZDtype, pd.Timestamp])
+DATETIME_TYPES = tuple(
+    [t for t in set(np.sctypeDict.values()) if t.__name__.startswith('datetime')]
+    + [datetime.datetime, pd.DatetimeTZDtype, pd.Timestamp]
+)
 DATE_TYPES = (datetime.datetime, datetime.date)
 
 # matrices can be column or row vectors if they have a single col/row
