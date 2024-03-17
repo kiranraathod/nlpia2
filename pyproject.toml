@@ -1,4 +1,10 @@
-[tool.poetry]
+[build-system]
+requires = [
+    "setuptools>=60",
+    "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "nlpia2"
 version = "0.0.42"
 description = "Natural language processing utilities and examples for the book Natural Language Processing in Action (nlpia) 2nd Edition by Hobson Lane and Maria Dyshel."
@@ -10,6 +16,7 @@ repository = "https://gitlab.com/tangibleai/nlpia2"
 documentation = "https://gitlab.com/tangibleai/nlpia2"
 keywords = [ "NLP", "Natural Language Processing", "Virtual Assistant", "chatbot", "Text Processing", "Machine Learning", "Text Mining", "Deep Learning",]
 classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "Operating System :: OS Independent", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Text Processing :: Linguistic", "Topic :: Text Processing", "Topic :: Communications", "Topic :: Communications :: Chat", "Intended Audience :: Education",]
+
 [[tool.poetry.packages]]
 include = "nlpia2"
 from = "src"
@@ -62,6 +69,7 @@ pandas = "^2.1.4"
 pynndescent = "^0.5.10"
 parsimonious = "^0.10.0"
 pip = "*"
+plotly = "*"
 poetry = "*"
 pronouncing = "^0.2.0"
 psutil = "^5.9.5"
@@ -122,6 +130,4 @@ pydocstyle = "*"
 # version = "*"
 # extras = [ "faiss",]
 
-[build-system]
-requires = [ "poetry-core>=1.0.0",]
-build-backend = "poetry.core.masonry.api"
+

@@ -240,23 +240,6 @@ def create_notebook(code_lines, destfile):
     return nb
 
 
-def extract_notebooks(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_metadata=True):
-    """ NOTIMPLEMENTED: Convert adoc file code blocks into cells within jupyter notebooks """
-    blocks = []
-    for p in input_dir.glob(glob):
-        blocks = extract_code_blocks(filepath=p, with_metadata=with_metadata)
-        # create_notebook
-    # return blocks
-    for code_lines in blocks:
-        if code_lines:
-            destfile = p.with_suffix(p.suffix + '.ipynb')
-            print(destfile)
-            create_notebook(
-                code_lines=code_lines,
-                destfile=destfile)
-    return blocks
-
-
 def extract_doctest_examples_file(filepath=DEFAULT_ADOC_FILEPATH, destfile=None):
     """ Extract the lines of code from code blocks in an adoc file """
     filepath = Path(filepath)
@@ -767,5 +750,42 @@ def extract_code(adocs=None, output=None):
         # return results
 
 
+def extract_notebooks(input_dir=OFFICIAL_MANUSCRIPT_DIR, glob='*.adoc', with_metadata=True):
+    """ NOTIMPLEMENTED: Convert adoc file code blocks into cells within jupyter notebooks """
+    __doc__ = """
+        NOT IMPLEMENTED!!!! USE THESE ALTERNATIVES INSTEAD:
+           - nlpia2.text_processing.converters.adocs2notebooks()
+           - nlpia-manuscript/scripts/extract_code.py
+           - ????? nlpia2/scripts/extract_code.py ?????
+    """
+    raise NotImplementedError(__doc__)
+
+
+def extract_notebooks_and_pyfiles(input_dir=ADOC_DIR, glob='*.adoc', with_metadata=True):
+    raise NotImplementedError("Untested and had broken code.")
+    print('Extracting py files and notebooks (*.ipynb) from asciidoc code blocks here:')
+    print(f'   {ADOC_DIR}')
+    results = extract_notebooks(input_dir=ADOC_DIR)
+    print(f'results = \n    {results}')
+    print('Extracted notebooks can be found here:')
+    print(f'   {ADOC_DIR.parent / "ipynb"}')
+
+    blocks = []
+    for p in input_dir.glob(glob):
+        blocks = extract_code_blocks(filepath=p, with_metadata=with_metadata)
+        # create_notebook
+    # return blocks
+    for code_lines in blocks:
+        if code_lines:
+            destfile = p.with_suffix(p.suffix + '.ipynb')
+            print(destfile)
+            create_notebook(
+                code_lines=code_lines,
+                destfile=destfile)
+    return blocks
+
+
 if __name__ == '__main__':
+    print('!!!!!!PROBABLY BROKEN!!!!!')
+    raise NotImplementedError("USE THIS INSTEAD: nlpia2.text_processing.converters.adocs2notebooks()")
     results = extract_code(OFFICIAL_MANUSCRIPT_DIR, output=SRC_DATA_DIR)
