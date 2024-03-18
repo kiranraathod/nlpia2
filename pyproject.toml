@@ -91,8 +91,10 @@ dependencies = [
     "openai>=0.27.8",
     "pandas>=2.2.0,<2.3",  # pandas-gbq>=*"  # pandas oauthlib requests google-auth requests-oathlib proto-plus urllib3 pyarrow pytz python-dateutil,
     # "parsimonious>=0.10.0,<0.11",
+    "PyMuPDF",
     "pynndescent>=0.5.10,<0.6",
     "pytest-coverage",
+
     "pip",
     "plotly",
     "poetry",
