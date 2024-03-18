@@ -11,7 +11,6 @@ from plotly.offline import plot as plot_html
 import plotly.express as px
 import seaborn as sns
 
-import fitz  # pip install PyMuPDF
 from matplotlib import pyplot as plt
 
 sns.set_style('whitegrid')
@@ -36,6 +35,8 @@ def extract_tables(pdf_path=LLM_PDF):
 
 
 def extract_text(pdf_path=LLM_PDF, write_file=True, page_sep=FORMFEED, header='', footer='\n\n' + '_' * 80 + '\n\n'):
+    """ UNUSED: Extract plain text from PDF document, repeat `header` and/or `footer` on each page (for semantic search) """
+    import fitz  # pip install PyMuPDF
     doc = fitz.open(pdf_path)
     pages = []
     for page in doc:
