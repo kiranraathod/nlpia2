@@ -1,23 +1,21 @@
 = Natural Language Processing in Action, Second Edition
 :chapter: 10
 :part: 3
-:sectnumoffset: 1
+:sectnumoffset: 9
 :sectnums:
-:imagesdir: .
 :xrefstyle: short
 :figure-caption: Figure {chapter}.
 :listing-caption: Listing {chapter}.
 :table-caption: Table {chapter}.
-:leveloffset: 0
+:leveloffset: 1
 :xrefstyle: short
 :stem: latexmath
-:toc:
 :source-highlighter: coderay
 :bibliography-database: dl4nlp.bib
 :bibliography-style: ieee
-:index::[]
 
-= Large Language Models in the Real World
+= Large Language Models in the real world
+
 
 This chapter covers
 
@@ -28,32 +26,11 @@ This chapter covers
 * Finding meaningful search results for your queries (semantic search)
 * Speeding up your vector search with Approximate Nearest Neighbor Algorithm
 * Generating fact-based well-formed text with LLMs
+* Indexing documents for extractive and generative question answering
 
-
-////
-* Using semantic search to help you write more meaningful text
-* Building a knowledge graph from text
-* Grounding large language models with information retrieval
-CHAPTER OUTLINE
-== LLMs
- * introduction
- * creative writing (story telling, poetry, naming) - predicting next word repeatedly
- * influence, debate, reasoning, logic (word calculator)
- * in-context learning (few shot and zero shot)
- * coding
- * prompt engineering
- * safety
-== Vector/Neural Search
- * returning to semantic search
- * ANNs
-== Making it real
- * Retrieval-Augmented Generation
- * training a ExtractiveQA and a RAG pipeline in Haystack
- * deploying our app as a Streamlit app on Huggingface spaces
-////
 
 If you increase the number of parameters for transformer-based language models to obscene sizes, you can achieve some surprisingly impressive results.
-Researchers call these surprises _emergent properties_ but they may be a mirage.footnote:["AI's Ostensible Emergent Abilities Are a Mirage" 2023 by Katharine Miller (https://hai.stanford.edu/news/ais-ostensible-emergent-abilities-are-mirage)]
+Researchers call these surprises _emergent properties_ but they may be a mirage.footnote:["AI's Ostensible Emergent Abilities Are a Mirage" 2023 by Katharine Miller (http://mng.bz/z0l6)]
 Since the general public started to become aware of the capabilities of really large transformers, they are increasingly referred to as Large Language Models (LLMs).
 The most sensational of these surprises is that chatbots built using LLMs generate intelligent-sounding text.
 You've probably already spent some time using conversational LLMs such as ChatGPT, You.com and Llamma 2.
@@ -64,13 +41,13 @@ This chapter will help you use LLMs better so you can do more than merely _sound
 This chapter will help you understand how generative Large Language Models work.
 We will also discuss the problems with practical applications of LLMs so you can use them smartly and minimize their harm to you and others:
 
-* _Misinformation_:: LLMs trained on social media will amplify misinformation
-* _Reliability_:: LLMs will sometimes insert errors into your code and words, and these errors are very hard to spot
-* _Impact on Learning_:: Used incorrectly, LLMs can reduce your metacognition skill
-* _Impact on Collective Intelligence_:: LLMs are dumbing down society, making us more reactive, less thoughtful, and more susceptible to misinformation
-* _Bias_:: LLMs have algorithmic biases that are harming us all
-* _Accessibility_:: Most people do not have access to the resources and skills required to use LLMs effectively
-* _Environmental Impact_:: A typical LLM emits more than 8 tons of climate warming CO2 per year and consumes about half a liter of fresh water per conversation footnote:[ChatGPT environmental impact estimate by Earth.org (https://earth.org/environmental-impact-chatgpt/)] footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)]
+* _Misinformation_:: LLMs trained on social media will amplify misinformation, and the ability to generate text at speed is creating an "infodemic", making it harder to distinguish between correct and false information.footnote:[(https://arxiv.org/pdf/2009.06807.pdf)]
+* _Reliability_:: LLMs will sometimes insert errors into your code and words, and these errors are very difficult to spot
+* _Impact on learning_:: Used incorrectly, LLMs can reduce your metacognition skill
+* _Impact on collective intelligence_:: Flooding the infosphere with false and inhuman text devalues authentic and thoughtful human-generated ideas.
+* _Bias_:: LLMs have algorithmic biases that are harming us all in ways we rarely notice except when it affects us personally, creating division and mistrust
+* _Accessibility_:: Most people do not have access to the resources and skills required to use LLMs effectively, disadvantaging the already disadvantaged
+* _Environmental Impact_:: Each interaction with ChatGPT consumes energy enough to boil 2 spoons of water, or about 10 times as much as a Google Search. Multiply that by billions of interactions a year. footnote:[Tool for estimating ML model environmental impact (https://mlco2.github.io/impact/)] footnote:["Sustainable AI: Environmental Implications, Challenges and Opportunities" 2022 by Carole-Jean Wu et al. (https://arxiv.org/pdf/2111.00364.pdf )]
 
 You can mitigate a lot of these harms by building and using LLMs that are smarter and more efficient.
 That's what this chapter is all about.
@@ -81,7 +58,7 @@ And you will learn how to make your LLMs more efficient and less wasteful, not o
 
 The largest of the LLMs have more than a trillion parameters.
 Models this large require expensive specialized hardware and many months of compute on high-performance computing (HPC) platforms.
-At the time of this writing, training a modest 100B parameter model on just the 3 TB of text in Common Crawl would cost at least $3 M.footnote:["Behind the Millions: Estimating the Scale of Large Language Models" by Dmytro Nikolaiev (https://12ft.io/proxy?&q=https%3A%2F%2Ftowardsdatascience.com%2Fbehind-the-millions-estimating-the-scale-of-large-language-models-97bd7287fb6b)]
+At the time of this writing, training a modest 100B parameter model on just the 3 TB of text in Common Crawl would cost at least $3 M.footnote:["Behind the Millions: Estimating the Scale of Large Language Models" by Dmytro Nikolaiev (http://mng.bz/G94A)]
 Even the crudest model of the human brain would have to have more than 100 trillion parameters to account for all the connections between our neurons.
 Not only do LLMs have high-capacity "brains" but they have binged on a mountain of text -- all the interesting text that NLP engineers can find on the Internet.
 And it turns out that by following online _conversations_, LLMs can get really good at imitating intelligent human conversation.
@@ -94,14 +71,14 @@ It turns out that if you can predict the next word, and you you add a little hum
 Chatbots based on LLMs can have seemingly intelligent conversations with you about extremely complex topics.
 And they can carry out complex instructions to compose essays or poems or even suggest seemingly intelligent lines of argument for your online debates.
 
-But there's a small problem.
-LLMs aren't logical, reasonable, or even intentional.
-And these are the foundation of both human intelligence and artificial intelligence.
+But there is a small problem -- LLMs aren't logical, reasonable, or even intentional, much less _intelligent_.
+Reasoning is the very foundation of both human intelligence and artificial intelligence.
 You may hear people talking about how LLMs can pass really hard tests of intelligence, like IQ tests or college entrance exams.
-But these LLMs are just faking it.
-Keep in mind they have probably been trained on a large portion of all the question-answer pairs in these exams.
-We are all easily fooled by a machine that has been trained on virtually the entire Internet.
-It can regurgitate patterns of words that look a lot like reasonable answers to any quesiton that has ever been posed online.
+But LLMs are just faking it.
+Remember, LLMs are trained on a large portion of all the question-answer pairs in various standardized tests and exams.
+A recent report found that the largest proprietary LLM (ChatGPT4) cannot solve even the simplest programming challenges if those challenges were published after the LLM was trained.footnote:["Competition-Level Problems are Effective LLM Evaluators" by Yiming Huang et al on arXiv.org (https://arxiv.org/abs/2312.02143)]
+A machine that has been trained on virtually the entire Internet can appear to be smart by merely mashing up word sequences that it has seen before.
+It can regurgitate patterns of words that look a lot like reasonable answers to any question that has ever been posed online.
 
 [TIP]
 ====
@@ -1034,13 +1011,39 @@ Some common ones are:
 * stochastic chameleon
 * stochastic parrot
 * chickenized reverse centaurs
+* sychophant machines
 
-Yes, these are real terms, used by really smart people to describe AI.
-You'll learn a lot by researching these terms online to develop your own intuitions.
+Yes, these are real terms, used by really smart people to describe LLMs and AI.
+Terms like these are more than just tokens for communication, they encapsulate deep concepts that you can leverage as _intuition pumps_.
 ====
 
-Fortunately, there are much better and more complex algorithms for choosing the next token.
-One of the common methods to make the token decoding a bit less predictable is _sampling_.
+Fortunately, greedy sampling and repetition filtering are the only approachs you can use for generating the next token.
+Two ways to make the token decoding both less predictable _and_ less noisy (incorrect) are _beam search_ and _sampling_.
+Beam search keeps track of several possible "beams" or paths through the fishbone diagram.
+That way, you can chose the path that gets all the way to the end of the sentence chose the words with the maximum _total_ probability.
+As you can imagine, the number of possible word sequences (paths) grows exponentially as you explore longer and longer sequences, so most beam search arbitrarily limits the number of paths that your algorithm remembers.
+Beam search algorithms also limit the number of tokens that they explore for each path (beam).
+The breadth of the tree search algorithm is limited by the limit on the number of paths and the depth is limited by number of tokens that are generated for each path.
+By combining breadth and depth limits and recursively applying the beam search algorithm after each generated token, you create a _receding horizon_ algorithm, ensuring that your algorithm can generate a sequence in a predictable amount of time.
+Figure <<figure-stochastic-chameleon-beam-search>> shows only two possible paths.
+
+image::../images/ch10/stochastic-chameleon-decision-tree-beam-search_drawio.png["Horizontal decision tree diagram with the base of the tree to the left and the leaves of the tree to the right. It has three layers of branchs starting with the node labeled 'LLMs' on the far left. A wide dotted gray line passes from 'LLMs' to 'can' (with 0.15 probability) then to 'generate' (with 0.1 probability). Right below the highlighted path for 'LLMs can generate' there is an unhighlighted solid line passing through 'LLMs can (0.1) lie (0.05)'. A highlighted solid path extend from 'LLMs' to 'are' (0.12) and then to 'statistical' (0.38), yielding the higher total probability phrase 'LLMs are statistical'. Many other paths are not highlighed, such as 'LLMs are AI', 'LLMs are stochastic', and 'LLMs generate bull'.", width=650, align="center", link="../images/ch10/annoy_all_stages.png"]
+/home/hobs/code/hobs/mesa/2024/mesa_python.gitlab.io/static
+
+Imagine planning a road trip where you are choosing your next destination based on the speed of the traffic on that span of road.
+You want to avoid slow traffic jams.
+Slow segments of your journey are like the low probability token choices in a generative language model.
+A greedy driver, or greedy algorithm, would just chose the fastest path right in front of them.
+A more thoughtful driver, or a beam search algorithm, would spend some additional time exploring further ahead, estimating the total time of the journey.
+That is what beam search does.
+
+
+// FIXME: this file is in nlpia2 and must be merged with nlpia-manuscript!!!!!
+In figure <<figure-stochastic-chameleon-beam-search>> FIXME!! TODO!!
+Horizontal decision tree diagram with the base of the tree to the left and the leaves of the tree to the right. It has three layers of branchs starting with the node labeled 'LLMs' on the far left. A wide dotted gray line passes from 'LLMs' to 'can' (with 0.15 probability) then to 'generate' (with 0.1 probability). Right below the highlighted path for 'LLMs can generate' there is an unhighlighted solid line passing through 'LLMs can (0.1) lie (0.05)'. A highlighted solid path extend from 'LLMs' to 'are' (0.12) and then to 'statistical' (0.38), yielding the higher total probability phrase 'LLMs are statistical'. Many other paths are not highlighed, such as 'LLMs are AI', 'LLMs are stochastic', and 'LLMs generate bull'.
+
+
+When you chose a value from a probability distribution of possible values, that is called "sampling."
 With sampling, instead of choosing the optimal word, we look at several token candidates and choose probabilistically out of them.
 Popular sampling techniques that are often used in practice are _top-k_ sampling and _nucleus_ sampling.
 We won't discuss all of them here - you can read more about them in HuggingFace's excellent guide. footnote:[How to generate text: using different decoding methods for language generation with Transformers (https://huggingface.co/blog/how-to-generate)]
@@ -1631,7 +1634,6 @@ Others, such as Faiss footnote:[Faiss Github repository: (https://github.com/fac
 Figure <<figure-ann-benchmarks>> shows the comparison of different algorithm libraries on a text dataset.
 You can discover more comparisons and links to dozens of ANN software libraries in Erik Bern's ANN benchmarks repository.footnote:[ANN Benchmarks repository on GitHub (https://github.com/erikbern/ann-benchmarks/)]
 
-
 [id=figure-ann-benchmarks, reftext={chapter}.{counter:figure}]
 .Performance comparison of ANN algorithms for the New York Times dataset
 image::../images/ch10/ann-benchmarks-nyt-256-dataset.png["Accuracy-speed curve of ANN algorithms on the New York Times text dataset",width=650,align="center",link="../images/ch10/ann-benchmarks-nyt-256-dataset.png"]
@@ -1654,7 +1656,7 @@ If you're feeling a bit intimidated by the prospect of deploying the Java OpenSe
 It's a great way to experiment with your own ideas for indexing and searching your documents.
 And you're probably here because you want to understand how it all works.
 For that, you need a Python package.
-Haystack is the latest and greatest Python package for building question-answering and semantic search pipelines.
+Haystack is one of the first Python package for integrating semantic search into LLMs to add a bit of grounding to LLM responses.
 
 === Pulling it all together with `haystack`
 
@@ -1900,7 +1902,6 @@ And that's it! Let's see how our model does on a couple of questions.
 Well, that was a bit vague but correct!
 Let's see how our model deals with a question that doesn't have an answer in the book:
 
-
 [source,python]
 ----
 >>> question = "How can artificial intelligence save the world"
@@ -1913,7 +1914,8 @@ Let's see how our model deals with a question that doesn't have an answer in the
 [{'answer': "I don't think it will save the world, but it will make the world a better place.'}]
 ----
 
-Well said, for a stochastic chameleon!
+Well said, for a stochastic parrot!
+A RAG pipeline
 
 === Deploying your app in the cloud
 

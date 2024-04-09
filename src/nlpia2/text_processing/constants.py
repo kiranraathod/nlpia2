@@ -5,13 +5,14 @@ from collections.abc import Mapping
 import string
 
 
-uri_schemes_popular = ['http', 'https', 'telnet', 'mailto',
-                       'udp', 'ftp', 'ssh', 'git', 'apt', 'svn', 'cvs', 'hg',
-                       'smtp', 'feed',
-                       'example', 'content',
-                       'gtalk', 'chrome-extension',
-                       'bitcoin'
-                       ]
+uri_schemes_popular = [
+    'http', 'https', 'telnet', 'mailto',
+    'udp', 'ftp', 'ssh', 'git', 'apt', 'svn', 'cvs', 'hg',
+    'smtp', 'feed',
+    'example', 'content',
+    'gtalk', 'chrome-extension',
+    'bitcoin'
+]
 uri_schemes_web = ['http', 'https']
 
 # these may not all be the sames isinstance types, depending on the env

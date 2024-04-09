@@ -54,7 +54,7 @@ That Python dictionary that maps words to document links or pages is called a re
 It's just like the index at the back of this book.
 This is called _information retrieval_ -- a really powerful tool in your NLP toolbox.
 
-Statistics about tokens are often all you need for keyword detection, full text search, and information retrieval.
+Statistics about tokens are often all you need for keyword detection, full-text search, and information retrieval.
 You can even build customer support chatbots using text search to find answers to customers' questions in your documentation or FAQ (frequently asked question) lists.
 A chatbot can't answer your questions until it knows where to look for the answer.
 Search is the foundation of many state of the art applications such as conversational AI and open domain question answering.
@@ -440,7 +440,7 @@ Maybe you don't want your regular expression tokenizer to keep contractions toge
 Perhaps you'd like to recognize the word "isn't" as two separate words, "is" and "n't".
 That way you could consolidate the synonyms "n't" and "not" into a single token.
 This way your NLP pipeline would understand "the ice cream isn't bad" to mean the same thing as "the ice cream is not bad".
-For some applications, such as full text search, intent recognition, and sentiment analysis, you want to be able to *uncontract* or expand contractions like this.
+For some applications, such as full-text search, intent recognition, and sentiment analysis, you want to be able to *uncontract* or expand contractions like this.
 By splitting contractions, you can use synonym substitution or contraction expansion to improve the recall of your search engine and the accuracy of your sentiment analysis.
 
 [IMPORTANT]
@@ -1045,7 +1045,7 @@ Maybe you don't want your regular expression tokenizer to keep contractions toge
 Perhaps you'd like to recognize the word "isn't" as two separate words, "is" and "n't".
 That way you could consolidate the synonyms "n't" and "not" into a single token.
 This way your NLP pipeline would understand "the ice cream isn't bad" to mean the same thing as "the ice cream is not bad".
-For some applications, such as full text search, intent recognition, and sentiment analysis, you want to be able to *uncontract* or expand contractions like this.
+For some applications, such as full-text search, intent recognition, and sentiment analysis, you want to be able to *uncontract* or expand contractions like this.
 By splitting contractions, you can use synonym substitution or contraction expansion to improve the recall of your search engine and the accuracy of your sentiment analysis.
 
 [IMPORTANT]
@@ -1543,7 +1543,7 @@ Another advantage of the BOW representation of text is that it allows you to fin
 You can't get any faster than this.
 BOW vectors are the precursor to a reverse index which is what makes this speed possible.
 In computer science and software engineering, you are always on the lookout for data structures that enable this kind of speed.
-All major full text search tools use BOW vectors to find what you're looking for fast.
+All major full-text search tools use BOW vectors to find what you're looking for fast.
 You can see this numerical representation of natural language in EllasticSearch, Solr,footnote:[Apache Solr home page and Java source code (https://solr.apache.org/)] PostgreSQL, and even state of the art web search engines such as Qwant,footnote:[Qwant web search engine based in Europe (https://www.qwant.com/)], SearX,footnote:[SearX git repository (https://github.com/searx/searx) and web search (https://searx.thegpm.org/)], and Wolfram Alpha footnote:[(https://www.wolframalpha.com/)].
 
 Fortunately, the words in your vocabulary are sparsely utilized in any given text.
@@ -1907,7 +1907,7 @@ So you need a way for your word-vectors to keep "ice" and "cream" together.
 An _n_-gram is a sequence containing up to _n_ elements that have been extracted from a sequence of those elements, usually a string.
 In general the "elements" of an _n_-gram can be characters, syllables, words, or even symbols like "A", "D", and "G" used to represent the chemical amino acid markers in a DNA or RNA sequence.footnote:[Linguistic and NLP techniques are often used to glean information from DNA and RNA, this site provides a list of amino acid symbols that can help you translate amino acid language into a human-readable language: "Amino Acid - Wikipedia" (https://en.wikipedia.org/wiki/Amino_acid#Table_of_standard_amino_acid_abbreviations_and_properties).]
 
-In this book, we're only interested in _n_-grams of words, not characters.footnote:[You may have learned about trigram indexes in your database class or the documentation for PostgreSQL (`postgres`). But these are triplets of characters. They help you quickly retrieve fuzzy matches for strings in a massive database of strings using the `%` and `~*` SQL full text search queries.]
+In this book, we're only interested in _n_-grams of words, not characters.footnote:[You may have learned about trigram indexes in your database class or the documentation for PostgreSQL (`postgres`). But these are triplets of characters. They help you quickly retrieve fuzzy matches for strings in a massive database of strings using the `%` and `~*` SQL full-text search queries.]
 So in this book, when we say 2-gram, we mean a pair of words, like "ice cream".
 When we say 3-gram, we mean a triplet of words like "beyond the pale" or "Johann Sebastian Bach" or "riddle me this".
 _n_-grams do not have to mean something special together, like compound words.

@@ -484,24 +484,31 @@ if __name__ == '__main__':
     df = df.drop_duplicates(['Release', 'Size'], keep='last')
     df = df.sort_values(['Release'])
     IGNORE_NAMES = [
-        'mT5', 'ERNIE 3.0 Titan', 'WebGPT', 'BLOOMZ', 'LaMDA',
+        'T5', 'mT5',
+        'ERNIE 3.0 Titan', 'WebGPT', 'BLOOMZ', 'LaMDA',
         'Cohere', 'CodeGeeX', 'CodeGenX', 'Jurassic-1', 'Koala']
     for name in IGNORE_NAMES:
         if name in df.index:
             df = df.drop(axis=1, index=name)
+
+    # process dates from github repo table strings
     df['Release'] = df['Release'].str.split('/')
     df['Release'] = df['Release'].apply(lambda x: datetime(int(x[0]), int(x[1]), 1))
     df['Release'] = df['Release'].dt.date.astype(str)
     df = df.sort_values('Release')
 
-    df2 = pd.concat([df, DF_ADD_LLMS, DF_ADD_LLMS_2024])
-    df2['Release'] = df2['Release'].apply(strip_footnotes)
-    df2['Release'] = pd.to_datetime(df2['Release']).dt.date.astype(str)
+    # append some new rows gleaned from Wikipedia and manually curated by Hobs
+    df = pd.concat([df, DF_ADD_LLMS, DF_ADD_LLMS_2024])
 
-    df = df2.sort_values('Release')
+    # cleanup the dates from Wikipedia (NaTs and )
+    df['Release'] = df['Release'].apply(strip_footnotes)
+    df['Release'] = pd.to_datetime(df['Release']).dt.date.astype(str)
+
+    df = df.sort_values(['Open', 'Release'])  # so that open models will render first with the blue cicles instead of red diamonds
     isnat = df['Release'].str.startswith('N')
     df = df.drop(index=df.index.values[isnat])
-    # df.index = df['Name'].replace({'OPT': 'OPT  .', 'BLOOM': '.  BLOOM'})
+    df['DisplayName'] = df['Name'].replace({'OPT': 'OPT  .', 'BLOOM': '.  BLOOM'})
+    df = df.set_index('DisplayName')
     fig = plot_llm_sizes(
         df, opacity=.2,
         x='Release', y='Size', color='Open', symbol='Openness',

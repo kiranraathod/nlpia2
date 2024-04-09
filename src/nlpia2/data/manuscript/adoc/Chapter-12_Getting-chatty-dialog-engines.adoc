@@ -756,7 +756,7 @@ One question you might be asking yourself - given all the ways people say things
 And how can you anticipate in advance all the ways that your users will use your chatbot?
 In chapter 10 you learned how LLMs can chat about virtually anything.
 But it's not good enough to just redirect your users to some other corporation's LLM interface.
-You will need to be able to integrate the chatbot into your existing NLP pipeline, such as the block diagram in <<figure-chatbot-flow-diagram>>.
+You will need to be able to integrate the chatbot into your existing NLP pipeline, such as the block diagram in figure <<figure-chatbot-flow-diagram>>.
 The LangChain package gives you a way to do exactly that.
 
 === Adding LLMs to your chatbot with LangChain

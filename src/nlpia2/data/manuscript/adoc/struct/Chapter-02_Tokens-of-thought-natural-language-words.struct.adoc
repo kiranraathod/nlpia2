@@ -53,7 +53,7 @@ Is there something you can do with tokens that doesn't require a lot of complica
 This is called _information retrieval_ -- a really powerful tool in your NLP toolbox.
 
 [.first-sentence]
-Statistics about tokens are often all you need for keyword detection, full text search, and information retrieval.
+Statistics about tokens are often all you need for keyword detection, full-text search, and information retrieval.
 
 [.last-sentence]
 A tokenizer forms the foundation for almost all NLP pipelines.
@@ -1089,7 +1089,7 @@ An _n_-gram is a sequence containing up to _n_ elements that have been extracted
 In general the "elements" of an _n_-gram can be characters, syllables, words, or even symbols like "A", "D", and "G" used to represent the chemical amino acid markers in a DNA or RNA sequence.footnote:[Linguistic and NLP techniques are often used to glean information from DNA and RNA, this site provides a list of amino acid symbols that can help you translate amino acid language into a human-readable language: "Amino Acid - Wikipedia" (https://en.wikipedia.org/wiki/Amino_acid#Table_of_standard_amino_acid_abbreviations_and_properties).]
 
 [.first-sentence]
-In this book, we're only interested in _n_-grams of words, not characters.footnote:[You may have learned about trigram indexes in your database class or the documentation for PostgreSQL (`postgres`). But these are triplets of characters. They help you quickly retrieve fuzzy matches for strings in a massive database of strings using the `%` and `~*` SQL full text search queries.]
+In this book, we're only interested in _n_-grams of words, not characters.footnote:[You may have learned about trigram indexes in your database class or the documentation for PostgreSQL (`postgres`). But these are triplets of characters. They help you quickly retrieve fuzzy matches for strings in a massive database of strings using the `%` and `~*` SQL full-text search queries.]
 
 [.last-sentence]
 They have to be frequent enough together to catch the attention of your token counters.
