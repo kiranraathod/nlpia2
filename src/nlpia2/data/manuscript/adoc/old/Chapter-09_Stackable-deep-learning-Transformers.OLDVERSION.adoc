@@ -187,7 +187,7 @@ We've discussed embeddings, positional encodings, and the multi-head self-attent
 Using simple feed-forward layers, normalization and some residual layers, an encoder and decoder blocks of the transformer are constructed as shown in the following figure.
 
 .Original Transformer Model Architecture
-image::../images/Ch12/transformer_original.png[alt="Original Transfomer from 'Attention Is All You Need'",width=100%,align="center",link="../images/ch12/transformer_original.png"]
+image::../images/ch09/transformer_original.png[alt="Original Transfomer from 'Attention Is All You Need'",width=100%,align="center",link="../images/ch12/transformer_original.png"]
 
 In the original transformer, both the encoder and decoder are comprised of _N_ = 6 stacked identical encoder and decoder layers, respectively.
 

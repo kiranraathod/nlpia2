@@ -893,7 +893,7 @@ That should be enough to give you a clearer understanding of convolution and how
 
 // Figure 7.9
 .Morse code dictionary
-image::../images/ch07/wikipedia-morse-code-table_svg.png["Table of all the Morse code alphabet letters", width=50%, link="../images/ch07/wikipedia-morse-code-table.svg.png"]
+image::../images/ch07/wikipedia-morse-code-table_svg.png["Table of all the Morse code alphabet letters", width=50%, link="../images/ch07/wikipedia-morse-code-table_svg.png"]
 
 Morse code is still used today in situations when the radio waves are too noisy for someone to understand your voice.
 It's especially useful when you really, really, really need to get a message out.
@@ -1259,7 +1259,7 @@ Figure 7.15 shows what this would look like before you've turned your word seque
 
 // Figure 7.15
 .Convolution striding
-image::../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png["Stride a box across the quote 'Words are sacred . <pad> <pad> ... <pad>", width=80%, link="../images/ch07/cnn-stride-text-words-are-sacred.transparent_drawio.png"]
+image::../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png["Stride a box across the quote 'Words are sacred . <pad> <pad> ... <pad>", width=80%, link="../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png"]
 
 Now that you have assembled a sequence of tokens, you need to represent their meaning well for your convolution to be able to compress and encode all that meaning.
 For the fully-connected neural networks we used in chapter 5 and 6 you could use one-hot encoding.

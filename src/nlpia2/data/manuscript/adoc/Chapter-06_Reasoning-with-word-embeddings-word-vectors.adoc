@@ -2250,7 +2250,7 @@ And there are other smaller clusters of nodes further out from the central clust
 
 [id=concepts-to-each-other, reftext={chapter}.{counter:figure}]
 .Connecting concepts to each other with word embeddings
-image::../images/ch06/adjacency_graph_ch_6_with_labels_bold.png[An undirected graph or network diagram of the natural language in  chapter 6 using sentence embeddings and noun phrases as labels,width=100%,link="../images/ch06/adjacency_graph_ch_6_with_labels_bold.png]
+image::../images/ch06/adjacency_graph_ch_6_with_labels_bold.png[alt="An undirected graph or network diagram of the natural language in chapter 6 using sentence embeddings and noun phrases as labels",width=100%,link="../images/ch06/adjacency_graph_ch_6_with_labels_bold.png"]
 
 The dense cluster of concepts in the center should contain some information about the central ideas of this chapter and how they are related.
 Zooming in you can see these passages are mostly about words and numbers to represent words, because that's what this chapter is about.

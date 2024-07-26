@@ -140,7 +140,7 @@ The query string has both the words "hacking" and "computers" in it.
 Our query string word vector is `[1, 1]` for the words "hack" and "computer" because our query tokenized and stemmed the words that way (see chapter 2).
 
 .Measuring Euclidean distance
-image::../images/ch03/cosine_distance_justification.png[2D Vectors and Euclidean distance, width=80%, link="../images/ch03/cosine_distance_justification.png"]
+image::../images/ch03/cosine_distance_justification.png[alt="2D Vectors and Euclidean distance", width=80%, link="../images/ch03/cosine_distance_justification.png"]
 
 Now which articles would you say are closest to our query in Euclidean distance?
 Euclidean distance is the length of the green lines in figure C.1.

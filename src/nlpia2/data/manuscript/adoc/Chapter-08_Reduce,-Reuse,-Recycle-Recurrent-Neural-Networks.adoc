@@ -1161,7 +1161,7 @@ CNNs accomplish this with overlapping windows of weights that can detect almost 
 // Figure 8.10
 [id=convolution-with-embeddings, reftext={chapter}.{counter:figure}]
 .1D convolution with embeddings
-image::../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png[alt="Figure 8.9: The words 'Words are sacred' with rows for t=0, t=1, and every step of the 2-word window sliding across the text and into the <PAD> tokens at the end of the string.", width=80%, link="../images/ch07/cnn-stride-text-words-are-sacred.transparent_drawio.png"]
+image::../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png[alt="Figure 8.9: The words 'Words are sacred' with rows for t=0, t=1, and every step of the 2-word window sliding across the text and into the <PAD> tokens at the end of the string.", width=80%, link="../images/ch07/cnn-stride-text-words-are-sacred_transparent_drawio.png"]
 
 In Chapter 7 you imagined striding the kernel window over your text, one step at a time.
 But in reality, the machine is doing all the multiplications in parallel.

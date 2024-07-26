@@ -78,8 +78,9 @@ def plotly_timeseries(df):
 
 def scatter_3d(df, labels=None, depthshade=True):
     df = getattr(df, 'embedding_', df)
-    labels = df[labels] if (isinstance(labels, (int, str, bytes)) and
-                            labels in getattr(df, 'columns', set())) else labels
+    labels = df[labels] if (
+        isinstance(labels, (int, str, bytes))
+        and labels in getattr(df, 'columns', set())) else labels
     labels = np.array(np.zeros(shape=(len(df),)) if labels is None else labels)
     try:
         labels = labels.astype(int)  # TODO: use LabelEncoder
@@ -195,7 +196,7 @@ def annotate(row, ax, x='x', y='y', text='name', xytext=(7, -5), textcoords='off
 
 
 def offline_plotly_data(data, filename=None, config=None, validate=True,
-                        default_width='100%', 
+                        default_width='100%',
                         default_height=525, global_requirejs=False,
                         plotlyjs=''):
     r""" Write a plotly scatter plot to HTML file that doesn't require server

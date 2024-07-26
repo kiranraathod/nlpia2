@@ -361,7 +361,7 @@ These linear and normalization layers are stacked on top of the attention layers
 
 [[figure-transformer-architecture]]
 .Transformer architecture
-image::../images/ch09/transformer_original.png[alt="Original Transfomer from 'Attention Is All You Need'",width=100%,align="center",link="../images/ch12/transformer_original.png"]
+image::../images/ch09/transformer_original.png[alt="Original Transfomer from 'Attention Is All You Need'",width=100%,align="center",link="../images/ch09/transformer_original.png"]
 
 In the original transformer, both the encoder and decoder are comprised of _N_ = 6 stacked identical encoder and decoder layers, respectively.
 

@@ -55,23 +55,34 @@ MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
 ADOC_DIR = MANUSCRIPT_DIR / 'adoc'
 IMAGES_DIR = MANUSCRIPT_DIR / 'images'
 
+# nlpia2/
 OFFICIAL_MANUSCRIPT_DIR = BASE_DIR
 OFFICIAL_RELATIVE_MANUSCRIPT_DIR = Path('nlpia-manuscript') / 'manuscript'
-for i in range(4):
+for i in range(6):
     OFFICIAL_MANUSCRIPT_DIR = OFFICIAL_MANUSCRIPT_DIR.parent
-    if (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR / 'adoc').is_dir():
+    log.info(f'OFFICIAL_MANUSCRIPT_DIR: {OFFICIAL_MANUSCRIPT_DIR}')
+    if ((OFFICIAL_MANUSCRIPT_DIR / 'nlpia-manuscript' / '.git').is_dir()
+            and (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR / 'adoc').is_dir()):
         break
+    OFFICIAL_MANUSCRIPT_DIR = OFFICIAL_MANUSCRIPT_DIR / 'hobs'
+    log.info(f'OFFICIAL_MANUSCRIPT_DIR: {OFFICIAL_MANUSCRIPT_DIR}')
+    if ((OFFICIAL_MANUSCRIPT_DIR / 'nlpia-manuscript' / '.git').is_dir()
+            and (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR / 'adoc').is_dir()):
+        break
+    OFFICIAL_MANUSCRIPT_DIR = OFFICIAL_MANUSCRIPT_DIR.parent
 OFFICIAL_MANUSCRIPT_DIR = (OFFICIAL_MANUSCRIPT_DIR / OFFICIAL_RELATIVE_MANUSCRIPT_DIR).resolve()
+log.info(f'OFFICIAL_MANUSCRIPT_DIR: {OFFICIAL_MANUSCRIPT_DIR}')
 if not (OFFICIAL_MANUSCRIPT_DIR / 'adoc').is_dir():
     OFFICIAL_MANUSCRIPT_DIR = next(OFFICIAL_MANUSCRIPT_DIR.parent.parent.glob('**/manuscript/adoc')).parent
-
 try:
     assert OFFICIAL_MANUSCRIPT_DIR.name == 'manuscript'
-    assert OFFICIAL_MANUSCRIPT_DIR.parent == 'nlpia-manuscript'
+    assert OFFICIAL_MANUSCRIPT_DIR.parent.name == 'nlpia-manuscript', f"OFFICIAL_MANUSCRIPT_DIR.parent: {OFFICIAL_MANUSCRIPT_DIR.parent}"
     OFFICIAL_IMAGES_DIR = OFFICIAL_MANUSCRIPT_DIR / 'images'
-    assert OFFICIAL_IMAGES_DIR.name == 'images'
+    log.info(f'OFFICIAL_IMAGES_DIR: {OFFICIAL_IMAGES_DIR}')
+    assert OFFICIAL_IMAGES_DIR.is_dir()
 except AssertionError:
     OFFICIAL_MANUSCRIPT_DIR = SRC_DATA_DIR / 'manuscript'
+    log.error(f'CHANGED OFFICIAL_MANUSCRIPT_DIR: {OFFICIAL_MANUSCRIPT_DIR}')
 OFFICIAL_ADOC_DIR = OFFICIAL_MANUSCRIPT_DIR / 'adoc'
 
 # TODO: shutil.copytree(from_path, to_path)
@@ -79,8 +90,10 @@ OFFICIAL_ADOC_DIR = OFFICIAL_MANUSCRIPT_DIR / 'adoc'
 
 assert OFFICIAL_MANUSCRIPT_DIR.name == 'manuscript'
 assert OFFICIAL_MANUSCRIPT_DIR.parent.name in 'nlpia-manuscript data'.split()
+assert OFFICIAL_ADOC_DIR.is_dir()
 assert OFFICIAL_ADOC_DIR.name == 'adoc'
 assert OFFICIAL_ADOC_DIR.parent.name == 'manuscript'
+print(OFFICIAL_ADOC_DIR)
 
 
 log.debug(f'SRC_DATA_DIR: {SRC_DATA_DIR}\n'

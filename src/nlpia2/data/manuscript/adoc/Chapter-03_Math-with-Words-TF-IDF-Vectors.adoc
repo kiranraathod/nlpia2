@@ -621,7 +621,7 @@ The tail of a position vector (represented by the "rear" of the arrow) is always
 
 [#figure-2d-vectors, reftext={chapter}.{counter:figure}]
 .2D vectors
-image::../images/ch03/vecs.png[2D Vectors, width=80%, link="../images/ch03/vecs.png"]
+image::../images/ch03/vecs.png[alt=2D Vectors, width=80%, link="../images/ch03/vecs.png"]
 
 What about 3D vector spaces?
 Positions and velocities in the 3D physical world you live in can be represented by x, y, and z coordinates in a 3D vector.
@@ -641,7 +641,7 @@ So in figure <<figure-2d-term-frequency-vectors>>, K is reduced to two for a two
 
 [#figure-2d-term-frequency-vectors, reftext={chapter}.{counter:figure}]
 .2D term frequency vectors
-image::../images/ch03/harry_faster_vecs.png[2D Term Frequency Vectors, width=80%, link="../images/ch03/harry_faster_vecs.png"]
+image::../images/ch03/harry_faster_vecs.png[alt=2D Term Frequency Vectors, width=80%, link="../images/ch03/harry_faster_vecs.png"]
 
 K-dimensional vectors work the same way, just in ways you can't easily visualize.
 Now that you have a representation of each document and know they share a common space, you have a path to compare them.
@@ -658,7 +658,7 @@ This accurate estimate would give you confidence that the documents they represe
 
 [figure-vecs-cosine]
 .2D vectors and the angles between them
-image::../images/ch03/vecs_cosine.png["2D vectors and cosine distance between them (angle between them and the perpendicular shadow of one on the other)", width=80%, link="../images/ch03/vecs_cosine.png"]
+image::../images/ch03/vecs_cosine.png[alt="2D vectors and cosine distance between them (angle between them and the perpendicular shadow of one on the other)", width=80%, link="../images/ch03/vecs_cosine.png"]
 // FIXME: Redraw this diagram and rewrite the text.
 //        This figure refers to 'TF of "harry"' in the diagram and the thetas are numbered and diagrammed incorrectly.
 
