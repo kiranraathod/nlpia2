@@ -195,6 +195,16 @@ def rstrip_one_newline(text, newlines='\r\n'):
     return text
 
 
+def get_headings(text):
+    headings = []
+    for lineno, line in enumerate(text.splitlines()):
+        match = re.match(r'^[=]{1,5}[ ]{0,2}.+', line)
+        if match:
+            headings.append(dict(
+                lineno=i,
+            ))
+
+
 def get_code_blocks(text,
                     header_patterns=CODEHEADER,
                     footer_patterns=None,  # CODEFOOTER,
@@ -334,6 +344,9 @@ def adoc2ipynb_file(filepath=None, dest_filepath=None, text=None, prompt=False, 
     return nb
 
 
+def adocs2outlines(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
+
+
 def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
     """ Convert a directory containing MANY adoc files into jupyter notebooks
 
@@ -352,15 +365,17 @@ def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
     adoc_dir = Path(adoc_dir or OFFICIAL_ADOC_DIR)
     if not adoc_dir.is_dir() or len(list(adoc_dir.glob(glob))) < 12:
         adoc_dir = Path('.')
-    notebooks = []
+    outlines = []
     if not dest_dir:
         dest_dir = adoc_dir.parent / 'notebooks'
     dest_dir = Path(dest_dir)
     dest_dir.mkdir(exist_ok=True, parents=True)
     for adoc_filepath in tqdm(list(adoc_dir.glob(glob))):
         dest_filepath = dest_dir / adoc_filepath.with_suffix('.ipynb').name
-        notebooks.append(adoc2ipynb_file(filepath=adoc_filepath, dest_filepath=dest_filepath))
-    return notebooks
+        outlines.append(
+            adoc2outline_file(filepath=adoc_filepath, dest_filepath=dest_filepath)
+        )
+    return outlines
 
 
 def convert(format='ipynb', **kwargs):

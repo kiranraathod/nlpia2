@@ -23,6 +23,17 @@ SYM_CHAPTER_TITLE = '= '  # "= Reasoning with word embeddings"
 SYM_CHAPTER_NUM = ':Chapter:'  # ":Chapter: 6"
 
 
+try:
+    BASE_DIR = Path(__file__).parent.parent.parent
+except Exception:
+    BASE_DIR = Path.cwd()
+assert BASE_DIR.is_dir(), "not {BASE_DIR}.is_dir()"
+assert BASE_DIR.name == 'nlpia2'
+
+ADOC_DIR = BASE_DIR.parent / 'hobs' / 'nlpia-manuscript' / 'manuscript' / 'adoc'
+assert ADOC_DIR.is_dir(), "not {ADOC_DIR}.is_dir()"
+
+
 def make_path(p):
     """ Should be `Path()`, perhaps or should monkey-patch the Path class """
     return Path(p).expanduser().resolve().absolute()
@@ -95,9 +106,9 @@ sed - i 's/= /'"\\${newline}"'* /g' docs / outline.md
 # pandoc --atx-headers     --verbose     --wrap=none     --toc     --reference-links     -s -o outline.adoc     outline.md
 """
 
-
 if __name__ == '__main__':
-    adoc_path = 'manuscript/adoc'
+    raise NotImplementedError('This make_outline.py script is BORKED!')
+    adoc_path = ADOC_DIR
     glob = 'Chapter*.adoc'
     if len(sys.argv) > 1:
         adoc_path = sys.argv[1]
