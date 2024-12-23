@@ -279,8 +279,7 @@ def adoc_doctests2ipynb(adocs=Path('.'), dest_filepath=None, **kwargs):
 
     nb['cells'] = cells
     if dest_filepath:
-        with dest_filepath.open('w') as f:
-            nbf.write(nb, f)
+        nbf.write(str(dest_filepath))
     return nb
 
 
@@ -296,11 +295,25 @@ def find_title(text, pattern=r'^\s*[=#]\s?(.+)$'):
 
 def adoc2ipynb_file(filepath=None, dest_filepath=None, text=None, prompt=False, output=False):
     """ Extract code blocks and their captions from a SINGLE adoc file and save to an *.ipynb file"""
+    if isinstance(filepath, str):
+        filepath = Path(filepath)
+        assert filepath.is_file()
     try:
-        text = Path(filepath).open().read()
+        log.debug('"filepath"')
+        log.debug(f'"{filepath}"')
+        log.debug('repr(filepath)')
+        log.debug(repr(filepath))
+        # for line in filepath.open().readlines():
+        #     print(line)
+        text_bytes = filepath.open('rb').read()
     except (TypeError, OSError, IOError, FileNotFoundError) as e:
         log.error(f'Invalid filepath: {filepath}\n  ERROR: {e}')
 
+    try:
+        text = text_bytes.decode()
+    except UnicodeDecodeError as err:
+        log.error(f'"{filepath}" does not appear to be a valid adoc or UTF-8 file')
+        log.error(err)
     dest_filepath = None if not dest_filepath else Path(dest_filepath)
     blocks = get_code_blocks(text)
 
@@ -312,8 +325,8 @@ def adoc2ipynb_file(filepath=None, dest_filepath=None, text=None, prompt=False, 
     if filepath:
         cells.append(new_markdown_cell(f"#### {title}"))
 
-    print(len(blocks), filepath)
-    print(dest_filepath)
+    log.info(f'len(blocks): {len(blocks)} for filepath: {filepath}')
+    log.info(f'Creating notebook: {dest_filepath}')
     for block in blocks:
         # need to run the doctest parser on a lot of text to get attr names right
         if 'source' not in block:
