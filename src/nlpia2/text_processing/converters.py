@@ -195,14 +195,14 @@ def rstrip_one_newline(text, newlines='\r\n'):
     return text
 
 
-def get_headings(text):
-    headings = []
-    for lineno, line in enumerate(text.splitlines()):
-        match = re.match(r'^[=]{1,5}[ ]{0,2}.+', line)
-        if match:
-            headings.append(dict(
-                lineno=i,
-            ))
+# def get_headings(text):
+#     headings = []
+#     for lineno, line in enumerate(text.splitlines()):
+#         match = re.match(r'^[=]{1,5}[ ]{0,2}.+', line)
+#         if match:
+#             headings.append(dict(
+#                 lineno=i,
+#             ))
 
 
 def get_code_blocks(text,
@@ -344,7 +344,7 @@ def adoc2ipynb_file(filepath=None, dest_filepath=None, text=None, prompt=False, 
     return nb
 
 
-def adocs2outlines(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
+# def adocs2outlines(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
 
 
 def adocs2notebooks(adoc_dir=Path('.'), dest_dir=None, glob='Chapter-*.adoc'):
