@@ -113,8 +113,9 @@ __MACOSX
 .venv*
 venv
 
-# docs html
-docs/**/*.html
+# # docs html
+# docs/**/*.html
+# !docs/*.html
 
 # secrets
 .env
