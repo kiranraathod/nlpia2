@@ -18,7 +18,17 @@ If you are using Windows you will have to first install `git-bash` so you can ha
 
 ### Within `bash`
 
-Launch your terminal (`git-bash` application on Windows) and then install the nlpia2 package from source:
+Launch your terminal (`git-bash` on Windows) and then install `uv` and clone the nlpia2 repository.
+Within the `nlpia2/` directory, create a virtual environment using `uv` and then use `uv` to install the `nlpia2` package from the cloned source code.
+
+```bash
+$ pip install uv
+$ git clone git@gitlab.com:tangbileai/nlpia2
+$ cd nlpia2
+$ uv venv -p 3.10
+$ source .venv/bin/activate
+$ uv pip install -e .
+```
 
 ```bash
 git clone git@gitlab.com:tangbileai/nlpia2
