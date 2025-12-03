@@ -1,6 +1,6 @@
 [project]
 name = "nlpia2"
-version = "0.2.0"
+version = "0.2.1"
 description = "NLP utilities and examples for _Natural Language Processing in Action, 2nd Ed_, by Hobson Lane and Maria Dyshel"
 readme = "README.md"
 authors = [
