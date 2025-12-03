@@ -675,6 +675,7 @@ def fuzzy_get(possible_keys, approximate_key, default=None, similarity=0.6, tupl
     'conditions'
     >>> fuzzy_get(possible_keys, "Tron")
     'astronomy'
+    >>> import numpy as np
     >>> df = pd.DataFrame(np.arange(6*2).reshape(2,6), columns=('alpha','beta','omega','begin','life','end'))
     >>> fuzzy_get(df, 'beg')  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
     0    3
@@ -682,11 +683,10 @@ def fuzzy_get(possible_keys, approximate_key, default=None, similarity=0.6, tupl
     Name: begin, dtype: int...
     >>> fuzzy_get(df, 'get')
     >>> fuzzy_get(df, 'et')[1]
-    7
-    >>> fuzzy_get(df, 'get')
+    np.int64(7)
     """
     dict_obj = copy.copy(possible_keys)
-    if not isinstance(dict_obj, (Mapping, pd.DataFrame, pd.Series)):
+    if not isinstance(dict_obj, (abc.Mapping, pd.DataFrame, pd.Series)):
         dict_obj = dict((x, x) for x in dict_obj)
 
     fuzzy_key, value = None, default
@@ -697,7 +697,7 @@ def fuzzy_get(possible_keys, approximate_key, default=None, similarity=0.6, tupl
         if approximate_key and strkey and strkey.strip():
             # print 'no exact match was found for {0} in {1} so preprocessing keys'.format(approximate_key, dict_obj.keys())
             if any(isinstance(k, (tuple, list)) for k in dict_obj):
-                dict_obj = dict((tuple_joiner.join(str(k2) for k2 in k), v) for (k, v) in viewitems(dict_obj))
+                dict_obj = dict((tuple_joiner.join(str(k2) for k2 in k), v) for (k, v) in dict_obj.items())
                 if isinstance(approximate_key, (tuple, list)):
                     strkey = tuple_joiner.join(approximate_key)
             # fuzzywuzzy requires that dict_keys be a list (sets and tuples fail!)
@@ -716,8 +716,8 @@ def fuzzy_get(possible_keys, approximate_key, default=None, similarity=0.6, tupl
                         fuzzy_score_keys = []
                         # add length similarity as part of score
                         for (i, (k, score)) in enumerate(fuzzy_key_scores):
-                            fuzzy_score_keys += [(score * math.sqrt(len(strkey)**2 /
-                                                                    float((len(k)**2 + len(strkey)**2) or 1)), k)]
+                            fuzzy_score_keys += [(score * math.sqrt(len(strkey)**2
+                                                                    / float((len(k)**2 + len(strkey)**2) or 1)), k)]
                         fuzzy_score, fuzzy_key = sorted(fuzzy_score_keys)[-1]
                         value = dict_obj[fuzzy_key]
     if key_and_value:
@@ -757,11 +757,12 @@ def fuzzy_get_value(obj, approximate_key, default=None, **kwargs):
       True
       >>> fuzzy_get_value({'word': tuple('word'), 'noun': tuple('noun')}, 'woh!', similarity=.3)
       ('w', 'o', 'r', 'd')
+      >>> import numpy as np
       >>> df = pd.DataFrame(np.arange(6*2).reshape(2,6), columns=('alpha','beta','omega','begin','life','end'))
       >>> fuzzy_get_value(df, 'life')[0], fuzzy_get(df, 'omega')[0]
-      (4, 2)
+      (np.int64(4), np.int64(2))
     """
-    dict_obj = OrderedDict(obj)
+    dict_obj = dict(obj)
     try:
         return dict_obj[list(dict_obj.keys())[int(approximate_key)]]
     except (ValueError, IndexError):
@@ -771,7 +772,7 @@ def fuzzy_get_value(obj, approximate_key, default=None, **kwargs):
 
 def fuzzy_get_tuple(dict_obj, approximate_key, dict_keys=None, key_and_value=False, similarity=0.6, default=None):
     """Find the closest matching key and/or value in a dictionary (must have all string keys!)"""
-    return fuzzy_get(dict(('|'.join(str(k2) for k2 in k), v) for (k, v) in viewitems(dict_obj)),
+    return fuzzy_get(dict(('|'.join(str(k2) for k2 in k), v) for (k, v) in dict_obj.items()),
                      '|'.join(str(k) for k in approximate_key), dict_keys=dict_keys,
                      key_and_value=key_and_value, similarity=similarity, default=default)
 
@@ -1171,7 +1172,7 @@ def update_dict(d, u=None, depth=-1, take_new=True, default_mapping_type=dict, p
         dictish = default_mapping_type
     if copy:
         d = dictish(d)
-    for k, v in viewitems(u):
+    for k, v in u.items():
         if isinstance(d, Mapping):
             if isinstance(v, Mapping) and not depth == 0:
                 r = update_dict(d.get(k, dictish()), v, depth=max(depth - 1, -1), copy=copy)
@@ -1560,7 +1561,7 @@ def read_csv(csv_file, ext='.csv', format=None, delete_empty_keys=False,
             if format in 'dj':  # django json format
                 recs += [{"pk": rownum, "model": model_name, "fields": row_dict}]
             elif format in 'vhl':  # list of lists of values, with header row (list of str)
-                recs += [[value for field_name, value in viewitems(row_dict)
+                recs += [[value for field_name, value in row_dict.items()
                           if (field_name.strip() or delete_empty_keys is False)]]
             elif format in 'c':  # columnwise dict of lists
                 for field_name in row_dict:

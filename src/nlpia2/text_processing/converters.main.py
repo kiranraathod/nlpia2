@@ -20,11 +20,12 @@ Typical DocTestParser Expression objects:
  'options': {},
  'exc_msg': None}
 """
-import sys
 from doctest import DocTestParser
 import logging
 from pathlib import Path
 import re
+import sys
+
 import nbformat as nbf
 from tqdm import tqdm
 

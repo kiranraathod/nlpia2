@@ -953,7 +953,7 @@ So you can create a `predict_hidden` method to output the 128-D hidden tensor an
 >>> def predict_hidden(self, text="Khalid"):
 ...    text_tensor = self.encode_one_hot_seq(text)
 ...    with torch.no_grad():  # <1>
-...    hidden = self.hidden_init
+...        hidden = self.hidden_init
 ...        for i in range(text_tensor.shape[0]):  # <2>
 ...            y, hidden = self(text_tensor[i], hidden)  # <3>
 ...    return hidden

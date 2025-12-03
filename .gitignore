@@ -14,6 +14,7 @@ src/nlpia2/data/big
 # src/nlpia2/data
 db.sqlite3
 *.bz2
+!glove.6B.50d.txt.bz2
 *.zip
 *.pkl
 *.npy
@@ -112,8 +113,9 @@ __MACOSX
 .venv*
 venv
 
-# docs html
-docs/**/*.html
+# # docs html
+# docs/**/*.html
+# !docs/*.html
 
 # secrets
 .env
@@ -129,3 +131,4 @@ src/nlpia2/data/meuller/*.pdf
 src/nlpia2/ch08/nlpia-rnn/
 src/nlpia2/ch08/huggingface-spaces-nlpia-rnn/
 
+.aider*
