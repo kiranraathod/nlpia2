@@ -1,16 +1,25 @@
 # A character-based N-gram language model
 
-## References
+### Build a small language model
+
+
+A statistical model is a function that predicts something about the world. An language model is a function that predicts the next token for a particular language, usually a natural language like English. Language models can generate text that seems like it was written by a human, and large language models (LLMs) are so good at this, that huge companies and their billionaire investors have convinced the public that they are actually intelligent. In fact, the term "LLM" is now synonymous with "AI", even among smart professors that know better.
+
+In this exercise you will build a small language model. Your model will be about will need a million times less data to generate interesting text. You definitely won't need to steal all the text on the Internet to get your language model working.  The example here downloads only 6 free and open source (FOS) Wikipedia pages about Python.  If you don't want to download them from wikipedia, you can find them here: gitlab.com
+
+### References
 
 1. [_Natural Language Processing in Action_](https://bookshop.org/p/books/natural-language-processing-in-action-second-edition-hobson-lane/dc5586a786c45232?ean=9781617299445&next=t) by Hobson Lane and Maria Dyshel is a beginner's guide to NLP for beginners and professional practioners
 2. [_Speech and Language Processing_](https://web.stanford.edu/~jurafsky/slp3/) by Daniel Jurafsky & James H. Martin - for students who want to pursue NLP in college
 
-## Downloading some natural language text
+### Downloading some natural language text
 
-Advanced students will want to install the `requests` package, for downloading pages from the web programmatically (automatically).
+You can download the ``*.md`` text files you need from the [nlpia2 source code here](https://gitlab.com/tangibleai/nlpia2/-/tree/main/src/nlpia2/data/ngram_model/). Once you have 6 markdown files from Wikipedia, you can skip to the next section.
+
+Advanced students will want to install the `requests` package which you can use to download pages from the web automatically. And if you install the `python-markdownify` package, you can use it to convert HTML into markdown text files, removing all the javascript and HTML styling that you don't need for a language model. You only want the natural language text for your small language model.
 
 ```bash
-uv pip install requests
+uv pip install requests python-markdownify
 ```
 
 You can use the requests package to download any web pages you like. Here's how to download 6 Wikipedia articles about the Python programming language.
